@@ -67,7 +67,21 @@ jobs:
 
       - name: Validate scanner syntax
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python -m py_compile scripts/jobspy_scan.py scripts/verify_company_jobs.py scripts/china_scan.py scripts/cloud_sources_scan.py scripts/aggregator_scan.py scripts/verify_aggregator_jobs.py
+        run: >-
+          python -m py_compile
+          scripts/jobspy_scan.py
+          scripts/verify_company_jobs.py
+          scripts/china_scan.py
+          scripts/cloud_sources_scan.py
+          scripts/aggregator_scan.py
+          scripts/verify_aggregator_jobs.py
+          scripts/company_portal_scan.py
+          scripts/merge_scan_results.py
+          scripts/scan_health.py
+
+      - name: Run scanner fixture tests
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python -m unittest discover -s tests -p 'test_*scan*.py'
 
       - name: Collect US jobs
         if: steps.schedule_guard.outputs.run == 'true'
@@ -93,40 +107,17 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/verify_aggregator_jobs.py
 
-      - name: Merge regional results
+      - name: Scan every company-pool career portal
         if: steps.schedule_guard.outputs.run == 'true'
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
+        run: python scripts/company_portal_scan.py
 
-          scan_dir = Path("data/scans")
-          regional_files = [
-              scan_dir / "us_jobs_verified_latest.json",
-              scan_dir / "china_jobs_latest.json",
-              scan_dir / "cloud_sources_jobs_latest.json",
-              scan_dir / "aggregator_jobs_verified_latest.json",
-          ]
-          jobs = []
-          for path in regional_files:
-              if path.exists():
-                  jobs.extend(json.loads(path.read_text(encoding="utf-8")))
-          deduplicated = {}
-          for job in jobs:
-              key = str(job.get("job_key") or job.get("canonical_url") or job.get("job_url") or "")
-              if not key:
-                  continue
-              current = deduplicated.get(key)
-              if current is None or int(job.get("score", 0)) > int(current.get("score", 0)):
-                  deduplicated[key] = job
-          jobs = list(deduplicated.values())
-          (scan_dir / "all_jobs_latest.json").write_text(
-              json.dumps(jobs, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8",
-          )
-          print(f"Merged and deduplicated {len(jobs)} jobs from all enabled cloud sources.")
-          PY
+      - name: Canonicalize, prune, and write run receipt
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/merge_scan_results.py
+
+      - name: Record scan health and anomaly history
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/scan_health.py
 
       - name: Sync jobs to Ivy Job Radar
         if: steps.schedule_guard.outputs.run == 'true'
@@ -146,6 +137,41 @@ jobs:
             --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
             --data-binary @data/scans/all_jobs_latest.json \
             "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
+
+      - name: Publish completed run receipt
+        if: steps.schedule_guard.outputs.run == 'true'
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" || -z "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
+            exit 0
+          fi
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          receipt = json.loads(Path("data/scans/run_receipt_latest.json").read_text(encoding="utf-8"))
+          payload = {
+              "state": "completed",
+              "message": (
+                  f"本轮扫描完成：抓取 {receipt['fetched']}，"
+                  f"去重后导入 {receipt['imported']}，新增 {receipt['new']}，"
+                  f"失败来源 {len(receipt['failed_sources'])}。"
+              ),
+          }
+          Path("data/scans/scan_status_payload.json").write_text(
+              json.dumps(payload, ensure_ascii=False), encoding="utf-8"
+          )
+          PY
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+            --data-binary @data/scans/scan_status_payload.json \
+            "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status"
 
       - name: Mark website scan as failed
         if: failure() && steps.schedule_guard.outputs.run == 'true'
