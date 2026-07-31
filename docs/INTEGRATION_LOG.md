@@ -34,8 +34,8 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | SmartRecruiters, Workable, Teamtailor, Recruitee | Integrated | Public JSON, Markdown, RSS/XML, and offers-feed adapters are enabled in the company-pool scanner. |
 | Breezy, Rippling, Pinpoint, Personio, JibeApply | Integrated | Zero-auth public board feeds are detected and normalized; saved fixtures cover detection, schema parsing, region filtering, and canonical deduplication. |
 | Oracle Recruiting Cloud | Integrated | Zero-auth Candidate Experience requisition API detection, pagination, location/description extraction, and stable public job URLs are enabled. Tenant WAF failures remain visible in receipts. |
-| iCIMS, Paylocity, Jobvite | Integrated | Provider-specific tenant detection and public board enumeration feed the shared normalization pipeline. Paylocity reads public embedded page state and calls its official feed only when a feed GUID is explicitly present. Live smoke tests on 2026-07-31 returned targeted rows from all three providers. |
-| JazzHR, Gem | Integrated | JazzHR public listings and Gem's public GraphQL board are normalized without login. Live smoke tests on 2026-07-31 returned targeted rows from both providers. |
+| iCIMS, Paylocity, Jobvite | Integrated | Provider-specific tenant detection and public board enumeration feed the shared normalization pipeline. Paylocity reads public embedded page state and calls its official feed only when a feed GUID is explicitly present. |
+| JazzHR, Gem | Integrated | JazzHR public listings and Gem's public GraphQL board are normalized without login. |
 | Comeet | Partial | The documented Careers API is enabled only when the public company UID and token are present; otherwise the scanner uses the public career page and embedded/schema.org extraction. Current company-pool production evidence is still missing. |
 | Taleo, SAP SuccessFactors | Partial | Public portal detection, embedded JSON, JSON-LD, and bounded job-link enumeration run automatically. Their official structured APIs are tenant-configured or authenticated, so the system does not claim universal direct-feed coverage. |
 | Dayforce, UKG/UltiPro, ADP Recruiting | Partial | Provider and tenant metadata are detected and public career pages are parsed for embedded JSON, JSON-LD, and job links. Official recruiting APIs require tenant-specific authentication or configuration; failed public enumeration remains visible in receipts. |
@@ -60,6 +60,8 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Email, Telegram, or ChatGPT completion notifications | Ivy requirement | Planned |
 | End-to-end run receipt with fetched, verified, rejected, deduplicated, imported, retained, stale-pruned, and failed counts | Ivy requirement | Integrated |
 | Automated tests with saved fixtures for core source/ATS behavior | Engineering requirement | Integrated |
+
+Enterprise ATS acceptance on 2026-07-31 used five live public boards (iCIMS, Paylocity, Jobvite, JazzHR, and Gem): 5/5 portals completed, 45 postings were enumerated, and 9 target-scope jobs survived normalization. The local regression suite passed 14/14 tests.
 
 ### Remaining cloud limitations, not reported as completed
 
