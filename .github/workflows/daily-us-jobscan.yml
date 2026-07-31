@@ -49,7 +49,7 @@ jobs:
 
       - name: Validate scanner syntax
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python -m py_compile scripts/jobspy_scan.py
+        run: python -m py_compile scripts/jobspy_scan.py scripts/verify_company_jobs.py
 
       - name: Collect and normalize jobs
         if: steps.schedule_guard.outputs.run == 'true'
