@@ -59,21 +59,23 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
         shell: bash
         run: |
-          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" ]]; then
-            echo "IVY_JOB_RADAR_SYNC_TOKEN is not configured; skipping website sync."
+          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" || -z "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
+            echo "Website sync credentials are not fully configured; skipping website sync."
             exit 0
           fi
           curl --fail-with-body --retry 3 --retry-all-errors \
             --request POST \
             --header "Content-Type: application/json" \
-            --header "OAI-Sites-Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
             --data-binary @data/scans/us_jobs_latest.json \
             "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
 
       - name: Upload scan artifact
-        if: steps.schedule_guard.outputs.run == 'true'
+        if: always() && steps.schedule_guard.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: us-jobscan-${{ github.run_id }}
@@ -82,7 +84,7 @@ jobs:
           retention-days: 30
 
       - name: Commit latest scan snapshot
-        if: steps.schedule_guard.outputs.run == 'true'
+        if: always() && steps.schedule_guard.outputs.run == 'true'
         shell: bash
         run: |
           if [[ -z "$(git status --short -- data/scans)" ]]; then
