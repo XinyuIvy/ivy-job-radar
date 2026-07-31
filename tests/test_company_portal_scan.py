@@ -14,6 +14,7 @@ from scripts.company_portal_scan import (
     detect_ats,
     extract_embedded_urls,
     location_matches_region,
+    normalize_api_job,
     normalize_posting,
     parse_embedded_jobs,
     parse_enterprise_html,
@@ -170,6 +171,28 @@ class CompanyPortalScanTests(unittest.TestCase):
             rows[0]["url"],
             "https://recruiting.paylocity.com/Recruiting/Jobs/Details/4304721",
         )
+
+    def test_normalizes_nested_enterprise_location(self) -> None:
+        job = normalize_api_job(
+            "Example",
+            "美国",
+            "gem",
+            {
+                "title": "Data Scientist",
+                "locations": [
+                    {
+                        "name": "San Francisco",
+                        "city": "San Francisco",
+                        "isoCountry": "USA",
+                        "isRemote": False,
+                    }
+                ],
+                "url": "https://jobs.example.com/1",
+            },
+            "now",
+        )
+        self.assertIsNotNone(job)
+        self.assertEqual(job["location"], "San Francisco")
 
     def test_parses_schema_org_job_posting(self) -> None:
         body = """
