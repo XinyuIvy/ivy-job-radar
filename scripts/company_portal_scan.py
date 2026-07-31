@@ -577,6 +577,7 @@ def nested_location(value: Any) -> str:
             "state",
             "region",
             "country",
+            "isoCountry",
             "addressLocality",
             "addressRegion",
             "addressCountry",
