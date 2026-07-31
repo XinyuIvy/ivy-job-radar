@@ -300,7 +300,7 @@ def detect_ats(urls: list[str]) -> tuple[str, str, str]:
             return "jazzhr", hostname.split(".", 1)[0], url
         if hostname in {"www.comeet.com", "comeet.com", "www.comeet.co", "comeet.co"}:
             api_match = re.search(
-                r"/careers-api/2\\.0/company/([^/]+)/positions",
+                r"/careers-api/2\.0/company/([^/]+)/positions",
                 parsed.path,
                 re.I,
             )
@@ -350,7 +350,7 @@ def extract_search_links(body: str) -> list[str]:
 def extract_embedded_urls(body: str) -> list[str]:
     """Recover public ATS endpoints referenced inside scripts and inline page state."""
     urls: list[str] = []
-    for match in re.finditer(r"https?://[^\\s\"'<>]+", body, re.I):
+    for match in re.finditer(r"https?://[^\s\"'<>]+", body, re.I):
         url = unescape(match.group(0)).replace("\\/", "/").rstrip("),;:'\"")
         if url not in urls:
             urls.append(url)
