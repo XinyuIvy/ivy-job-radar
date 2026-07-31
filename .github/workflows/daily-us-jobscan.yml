@@ -3,9 +3,9 @@ name: Daily global job scan
 on:
   workflow_dispatch:
   schedule:
-    # Run at both possible UTC offsets; the guard keeps only 9 AM New York time.
-    - cron: "7 13 * * *"
-    - cron: "7 14 * * *"
+    # Run at both possible UTC offsets; the guard keeps only 6 AM New York time.
+    - cron: "7 10 * * *"
+    - cron: "7 11 * * *"
 
 permissions:
   contents: write
@@ -25,7 +25,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$(TZ=America/New_York date +%H)" == "09" ]]; then
+          elif [[ "$(TZ=America/New_York date +%H)" == "06" ]]; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
