@@ -286,6 +286,9 @@ def detect_ats(urls: list[str]) -> tuple[str, str, str]:
         if hostname.endswith(".icims.com"):
             return "icims", hostname, url
         if hostname == "recruiting.paylocity.com":
+            feed_match = re.search(r"/api/feed/jobs/([0-9a-f-]{36})", parsed.path, re.I)
+            if feed_match:
+                return "paylocity", f"feed|{feed_match.group(1)}", url
             match = re.search(
                 r"/recruiting/jobs/(?:all|details)/([0-9a-f-]{36})",
                 parsed.path,
@@ -573,7 +576,17 @@ def nested_location(value: Any) -> str:
 
 def generic_job_row(row: dict[str, Any], base_url: str) -> dict[str, Any] | None:
     """Normalize one job-like object found in an enterprise ATS payload."""
-    title = value(row, "title", "name", "jobTitle", "positionTitle", "requisitionTitle")
+    title = value(
+        row,
+        "title",
+        "Title",
+        "name",
+        "Name",
+        "jobTitle",
+        "JobTitle",
+        "positionTitle",
+        "requisitionTitle",
+    )
     raw_url = value(
         row,
         "url",
@@ -584,18 +597,44 @@ def generic_job_row(row: dict[str, Any], base_url: str) -> dict[str, Any] | None
         "absolute_url",
         "hostedUrl",
         "externalPath",
+        "PositionUrl",
     )
-    identifier = value(row, "id", "jobId", "jobID", "requisitionId", "requisitionNumber")
+    identifier = value(
+        row,
+        "id",
+        "Id",
+        "jobId",
+        "JobId",
+        "jobID",
+        "requisitionId",
+        "requisitionNumber",
+    )
     if not title or (not raw_url and not identifier):
         return None
     location_value = (
         row.get("location")
+        or row.get("Location")
         or row.get("locations")
+        or row.get("Locations")
         or row.get("jobLocation")
+        or row.get("JobLocation")
         or row.get("primaryLocation")
+        or row.get("LocationName")
     )
-    description = value(row, "description", "jobDescription", "summary", "content")
-    resolved_url = urljoin(base_url, raw_url) if raw_url else base_url
+    description = value(
+        row,
+        "description",
+        "Description",
+        "jobDescription",
+        "summary",
+        "content",
+    )
+    if raw_url:
+        resolved_url = urljoin(base_url, raw_url)
+    elif identifier and (urlsplit(base_url).hostname or "").lower() == "recruiting.paylocity.com":
+        resolved_url = urljoin(base_url, f"/Recruiting/Jobs/Details/{identifier}")
+    else:
+        resolved_url = base_url
     return {
         "title": title,
         "location": nested_location(location_value),
@@ -721,9 +760,13 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
     elif ats_type == "rippling" and tenant:
         endpoint = f"https://api.rippling.com/platform/api/ats/v1/board/{tenant_parts[0]}/jobs"
         parser = "rippling"
-    elif ats_type == "paylocity" and tenant:
-        endpoint = f"https://recruiting.paylocity.com/recruiting/v2/api/feed/jobs/{tenant_parts[0]}"
+    elif ats_type == "paylocity" and tenant.startswith("feed|"):
+        feed_key = tenant.split("|", 1)[1]
+        endpoint = f"https://recruiting.paylocity.com/recruiting/v2/api/feed/jobs/{feed_key}"
         parser = "enterprise_json"
+    elif ats_type == "paylocity":
+        endpoint = portal_url
+        parser = "enterprise_html"
     elif ats_type == "comeet" and "|" in tenant:
         company_id, token = tenant.split("|", 1)
         endpoint = (
@@ -731,6 +774,9 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
             f"/positions/?token={quote_plus(token)}"
         )
         parser = "enterprise_json"
+    elif ats_type == "gem" and tenant:
+        endpoint = "https://jobs.gem.com/api/public/graphql"
+        parser = "gem_graphql"
     elif ats_type in {
         "icims",
         "jobvite",
@@ -741,7 +787,6 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
         "adp",
         "jazzhr",
         "comeet",
-        "gem",
     }:
         endpoint = enterprise_board_url(ats_type, tenant, portal_url)
         parser = "enterprise_html"
@@ -768,6 +813,27 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
         return [], ""
 
     request_body = None
+    if parser == "gem_graphql":
+        query = """
+        query JobBoardList($boardId: String!) {
+          oatsExternalJobPostings(boardId: $boardId) {
+            jobPostings {
+              id
+              extId
+              title
+              locations { name city isoCountry isRemote }
+              job { employmentType }
+            }
+          }
+        }
+        """
+        request_body = json.dumps(
+            {
+                "operationName": "JobBoardList",
+                "variables": {"boardId": tenant_parts[0]},
+                "query": query,
+            }
+        ).encode("utf-8")
     if parser == "workday":
         request_body = json.dumps(
             {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
@@ -786,6 +852,21 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
         return [], endpoint
     if parser == "enterprise_json":
         return job_rows_from_payload(payload, endpoint), endpoint
+    if parser == "gem_graphql":
+        data = payload.get("data", {}) if isinstance(payload, dict) else {}
+        container = data.get("oatsExternalJobPostings", {}) if isinstance(data, dict) else {}
+        rows = container.get("jobPostings", []) if isinstance(container, dict) else []
+        for row in rows if isinstance(rows, list) else []:
+            if not isinstance(row, dict):
+                continue
+            identifier = clean(row.get("id") or row.get("extId"))
+            row["location"] = row.get("locations")
+            row["url"] = (
+                f"https://jobs.gem.com/{tenant_parts[0]}?job_id={quote_plus(identifier)}"
+                if identifier
+                else f"https://jobs.gem.com/{tenant_parts[0]}"
+            )
+        return [row for row in rows if isinstance(row, dict)], endpoint
     if parser == "workday":
         rows: list[dict[str, Any]] = []
         page_size = 20
