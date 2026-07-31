@@ -56,11 +56,15 @@ jobs:
         run: python scripts/jobspy_scan.py
 
       - name: Sync eligible jobs to Ivy Job Radar
-        if: steps.schedule_guard.outputs.run == 'true' && secrets.IVY_JOB_RADAR_SYNC_TOKEN != ''
+        if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
         shell: bash
         run: |
+          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" ]]; then
+            echo "IVY_JOB_RADAR_SYNC_TOKEN is not configured; skipping website sync."
+            exit 0
+          fi
           curl --fail-with-body --retry 3 --retry-all-errors \
             --request POST \
             --header "Content-Type: application/json" \
