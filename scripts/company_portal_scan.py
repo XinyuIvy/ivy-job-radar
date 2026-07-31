@@ -15,7 +15,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote_plus, unquote, urljoin, urlsplit
+from urllib.parse import parse_qs, quote_plus, unquote, urljoin, urlsplit
 from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
@@ -82,6 +82,7 @@ ATS_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("bamboohr", re.compile(r"https?://([^.]+)\.bamboohr\.com", re.I)),
     ("breezy", re.compile(r"https?://([^.]+)\.breezy\.hr", re.I)),
     ("personio", re.compile(r"https?://([^.]+)\.jobs\.personio\.(?:de|com)", re.I)),
+    ("paylocity", re.compile(r"recruiting\.paylocity\.com/recruiting/jobs/(?:all|details)/([0-9a-f-]{36})", re.I)),
     ("icims", re.compile(r"https?://(?:careers|jobs)-?([^.]+)\.icims\.com", re.I)),
     ("jobvite", re.compile(r"jobs\.jobvite\.com/([^/?#]+)", re.I)),
     ("taleo", re.compile(r"(?:taleo\.net|oraclecloud\.com)", re.I)),
@@ -276,10 +277,42 @@ def detect_ats(urls: list[str]) -> tuple[str, str, str]:
     for url in urls:
         parsed = urlsplit(url)
         hostname = (parsed.hostname or "").lower()
+        path_parts = [part for part in parsed.path.split("/") if part]
+        query = parse_qs(parsed.query)
+
         if hostname.endswith("myworkdayjobs.com"):
-            path_parts = [part for part in parsed.path.split("/") if part]
             site = path_parts[0] if path_parts else ""
             return "workday", f"{hostname}/{site}".rstrip("/"), url
+        if hostname.endswith(".icims.com"):
+            return "icims", hostname, url
+        if hostname == "recruiting.paylocity.com":
+            match = re.search(
+                r"/recruiting/jobs/(?:all|details)/([0-9a-f-]{36})",
+                parsed.path,
+                re.I,
+            )
+            if match:
+                return "paylocity", match.group(1), url
+        if hostname.endswith(".applytojob.com"):
+            return "jazzhr", hostname.split(".", 1)[0], url
+        if hostname in {"www.comeet.com", "comeet.com", "www.comeet.co", "comeet.co"}:
+            company_id = clean((query.get("company") or query.get("companyId") or [""])[0])
+            token = clean((query.get("token") or [""])[0])
+            tenant = "|".join(value for value in (company_id, token) if value)
+            return "comeet", tenant, url
+        if hostname.endswith("successfactors.com") or hostname.endswith("successfactors.eu"):
+            company = clean((query.get("company") or [""])[0])
+            return "successfactors", "|".join(value for value in (hostname, company) if value), url
+        if "dayforcehcm.com" in hostname or hostname.endswith("dayforce.com"):
+            tenant = path_parts[1] if len(path_parts) > 1 and path_parts[0].lower() in {"en-us", "en-ca", "fr-ca"} else ""
+            return "dayforce", tenant, url
+        if "ultipro.com" in hostname or hostname.endswith("ukg.com"):
+            tenant = path_parts[0] if path_parts else hostname
+            return "ukg", tenant, url
+        if hostname in {"workforcenow.adp.com", "recruiting.adp.com"}:
+            company = clean((query.get("cid") or query.get("clientId") or [""])[0])
+            return "adp", company, url
+
         for name, pattern in ATS_PATTERNS:
             match = pattern.search(url)
             if not match:
@@ -506,6 +539,154 @@ def json_payload(result: FetchResult) -> Any:
         return None
 
 
+def nested_location(value: Any) -> str:
+    """Flatten common ATS location shapes into a readable string."""
+    if isinstance(value, str):
+        return clean(value)
+    if isinstance(value, list):
+        return ", ".join(filter(None, (nested_location(item) for item in value)))
+    if not isinstance(value, dict):
+        return ""
+    parts = [
+        clean(value.get(key))
+        for key in (
+            "name",
+            "city",
+            "state",
+            "region",
+            "country",
+            "addressLocality",
+            "addressRegion",
+            "addressCountry",
+        )
+        if clean(value.get(key))
+    ]
+    address = value.get("address")
+    if isinstance(address, dict):
+        parts.extend(
+            clean(address.get(key))
+            for key in ("addressLocality", "addressRegion", "addressCountry")
+            if clean(address.get(key))
+        )
+    return ", ".join(dict.fromkeys(parts))
+
+
+def generic_job_row(row: dict[str, Any], base_url: str) -> dict[str, Any] | None:
+    """Normalize one job-like object found in an enterprise ATS payload."""
+    title = value(row, "title", "name", "jobTitle", "positionTitle", "requisitionTitle")
+    raw_url = value(
+        row,
+        "url",
+        "jobUrl",
+        "jobURL",
+        "applyUrl",
+        "applyURL",
+        "absolute_url",
+        "hostedUrl",
+        "externalPath",
+    )
+    identifier = value(row, "id", "jobId", "jobID", "requisitionId", "requisitionNumber")
+    if not title or (not raw_url and not identifier):
+        return None
+    location_value = (
+        row.get("location")
+        or row.get("locations")
+        or row.get("jobLocation")
+        or row.get("primaryLocation")
+    )
+    description = value(row, "description", "jobDescription", "summary", "content")
+    resolved_url = urljoin(base_url, raw_url) if raw_url else base_url
+    return {
+        "title": title,
+        "location": nested_location(location_value),
+        "description": description,
+        "url": resolved_url,
+        "id": identifier,
+    }
+
+
+def job_rows_from_payload(payload: Any, base_url: str) -> list[dict[str, Any]]:
+    """Recursively collect job records from public embedded or feed JSON."""
+    rows: list[dict[str, Any]] = []
+    stack = [payload]
+    seen_objects: set[int] = set()
+    while stack:
+        item = stack.pop()
+        if isinstance(item, list):
+            stack.extend(item)
+            continue
+        if not isinstance(item, dict) or id(item) in seen_objects:
+            continue
+        seen_objects.add(id(item))
+        normalized = generic_job_row(item, base_url)
+        if normalized and TARGET_TITLE.search(normalized["title"]):
+            rows.append(normalized)
+        stack.extend(value for value in item.values() if isinstance(value, (dict, list)))
+    deduplicated = {
+        clean(row.get("url")) or f"{clean(row.get('title')).casefold()}::{clean(row.get('id'))}": row
+        for row in rows
+    }
+    return list(deduplicated.values())
+
+
+def parse_embedded_jobs(body: str, base_url: str) -> list[dict[str, Any]]:
+    """Read public JSON state embedded by client-rendered enterprise ATS pages."""
+    rows: list[dict[str, Any]] = []
+    decoder = json.JSONDecoder()
+    scripts = re.findall(r"<script\\b[^>]*>(.*?)</script>", body, re.I | re.S)
+    for script in scripts:
+        candidate = unescape(script).strip()
+        starts = [index for index in (candidate.find("{"), candidate.find("[")) if index >= 0]
+        if not starts:
+            continue
+        try:
+            payload, _ = decoder.raw_decode(candidate[min(starts):])
+        except (json.JSONDecodeError, TypeError):
+            continue
+        rows.extend(job_rows_from_payload(payload, base_url))
+    deduplicated = {
+        clean(row.get("url")) or f"{clean(row.get('title')).casefold()}::{clean(row.get('id'))}": row
+        for row in rows
+    }
+    return list(deduplicated.values())
+
+
+def parse_enterprise_html(body: str, base_url: str) -> list[dict[str, Any]]:
+    """Extract public jobs from enterprise ATS HTML without browser automation."""
+    if not body:
+        return []
+    _, links, postings = parse_html(body, base_url)
+    rows = job_rows_from_payload(postings, base_url)
+    rows.extend(parse_embedded_jobs(body, base_url))
+    for url, anchor in links:
+        if not TARGET_TITLE.search(anchor) or EXCLUDED_TITLE.search(anchor):
+            continue
+        if not JOB_LINK.search(url):
+            continue
+        rows.append({"title": anchor, "url": url, "location": "", "description": ""})
+    deduplicated = {
+        clean(row.get("url")) or f"{clean(row.get('title')).casefold()}::{clean(row.get('id'))}": row
+        for row in rows
+    }
+    return list(deduplicated.values())
+
+
+def enterprise_board_url(ats_type: str, tenant: str, portal_url: str) -> str:
+    """Return a stable public listing page when the input points at one job."""
+    parsed = urlsplit(portal_url)
+    origin = f"{parsed.scheme or 'https'}://{parsed.netloc}"
+    first_tenant = tenant.split("|", 1)[0].split("/", 1)[0]
+    if ats_type == "icims":
+        return f"{origin}/jobs/search?ss=1"
+    if ats_type == "jobvite" and first_tenant:
+        return f"https://jobs.jobvite.com/{first_tenant}/jobs"
+    if ats_type == "jazzhr" and first_tenant:
+        return f"https://{first_tenant}.applytojob.com/apply/jobs/"
+    if ats_type == "gem" and first_tenant:
+        return f"https://jobs.gem.com/{first_tenant}"
+    return portal_url
+
+
 def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str, Any]], str]:
     tenant_parts = tenant.split("/")
     endpoint = ""
@@ -540,6 +721,30 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
     elif ats_type == "rippling" and tenant:
         endpoint = f"https://api.rippling.com/platform/api/ats/v1/board/{tenant_parts[0]}/jobs"
         parser = "rippling"
+    elif ats_type == "paylocity" and tenant:
+        endpoint = f"https://recruiting.paylocity.com/recruiting/v2/api/feed/jobs/{tenant_parts[0]}"
+        parser = "enterprise_json"
+    elif ats_type == "comeet" and "|" in tenant:
+        company_id, token = tenant.split("|", 1)
+        endpoint = (
+            f"https://www.comeet.co/careers-api/2.0/company/{quote_plus(company_id)}"
+            f"/positions/?token={quote_plus(token)}"
+        )
+        parser = "enterprise_json"
+    elif ats_type in {
+        "icims",
+        "jobvite",
+        "taleo",
+        "successfactors",
+        "dayforce",
+        "ukg",
+        "adp",
+        "jazzhr",
+        "comeet",
+        "gem",
+    }:
+        endpoint = enterprise_board_url(ats_type, tenant, portal_url)
+        parser = "enterprise_html"
     elif ats_type == "personio":
         endpoint = f"https://{urlsplit(portal_url).hostname}/xml"
         parser = "personio_xml"
@@ -568,6 +773,8 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
             {"appliedFacets": {}, "limit": 20, "offset": 0, "searchText": ""}
         ).encode("utf-8")
     result = fetch(endpoint, request_body=request_body)
+    if parser == "enterprise_html":
+        return parse_enterprise_html(result.body, result.url or endpoint), endpoint
     if parser == "workable_markdown":
         return parse_workable_markdown(result.body, tenant_parts[0]), endpoint
     if parser == "personio_xml":
@@ -577,6 +784,8 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
     payload = json_payload(result)
     if payload is None:
         return [], endpoint
+    if parser == "enterprise_json":
+        return job_rows_from_payload(payload, endpoint), endpoint
     if parser == "workday":
         rows: list[dict[str, Any]] = []
         page_size = 20
