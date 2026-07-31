@@ -33,6 +33,7 @@ SOURCES = (
     ("himalayas", "https://himalayas.app/jobs/api?limit=20&offset=0"),
     ("arbeitnow", "https://www.arbeitnow.com/api/job-board-api"),
     ("weworkremotely", "https://weworkremotely.com/remote-jobs.rss"),
+    ("themuse", "https://www.themuse.com/api/public/jobs?category=Data%20Science&page=1"),
 )
 
 
@@ -81,6 +82,14 @@ def normalize(source: str, item: dict[str, object], scanned_at: str) -> dict[str
     company = pick(item, "company", "company_name", "companyName")
     url = pick(item, "url", "job_url", "jobUrl", "apply_url")
     description = strip_html(pick(item, "description", "jobDescription", "content"))
+    if source == "themuse":
+        company_value = item.get("company")
+        if isinstance(company_value, dict):
+            company = clean(company_value.get("name"))
+        refs = item.get("refs")
+        if isinstance(refs, dict):
+            url = clean(refs.get("landing_page"))
+        description = strip_html(item.get("contents"))
     if not title or not company or not url:
         return None
     if not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
@@ -90,7 +99,16 @@ def normalize(source: str, item: dict[str, object], scanned_at: str) -> dict[str
     if not re.search(r"ph\.?d|doctorate|doctoral|biostat|statistics|quantitative", combined, re.IGNORECASE):
         return None
 
-    location = pick(item, "location", "candidate_required_location", "jobGeo") or "Remote"
+    location = pick(item, "location", "candidate_required_location", "jobGeo")
+    if source == "themuse" and not location:
+        locations = item.get("locations")
+        if isinstance(locations, list):
+            location = ", ".join(
+                clean(value.get("name"))
+                for value in locations
+                if isinstance(value, dict) and clean(value.get("name"))
+            )
+    location = location or "Remote"
     identity = f"{company.lower()}::{title.lower()}::{location.lower()}"
     score = 55
     if re.search(r"ph\.?d|doctorate|doctoral", combined, re.IGNORECASE):
