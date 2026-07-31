@@ -19,7 +19,9 @@
   "sites": [
     "indeed",
     "linkedin",
-    "google"
+    "google",
+    "glassdoor",
+    "zip_recruiter"
   ],
   "results_wanted_per_query": 30,
   "hours_old": 72,
