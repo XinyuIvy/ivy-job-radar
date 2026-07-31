@@ -361,7 +361,9 @@ def normalize_result(result: dict[str, str], query: dict[str, str], scanned_at: 
         return None
 
     company = clean_text(result.get("company")) or company_from_result(title, description)
-    identity = f"{re.sub(r'\\W+', '', company.lower())}::{re.sub(r'\\W+', '', title.lower())}"
+    company_key = re.sub(r"\W+", "", company.lower())
+    title_key = re.sub(r"\W+", "", title.lower())
+    identity = f"{company_key}::{title_key}"
     return {
         "job_key": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24],
         "company": company,
