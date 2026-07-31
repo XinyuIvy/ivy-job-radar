@@ -299,7 +299,16 @@ def detect_ats(urls: list[str]) -> tuple[str, str, str]:
         if hostname.endswith(".applytojob.com"):
             return "jazzhr", hostname.split(".", 1)[0], url
         if hostname in {"www.comeet.com", "comeet.com", "www.comeet.co", "comeet.co"}:
-            company_id = clean((query.get("company") or query.get("companyId") or [""])[0])
+            api_match = re.search(
+                r"/careers-api/2\\.0/company/([^/]+)/positions",
+                parsed.path,
+                re.I,
+            )
+            company_id = (
+                unquote(api_match.group(1))
+                if api_match
+                else clean((query.get("company") or query.get("companyId") or [""])[0])
+            )
             token = clean((query.get("token") or [""])[0])
             tenant = "|".join(value for value in (company_id, token) if value)
             return "comeet", tenant, url
@@ -336,6 +345,16 @@ def extract_search_links(body: str) -> list[str]:
         if url.startswith("http"):
             links.append(url)
     return links
+
+
+def extract_embedded_urls(body: str) -> list[str]:
+    """Recover public ATS endpoints referenced inside scripts and inline page state."""
+    urls: list[str] = []
+    for match in re.finditer(r"https?://[^\\s\"'<>]+", body, re.I):
+        url = unescape(match.group(0)).replace("\\/", "/").rstrip("),;:'\"")
+        if url not in urls:
+            urls.append(url)
+    return urls
 
 
 def plausible_company_portal(url: str, company: str) -> bool:
@@ -598,6 +617,7 @@ def generic_job_row(row: dict[str, Any], base_url: str) -> dict[str, Any] | None
         "hostedUrl",
         "externalPath",
         "PositionUrl",
+        "position_url",
     )
     identifier = value(
         row,
@@ -771,7 +791,7 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
         company_id, token = tenant.split("|", 1)
         endpoint = (
             f"https://www.comeet.co/careers-api/2.0/company/{quote_plus(company_id)}"
-            f"/positions/?token={quote_plus(token)}"
+            f"/positions/?token={quote_plus(token)}&details=true"
         )
         parser = "enterprise_json"
     elif ats_type == "gem" and tenant:
@@ -1250,7 +1270,10 @@ def scan_company(row: dict[str, Any], scanned_at: str, max_pages: int) -> tuple[
 
     text, links, postings = parse_html(first.body, first.url)
     # If a company homepage was supplied, follow one obvious careers link before scanning.
-    ats_on_first, _, _ = detect_ats([first.url] + [url for url, _ in links])
+    embedded_urls = extract_embedded_urls(first.body)
+    ats_on_first, _, _ = detect_ats(
+        [first.url] + [url for url, _ in links] + embedded_urls
+    )
     career_links = [
         url for url, anchor in links
         if JOB_LINK.search(f"{url} {anchor}") and plausible_company_portal(url, company)
@@ -1273,7 +1296,7 @@ def scan_company(row: dict[str, Any], scanned_at: str, max_pages: int) -> tuple[
                 receipt.final_url = archived_page.url
                 receipt.http_status = archived_page.status
                 text, links, postings = parse_html(first.body, first.url)
-    candidate_urls = [first.url] + [url for url, _ in links]
+    candidate_urls = [first.url] + [url for url, _ in links] + extract_embedded_urls(first.body)
     ats_type, tenant, portal_url = detect_ats(candidate_urls)
     receipt.ats_type = ats_type
     receipt.ats_tenant = tenant
