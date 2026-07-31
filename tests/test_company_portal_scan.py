@@ -77,6 +77,18 @@ class CompanyPortalScanTests(unittest.TestCase):
             verified_company_portal("腾讯医疗健康"),
             "https://tencent.wd1.myworkdayjobs.com/Tencent_Careers",
         )
+        self.assertEqual(
+            verified_company_portal("Medpace"),
+            "https://uscareers-medpace.icims.com/jobs/search?ss=1",
+        )
+        self.assertEqual(
+            verified_company_portal("Owkin"),
+            "https://jobs.ashbyhq.com/owkin",
+        )
+        self.assertEqual(
+            verified_company_portal("Signant Health"),
+            "https://jobs.dayforcehcm.com/en-US/signanthealth/CANDIDATEPORTAL",
+        )
 
     def test_aggregator_registry_indexes_parent_and_upstream_names(self) -> None:
         rows = [
