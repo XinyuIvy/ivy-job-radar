@@ -182,8 +182,32 @@ jobs:
             echo "No scan changes to commit."
             exit 0
           fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/scans/
           git commit -m "Update daily global job scan"
-          git push
+
+          # The scan can run for a long time while main receives unrelated updates.
+          # Rebase the generated snapshot onto the newest main before pushing.
+          for attempt in 1 2 3; do
+            echo "Snapshot push attempt ${attempt}/3"
+            git fetch origin main
+
+            if ! git rebase origin/main; then
+              git rebase --abort || true
+              echo "Snapshot rebase conflicted; the uploaded artifact remains available."
+              exit 1
+            fi
+
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            if [[ "${attempt}" -lt 3 ]]; then
+              sleep $((attempt * 5))
+            fi
+          done
+
+          echo "Snapshot push still failed after 3 attempts; the uploaded artifact remains available."
+          exit 1
