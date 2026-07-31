@@ -298,7 +298,7 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
     quantitative_degree = bool(re.search(r"统计|生物统计|流行病|数学|经济|数据科学|quantitative", lower))
     score += 10 if phd_targeted else 6 if quantitative_degree else 0
     score += 4 if years is None else 10 if years == 0 else 8 if years <= 3 else 0
-    details.append("学历：明确接受博士" if phd_targeted else "学历：接受相关定量专业")
+    details.append("学历：明确接受博士" if phd_targeted else "学历：公开摘要未明确，需读取完整 JD 核验")
     details.append("经验：未写明最低年限" if years is None else f"经验：最低要求最高约 {years} 年")
 
     core_rules = (
@@ -338,26 +338,44 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
         details.append(f"硬技能缺口：检测到 {gap_count} 类不匹配的核心研发要求")
 
     experience_blocked = years is not None and years > 3
-    eligible = phd_targeted and not experience_blocked and gap_count < 2
+    # Discovery must tolerate incomplete search snippets; final degree eligibility is verified from the full JD.
+    eligible = quantitative_degree and not experience_blocked and gap_count < 2
     return max(0, min(100, round(score))), details, eligible
 
 
-def normalize_result(result: dict[str, str], query: dict[str, str], scanned_at: str) -> dict[str, object] | None:
+def normalize_result(
+    result: dict[str, str],
+    query: dict[str, str],
+    scanned_at: str,
+    rejection_stats: dict[str, int] | None = None,
+) -> dict[str, object] | None:
     title = strip_site_suffix(result["title"])
     description = clean_text(re.sub(r"<[^>]+>", " ", result["description"]))
     url = canonicalize_url(result["url"])
     combined = f"{title} {description}"
     lower_title = title.lower()
     if not title or not url:
+        if rejection_stats is not None:
+            rejection_stats["missing_title_or_url"] += 1
         return None
     if not any(signal in lower_title for signal in WANTED_TITLE_SIGNALS):
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
         return None
     if any(signal in lower_title for signal in EXCLUDED_TITLE_SIGNALS):
+        if rejection_stats is not None:
+            rejection_stats["excluded_seniority_or_role"] += 1
         return None
 
     years = required_experience(combined)
     score, details, eligible = score_job(title, description, years)
-    if not eligible or score < 55:
+    if not eligible:
+        if rejection_stats is not None:
+            rejection_stats["degree_experience_or_skill_gap"] += 1
+        return None
+    if score < 45:
+        if rejection_stats is not None:
+            rejection_stats["score_below_discovery_threshold"] += 1
         return None
 
     company = clean_text(result.get("company")) or company_from_result(title, description)
@@ -407,8 +425,15 @@ def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str,
     for item in config["queries"]:
         results = fetch_bing_rss(item["query"])
         matched = 0
+        rejection_stats = {
+            "missing_title_or_url": 0,
+            "title_not_targeted": 0,
+            "excluded_seniority_or_role": 0,
+            "degree_experience_or_skill_gap": 0,
+            "score_below_discovery_threshold": 0,
+        }
         for result in results:
-            normalized = normalize_result(result, item, scanned_at)
+            normalized = normalize_result(result, item, scanned_at, rejection_stats)
             if normalized:
                 records.append(normalized)
                 matched += 1
@@ -418,6 +443,7 @@ def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str,
                 "query": item["query"],
                 "scanned": len(results),
                 "matched": matched,
+                "rejected": rejection_stats,
             }
         )
         time.sleep(float(config.get("delay_seconds", 0.3)))
@@ -425,9 +451,16 @@ def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str,
     for page in config.get("direct_pages", []):
         results = collect_direct_page(page)
         matched = 0
+        rejection_stats = {
+            "missing_title_or_url": 0,
+            "title_not_targeted": 0,
+            "excluded_seniority_or_role": 0,
+            "degree_experience_or_skill_gap": 0,
+            "score_below_discovery_threshold": 0,
+        }
         query = {"source": str(page["source"]), "query": str(page["url"])}
         for result in results:
-            normalized = normalize_result(result, query, scanned_at)
+            normalized = normalize_result(result, query, scanned_at, rejection_stats)
             if normalized:
                 records.append(normalized)
                 matched += 1
@@ -437,6 +470,7 @@ def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str,
                 "query": page["url"],
                 "scanned": len(results),
                 "matched": matched,
+                "rejected": rejection_stats,
             }
         )
 
