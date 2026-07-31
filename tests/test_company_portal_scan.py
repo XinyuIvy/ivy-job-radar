@@ -129,6 +129,29 @@ class CompanyPortalScanTests(unittest.TestCase):
         rows = parse_enterprise_html(body, "https://careers.example.com/")
         self.assertEqual({row["title"] for row in rows}, {"Biostatistician", "Data Scientist"})
 
+    def test_parses_paylocity_page_data(self) -> None:
+        body = """
+        <script>
+          window.pageData = {"Jobs":[{
+            "JobId":4304721,
+            "JobTitle":"Biostatistician II",
+            "LocationName":"Remote Worker",
+            "JobLocation":{"City":"Washington","State":"DC","Country":"USA"}
+          }]};
+        </script>
+        """
+        rows = parse_embedded_jobs(
+            body,
+            "https://recruiting.paylocity.com/recruiting/jobs/All/"
+            "d41cfe64-1dc9-420c-8d79-e98f168d48fa/Example",
+        )
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["title"], "Biostatistician II")
+        self.assertEqual(
+            rows[0]["url"],
+            "https://recruiting.paylocity.com/Recruiting/Jobs/Details/4304721",
+        )
+
     def test_parses_schema_org_job_posting(self) -> None:
         body = """
         <html><script type="application/ld+json">
