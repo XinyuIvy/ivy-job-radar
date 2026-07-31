@@ -192,7 +192,7 @@ class CompanyPortalScanTests(unittest.TestCase):
             "now",
         )
         self.assertIsNotNone(job)
-        self.assertEqual(job["location"], "San Francisco")
+        self.assertEqual(job["location"], "San Francisco, USA")
 
     def test_parses_schema_org_job_posting(self) -> None:
         body = """
