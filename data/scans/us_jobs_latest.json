@@ -23,8 +23,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "biostatistician",
     "date_posted": "",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -52,8 +52,35 @@
     "source": "JobSpy · indeed",
     "search_query": "biostatistician",
     "date_posted": "2026-07-28",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "704134d57c960ea05673380c",
+    "company": "CHAOS Industries",
+    "title": "Data Scientist: Mission Engineering",
+    "location": "El Segundo, CA",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 69,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：23/30；领域迁移：13/20；工具匹配：12/15；工作授权：JD 未明确",
+    "skills": [
+      "R",
+      "Python",
+      "Statistics",
+      "Experimentation",
+      "Machine learning"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4428740318",
+    "canonical_url": "https://linkedin.com/jobs/view/4428740318",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "statistical scientist",
+    "date_posted": "",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -80,8 +107,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "healthcare data scientist",
     "date_posted": "2026-07-28",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -107,8 +134,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "statistical scientist",
     "date_posted": "2026-07-29",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -130,10 +157,10 @@
     "canonical_url": "https://linkedin.com/jobs/view/4444161236",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "biostatistician",
+    "search_query": "algorithm validation scientist",
     "date_posted": "2026-07-29",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -159,37 +186,8 @@
     "source": "JobSpy · indeed",
     "search_query": "biostatistician",
     "date_posted": "2026-07-29",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "14661938559401805f816000",
-    "company": "StudyFetch",
-    "title": "AI Research Scientist, Learning & Evaluation",
-    "location": "Beverly Hills, CA",
-    "region": "美国",
-    "track": "Healthcare AI",
-    "score": 64,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：30/30；领域迁移：8/20；工具匹配：5/15；工作授权：JD 未明确",
-    "skills": [
-      "Python",
-      "SQL",
-      "Statistics",
-      "Causal inference",
-      "Experimentation",
-      "Machine learning",
-      "Model validation"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4446019491",
-    "canonical_url": "https://linkedin.com/jobs/view/4446019491",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "algorithm validation scientist",
-    "date_posted": "2026-07-29",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -216,61 +214,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "statistical scientist",
     "date_posted": "",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "00fc27a67eb42c8d8d508eae",
-    "company": "Tombras",
-    "title": "Data Scientist",
-    "location": "Knoxville, TN",
-    "region": "美国",
-    "track": "Healthcare AI",
-    "score": 62,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：16/30；领域迁移：13/20；工具匹配：12/15；工作授权：JD 未明确",
-    "skills": [
-      "R",
-      "Python",
-      "SQL",
-      "Statistics",
-      "Machine learning"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4445046265",
-    "canonical_url": "https://linkedin.com/jobs/view/4445046265",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "statistical scientist",
-    "date_posted": "",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "dd45b88e6c47c61ccbb89059",
-    "company": "University of Utah",
-    "title": "Research Scientists (PhD)",
-    "location": "Salt Lake City, UT",
-    "region": "美国",
-    "track": "Healthcare AI",
-    "score": 60,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：17/30；领域迁移：14/20；工具匹配：8/15；工作授权：JD 未明确",
-    "skills": [
-      "Python",
-      "Statistics",
-      "Experimentation",
-      "Medical imaging"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4445779229",
-    "canonical_url": "https://linkedin.com/jobs/view/4445779229",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "medical imaging data scientist",
-    "date_posted": "2026-07-28",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -295,8 +240,36 @@
     "source": "JobSpy · linkedin",
     "search_query": "medical imaging data scientist",
     "date_posted": "2026-07-28",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "676e02bafa5816354051acbe",
+    "company": "Stanford University",
+    "title": "Data Scientist, RegLab, Stanford Law School",
+    "location": "Stanford, CA",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 59,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：23/30；领域迁移：0/20；工具匹配：15/15；工作授权：JD 未明确",
+    "skills": [
+      "R",
+      "Python",
+      "SQL",
+      "Statistics",
+      "Causal inference",
+      "Machine learning"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4443695651",
+    "canonical_url": "https://linkedin.com/jobs/view/4443695651",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "statistical scientist",
+    "date_posted": "2026-07-30",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -320,8 +293,33 @@
     "source": "JobSpy · linkedin",
     "search_query": "quantitative researcher",
     "date_posted": "2026-07-28",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "137cae150766e83ab85fa015",
+    "company": "Two Sigma",
+    "title": "Quantitative Researcher: Machine Learning",
+    "location": "New York, United States",
+    "region": "美国",
+    "track": "Quant",
+    "score": 58,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：16/30；领域迁移：13/20；工具匹配：8/15；工作授权：JD 未明确",
+    "skills": [
+      "Python",
+      "Statistics",
+      "Machine learning"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4376204181",
+    "canonical_url": "https://linkedin.com/jobs/view/4376204181",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "quantitative researcher",
+    "date_posted": "2026-07-29",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -345,10 +343,10 @@
     "canonical_url": "https://linkedin.com/jobs/view/4444503535",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "healthcare data scientist",
+    "search_query": "statistical scientist",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -375,8 +373,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "healthcare data scientist",
     "date_posted": "",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -401,35 +399,10 @@
     "canonical_url": "https://linkedin.com/jobs/view/4426472157",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "statistical scientist",
+    "search_query": "healthcare data scientist",
     "date_posted": "2026-07-29",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "1c62380ee162ada301ac5fc8",
-    "company": "Man Group",
-    "title": "Quantitative Researcher",
-    "location": "Boston, MA",
-    "region": "美国",
-    "track": "Quant",
-    "score": 56,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：10/30；领域迁移：13/20；工具匹配：12/15；工作授权：JD 未明确",
-    "skills": [
-      "R",
-      "Python",
-      "Statistics"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4429942723",
-    "canonical_url": "https://linkedin.com/jobs/view/4429942723",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "quantitative researcher",
-    "date_posted": "",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -456,8 +429,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "applied scientist causal inference",
     "date_posted": "",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   },
   {
@@ -479,10 +452,10 @@
     "canonical_url": "https://linkedin.com/jobs/view/4445785398",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "pharmacoepidemiologist",
+    "search_query": "real world evidence scientist",
     "date_posted": "2026-07-28",
-    "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
+    "discovered_at": "2026-07-31T04:38:28.420953+00:00",
+    "checked_at": "2026-07-31T04:38:28.420953+00:00",
     "status": "待官网核验"
   }
 ]
