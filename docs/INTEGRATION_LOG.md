@@ -41,6 +41,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Dayforce, UKG/UltiPro, ADP Recruiting | Partial | Provider and tenant metadata are detected and public career pages are parsed for embedded JSON, JSON-LD, and job links. Official recruiting APIs require tenant-specific authentication or configuration; failed public enumeration remains visible in receipts. |
 | Generic schema.org `JobPosting` company-page crawler | Integrated | Every company portal is parsed for nested/list/graph JSON-LD and bounded job-detail links, rather than only verifying already-known candidates. |
 | Full company-pool coverage report | Integrated | `company_portal_summary.json` reports dynamic pool size, attempted/succeeded/failed/unidentified counts, ATS distribution, scanned/matched jobs, and the complete failure list. |
+| Reviewed official-portal seeds for companies missing current Aggregator evidence | Integrated | Public employer/ATS evidence now seeds AbbVie, Analysis Group, Biogen, Cytel, Foundation Medicine, Gilead, Guardant Health, J&J, Merck/MSD, Eli Lilly, Tempus AI, TriNetX, and Vertex. Regional aliases reuse the same verified parent-company board. The next scheduled production run must measure the resulting coverage change. |
 
 ## Pipeline and product gaps found in other open-source projects
 
@@ -55,18 +56,21 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Explicit uncertainty penalties for missing degree/experience evidence | Ivy scoring audit | Integrated |
 | Company research and hiring-manager/contact discovery | career-ops | Planned |
 | Interview story bank, interview preparation, follow-up cadence, reply classification | career-ops | Planned |
-| Funnel analytics and per-source application success rates | career-ops | Planned |
-| Complete CSV, Excel, JSON, and SQLite export | Ivy requirement | Planned |
+| Funnel analytics and per-source application success rates | career-ops | Integrated |
+| Complete CSV, Excel, JSON, and SQLite export | Ivy requirement | Integrated |
 | Email, Telegram, or ChatGPT completion notifications | Ivy requirement | Planned |
 | End-to-end run receipt with fetched, verified, rejected, deduplicated, imported, retained, stale-pruned, and failed counts | Ivy requirement | Integrated |
 | Automated tests with saved fixtures for core source/ATS behavior | Engineering requirement | Integrated |
 
-Enterprise ATS acceptance on 2026-07-31 used five live public boards (iCIMS, Paylocity, Jobvite, JazzHR, and Gem): 5/5 portals completed, 45 postings were enumerated, and 9 target-scope jobs survived normalization. The local regression suite passed 14/14 tests.
+Enterprise ATS acceptance on 2026-07-31 used five live public boards (iCIMS, Paylocity, Jobvite, JazzHR, and Gem): 5/5 portals completed, 45 postings were enumerated, and 9 target-scope jobs survived normalization. The company-portal regression suite now passes 15/15 tests, including reviewed portal seeds and Oracle Candidate Experience tenant detection.
+
+Application analytics now records status transitions and calculates the cumulative funnel from submitted application through first interview, technical/second interview, final interview, and offer. Source analytics reports application count, interview count/rate, and offer count/rate with explicit sample sizes. Complete account-protected exports cover jobs, applications, application status history, saved/ignored jobs, verification requests, scan status, profile data, CV metadata, and the company pool. CSV is delivered as a multi-table ZIP; Excel uses one sheet per table; JSON preserves table structure; SQLite is a valid database file. CV file bytes are intentionally excluded.
 
 ### Remaining cloud limitations, not reported as completed
 
 - Production evidence now exists: the 2026-07-31 run attempted all 176 companies and completed with a warning health state. It found 11 matched jobs from company portals, while 110 companies remained failed or unidentified. “Attempted” must not be interpreted as successful structured coverage.
 - The first production receipt exposed two discovery gaps now fixed in code: regional/legacy company labels did not match parent-company Aggregator records, and stale sample job URLs could hide a still-live ATS board. Static matching now links 46 company-pool labels to Aggregator ATS evidence (up from 39), but the next scheduled run must measure the actual success-rate improvement.
+- A second remediation layer now uses reviewed official public portals for major failed companies that had no current targeted Aggregator sample. These are code-complete and regression-tested, but are not counted as production successes until the next scheduled 176-company receipt confirms them.
 - Branded enterprise ATS tenants may expose only client-rendered or tenant-specific endpoints. iCIMS, Paylocity, Jobvite, JazzHR, and Gem now have verified public adapters; Comeet is conditional on its public Careers API identifiers. Taleo, SuccessFactors, Dayforce, UKG, and ADP remain public-page fallbacks because their structured APIs are authenticated or tenant-configured. Failed/unidentified receipts are not renamed as successful structured coverage.
 - Credentialed sources (Adzuna, Jooble, USAJobs, Exa) remain blocked until keys are intentionally configured.
 - Login-protected sources are outside this cloud-only integration and are not included in completion counts.
