@@ -20,6 +20,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Job Board Aggregator daily ATS dataset | Feashliaa/job-board-aggregator | Integrated | `scripts/aggregator_scan.py` reads every published gzip chunk, filters the US/China target scope, preserves CC BY-NC attribution, and writes a source receipt. `scripts/verify_aggregator_jobs.py` then checks candidates on official ATS pages before the shared merge/import step. Local acceptance test on 2026-07-31 scanned 1,497,570 rows across 60/60 chunks and found 555 deduplicated candidates before the 250-candidate verification limit. First production Actions receipt remains to be observed. |
 | career-ops portal scanner | santifer/career-ops | Partial | Existing Ivy code scans Greenhouse/Ashby/Lever and several other ATS tenants, but career-ops portal registry and Wellfound/custom-page coverage are not imported. |
 | Company-pool full career-homepage registry | career-ops pattern | Planned | Add one canonical career URL, ATS type/tenant, last success, HTTP state, scanned count, and error for every unique company. |
+| Automatic onboarding for newly added company-pool companies | career-ops / ATS discovery pattern | Planned | When `app/company-pool.json` gains a company, automatically recalculate the deduplicated company count, discover its official career portal, identify the ATS and tenant, add it to future scans, and place unresolved or failed discoveries in an auditable manual-review queue. No company should be counted as website-covered until discovery and a real scan attempt are recorded. |
 | Common Crawl ATS tenant discovery | Job Board Aggregator | Planned | Useful for filling missing company ATS tenants; requires a bounded discovery/update job rather than every refresh. |
 | Remote source retry, delay, and proxy support | Ever Jobs | Partial | Individual failures are isolated and basic delays exist; exponential backoff and optional proxy rotation are not implemented. |
 | API-key sources: Adzuna, Jooble, USAJobs, Exa | Ever Jobs | Blocked | Add only after credentials and relevance are confirmed; secrets must stay in GitHub/Sites secret storage. |
@@ -29,7 +30,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 
 | Capability | Status | Remaining work |
 |---|---:|---|
-| Greenhouse, Lever, Ashby, BambooHR, iCIMS, Paylocity, Workday | Partial | Adapters exist, but the company registry covers only a subset of the 176 unique companies and Workday still has tenant-specific failures. |
+| Greenhouse, Lever, Ashby, BambooHR, iCIMS, Paylocity, Workday | Partial | Adapters exist, but the company registry covers only a subset of the current unique-company pool (176 as audited on 2026-07-31); Workday still has tenant-specific failures. The count must be calculated dynamically rather than hard-coded. |
 | SmartRecruiters, Workable, Teamtailor, Recruitee | Planned | Add public API/page adapters and tests. |
 | Jobvite, Taleo, Oracle Recruiting Cloud, SAP SuccessFactors | Planned | Add tenant discovery, pagination, full-JD extraction, and closed-post detection. |
 | Dayforce, UKG/UltiPro, ADP Recruiting, JazzHR | Planned | Add adapters and throttling tests. |
