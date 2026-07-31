@@ -11,6 +11,7 @@ from scripts.company_portal_scan import (
     company_names_match,
     company_rows,
     previous_portals,
+    verified_company_portal,
     detect_ats,
     extract_embedded_urls,
     location_matches_region,
@@ -40,6 +41,17 @@ class CompanyPortalScanTests(unittest.TestCase):
         self.assertIn("pfizer", company_match_keys("辉瑞中国"))
         self.assertIn("iqvia", company_match_keys("IQVIA中国"))
         self.assertIn("genentechroche", company_match_keys("罗氏中国"))
+        self.assertIn("johnsonjohnsoninnovativemedicine", company_match_keys("强生创新制药中国"))
+
+    def test_uses_reviewed_portal_seeds_when_search_has_no_evidence(self) -> None:
+        self.assertEqual(
+            verified_company_portal("Tempus AI"),
+            "https://tempus.wd5.myworkdayjobs.com/Tempus_Careers",
+        )
+        self.assertEqual(
+            verified_company_portal("强生创新制药中国"),
+            "https://jj.wd5.myworkdayjobs.com/JJ",
+        )
 
     def test_aggregator_registry_indexes_parent_and_upstream_names(self) -> None:
         rows = [
@@ -107,6 +119,10 @@ class CompanyPortalScanTests(unittest.TestCase):
                 "career5.successfactors.eu|ACME",
             ),
             "https://jobs.gem.com/acme": ("gem", "acme"),
+            "https://iblyjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/cytel/jobs": (
+                "oraclecloud",
+                "iblyjb.fa.ocs/cytel",
+            ),
         }
         for url, expected in enterprise_cases.items():
             with self.subTest(url=url):
