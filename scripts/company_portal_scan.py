@@ -633,7 +633,7 @@ def parse_embedded_jobs(body: str, base_url: str) -> list[dict[str, Any]]:
     """Read public JSON state embedded by client-rendered enterprise ATS pages."""
     rows: list[dict[str, Any]] = []
     decoder = json.JSONDecoder()
-    scripts = re.findall(r"<script\\b[^>]*>(.*?)</script>", body, re.I | re.S)
+    scripts = re.findall(r"<script\b[^>]*>(.*?)</script>", body, re.I | re.S)
     for script in scripts:
         candidate = unescape(script).strip()
         starts = [index for index in (candidate.find("{"), candidate.find("[")) if index >= 0]
