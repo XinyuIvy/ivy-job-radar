@@ -1,0 +1,27 @@
+{
+  "locations": [
+    "United States"
+  ],
+  "queries": [
+    "biostatistician",
+    "statistical scientist",
+    "clinical data scientist",
+    "healthcare data scientist",
+    "algorithm validation scientist",
+    "real world evidence scientist",
+    "health economics outcomes research scientist",
+    "pharmacoepidemiologist",
+    "quantitative researcher",
+    "applied scientist causal inference",
+    "decision scientist experimentation",
+    "medical imaging data scientist"
+  ],
+  "sites": [
+    "indeed",
+    "linkedin",
+    "google"
+  ],
+  "results_wanted_per_query": 30,
+  "hours_old": 72,
+  "country_indeed": "USA"
+}
