@@ -55,7 +55,11 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/jobspy_scan.py
 
-      - name: Sync eligible jobs to Ivy Job Radar
+      - name: Verify candidates on company career sites
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/verify_company_jobs.py
+
+      - name: Sync verified jobs to Ivy Job Radar
         if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
@@ -71,7 +75,7 @@ jobs:
             --header "Content-Type: application/json" \
             --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
             --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-            --data-binary @data/scans/us_jobs_latest.json \
+            --data-binary @data/scans/us_jobs_verified_latest.json \
             "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
 
       - name: Upload scan artifact
@@ -93,6 +97,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/scans/us_jobs_latest.json data/scans/us_jobs_latest.csv data/scans/us_scan_summary.json
+          git add data/scans/us_jobs_latest.json data/scans/us_jobs_latest.csv data/scans/us_scan_summary.json \
+            data/scans/us_jobs_verified_latest.json data/scans/us_verification_summary.json
           git commit -m "Update daily US job scan"
           git push
