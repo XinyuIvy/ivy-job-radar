@@ -109,6 +109,19 @@ COMMON_CRAWL_BUDGET = threading.BoundedSemaphore(20)
 _common_crawl_index = ""
 _common_crawl_lock = threading.Lock()
 
+# Map regional and legacy company-pool labels to the parent name used by upstream ATS data.
+COMPANY_NAME_ALIASES = {
+    "iqvia中国": "IQVIA",
+    "礼来中国": "Eli Lilly",
+    "罗氏中国": "Genentech/Roche",
+    "葛兰素史克中国": "GSK",
+    "诺华中国": "Novartis",
+    "赛诺菲中国": "Sanofi",
+    "辉瑞中国": "Pfizer",
+    "阿斯利康中国": "AstraZeneca",
+    "默沙东中国": "Merck & Co.",
+}
+
 
 class PortalParser(HTMLParser):
     def __init__(self) -> None:
@@ -365,15 +378,39 @@ def company_rows(path: Path) -> list[dict[str, Any]]:
     return sorted(unique.values(), key=lambda row: (clean(row.get("region")), int(row.get("rank") or 9999)))
 
 
+def company_match_keys(company: str) -> list[str]:
+    """Return stable keys for matching regional, legacy, and parent company labels."""
+    raw = clean(company)
+    alias = COMPANY_NAME_ALIASES.get(raw.casefold(), "")
+    candidates = [raw, alias]
+    candidates.extend(re.split(r"[/（(]", raw, maxsplit=1)[:1])
+    keys: list[str] = []
+    for candidate in candidates:
+        normalized = re.sub(
+            r"(?:中国|china|incorporated|corporation|corp|company|co|limited|ltd)$",
+            "",
+            re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "", clean(candidate).casefold()),
+        )
+        if normalized and normalized not in keys:
+            keys.append(normalized)
+    return keys
+
+
 def aggregator_portals(path: Path) -> dict[str, str]:
     if not path.exists():
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
-    return {
-        clean(row.get("company")): clean(row.get("sample_job_url"))
-        for row in payload if isinstance(row, dict)
-        if clean(row.get("company")) and clean(row.get("sample_job_url"))
-    }
+    portals: dict[str, str] = {}
+    for row in payload:
+        if not isinstance(row, dict):
+            continue
+        url = clean(row.get("sample_job_url"))
+        if not url:
+            continue
+        for label in (clean(row.get("company")), clean(row.get("upstream_company"))):
+            for key in company_match_keys(label):
+                portals.setdefault(key, url)
+    return portals
 
 
 def json_payload(result: FetchResult) -> Any:
@@ -788,6 +825,37 @@ def scan_company(row: dict[str, Any], scanned_at: str, max_pages: int) -> tuple[
             receipt.error = discovery_error
             return receipt, []
 
+    # Prefer the ATS API discovered from an upstream job URL. The sample posting may
+    # have closed, while the company board and its public API remain valid.
+    seed_ats, seed_tenant, seed_portal = detect_ats([homepage])
+    if seed_ats != "generic":
+        api_rows, api_url = api_jobs(seed_ats, seed_tenant, seed_portal)
+        if api_rows:
+            receipt.ats_type = seed_ats
+            receipt.ats_tenant = seed_tenant
+            receipt.final_url = seed_portal
+            receipt.http_status = 200
+            receipt.jobs_scanned = len(api_rows)
+            jobs = [
+                job
+                for api_row in api_rows
+                if (job := normalize_api_job(
+                    company, region, seed_ats, api_row, scanned_at, seed_portal
+                ))
+            ]
+            for job in jobs:
+                if not job["job_url"] and api_url:
+                    job["job_url"] = seed_portal
+                    job["canonical_url"] = seed_portal
+            deduplicated = {
+                clean(job.get("canonical_url")) or clean(job.get("job_key")): job
+                for job in jobs
+                if clean(job.get("canonical_url")) or clean(job.get("job_key"))
+            }
+            receipt.jobs_matched = len(deduplicated)
+            receipt.state = "success"
+            return receipt, list(deduplicated.values())
+
     first = fetch(homepage)
     receipt.attempts = first.attempts
     if first.status in {404, 410} and re.search(r"(?:gh_jid=|/jobs?/|/job-board/)", homepage, re.I):
@@ -854,6 +922,7 @@ def scan_company(row: dict[str, Any], scanned_at: str, max_pages: int) -> tuple[
             jobs.append(job)
 
     # Generic career sites often expose job detail links without an API.
+    likely_links: list[tuple[str, str]] = []
     if not api_rows:
         likely_links = [
             (url, anchor)
@@ -893,7 +962,7 @@ def scan_company(row: dict[str, Any], scanned_at: str, max_pages: int) -> tuple[
     }
     receipt.jobs_matched = len(deduplicated)
     receipt.state = "success"
-    if ats_type == "generic" and not postings and not links:
+    if ats_type == "generic" and not postings and not likely_links:
         receipt.state = "unidentified"
         receipt.error = "Career page loaded, but no ATS or job listing structure was identified."
     return receipt, list(deduplicated.values())
@@ -910,8 +979,17 @@ def run(
     companies = company_rows(pool_path)
     discovered_portals = aggregator_portals(aggregator_registry_path)
     for row in companies:
-        if not clean(row.get("source")) and discovered_portals.get(clean(row.get("company"))):
-            row["source"] = discovered_portals[clean(row.get("company"))]
+        company = clean(row.get("company"))
+        aggregator_url = next(
+            (discovered_portals[key] for key in company_match_keys(company) if key in discovered_portals),
+            "",
+        )
+        current_source = clean(row.get("source"))
+        # A structured upstream ATS URL is stronger evidence than a generic corporate homepage.
+        if aggregator_url and detect_ats([aggregator_url])[0] != "generic":
+            row["source"] = aggregator_url
+        elif not current_source and aggregator_url:
+            row["source"] = aggregator_url
     if company_limit > 0:
         companies = companies[:company_limit]
     receipts: list[CompanyReceipt] = []
