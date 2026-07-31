@@ -12,6 +12,7 @@ from scripts.company_portal_scan import (
     company_rows,
     previous_portals,
     detect_ats,
+    extract_embedded_urls,
     location_matches_region,
     normalize_posting,
     parse_embedded_jobs,
@@ -128,6 +129,24 @@ class CompanyPortalScanTests(unittest.TestCase):
         self.assertEqual(embedded[0]["location"], "Boston, Massachusetts")
         rows = parse_enterprise_html(body, "https://careers.example.com/")
         self.assertEqual({row["title"] for row in rows}, {"Biostatistician", "Data Scientist"})
+
+    def test_discovers_public_comeet_api_reference(self) -> None:
+        body = """
+        <script>
+        const endpoint = "https://www.comeet.co/careers-api/2.0/company/D4.001/"
+          + "positions?token=PUBLIC123&amp;details=true";
+        </script>
+        """
+        # Use one contiguous URL as it appears in production pages.
+        body = (
+            '<script>const endpoint="https://www.comeet.co/careers-api/2.0/'
+            'company/D4.001/positions?token=PUBLIC123&amp;details=true";</script>'
+        )
+        url = extract_embedded_urls(body)[0]
+        self.assertEqual(
+            detect_ats([url])[0:2],
+            ("comeet", "D4.001|PUBLIC123"),
+        )
 
     def test_parses_paylocity_page_data(self) -> None:
         body = """
