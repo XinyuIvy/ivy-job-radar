@@ -8,7 +8,9 @@ from pathlib import Path
 from scripts.company_portal_scan import (
     aggregator_portals,
     company_match_keys,
+    company_names_match,
     company_rows,
+    previous_portals,
     detect_ats,
     location_matches_region,
     normalize_posting,
@@ -52,6 +54,33 @@ class CompanyPortalScanTests(unittest.TestCase):
                 portals[company_match_keys("罗氏中国")[-1]],
                 rows[0]["sample_job_url"],
             )
+
+    def test_company_name_validation_rejects_unrelated_entities(self) -> None:
+        self.assertTrue(company_names_match("Apple Inc.", "Apple Inc."))
+        self.assertTrue(company_names_match("BeOne Medicines", "BeOne Medicines Ltd."))
+        self.assertFalse(company_names_match("Apple Inc.", "Apple Health Foundation"))
+
+    def test_reuses_only_prior_portals_with_job_evidence(self) -> None:
+        rows = [
+            {
+                "company": "Example Health",
+                "final_url": "https://jobs.example.com/careers",
+                "ats_type": "workday",
+                "jobs_scanned": 3,
+            },
+            {
+                "company": "Unverified Corp",
+                "final_url": "https://unverified.example.com/",
+                "ats_type": "generic",
+                "jobs_scanned": 0,
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "previous.json"
+            path.write_text(json.dumps(rows), encoding="utf-8")
+            portals = previous_portals(path)
+            self.assertIn(company_match_keys("Example Health")[0], portals)
+            self.assertNotIn(company_match_keys("Unverified Corp")[0], portals)
 
     def test_detects_supported_ats(self) -> None:
         self.assertEqual(
