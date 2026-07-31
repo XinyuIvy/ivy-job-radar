@@ -1,0 +1,79 @@
+name: Daily US job scan
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run at both possible UTC offsets; the guard keeps only 9 AM New York time.
+    - cron: "7 13 * * *"
+    - cron: "7 14 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-us-jobscan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check New York schedule
+        id: schedule_guard
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$(TZ=America/New_York date +%H)" == "09" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out repository
+        if: steps.schedule_guard.outputs.run == 'true'
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: steps.schedule_guard.outputs.run == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-jobscan.txt
+
+      - name: Install scanner dependencies
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python -m pip install --requirement requirements-jobscan.txt
+
+      - name: Validate scanner syntax
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python -m py_compile scripts/jobspy_scan.py
+
+      - name: Collect and normalize jobs
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/jobspy_scan.py
+
+      - name: Upload scan artifact
+        if: steps.schedule_guard.outputs.run == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: us-jobscan-${{ github.run_id }}
+          path: data/scans/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit latest scan snapshot
+        if: steps.schedule_guard.outputs.run == 'true'
+        shell: bash
+        run: |
+          if git diff --quiet -- data/scans; then
+            echo "No scan changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/scans/us_jobs_latest.json data/scans/us_jobs_latest.csv data/scans/us_scan_summary.json
+          git commit -m "Update daily US job scan"
+          git push
