@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-31T04:48:22.150884+00:00",
+  "generated_at": "2026-07-31T12:53:06.715491+00:00",
   "matched_jobs": 0,
   "sources": [
     {
@@ -83,11 +83,11 @@
     {
       "source": "中国公司官网",
       "query": "(招聘 OR careers) (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士 -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
-      "scanned": 7,
+      "scanned": 10,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 7,
+        "title_not_targeted": 10,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0

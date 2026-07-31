@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-07-31T12:53:12.311162+00:00",
+  "matched_jobs": 1,
+  "sources": [
+    {
+      "source": "remoteok",
+      "state": "success",
+      "scanned": 100,
+      "matched": 0
+    },
+    {
+      "source": "remotive",
+      "state": "success",
+      "scanned": 34,
+      "matched": 0
+    },
+    {
+      "source": "jobicy",
+      "state": "success",
+      "scanned": 50,
+      "matched": 0
+    },
+    {
+      "source": "himalayas",
+      "state": "success",
+      "scanned": 20,
+      "matched": 0
+    },
+    {
+      "source": "arbeitnow",
+      "state": "success",
+      "scanned": 175,
+      "matched": 1
+    },
+    {
+      "source": "weworkremotely",
+      "state": "success",
+      "scanned": 100,
+      "matched": 0
+    }
+  ]
+}

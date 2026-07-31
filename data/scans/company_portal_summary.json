@@ -1,0 +1,570 @@
+{
+  "generated_at": "2026-07-31T12:53:58.137958+00:00",
+  "companies_in_pool": 176,
+  "companies_attempted": 176,
+  "companies_succeeded": 66,
+  "companies_failed": 8,
+  "companies_unidentified": 102,
+  "jobs_scanned": 2060,
+  "jobs_matched": 11,
+  "ats_counts": {
+    "ashby": 1,
+    "generic": 37,
+    "greenhouse": 6,
+    "lever": 2,
+    "unidentified": 103,
+    "workday": 27
+  },
+  "failure_companies": [
+    {
+      "company": "君实生物",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "传奇生物",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "再鼎医药",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "恒瑞医药",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "BeOne Medicines（原百济神州）",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "荣昌生物",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "康方生物",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "信达生物",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "翰森制药",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "石药集团",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "和黄医药",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "罗氏中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "辉瑞中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "阿斯利康中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "葛兰素史克中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "强生创新制药中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "赛诺菲中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "礼来中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "诺华中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "默沙东中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "数坤科技",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "联影医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "联影智能",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "推想医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "深睿医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "华大基因",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "东软医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "燃石医学",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "迪安诊断",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "金域医学",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "泰格医药",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "康龙化成",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "诺思格",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "WuXi Clinical",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "太美医疗科技",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "普蕊斯",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "晶泰科技（XtalPi）",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "百图生科",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "英矽智能（Insilico Medicine）",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "森亿智能",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "深势科技",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "医渡科技",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "华为运动健康",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "零氪科技",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "小米健康",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "IQVIA中国",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "乐普医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "鱼跃医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "微创医疗",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "方达控股",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "威高集团",
+      "url": "",
+      "error": "Remote end closed connection without response"
+    },
+    {
+      "company": "迈瑞医疗",
+      "url": "https://career.mindray.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Merck & Co.",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
+      "company": "Johnson & Johnson Innovative Medicine",
+      "url": "",
+      "error": "Remote end closed connection without response"
+    },
+    {
+      "company": "阿里健康",
+      "url": "https://talent.alibaba.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "腾讯医疗健康",
+      "url": "https://careers.tencent.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "AbbVie",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "微医",
+      "url": "https://www.guahao.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "平安健康/平安科技",
+      "url": "https://talent.pingan.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Eli Lilly",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Gilead Sciences",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "卫宁健康",
+      "url": "https://www.winning.com.cn/",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Vertex Pharmaceuticals",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Novo Nordisk",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Biogen",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Denali Therapeutics",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Neurocrine Biosciences",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Sage Therapeutics",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Alnylam Pharmaceuticals",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "BioMarin",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Voyager Therapeutics",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "GE HealthCare",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Siemens Healthineers",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Tempus AI",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Foundation Medicine",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Guardant Health",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Evidera",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Cytel",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Clario",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Signant Health",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Owkin",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Recursion",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Generate Biomedicines",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Optum",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Aetion",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Datavant",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "TriNetX",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "ConcertAI",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "OM1",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Analysis Group",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "RTI Health Solutions",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Genesis Research",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Koneksa",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Evidation",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "ActiGraph",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "AliveCor",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Empatica",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Insulet",
+      "url": "https://careers.insulet.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "company": "Masimo",
+      "url": "https://www.masimo.com/company/careers/",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "company": "Paige",
+      "url": "https://paige.ai/careers/",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "RapidAI",
+      "url": "https://www.rapidai.com/about/careers",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Apple Health",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Qure.ai",
+      "url": "https://qure.ai/careers",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Google/Fitbit",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Medpace",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "PPD/Thermo Fisher Scientific",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Veristat",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Precision for Medicine",
+      "url": "",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "company": "Dexcom",
+      "url": "https://careers.dexcom.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    }
+  ]
+}
