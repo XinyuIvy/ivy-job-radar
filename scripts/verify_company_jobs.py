@@ -117,24 +117,30 @@ def is_official_candidate(url: str, company: str) -> bool:
     return any(token in current.replace("-", "") for token in company_tokens)
 
 
-def fetch_page(url: str, timeout: int = 25) -> tuple[int, str, str]:
-    request = Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0; +job-verification)",
-            "Accept": "text/html,application/xhtml+xml,application/json",
-            "Accept-Language": "en-US,en;q=0.8",
-        },
-    )
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            body = response.read(3_000_000).decode(response.headers.get_content_charset() or "utf-8", "replace")
-            return response.status, response.geturl(), body
-    except HTTPError as exc:
-        body = exc.read(200_000).decode("utf-8", "replace")
-        return exc.code, exc.geturl(), body
-    except (URLError, TimeoutError, ValueError):
-        return 0, url, ""
+def fetch_page(url: str, timeout: int = 25, retries: int = 2) -> tuple[int, str, str]:
+    for attempt in range(retries + 1):
+        request = Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0; +job-verification)",
+                "Accept": "text/html,application/xhtml+xml,application/json",
+                "Accept-Language": "en-US,en;q=0.8",
+            },
+        )
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                body = response.read(3_000_000).decode(response.headers.get_content_charset() or "utf-8", "replace")
+                return response.status, response.geturl(), body
+        except HTTPError as exc:
+            body = exc.read(200_000).decode("utf-8", "replace")
+            if exc.code not in {408, 425, 429, 500, 502, 503, 504} or attempt == retries:
+                return exc.code, exc.geturl(), body
+        except (URLError, TimeoutError, ValueError):
+            if attempt == retries:
+                return 0, url, ""
+        if attempt < retries:
+            time.sleep((2 ** attempt) + 0.25)
+    return 0, url, ""
 
 
 def parse_page(body: str, base_url: str) -> tuple[str, list[str], list[dict[str, object]]]:
