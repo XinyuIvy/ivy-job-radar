@@ -10,6 +10,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 - **Partial**: code or discovery exists, but full company coverage, verification, or stable production evidence is missing.
 - **Planned**: not yet in the single-refresh production pipeline.
 - **Blocked**: requires credentials, a paid service, incompatible licensing, or another user decision.
+- **Out of scope**: reviewed and intentionally excluded because it does not fit the current US/China, full-time, fresh-PhD or 0–3-year search.
 
 ## Cloud sources
 
@@ -17,6 +18,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 |---|---|---:|---|
 | LinkedIn, Indeed, Google Jobs, Glassdoor, ZipRecruiter | JobSpy | Integrated | Configured in `scripts/jobspy_scan.py`; retain per-source failure isolation and verify each source in run summaries. |
 | RemoteOK, Remotive, Jobicy, Himalayas, Arbeitnow, We Work Remotely | Ever Jobs | Integrated | Credential-free source runner writes `cloud_sources_jobs_latest.json` and per-source success/failure counts. |
+| The Muse public jobs API | The Muse | Integrated | The credential-free Data Science feed is normalized from its nested company, location, description, and application-link schema, then passes through the same PhD/title/exclusion filters and run receipt as the other cloud sources. |
 | Job Board Aggregator daily ATS dataset | Feashliaa/job-board-aggregator | Integrated | `scripts/aggregator_scan.py` reads every published gzip chunk, filters the US/China target scope, preserves CC BY-NC attribution, and writes a source receipt. The same pass now derives official ATS samples for every matching company-pool company, avoiding a second 1.5-million-row scan. `scripts/verify_aggregator_jobs.py` checks targeted candidates on official pages. Local acceptance on 2026-07-31 scanned 1,497,570 rows across 60/60 chunks and found official ATS samples for 39 current company-pool companies. |
 | career-ops portal scanner pattern | santifer/career-ops | Integrated | `scripts/company_portal_scan.py` dynamically scans every unique company-pool company, auto-detects public ATS providers, falls back to schema.org/company pages, and records per-company receipts. The first production run on 2026-07-31 attempted 176/176 companies: 66 succeeded, 102 were unidentified, and 8 failed. Protected/login-only Wellfound access remains outside cloud scope. |
 | Company-pool full career-homepage registry | career-ops pattern | Integrated | Every refresh writes `company_portal_registry.json` with canonical portal, ATS/tenant, terminal state, HTTP state, attempts, scanned/matched counts, timestamp, and error. Coverage means a real attempt, not guaranteed success. |
@@ -24,7 +26,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Common Crawl ATS/career discovery | Job Board Aggregator | Integrated | A bounded 20-company-per-run Common Crawl fallback runs only when a live company page exposes no usable career/ATS link, preventing unbounded archive queries during every refresh. |
 | Remote source retry and delay | Ever Jobs | Integrated | Job-board, Aggregator, official-page, and company-portal fetches use isolated failure handling plus exponential backoff. Standard `HTTP_PROXY`/`HTTPS_PROXY` environment support is inherited from the Python runtime; no proxy vendor is required. |
 | API-key sources: Adzuna, Jooble, USAJobs, Exa | Ever Jobs | Blocked | Add only after credentials and relevance are confirmed; secrets must stay in GitHub/Sites secret storage. |
-| Upwork, Reed, CareerJet, Naukri, BDJobs, Bayt, Internshala | Ever Jobs / JobSpy | Planned | Outside the current US/China full-time PhD-targeted scope or requires credentials; do not count as coverage today. |
+| Upwork, Reed, CareerJet, Naukri, BDJobs, Bayt, Internshala | Ever Jobs / JobSpy | Out of scope | Upwork is freelance-first; Reed targets the UK; Naukri, BDJobs, Bayt, and Internshala target other regions or internships; CareerJet requires an affiliate relationship. They are not unfinished coverage for the present search. |
 
 ## ATS and company-site coverage
 
@@ -41,7 +43,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Dayforce, UKG/UltiPro, ADP Recruiting | Partial | Provider and tenant metadata are detected and public career pages are parsed for embedded JSON, JSON-LD, and job links. Official recruiting APIs require tenant-specific authentication or configuration; failed public enumeration remains visible in receipts. |
 | Generic schema.org `JobPosting` company-page crawler | Integrated | Every company portal is parsed for nested/list/graph JSON-LD and bounded job-detail links, rather than only verifying already-known candidates. |
 | Full company-pool coverage report | Integrated | `company_portal_summary.json` reports dynamic pool size, attempted/succeeded/failed/unidentified counts, ATS distribution, scanned/matched jobs, and the complete failure list. |
-| Reviewed official-portal seeds for companies missing current Aggregator evidence | Integrated | Public employer/ATS evidence now seeds AbbVie, Analysis Group, Biogen, Cytel, Foundation Medicine, Gilead, Guardant Health, J&J, Merck/MSD, Eli Lilly, Tempus AI, TriNetX, and Vertex. Regional aliases reuse the same verified parent-company board. The next scheduled production run must measure the resulting coverage change. |
+| Reviewed official-portal seeds for companies missing current Aggregator evidence | Integrated | Public employer/ATS evidence now seeds AbbVie, ActiGraph/Ametris, AliveCor, Analysis Group, Biogen, BioMarin, Cytel, Denali Therapeutics, Dexcom, Empatica, Foundation Medicine, GE HealthCare, Gilead, Guardant Health, J&J, Koneksa, Merck/MSD, Eli Lilly, Neurocrine, OM1, Siemens Healthineers, Tempus AI, Tencent, TriNetX, and Vertex. Regional aliases reuse the same verified parent-company board. The next scheduled production run must measure the resulting coverage change. |
 
 ## Pipeline and product gaps found in other open-source projects
 
@@ -62,7 +64,7 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | End-to-end run receipt with fetched, verified, rejected, deduplicated, imported, retained, stale-pruned, and failed counts | Ivy requirement | Integrated |
 | Automated tests with saved fixtures for core source/ATS behavior | Engineering requirement | Integrated |
 
-Enterprise ATS acceptance on 2026-07-31 used five live public boards (iCIMS, Paylocity, Jobvite, JazzHR, and Gem): 5/5 portals completed, 45 postings were enumerated, and 9 target-scope jobs survived normalization. The company-portal regression suite now passes 15/15 tests, including reviewed portal seeds and Oracle Candidate Experience tenant detection.
+Enterprise ATS acceptance on 2026-07-31 used five live public boards (iCIMS, Paylocity, Jobvite, JazzHR, and Gem): 5/5 portals completed, 45 postings were enumerated, and 9 target-scope jobs survived normalization. The company-portal regression suite now passes 16/16 tests, including reviewed portal seeds, Oracle Candidate Experience tenant detection, and The Muse's nested public-job schema.
 
 Application analytics now records status transitions and calculates the cumulative funnel from submitted application through first interview, technical/second interview, final interview, and offer. Source analytics reports application count, interview count/rate, and offer count/rate with explicit sample sizes. Complete account-protected exports cover jobs, applications, application status history, saved/ignored jobs, verification requests, scan status, profile data, CV metadata, and the company pool. CSV is delivered as a multi-table ZIP; Excel uses one sheet per table; JSON preserves table structure; SQLite is a valid database file. CV file bytes are intentionally excluded.
 
