@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import json
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -43,23 +44,62 @@ CHINA_LOCATION = re.compile(
 )
 
 
-def fetch_json(url: str, compressed: bool = False, timeout: int = 45) -> object:
-    request = Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0)",
-            "Accept": "application/json,application/gzip,*/*",
-        },
-    )
-    with urlopen(request, timeout=timeout) as response:
-        body = response.read()
-    if compressed:
-        body = gzip.decompress(body)
-    return json.loads(body)
+def fetch_json(url: str, compressed: bool = False, timeout: int = 45, retries: int = 2) -> object:
+    last_error: Exception | None = None
+    for attempt in range(retries + 1):
+        request = Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0)",
+                "Accept": "application/json,application/gzip,*/*",
+            },
+        )
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                body = response.read()
+            if compressed:
+                body = gzip.decompress(body)
+            return json.loads(body)
+        except Exception as error:
+            last_error = error
+            if attempt < retries:
+                time.sleep((2 ** attempt) + 0.25)
+    assert last_error is not None
+    raise last_error
 
 
 def clean(value: object) -> str:
     return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def company_key(value: object) -> str:
+    name = clean(value).casefold()
+    name = re.sub(r"[（(].*?[）)]", "", name)
+    name = re.sub(
+        r"\b(?:incorporated|corporation|company|limited|holdings|group|inc|corp|co|ltd|llc|plc)\b",
+        " ",
+        name,
+    )
+    return re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "", name)
+
+
+def load_company_aliases(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    aliases: dict[str, str] = {}
+    for row in payload if isinstance(payload, list) else []:
+        if not isinstance(row, dict):
+            continue
+        company = clean(row.get("company"))
+        for variant in re.split(r"[/／]|(?:（原|兼并|formerly)", company, flags=re.IGNORECASE):
+            key = company_key(variant)
+            if len(key) >= 3:
+                aliases[key] = company
+        key = company_key(company)
+        if len(key) >= 3:
+            aliases[key] = company
+    return aliases
 
 
 def infer_region(location: str) -> str:
@@ -134,7 +174,12 @@ def normalize(row: dict[str, object], scanned_at: str) -> dict[str, object] | No
     }
 
 
-def scan_chunk(base_url: str, chunk_name: str, scanned_at: str) -> tuple[int, list[dict[str, object]]]:
+def scan_chunk(
+    base_url: str,
+    chunk_name: str,
+    scanned_at: str,
+    company_aliases: dict[str, str],
+) -> tuple[int, list[dict[str, object]], list[dict[str, str]]]:
     payload = fetch_json(f"{base_url}/{chunk_name}", compressed=True)
     if not isinstance(payload, list):
         raise ValueError(f"{chunk_name} did not contain a JSON array")
@@ -143,10 +188,30 @@ def scan_chunk(base_url: str, chunk_name: str, scanned_at: str) -> tuple[int, li
         for row in payload
         if isinstance(row, dict) and (job := normalize(row, scanned_at)) is not None
     ]
-    return len(payload), matched
+    portals: list[dict[str, str]] = []
+    for row in payload:
+        if not isinstance(row, dict):
+            continue
+        pool_company = company_aliases.get(company_key(row.get("company")))
+        url = clean(row.get("url"))
+        if pool_company and url:
+            portals.append(
+                {
+                    "company": pool_company,
+                    "upstream_company": clean(row.get("company")),
+                    "url": url,
+                    "ats": clean(row.get("ats")),
+                }
+            )
+    return len(payload), matched, portals
 
 
-def run(base_url: str, workers: int, max_candidates: int) -> tuple[list[dict[str, object]], dict[str, object]]:
+def run(
+    base_url: str,
+    workers: int,
+    max_candidates: int,
+    company_aliases: dict[str, str] | None = None,
+) -> tuple[list[dict[str, object]], dict[str, object], list[dict[str, object]]]:
     manifest = fetch_json(f"{base_url}/jobs_manifest.json")
     if not isinstance(manifest, dict) or not isinstance(manifest.get("chunks"), list):
         raise ValueError("Aggregator manifest is missing its chunk list")
@@ -155,19 +220,22 @@ def run(base_url: str, workers: int, max_candidates: int) -> tuple[list[dict[str
     rows_scanned = 0
     failed_chunks: list[dict[str, str]] = []
     candidates: list[dict[str, object]] = []
+    company_portals: list[dict[str, str]] = []
     chunks = [clean(name) for name in manifest["chunks"] if clean(name)]
+    company_aliases = company_aliases or {}
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
         futures = {
-            executor.submit(scan_chunk, base_url, chunk, scanned_at): chunk
+            executor.submit(scan_chunk, base_url, chunk, scanned_at, company_aliases): chunk
             for chunk in chunks
         }
         for future in as_completed(futures):
             chunk = futures[future]
             try:
-                scanned, matched = future.result()
+                scanned, matched, portals = future.result()
                 rows_scanned += scanned
                 candidates.extend(matched)
+                company_portals.extend(portals)
             except Exception as error:
                 failed_chunks.append({"chunk": chunk, "error": str(error)[:300]})
 
@@ -192,13 +260,31 @@ def run(base_url: str, workers: int, max_candidates: int) -> tuple[list[dict[str
         "candidates_written": len(ordered),
         "candidate_limit": max_candidates,
         "failed_chunk_details": failed_chunks,
+        "company_pool_companies_with_aggregator_jobs": len({row["company"] for row in company_portals}),
         "attribution": {
             "project": "Feashliaa/job-board-aggregator",
             "data_license": "CC BY-NC 4.0",
             "use": "Non-commercial personal job search",
         },
     }
-    return ordered, summary
+    registry: dict[str, dict[str, object]] = {}
+    for row in company_portals:
+        current = registry.setdefault(
+            row["company"],
+            {
+                "company": row["company"],
+                "upstream_company": row["upstream_company"],
+                "ats": row["ats"],
+                "sample_job_url": row["url"],
+                "jobs_seen": 0,
+            },
+        )
+        current["jobs_seen"] = int(current["jobs_seen"]) + 1
+        if not clean(current.get("ats")) and row["ats"]:
+            current["ats"] = row["ats"]
+        if not clean(current.get("sample_job_url")):
+            current["sample_job_url"] = row["url"]
+    return ordered, summary, sorted(registry.values(), key=lambda row: str(row["company"]))
 
 
 def main() -> None:
@@ -207,9 +293,15 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("data/scans"))
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--max-candidates", type=int, default=250)
+    parser.add_argument("--company-pool", type=Path, default=Path("app/company-pool.json"))
     args = parser.parse_args()
 
-    jobs, summary = run(args.base_url.rstrip("/"), args.workers, args.max_candidates)
+    jobs, summary, registry = run(
+        args.base_url.rstrip("/"),
+        args.workers,
+        args.max_candidates,
+        load_company_aliases(args.company_pool),
+    )
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "aggregator_jobs_latest.json").write_text(
         json.dumps(jobs, ensure_ascii=False, indent=2) + "\n",
@@ -217,6 +309,10 @@ def main() -> None:
     )
     (args.output_dir / "aggregator_scan_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (args.output_dir / "aggregator_company_registry.json").write_text(
+        json.dumps(registry, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     print(
