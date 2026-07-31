@@ -249,7 +249,7 @@ def normalize_row(row: pd.Series, query: str, scanned_at: str) -> dict[str, obje
     years = required_experience(description)
     sponsorship = infer_sponsorship(description)
     score, details, eligible = score_job(title, description, sponsorship, years)
-    phd_targeted = bool(re.search(r"\\bph\\.?d\\.?\\b|doctoral|doctorate", description, flags=re.IGNORECASE))
+    phd_targeted = bool(re.search(r"\bph\.?d\.?\b|doctoral|doctorate", description, flags=re.IGNORECASE))
     if not eligible or not phd_targeted or score < 55:
         return None
 
@@ -261,9 +261,9 @@ def normalize_row(row: pd.Series, query: str, scanned_at: str) -> dict[str, obje
     source_site = clean_text(row.get("site")) or "JobSpy"
 
     # Aggregators often expose different URLs for the same employer posting.
-    normalized_company = re.sub(r"\\W+", "", company.lower())
-    normalized_title = re.sub(r"\\W+", " ", title.lower()).strip()
-    normalized_location = re.sub(r"\\W+", " ", location.lower()).strip()
+    normalized_company = re.sub(r"\W+", "", company.lower())
+    normalized_title = re.sub(r"\W+", " ", title.lower()).strip()
+    normalized_location = re.sub(r"\W+", " ", location.lower()).strip()
     identity = f"{normalized_company}::{application_id or normalized_title + '::' + normalized_location}"
 
     return {
