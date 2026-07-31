@@ -1,0 +1,55 @@
+{
+  "delay_seconds": 0.5,
+  "queries": [
+    {
+      "source": "BOSS直聘公开索引",
+      "query": "site:zhipin.com/job_detail (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士"
+    },
+    {
+      "source": "猎聘",
+      "query": "site:liepin.com/job (生物统计 OR 统计科学家 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士"
+    },
+    {
+      "source": "牛客招聘",
+      "query": "site:nowcoder.com/jobs/detail (数据科学家 OR 量化研究 OR 生物统计 OR 医疗咨询) 博士"
+    },
+    {
+      "source": "前程无忧",
+      "query": "site:51job.com (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士"
+    },
+    {
+      "source": "智联招聘",
+      "query": "site:zhaopin.com/jobdetail (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士"
+    },
+    {
+      "source": "拉勾",
+      "query": "site:lagou.com/jobs (数据科学家 OR 量化研究 OR 生物统计 OR 医疗咨询) 博士"
+    },
+    {
+      "source": "中国公司官网",
+      "query": "(招聘 OR careers) (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士 -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com"
+    }
+  ],
+  "direct_pages": [
+    {
+      "source": "猎聘·生物统计",
+      "url": "https://www.liepin.com/zpshengwutongjishi/",
+      "max_jobs": 12
+    },
+    {
+      "source": "猎聘·数据科学",
+      "url": "https://www.liepin.com/zpshujukexuejia/",
+      "max_jobs": 12
+    },
+    {
+      "source": "猎聘·医疗咨询",
+      "url": "https://www.liepin.com/zpyiliaozixun/",
+      "max_jobs": 12
+    },
+    {
+      "source": "猎聘·卫生经济",
+      "url": "https://www.liepin.com/zpweishengjingji/",
+      "max_jobs": 12
+    }
+  ]
+}
