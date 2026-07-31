@@ -100,9 +100,9 @@ SKILL_RULES = {
 
 
 EXCLUDED_TITLE_PATTERNS = (
-    r"\\bsr\\.?(?:\\s|$)",
-    r"\\bexperienced hire\\b",
-    r"\\bresearch scientist\\s+(?:iii|iv|v|[3-9])\\b",
+    r"\bsr\.?(?:\s|$)",
+    r"\bexperienced hire\b",
+    r"\bresearch scientist\s+(?:iii|iv|v|[3-9])\b",
 )
 
 
