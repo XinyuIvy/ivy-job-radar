@@ -122,6 +122,7 @@ COMPANY_NAME_ALIASES = {
     "辉瑞中国": "Pfizer",
     "阿斯利康中国": "AstraZeneca",
     "默沙东中国": "Merck & Co.",
+    "强生创新制药中国": "Johnson & Johnson Innovative Medicine",
     "apple health": "Apple Inc.",
     "google/fitbit": "Fitbit",
     "microsoft health & life sciences": "Microsoft",
@@ -129,6 +130,25 @@ COMPANY_NAME_ALIASES = {
     "beone medicines（原百济神州）": "BeOne Medicines",
     "英矽智能（insilico medicine）": "Insilico Medicine",
     "晶泰科技（xtalpi）": "XtalPi",
+}
+
+# Stable public career portals verified from employer pages or public ATS boards.
+# These seeds avoid relying on search-engine HTML when a company has no current
+# targeted posting in the upstream Aggregator sample.
+VERIFIED_COMPANY_PORTALS = {
+    "abbvie": "https://careers.smartrecruiters.com/abbvie",
+    "analysisgroup": "https://professionalcareers-analysisgroup.icims.com/jobs/search?ss=1",
+    "biogen": "https://biibhr.wd3.myworkdayjobs.com/external",
+    "cytel": "https://iblyjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/cytel/jobs",
+    "foundationmedicine": "https://careers.foundationmedicine.com/jobs/search",
+    "gileadsciences": "https://gilead.wd1.myworkdayjobs.com/gileadcareers",
+    "guardanthealth": "https://gh.wd1.myworkdayjobs.com/gh",
+    "johnsonjohnsoninnovativemedicine": "https://jj.wd5.myworkdayjobs.com/JJ",
+    "merck": "https://msd.wd5.myworkdayjobs.com/SearchJobs",
+    "elililly": "https://lilly.wd115.myworkdayjobs.com/LLY",
+    "tempusai": "https://tempus.wd5.myworkdayjobs.com/Tempus_Careers",
+    "trinetx": "https://globaleur241.dayforcehcm.com/CandidatePortal/en-US/trinetx1",
+    "vertexpharmaceuticals": "https://vrtx.wd501.myworkdayjobs.com/Vertex_Careers",
 }
 
 
@@ -283,6 +303,11 @@ def detect_ats(urls: list[str]) -> tuple[str, str, str]:
         if hostname.endswith("myworkdayjobs.com"):
             site = path_parts[0] if path_parts else ""
             return "workday", f"{hostname}/{site}".rstrip("/"), url
+        if hostname.endswith("oraclecloud.com") and "CandidateExperience" in parsed.path:
+            site_match = re.search(r"/sites/([^/?#]+)", parsed.path, re.I)
+            if site_match:
+                host_prefix = hostname[: -len(".oraclecloud.com")]
+                return "oraclecloud", f"{host_prefix}/{site_match.group(1)}", url
         if hostname.endswith(".icims.com"):
             return "icims", hostname, url
         if hostname == "recruiting.paylocity.com":
@@ -508,6 +533,14 @@ def company_match_keys(company: str) -> list[str]:
         if normalized and normalized not in keys:
             keys.append(normalized)
     return keys
+
+
+def verified_company_portal(company: str) -> str:
+    """Return a reviewed public portal seed for a company or one of its aliases."""
+    return next(
+        (VERIFIED_COMPANY_PORTALS[key] for key in company_match_keys(company) if key in VERIFIED_COMPANY_PORTALS),
+        "",
+    )
 
 
 def aggregator_portals(path: Path) -> dict[str, str]:
@@ -1392,10 +1425,13 @@ def run(
             (prior_portals[key] for key in company_match_keys(company) if key in prior_portals),
             "",
         )
+        verified_url = verified_company_portal(company)
         current_source = clean(row.get("source"))
         # A structured upstream ATS URL is stronger evidence than a generic corporate homepage.
         if aggregator_url and detect_ats([aggregator_url])[0] != "generic":
             row["source"] = aggregator_url
+        elif verified_url:
+            row["source"] = verified_url
         elif not current_source and aggregator_url:
             row["source"] = aggregator_url
         elif not current_source and prior_url:
