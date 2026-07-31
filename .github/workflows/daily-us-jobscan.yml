@@ -68,7 +68,7 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         shell: bash
         run: |
-          if git diff --quiet -- data/scans; then
+          if [[ -z "$(git status --short -- data/scans)" ]]; then
             echo "No scan changes to commit."
             exit 0
           fi
