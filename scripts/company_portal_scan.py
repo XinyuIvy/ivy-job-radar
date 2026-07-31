@@ -137,18 +137,30 @@ COMPANY_NAME_ALIASES = {
 # targeted posting in the upstream Aggregator sample.
 VERIFIED_COMPANY_PORTALS = {
     "abbvie": "https://careers.smartrecruiters.com/abbvie",
+    "actigraph": "https://apply.workable.com/ametris/",
+    "alivecor": "https://jobs.jobvite.com/alivecor/jobs",
     "analysisgroup": "https://professionalcareers-analysisgroup.icims.com/jobs/search?ss=1",
     "biogen": "https://biibhr.wd3.myworkdayjobs.com/external",
+    "biomarin": "https://jobs.jobvite.com/biomarin/jobs",
     "cytel": "https://iblyjb.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/cytel/jobs",
+    "denalitherapeutics": "https://dnli.wd1.myworkdayjobs.com/Discovery",
+    "dexcom": "https://dexcom.wd1.myworkdayjobs.com/Dexcom",
+    "empatica": "https://apply.workable.com/empatica/",
     "foundationmedicine": "https://careers.foundationmedicine.com/jobs/search",
+    "gehealthcare": "https://gehc.wd5.myworkdayjobs.com/GEHC_ExternalSite",
     "gileadsciences": "https://gilead.wd1.myworkdayjobs.com/gileadcareers",
     "guardanthealth": "https://gh.wd1.myworkdayjobs.com/gh",
     "johnsonjohnsoninnovativemedicine": "https://jj.wd5.myworkdayjobs.com/JJ",
+    "koneksa": "https://careers.smartrecruiters.com/Koneksa",
     "merck": "https://msd.wd5.myworkdayjobs.com/SearchJobs",
     "elililly": "https://lilly.wd115.myworkdayjobs.com/LLY",
+    "neurocrinebiosciences": "https://neurocrine.wd5.myworkdayjobs.com/Neurocrinecareers",
+    "om1": "https://job-boards.greenhouse.io/om1",
+    "siemenshealthineers": "https://onehealthineers.wd3.myworkdayjobs.com/SHSJB",
     "tempusai": "https://tempus.wd5.myworkdayjobs.com/Tempus_Careers",
     "trinetx": "https://globaleur241.dayforcehcm.com/CandidatePortal/en-US/trinetx1",
     "vertexpharmaceuticals": "https://vrtx.wd501.myworkdayjobs.com/Vertex_Careers",
+    "腾讯医疗健康": "https://tencent.wd1.myworkdayjobs.com/Tencent_Careers",
 }
 
 
