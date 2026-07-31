@@ -52,13 +52,13 @@ EXCLUDED_TITLE_SIGNALS = (
     "director",
     "vice president",
     "senior",
-    "sr.",
     "principal",
     "staff",
     "manager",
     "lead",
     "head of",
     "technical leadership",
+    "experienced hire",
     "nlp",
     "language model",
     "generative ai",
@@ -97,6 +97,21 @@ SKILL_RULES = {
     "Medical imaging": r"medical imaging|neuroimaging|multimodal imaging|digital biomarker",
     "RWE / HEOR": r"real.world evidence|\brwe\b|\bheor\b|health economics|pharmacoepidemi",
 }
+
+
+EXCLUDED_TITLE_PATTERNS = (
+    r"\\bsr\\.?(?:\\s|$)",
+    r"\\bexperienced hire\\b",
+    r"\\bresearch scientist\\s+(?:iii|iv|v|[3-9])\\b",
+)
+
+
+def is_excluded_title(title: str) -> bool:
+    lower = title.lower()
+    return any(signal in lower for signal in EXCLUDED_TITLE_SIGNALS) or any(
+        re.search(pattern, title, flags=re.IGNORECASE)
+        for pattern in EXCLUDED_TITLE_PATTERNS
+    )
 
 
 def clean_text(value: object) -> str:
@@ -243,7 +258,7 @@ def normalize_row(row: pd.Series, query: str, scanned_at: str) -> dict[str, obje
     lower_title = title.lower()
     if not any(signal in lower_title for signal in WANTED_TITLE_SIGNALS):
         return None
-    if any(signal in lower_title for signal in EXCLUDED_TITLE_SIGNALS):
+    if is_excluded_title(lower_title):
         return None
 
     years = required_experience(description)
@@ -263,8 +278,9 @@ def normalize_row(row: pd.Series, query: str, scanned_at: str) -> dict[str, obje
     # Aggregators often expose different URLs for the same employer posting.
     normalized_company = re.sub(r"\W+", "", company.lower())
     normalized_title = re.sub(r"\W+", " ", title.lower()).strip()
-    normalized_location = re.sub(r"\W+", " ", location.lower()).strip()
-    identity = f"{normalized_company}::{application_id or normalized_title + '::' + normalized_location}"
+    # Without a requisition ID, treat same-company/same-title aggregator rows as one provisional job.
+    # This removes LinkedIn/Indeed/company-site mirrors while preserving distinct requisitions when IDs exist.
+    identity = f"{normalized_company}::{application_id or normalized_title}"
 
     return {
         "job_key": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24],
