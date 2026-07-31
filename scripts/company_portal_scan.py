@@ -1060,11 +1060,15 @@ def normalize_api_job(
     portal_url: str = "",
 ) -> dict[str, Any] | None:
     title = value(row, "title", "name", "jobTitle")
-    location = value(
+    location = nested_location(
+        row.get("location")
+        or row.get("locations")
+        or row.get("jobLocation")
+        or row.get("primaryLocation")
+    ) or value(
         row,
         "location.name",
         "location.city",
-        "location",
         "primaryLocation",
         "locationsText",
     )
