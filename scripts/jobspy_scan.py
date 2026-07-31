@@ -51,6 +51,14 @@ EXCLUDED_TITLE_SIGNALS = (
     "machine learning engineer",
     "director",
     "vice president",
+    "senior",
+    "sr.",
+    "principal",
+    "staff",
+    "manager",
+    "lead",
+    "head of",
+    "technical leadership",
     "nlp",
     "language model",
     "generative ai",
@@ -241,16 +249,22 @@ def normalize_row(row: pd.Series, query: str, scanned_at: str) -> dict[str, obje
     years = required_experience(description)
     sponsorship = infer_sponsorship(description)
     score, details, eligible = score_job(title, description, sponsorship, years)
-    if not eligible:
+    phd_targeted = bool(re.search(r"\\bph\\.?d\\.?\\b|doctoral|doctorate", description, flags=re.IGNORECASE))
+    if not eligible or not phd_targeted or score < 55:
         return None
 
     canonical_url = canonicalize_url(url)
     application_id = extract_application_id(url)
     location_parts = [clean_text(row.get(name)) for name in ("city", "state", "country")]
-    location = ", ".join(part for part in location_parts if part)
+    location = clean_text(row.get("location")) or ", ".join(part for part in location_parts if part)
     skills = [label for label, pattern in SKILL_RULES.items() if re.search(pattern, description, flags=re.IGNORECASE)][:7]
     source_site = clean_text(row.get("site")) or "JobSpy"
-    identity = f"{company.lower()}::{application_id or canonical_url or title.lower()}"
+
+    # Aggregators often expose different URLs for the same employer posting.
+    normalized_company = re.sub(r"\\W+", "", company.lower())
+    normalized_title = re.sub(r"\\W+", " ", title.lower()).strip()
+    normalized_location = re.sub(r"\\W+", " ", location.lower()).strip()
+    identity = f"{normalized_company}::{application_id or normalized_title + '::' + normalized_location}"
 
     return {
         "job_key": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24],
