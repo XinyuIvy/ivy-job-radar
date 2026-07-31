@@ -52,18 +52,23 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Cross-source canonical deduplication with stale-job pruning | Job Board Aggregator / career-ops | Integrated |
 | Per-platform trend history and anomaly alerts | Job Board Aggregator | Integrated |
 | Progressive/chunked loading for very large job pools | Job Board Aggregator | Integrated |
-| Map/heatmap and geographic normalization | Job Board Aggregator | Planned |
+| Map/heatmap and geographic normalization | Job Board Aggregator | Out of scope |
 | Posting legitimacy / ghost-job / repost detection | career-ops | Integrated |
 | Required vs preferred skill extraction | career-ops-style evaluation | Integrated |
 | Explicit uncertainty penalties for missing degree/experience evidence | Ivy scoring audit | Integrated |
-| Company research workspace with job/application/interview rollups and persistent notes | career-ops | Integrated |\n| Hiring-manager/contact discovery | career-ops | Planned |
-| Interview scheduling, contacts, notes, thank-you status, and follow-up cadence | career-ops | Integrated |\n| Interview story bank, targeted preparation, and reply classification | career-ops | Planned |
+| Company research workspace with job/application/interview rollups and persistent notes | career-ops | Integrated |\n| Persistent recruiter, hiring-manager, alumni, and referral contact management | career-ops | Integrated |
+| Automated external contact discovery | career-ops | Planned |
+| Interview scheduling, contacts, notes, thank-you status, and follow-up cadence | career-ops | Integrated |\n| Interview preparation workspace, source-linked experience library, readiness checklist, mock notes, and interviewer questions | career-ops | Integrated |
+| Automated interview-experience ingestion and refresh | Ivy requirement | Partial |
+| Email reply classification | career-ops | Planned |
 | Application deadlines, planned-application dates, tasks, and reminders | Ivy requirement | Integrated |\n| Funnel analytics and per-source application success rates | career-ops | Integrated |
 | Complete CSV, Excel, JSON, and SQLite export | Ivy requirement | Integrated |
 | Scan-completion notification center and browser alerts | Ivy requirement | Integrated |
 | Email, Telegram, or ChatGPT completion notifications | Ivy requirement | Planned |
 | End-to-end run receipt with fetched, verified, rejected, deduplicated, imported, retained, stale-pruned, and failed counts | Ivy requirement | Integrated |
 | Automated data-quality remediation for missing JD evidence, degree, sponsorship, skills, location, stale checks, and duplicates | Ivy requirement | Integrated |
+| Data-quality run history, failure-reason monitoring, and trend visibility | Ivy requirement | Integrated |
+| Unified job-search calendar for applications, deadlines, tasks, interviews, thank-you notes, and follow-ups | Ivy requirement | Integrated |
 | Automated tests with saved fixtures for core source/ATS behavior | Engineering requirement | Integrated |
 
 Enterprise ATS acceptance on 2026-07-31 used five live public boards (iCIMS, Paylocity, Jobvite, JazzHR, and Gem): 5/5 portals completed, 45 postings were enumerated, and 9 target-scope jobs survived normalization. The company-portal regression suite now passes 16/16 tests, including reviewed portal seeds, Oracle Candidate Experience tenant detection, and The Muse's nested public-job schema.
@@ -73,6 +78,8 @@ Application analytics now records status transitions and calculates the cumulati
 The website now renders the job pool progressively in 20-record batches while preserving client-side filtering and sorting. The website starts the remediation sweep in the background whenever it is opened, and the data-quality view is an automated monitoring surface rather than a manual cleaning queue: it audits every stored job for insufficient JD evidence, missing degree requirements, unknown sponsorship, missing structured skills, missing location, checks older than 14 days, and strict duplicates; automatically reads the original JD, backfills the original job record, closes expired jobs, and merges only duplicates supported by the same application ID or canonical URL. Network failures retry with 1/2/4-hour exponential delays, while missing links or unresolved evidence after three attempts are isolated as the small manual-review exception set. Verification never creates an application record. Persistent quality-run status is included in CSV, Excel, JSON, and SQLite exports. The account-protected notification center retains the latest 20 scan completion/failure notices in the browser, prevents duplicate notices for the same terminal scan, and can request browser notification permission. External email, Telegram, and ChatGPT delivery remain separate planned integrations because they require a selected channel and credentials or connector authorization.
 
 Application planning now stores an automatically extracted JD deadline, deadline type (explicit date, rolling, or not published), evidence source, and a separate user-planned application date. Manual deadline edits take precedence over automated extraction. The notification center creates deadline reminders at 14, 7, 3, 1, and 0 days and surfaces due application tasks. Application tasks are durable records with due/reminder dates and completion state. Interview records separately store round, schedule, format, contact, notes, outcome, thank-you status/deadline, and follow-up date. The company workspace now aggregates current jobs, applications, and interviews for each company and stores persistent website, careers link, business summary, recent developments, and personal research notes. Tasks, interviews, company research, and deadline metadata are included in all four complete export formats.
+
+Contact management now stores recruiter, hiring-manager, alumni, referral, interviewer, and other contacts; records may link to an application and retain contact status, email, LinkedIn URL, last-contact date, next follow-up, and notes. Contact follow-ups feed the unified job-search calendar alongside planned applications, deadlines, tasks, interviews, thank-you deadlines, and application/interview follow-ups. The interview-preparation center links a saved interview to a readiness score, reusable preparation checklist, mock-interview or technical-practice notes, interviewer questions, and selected historical experience sources. Its initial evidence library contains 15 source-linked summaries spanning Glassdoor, Reddit, 一亩三分地, and 牛客 across pharma/biostatistics, healthcare data science, general data science, and quantitative research. Forum reports are labeled as candidate experience rather than current company policy; automated ongoing ingestion remains partial. Data-quality automation now writes durable per-run counts and normalized failure reasons for monitoring. Contacts, interview preparation, and quality-run history are included in all four complete export formats. Geographic normalization and map/heatmap work were explicitly removed from scope on 2026-07-31.
 
 ### Remaining cloud limitations, not reported as completed
 
