@@ -31,6 +31,24 @@ jobs:
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Mark website scan as running
+        if: steps.schedule_guard.outputs.run == 'true'
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -n "${IVY_JOB_RADAR_SYNC_TOKEN}" && -n "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
+            curl --fail-with-body --retry 3 --retry-all-errors \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+              --data '{"state":"running"}' \
+              "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status" \
+              || echo "Warning: could not publish running status."
+          fi
+
       - name: Check out repository
         if: steps.schedule_guard.outputs.run == 'true'
         uses: actions/checkout@v4
@@ -105,6 +123,24 @@ jobs:
             --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
             --data-binary @data/scans/all_jobs_latest.json \
             "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
+
+      - name: Mark website scan as failed
+        if: failure() && steps.schedule_guard.outputs.run == 'true'
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -n "${IVY_JOB_RADAR_SYNC_TOKEN}" && -n "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
+            curl --fail-with-body --retry 3 --retry-all-errors \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+              --data '{"state":"failed","message":"GitHub Actions 执行失败，未完成本轮回写。"}' \
+              "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status" \
+              || echo "Warning: could not publish failure status."
+          fi
 
       - name: Upload scan artifact
         if: always() && steps.schedule_guard.outputs.run == 'true'
