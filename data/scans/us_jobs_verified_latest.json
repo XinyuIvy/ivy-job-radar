@@ -24,8 +24,14 @@
     "search_query": "biostatistician",
     "date_posted": "",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4438522376",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "93f2887c7648401bd78d9fd5",
@@ -53,8 +59,14 @@
     "search_query": "biostatistician",
     "date_posted": "2026-07-28",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "http://www.indeed.com/job/biostatistician-fc1d75d2bda340a4",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "6fb0eca223355d471dc1d986",
@@ -81,8 +93,14 @@
     "search_query": "healthcare data scientist",
     "date_posted": "2026-07-28",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4445491056",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "4618ec9b10dcd7dc05a6b393",
@@ -108,8 +126,14 @@
     "search_query": "statistical scientist",
     "date_posted": "2026-07-29",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4446853191",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "f184fba83ffa084ac61338d0",
@@ -133,8 +157,14 @@
     "search_query": "biostatistician",
     "date_posted": "2026-07-29",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4444161236",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "844baf2d3306cf64db9c4f5f",
@@ -145,7 +175,7 @@
     "track": "Pharma",
     "score": 64,
     "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：17/30；领域迁移：14/20；工具匹配：12/15；工作授权：JD 未明确",
+    "evidence": "已定位公司页面，但未取得足够证据确认具体 JD 仍开放。；官网：https://talent.stjude.org/careers/JobDetail/Biostatistician-or-Associate-Biostatistician-JR6866/4648；岗位编号：未提取；Sponsorship：JD 未明确",
     "skills": [
       "R",
       "Python",
@@ -156,12 +186,18 @@
     "job_url": "https://talent.stjude.org/careers/JobDetail/Biostatistician-or-Associate-Biostatistician-JR6866/4648",
     "canonical_url": "https://talent.stjude.org/careers/JobDetail/Biostatistician-or-Associate-Biostatistician-JR6866/4648",
     "application_id": "",
-    "source": "JobSpy · indeed",
+    "source": "官网核验 · talent.stjude.org",
     "search_query": "biostatistician",
     "date_posted": "2026-07-29",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://talent.stjude.org/careers/JobDetail/Biostatistician-or-Associate-Biostatistician-JR6866/4648",
+    "official_url": "https://talent.stjude.org/careers/JobDetail/Biostatistician-or-Associate-Biostatistician-JR6866/4648",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "已定位公司页面，但未取得足够证据确认具体 JD 仍开放。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "14661938559401805f816000",
@@ -189,8 +225,14 @@
     "search_query": "algorithm validation scientist",
     "date_posted": "2026-07-29",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4446019491",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "dbcd21df736b008d58534042",
@@ -217,8 +259,14 @@
     "search_query": "statistical scientist",
     "date_posted": "",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4437367878",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "00fc27a67eb42c8d8d508eae",
@@ -244,8 +292,14 @@
     "search_query": "statistical scientist",
     "date_posted": "",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4445046265",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "dd45b88e6c47c61ccbb89059",
@@ -270,8 +324,14 @@
     "search_query": "medical imaging data scientist",
     "date_posted": "2026-07-28",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4445779229",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "f11c82b2213390db42367040",
@@ -296,8 +356,14 @@
     "search_query": "medical imaging data scientist",
     "date_posted": "2026-07-28",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4446394856",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "82a1c6fe7a1adc3380323e98",
@@ -321,8 +387,14 @@
     "search_query": "quantitative researcher",
     "date_posted": "2026-07-28",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4377828975",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "f8c70efe5d07ec1c1314e0f2",
@@ -348,8 +420,14 @@
     "search_query": "healthcare data scientist",
     "date_posted": "2026-07-30",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4444503535",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "54f92981267ffe7e76cee64e",
@@ -376,8 +454,14 @@
     "search_query": "healthcare data scientist",
     "date_posted": "",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4446768858",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "9236c73e6bfd1d6d4d72e388",
@@ -404,8 +488,14 @@
     "search_query": "statistical scientist",
     "date_posted": "2026-07-29",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4426472157",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "1c62380ee162ada301ac5fc8",
@@ -429,8 +519,14 @@
     "search_query": "quantitative researcher",
     "date_posted": "",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4429942723",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "182d388c69cbab8d6df987a1",
@@ -457,8 +553,14 @@
     "search_query": "applied scientist causal inference",
     "date_posted": "",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4401794091",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   },
   {
     "job_key": "502c54379e5b1c5f30f42988",
@@ -482,7 +584,13 @@
     "search_query": "pharmacoepidemiologist",
     "date_posted": "2026-07-28",
     "discovered_at": "2026-07-31T04:22:47.627104+00:00",
-    "checked_at": "2026-07-31T04:22:47.627104+00:00",
-    "status": "待官网核验"
+    "checked_at": "2026-07-31T04:29:14.977469+00:00",
+    "status": "待官网核验",
+    "original_job_url": "https://www.linkedin.com/jobs/view/4445785398",
+    "official_url": "",
+    "verification_method": "company_site_or_official_ats",
+    "verification_note": "未自动定位到可审计的公司官网或官方 ATS 页面。",
+    "full_description": "",
+    "sponsorship_evidence": ""
   }
 ]
