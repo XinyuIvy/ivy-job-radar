@@ -121,6 +121,13 @@ COMPANY_NAME_ALIASES = {
     "辉瑞中国": "Pfizer",
     "阿斯利康中国": "AstraZeneca",
     "默沙东中国": "Merck & Co.",
+    "apple health": "Apple Inc.",
+    "google/fitbit": "Fitbit",
+    "microsoft health & life sciences": "Microsoft",
+    "ppd/thermo fisher scientific": "Thermo Fisher Scientific",
+    "beone medicines（原百济神州）": "BeOne Medicines",
+    "英矽智能（insilico medicine）": "Insilico Medicine",
+    "晶泰科技（xtalpi）": "XtalPi",
 }
 
 
@@ -310,6 +317,19 @@ def plausible_company_portal(url: str, company: str) -> bool:
     return bool(tokens) and any(token in compact_host for token in tokens) and bool(JOB_LINK.search(url))
 
 
+def company_names_match(left: str, right: str) -> bool:
+    """Reject unrelated Wikidata search results before trusting their website claim."""
+    left_keys = company_match_keys(left)
+    right_keys = company_match_keys(right)
+    for left_key in left_keys:
+        for right_key in right_keys:
+            if min(len(left_key), len(right_key)) >= 4 and (
+                left_key in right_key or right_key in left_key
+            ):
+                return True
+    return False
+
+
 def wikidata_official_website(company: str) -> str:
     """Resolve an official homepage from Wikidata's P856 claim without an API key."""
     if not WIKIDATA_BUDGET.acquire(blocking=False):
@@ -324,7 +344,8 @@ def wikidata_official_website(company: str) -> str:
     candidates = payload.get("search", []) if isinstance(payload, dict) else []
     for candidate in candidates:
         entity_id = clean(candidate.get("id")) if isinstance(candidate, dict) else ""
-        if not entity_id:
+        label = clean(candidate.get("label")) if isinstance(candidate, dict) else ""
+        if not entity_id or not company_names_match(search_name, label):
             continue
         entity_url = (
             "https://www.wikidata.org/w/api.php?action=wbgetentities"
