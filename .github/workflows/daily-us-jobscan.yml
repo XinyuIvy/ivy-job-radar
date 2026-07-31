@@ -67,7 +67,7 @@ jobs:
 
       - name: Validate scanner syntax
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python -m py_compile scripts/jobspy_scan.py scripts/verify_company_jobs.py scripts/china_scan.py scripts/cloud_sources_scan.py
+        run: python -m py_compile scripts/jobspy_scan.py scripts/verify_company_jobs.py scripts/china_scan.py scripts/cloud_sources_scan.py scripts/aggregator_scan.py scripts/verify_aggregator_jobs.py
 
       - name: Collect US jobs
         if: steps.schedule_guard.outputs.run == 'true'
@@ -85,6 +85,14 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/cloud_sources_scan.py
 
+      - name: Collect Job Board Aggregator candidates
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/aggregator_scan.py
+
+      - name: Verify Aggregator candidates on official ATS pages
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/verify_aggregator_jobs.py
+
       - name: Merge regional results
         if: steps.schedule_guard.outputs.run == 'true'
         shell: bash
@@ -98,6 +106,7 @@ jobs:
               scan_dir / "us_jobs_verified_latest.json",
               scan_dir / "china_jobs_latest.json",
               scan_dir / "cloud_sources_jobs_latest.json",
+              scan_dir / "aggregator_jobs_verified_latest.json",
           ]
           jobs = []
           for path in regional_files:
