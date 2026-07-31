@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from scripts.company_portal_scan import (
+    aggregator_portals,
+    company_match_keys,
     company_rows,
     detect_ats,
     location_matches_region,
@@ -27,6 +29,29 @@ class CompanyPortalScanTests(unittest.TestCase):
             path = Path(directory) / "pool.json"
             path.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
             self.assertEqual(len(company_rows(path)), 2)
+
+    def test_matches_regional_company_aliases_to_upstream_names(self) -> None:
+        self.assertIn("pfizer", company_match_keys("辉瑞中国"))
+        self.assertIn("iqvia", company_match_keys("IQVIA中国"))
+        self.assertIn("genentechroche", company_match_keys("罗氏中国"))
+
+    def test_aggregator_registry_indexes_parent_and_upstream_names(self) -> None:
+        rows = [
+            {
+                "company": "Genentech/Roche",
+                "upstream_company": "roche",
+                "sample_job_url": "https://roche.wd3.myworkdayjobs.com/roche-ext/job/1",
+            }
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "registry.json"
+            path.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
+            portals = aggregator_portals(path)
+            self.assertEqual(portals["roche"], rows[0]["sample_job_url"])
+            self.assertEqual(
+                portals[company_match_keys("罗氏中国")[-1]],
+                rows[0]["sample_job_url"],
+            )
 
     def test_detects_supported_ats(self) -> None:
         self.assertEqual(
