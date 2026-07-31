@@ -1,4 +1,4 @@
-name: Daily US job scan
+name: Daily global job scan
 
 on:
   workflow_dispatch:
@@ -11,13 +11,13 @@ permissions:
   contents: write
 
 concurrency:
-  group: daily-us-jobscan
+  group: daily-global-jobscan
   cancel-in-progress: false
 
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - name: Check New York schedule
         id: schedule_guard
@@ -49,17 +49,45 @@ jobs:
 
       - name: Validate scanner syntax
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python -m py_compile scripts/jobspy_scan.py scripts/verify_company_jobs.py
+        run: python -m py_compile scripts/jobspy_scan.py scripts/verify_company_jobs.py scripts/china_scan.py
 
-      - name: Collect and normalize jobs
+      - name: Collect US jobs
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/jobspy_scan.py
 
-      - name: Verify candidates on company career sites
+      - name: Verify US candidates on company career sites
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/verify_company_jobs.py
 
-      - name: Sync verified jobs to Ivy Job Radar
+      - name: Collect China jobs
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/china_scan.py
+
+      - name: Merge regional results
+        if: steps.schedule_guard.outputs.run == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          scan_dir = Path("data/scans")
+          regional_files = [
+              scan_dir / "us_jobs_verified_latest.json",
+              scan_dir / "china_jobs_latest.json",
+          ]
+          jobs = []
+          for path in regional_files:
+              if path.exists():
+                  jobs.extend(json.loads(path.read_text(encoding="utf-8")))
+          (scan_dir / "all_jobs_latest.json").write_text(
+              json.dumps(jobs, ensure_ascii=False, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          print(f"Merged {len(jobs)} US and China jobs.")
+          PY
+
+      - name: Sync jobs to Ivy Job Radar
         if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
@@ -75,14 +103,14 @@ jobs:
             --header "Content-Type: application/json" \
             --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
             --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-            --data-binary @data/scans/us_jobs_verified_latest.json \
+            --data-binary @data/scans/all_jobs_latest.json \
             "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
 
       - name: Upload scan artifact
         if: always() && steps.schedule_guard.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: us-jobscan-${{ github.run_id }}
+          name: global-jobscan-${{ github.run_id }}
           path: data/scans/
           if-no-files-found: error
           retention-days: 30
@@ -97,7 +125,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/scans/us_jobs_latest.json data/scans/us_jobs_latest.csv data/scans/us_scan_summary.json \
-            data/scans/us_jobs_verified_latest.json data/scans/us_verification_summary.json
-          git commit -m "Update daily US job scan"
+          git add data/scans/
+          git commit -m "Update daily global job scan"
           git push
