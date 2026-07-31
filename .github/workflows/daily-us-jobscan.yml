@@ -103,10 +103,6 @@ jobs:
           for path in regional_files:
               if path.exists():
                   jobs.extend(json.loads(path.read_text(encoding="utf-8")))
-          (scan_dir / "all_jobs_latest.json").write_text(
-              json.dumps(jobs, ensure_ascii=False, indent=2) + "\n",
-              encoding="utf-8",
-          )
           deduplicated = {}
           for job in jobs:
               key = str(job.get("job_key") or job.get("canonical_url") or job.get("job_url") or "")
@@ -117,7 +113,7 @@ jobs:
                   deduplicated[key] = job
           jobs = list(deduplicated.values())
           (scan_dir / "all_jobs_latest.json").write_text(
-              json.dumps(jobs, ensure_ascii=False, indent=2) + "\\n",
+              json.dumps(jobs, ensure_ascii=False, indent=2) + "\n",
               encoding="utf-8",
           )
           print(f"Merged and deduplicated {len(jobs)} jobs from all enabled cloud sources.")
