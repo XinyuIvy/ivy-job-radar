@@ -14,6 +14,8 @@ from scripts.company_portal_scan import (
     detect_ats,
     location_matches_region,
     normalize_posting,
+    parse_embedded_jobs,
+    parse_enterprise_html,
     parse_html,
     parse_workable_markdown,
 )
@@ -91,6 +93,41 @@ class CompanyPortalScanTests(unittest.TestCase):
             detect_ats(["https://acme.wd5.myworkdayjobs.com/External"])[0:2],
             ("workday", "acme.wd5.myworkdayjobs.com/External"),
         )
+        enterprise_cases = {
+            "https://careers-acme.icims.com/jobs/search?ss=1": ("icims", "careers-acme.icims.com"),
+            "https://recruiting.paylocity.com/recruiting/jobs/All/12345678-1234-1234-1234-123456789abc/acme": (
+                "paylocity",
+                "12345678-1234-1234-1234-123456789abc",
+            ),
+            "https://acme.applytojob.com/apply/jobs/": ("jazzhr", "acme"),
+            "https://career5.successfactors.eu/career?company=ACME": (
+                "successfactors",
+                "career5.successfactors.eu|ACME",
+            ),
+            "https://jobs.gem.com/acme": ("gem", "acme"),
+        }
+        for url, expected in enterprise_cases.items():
+            with self.subTest(url=url):
+                self.assertEqual(detect_ats([url])[0:2], expected)
+
+    def test_parses_enterprise_embedded_json_and_links(self) -> None:
+        body = """
+        <html>
+          <script id="__NEXT_DATA__" type="application/json">
+            {"props":{"pageProps":{"jobs":[
+              {"jobTitle":"Biostatistician","jobUrl":"/jobs/123",
+               "location":{"city":"Boston","state":"Massachusetts"}}
+            ]}}}
+          </script>
+          <a href="/jobs/456">Data Scientist</a>
+          <a href="/jobs/999">Software Engineer</a>
+        </html>
+        """
+        embedded = parse_embedded_jobs(body, "https://careers.example.com/")
+        self.assertEqual(len(embedded), 1)
+        self.assertEqual(embedded[0]["location"], "Boston, Massachusetts")
+        rows = parse_enterprise_html(body, "https://careers.example.com/")
+        self.assertEqual({row["title"] for row in rows}, {"Biostatistician", "Data Scientist"})
 
     def test_parses_schema_org_job_posting(self) -> None:
         body = """
