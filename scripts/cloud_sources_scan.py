@@ -36,16 +36,28 @@ SOURCES = (
 )
 
 
-def fetch(url: str, timeout: int = 35) -> bytes:
-    request = Request(
-        url,
-        headers={
-            "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0)",
-            "Accept": "application/json,application/rss+xml,application/xml,text/xml,*/*",
-        },
-    )
-    with urlopen(request, timeout=timeout) as response:
-        return response.read(8_000_000)
+def fetch(url: str, timeout: int = 35, retries: int = 2) -> bytes:
+    last_error: Exception | None = None
+    for attempt in range(retries + 1):
+        request = Request(
+            url,
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0)",
+                "Accept": "application/json,application/rss+xml,application/xml,text/xml,*/*",
+            },
+        )
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                return response.read(8_000_000)
+        except (HTTPError, URLError, TimeoutError) as error:
+            last_error = error
+            if isinstance(error, HTTPError) and error.code not in {408, 425, 429, 500, 502, 503, 504}:
+                raise
+            if attempt < retries:
+                # Exponential backoff prevents temporary rate limits from failing the whole source.
+                time.sleep((2 ** attempt) + 0.25)
+    assert last_error is not None
+    raise last_error
 
 
 def clean(value: object) -> str:
