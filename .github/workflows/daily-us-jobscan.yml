@@ -55,6 +55,19 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/jobspy_scan.py
 
+      - name: Sync eligible jobs to Ivy Job Radar
+        if: steps.schedule_guard.outputs.run == 'true' && secrets.IVY_JOB_RADAR_SYNC_TOKEN != ''
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+        shell: bash
+        run: |
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "OAI-Sites-Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+            --data-binary @data/scans/us_jobs_latest.json \
+            "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
+
       - name: Upload scan artifact
         if: steps.schedule_guard.outputs.run == 'true'
         uses: actions/upload-artifact@v4
