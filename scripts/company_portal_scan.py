@@ -106,6 +106,7 @@ AGGREGATOR_DOMAINS = {
     "wellfound.com",
 }
 COMMON_CRAWL_BUDGET = threading.BoundedSemaphore(20)
+WIKIDATA_BUDGET = threading.BoundedSemaphore(100)
 _common_crawl_index = ""
 _common_crawl_lock = threading.Lock()
 
@@ -309,6 +310,40 @@ def plausible_company_portal(url: str, company: str) -> bool:
     return bool(tokens) and any(token in compact_host for token in tokens) and bool(JOB_LINK.search(url))
 
 
+def wikidata_official_website(company: str) -> str:
+    """Resolve an official homepage from Wikidata's P856 claim without an API key."""
+    if not WIKIDATA_BUDGET.acquire(blocking=False):
+        return ""
+    language = "zh" if re.search(r"[\u4e00-\u9fff]", company) else "en"
+    search_name = COMPANY_NAME_ALIASES.get(clean(company).casefold(), company)
+    endpoint = (
+        "https://www.wikidata.org/w/api.php?action=wbsearchentities"
+        f"&search={quote_plus(search_name)}&language={language}&format=json&limit=3&origin=*"
+    )
+    payload = json_payload(fetch(endpoint, retries=1))
+    candidates = payload.get("search", []) if isinstance(payload, dict) else []
+    for candidate in candidates:
+        entity_id = clean(candidate.get("id")) if isinstance(candidate, dict) else ""
+        if not entity_id:
+            continue
+        entity_url = (
+            "https://www.wikidata.org/w/api.php?action=wbgetentities"
+            f"&ids={quote_plus(entity_id)}&props=claims&format=json&origin=*"
+        )
+        entity_payload = json_payload(fetch(entity_url, retries=1))
+        entities = entity_payload.get("entities", {}) if isinstance(entity_payload, dict) else {}
+        claims = entities.get(entity_id, {}).get("claims", {}) if isinstance(entities, dict) else {}
+        websites = claims.get("P856", []) if isinstance(claims, dict) else []
+        for claim in websites:
+            try:
+                website = clean(claim["mainsnak"]["datavalue"]["value"])
+            except (KeyError, TypeError):
+                continue
+            if website.startswith(("http://", "https://")):
+                return website
+    return ""
+
+
 def discover_homepage(company: str) -> tuple[str, str]:
     query = quote_plus(f'"{company}" careers jobs')
     errors: list[str] = []
@@ -323,7 +358,10 @@ def discover_homepage(company: str) -> tuple[str, str]:
         for link in extract_search_links(result.body):
             if plausible_company_portal(link, company):
                 return link, ""
-    return "", "; ".join(errors)[:300] or "No official career portal found by public web discovery."
+    official_website = wikidata_official_website(company)
+    if official_website:
+        return official_website, ""
+    return "", "; ".join(errors)[:300] or "No official career portal found by public discovery."
 
 
 def common_crawl_career_url(seed_url: str) -> str:
@@ -409,6 +447,31 @@ def aggregator_portals(path: Path) -> dict[str, str]:
             continue
         for label in (clean(row.get("company")), clean(row.get("upstream_company"))):
             for key in company_match_keys(label):
+                portals.setdefault(key, url)
+    return portals
+
+
+def previous_portals(path: Path) -> dict[str, str]:
+    """Reuse the strongest portal evidence from the prior production receipt."""
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+    portals: dict[str, str] = {}
+    for row in payload if isinstance(payload, list) else []:
+        if not isinstance(row, dict):
+            continue
+        url = clean(row.get("final_url")) or clean(row.get("career_homepage"))
+        company = clean(row.get("company"))
+        has_evidence = (
+            clean(row.get("ats_type")) not in {"", "generic", "unidentified"}
+            or int(row.get("jobs_scanned") or 0) > 0
+            or bool(re.search(r"(?:career|jobs?|recruit|招聘|职位)", url, re.I))
+        )
+        if company and url.startswith(("http://", "https://")) and has_evidence:
+            for key in company_match_keys(company):
                 portals.setdefault(key, url)
     return portals
 
@@ -974,14 +1037,20 @@ def run(
     workers: int,
     max_pages: int,
     company_limit: int,
+    previous_registry_path: Path | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
     scanned_at = datetime.now(timezone.utc).isoformat()
     companies = company_rows(pool_path)
     discovered_portals = aggregator_portals(aggregator_registry_path)
+    prior_portals = previous_portals(previous_registry_path) if previous_registry_path else {}
     for row in companies:
         company = clean(row.get("company"))
         aggregator_url = next(
             (discovered_portals[key] for key in company_match_keys(company) if key in discovered_portals),
+            "",
+        )
+        prior_url = next(
+            (prior_portals[key] for key in company_match_keys(company) if key in prior_portals),
             "",
         )
         current_source = clean(row.get("source"))
@@ -990,6 +1059,8 @@ def run(
             row["source"] = aggregator_url
         elif not current_source and aggregator_url:
             row["source"] = aggregator_url
+        elif not current_source and prior_url:
+            row["source"] = prior_url
     if company_limit > 0:
         companies = companies[:company_limit]
     receipts: list[CompanyReceipt] = []
@@ -1062,6 +1133,7 @@ def main() -> None:
         args.workers,
         args.max_pages,
         args.company_limit,
+        args.output_dir / "company_portal_registry.json",
     )
     outputs = {
         "company_portal_jobs_latest.json": jobs,
