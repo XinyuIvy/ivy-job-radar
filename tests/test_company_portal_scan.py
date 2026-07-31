@@ -23,9 +23,26 @@ from scripts.company_portal_scan import (
     parse_workable_markdown,
 )
 from scripts.merge_scan_results import canonical_url, enrich_job, merge_record
+from scripts.cloud_sources_scan import normalize as normalize_cloud_source
 
 
 class CompanyPortalScanTests(unittest.TestCase):
+    def test_normalizes_the_muse_nested_job_schema(self) -> None:
+        job = normalize_cloud_source(
+            "themuse",
+            {
+                "name": "Data Scientist",
+                "company": {"name": "Example Health"},
+                "refs": {"landing_page": "https://www.themuse.com/jobs/example/data-scientist"},
+                "contents": "Required qualifications: PhD in biostatistics and experience with R.",
+                "locations": [{"name": "Boston, MA"}],
+            },
+            "now",
+        )
+        self.assertIsNotNone(job)
+        self.assertEqual(job["company"], "Example Health")
+        self.assertEqual(job["location"], "Boston, MA")
+
     def test_company_pool_is_deduplicated(self) -> None:
         rows = [
             {"company": "Example Health", "region": "美国", "source": "https://example.com/careers"},
@@ -51,6 +68,14 @@ class CompanyPortalScanTests(unittest.TestCase):
         self.assertEqual(
             verified_company_portal("强生创新制药中国"),
             "https://jj.wd5.myworkdayjobs.com/JJ",
+        )
+        self.assertEqual(
+            verified_company_portal("BioMarin"),
+            "https://jobs.jobvite.com/biomarin/jobs",
+        )
+        self.assertEqual(
+            verified_company_portal("腾讯医疗健康"),
+            "https://tencent.wd1.myworkdayjobs.com/Tencent_Careers",
         )
 
     def test_aggregator_registry_indexes_parent_and_upstream_names(self) -> None:
