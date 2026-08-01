@@ -30,6 +30,13 @@
       "notes": "覆盖 BOSS、前程无忧、智联、拉勾、猎聘、就业在线；导出的 JSON/CSV 由统一 importer 接收。"
     },
     {
+      "source": "mcp-jobs 1.4.0",
+      "mode": "local-playwright-experiment",
+      "status": "limited",
+      "cost": "free",
+      "notes": "发布包仅实现猎聘和移动版 BOSS 规则；拉勾、智联、前程无忧只有 URL 条目，没有解析配置。"
+    },
+    {
       "source": "智联招聘 Apify Actor",
       "mode": "cloud-api-optional",
       "status": "disabled-until-paid-use-approved",
