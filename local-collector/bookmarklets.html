@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ivy Job Radar JD 捕获</title>
+    <style>
+      body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; max-width: 760px; margin: 48px auto; padding: 0 24px; line-height: 1.6; color: #172033; }
+      a.capture { display: inline-block; margin: 12px 0; padding: 12px 18px; border-radius: 10px; color: white; background: #0c8f8a; text-decoration: none; font-weight: 700; }
+      code { background: #f3f5f8; padding: 2px 6px; border-radius: 5px; }
+      .note { color: #586174; }
+    </style>
+  </head>
+  <body>
+    <h1>Ivy Job Radar JD 捕获</h1>
+    <p>把下面按钮拖到 Chrome 书签栏。打开任意职位详情页后点击一次；它只读取当前可见页面，不读取 Cookie，也不会自动投递。</p>
+    <p><a id="capture" class="capture" href="#">保存当前 JD</a></p>
+    <p class="note">适用于 BOSS、猎聘、智联、前程无忧、拉勾、就业在线、Moka、飞书招聘及公司官网。使用前先运行 <code>python3 local-collector/jd_inbox_server.py</code>。</p>
+    <script>
+      function captureVisibleJob() {
+        const pick = (selectors) => {
+          for (const selector of selectors) {
+            const node = document.querySelector(selector);
+            const value = node && (node.innerText || node.textContent || "").trim();
+            if (value) return value;
+          }
+          return "";
+        };
+        const host = location.hostname.replace(/^www\./, "");
+        const title = pick([
+          "h1", ".job-name", ".job-title", ".position-name", ".position-title",
+          "[class*='jobTitle']", "[class*='positionName']"
+        ]) || document.title;
+        const company = pick([
+          ".company-name", ".company-info h3", ".company-card h3",
+          "[class*='companyName']", "[class*='company-name']"
+        ]);
+        const description = pick([
+          ".job-detail", ".job-intro", ".job-description", ".position-detail",
+          ".job_msg", "[class*='jobDescription']", "[class*='job-description']",
+          "[class*='positionDescription']"
+        ]) || (document.body.innerText || "");
+        const locationText = pick([
+          ".job-location", ".job-area", ".work-address", ".position-address",
+          "[class*='jobAddress']", "[class*='location']"
+        ]);
+        const payload = {
+          title: title.slice(0, 500),
+          company: company.slice(0, 500),
+          location: locationText.slice(0, 500),
+          description: description.slice(0, 120000),
+          url: location.href,
+          source: host,
+          capturedAt: new Date().toISOString()
+        };
+        fetch("http://127.0.0.1:8787/jd", {
+          method: "POST",
+          mode: "cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).then(async (response) => {
+          if (!response.ok) throw new Error((await response.text()) || `HTTP ${response.status}`);
+          alert("✓ JD 已保存到 Ivy Job Radar inbox");
+        }).catch((error) => {
+          alert("JD 保存失败：" + error.message + "\n请确认本地 inbox server 正在运行。");
+        });
+      }
+      document.getElementById("capture").href = "javascript:(" + captureVisibleJob.toString() + ")()";
+    </script>
+  </body>
+</html>
