@@ -23,8 +23,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "applied scientist causal inference",
     "date_posted": "",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -51,8 +51,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "biostatistician",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -78,10 +78,62 @@
     "canonical_url": "https://linkedin.com/jobs/view/4435908911",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "applied scientist causal inference",
+    "search_query": "decision scientist experimentation",
     "date_posted": "2026-07-31",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "36026d663f0249583ad37d6d",
+    "company": "Meta",
+    "title": "Research Scientist – Central Applied Science",
+    "location": "Menlo Park, CA",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 69,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：23/30；领域迁移：13/20；工具匹配：12/15；工作授权：JD 未明确",
+    "skills": [
+      "R",
+      "Python",
+      "Statistics",
+      "Causal inference",
+      "Machine learning"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4436658731",
+    "canonical_url": "https://linkedin.com/jobs/view/4436658731",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "applied scientist causal inference",
+    "date_posted": "",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "f184fba83ffa084ac61338d0",
+    "company": "The Henry M. Jackson Foundation for the Advancement of Military Medicine",
+    "title": "Computational Research Scientist II - 711 HPW",
+    "location": "Dayton, OH",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 65,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：30/30；领域迁移：14/20；工具匹配：0/15；工作授权：JD 未明确",
+    "skills": [
+      "Statistics",
+      "Machine learning",
+      "Longitudinal data"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4444161236",
+    "canonical_url": "https://linkedin.com/jobs/view/4444161236",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "algorithm validation scientist",
+    "date_posted": "2026-07-29",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -107,8 +159,8 @@
     "source": "JobSpy · indeed",
     "search_query": "biostatistician",
     "date_posted": "2026-07-29",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -135,8 +187,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "statistical scientist",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -162,8 +214,8 @@
     "source": "JobSpy · indeed",
     "search_query": "healthcare data scientist",
     "date_posted": "2026-07-31",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -190,62 +242,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "statistical scientist",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "4e92c89888e1dadf25153023",
-    "company": "Starbucks",
-    "title": "data scientist, Data & Analytics (Nashville, TN)",
-    "location": "Nashville, TN",
-    "region": "美国",
-    "track": "Healthcare AI",
-    "score": 58,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：17/30；领域迁移：8/20；工具匹配：12/15；工作授权：JD 未明确",
-    "skills": [
-      "R",
-      "Python",
-      "SQL",
-      "Statistics",
-      "Causal inference"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4411473326",
-    "canonical_url": "https://linkedin.com/jobs/view/4411473326",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "applied scientist causal inference",
-    "date_posted": "",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "f8c70efe5d07ec1c1314e0f2",
-    "company": "UW School of Medicine and Public Health",
-    "title": "Data Scientist II or III",
-    "location": "Madison, WI",
-    "region": "美国",
-    "track": "Pharma",
-    "score": 58,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：16/30；领域迁移：6/20；工具匹配：15/15；工作授权：JD 未明确",
-    "skills": [
-      "R",
-      "Python",
-      "SQL",
-      "Statistics",
-      "Machine learning"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4444503535",
-    "canonical_url": "https://linkedin.com/jobs/view/4444503535",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "healthcare data scientist",
-    "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -270,10 +268,38 @@
     "canonical_url": "https://linkedin.com/jobs/view/4446768858",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "real world evidence scientist",
+    "search_query": "healthcare data scientist",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "e01c6b3dd8360b63e3baa01f",
+    "company": "Helus Pharma",
+    "title": "BIOSTATISTICIAN (CONTRACTOR)",
+    "location": "",
+    "region": "美国",
+    "track": "Pharma",
+    "score": 56,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：17/30；领域迁移：8/20；工具匹配：10/15；工作授权：JD 未明确",
+    "skills": [
+      "R",
+      "SAS",
+      "Statistics",
+      "Biostatistics",
+      "Clinical trials",
+      "Model validation"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4446763875",
+    "canonical_url": "https://linkedin.com/jobs/view/4446763875",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "biostatistician",
+    "date_posted": "2026-07-30",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -295,10 +321,10 @@
     "canonical_url": "https://linkedin.com/jobs/view/4429942723",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "quantitative researcher",
+    "search_query": "algorithm validation scientist",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -322,8 +348,8 @@
     "source": "JobSpy · indeed",
     "search_query": "real world evidence scientist",
     "date_posted": "2026-07-31",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   },
   {
@@ -350,8 +376,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "applied scientist causal inference",
     "date_posted": "2026-07-30",
-    "discovered_at": "2026-08-01T18:19:23.772963+00:00",
-    "checked_at": "2026-08-01T18:19:23.772963+00:00",
+    "discovered_at": "2026-08-01T18:46:20.766667+00:00",
+    "checked_at": "2026-08-01T18:46:20.766667+00:00",
     "status": "待官网核验"
   }
 ]

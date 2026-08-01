@@ -1,16 +1,16 @@
 {
-  "generated_at": "2026-08-01T18:34:31.567059+00:00",
+  "generated_at": "2026-08-01T19:01:05.090399+00:00",
   "state": "warning",
-  "imported": 337,
-  "fetched": 345,
-  "failed_source_count": 174,
+  "imported": 338,
+  "fetched": 346,
+  "failed_source_count": 175,
   "company_attempted": 350,
-  "company_succeeded": 176,
-  "company_success_rate": 0.5029,
+  "company_succeeded": 175,
+  "company_success_rate": 0.5,
   "china_matched": 0,
-  "china_company_attempted": 171,
-  "china_company_succeeded": 28,
-  "china_company_success_rate": 0.1637,
+  "china_company_attempted": 169,
+  "china_company_succeeded": 27,
+  "china_company_success_rate": 0.1598,
   "anomalies": [
     {
       "type": "zero_china_search_matches",
@@ -19,14 +19,14 @@
     },
     {
       "type": "low_china_company_portal_success_rate",
-      "current": 0.1637,
-      "attempted": 171,
-      "succeeded": 28,
+      "current": 0.1598,
+      "attempted": 169,
+      "succeeded": 27,
       "severity": "high"
     },
     {
       "type": "source_failures",
-      "count": 174,
+      "count": 175,
       "severity": "warning"
     }
   ]

@@ -1,6 +1,6 @@
 [
   {
-    "company": "上海交通大学医学院附属第九人民医院口腔颅面及感官综合健康研究院",
+    "company": "上海宝藤生物医药科技股份有限公司",
     "region": "",
     "career_homepage": "",
     "final_url": "",
@@ -12,7 +12,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Remote end closed connection without response",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
+  },
+  {
+    "company": "上海成均资产管理有限公司",
+    "region": "",
+    "career_homepage": "",
+    "final_url": "",
+    "ats_type": "unidentified",
+    "ats_tenant": "",
+    "state": "failed",
+    "http_status": 0,
+    "attempts": 0,
+    "jobs_scanned": 0,
+    "jobs_matched": 0,
+    "error": "Remote end closed connection without response",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "上海泓信投资管理有限公司",
@@ -27,7 +42,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Remote end closed connection without response",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
+  },
+  {
+    "company": "厦门特宝生物工程股份有限公司",
+    "region": "",
+    "career_homepage": "",
+    "final_url": "",
+    "ats_type": "unidentified",
+    "ats_tenant": "",
+    "state": "failed",
+    "http_status": 0,
+    "attempts": 0,
+    "jobs_scanned": 0,
+    "jobs_matched": 0,
+    "error": "Remote end closed connection without response",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "威高集团",
@@ -42,7 +72,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Remote end closed connection without response",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Accenture China",
@@ -57,7 +87,7 @@
     "jobs_scanned": 662,
     "jobs_matched": 16,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Alibaba（淘天集团）",
@@ -72,7 +102,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "BCG Greater China",
@@ -87,7 +117,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Bain Greater China",
@@ -102,7 +132,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "BeOne Medicines（原百济神州）",
@@ -117,13 +147,13 @@
     "jobs_scanned": 61,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Citadel",
     "region": "中国",
     "career_homepage": "https://www.citadel.com/careers/open-positions/",
-    "final_url": "https://www.citadel.com/careers/open-positions/",
+    "final_url": "https://www.citadel.com/careers/open-opportunities/",
     "ats_type": "unidentified",
     "ats_tenant": "",
     "state": "failed",
@@ -132,22 +162,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Citadel Securities",
     "region": "中国",
     "career_homepage": "https://www.citadelsecurities.com/careers/open-opportunities/",
     "final_url": "https://www.citadelsecurities.com/careers/open-opportunities/",
-    "ats_type": "unidentified",
+    "ats_type": "generic",
     "ats_tenant": "",
-    "state": "failed",
-    "http_status": 403,
-    "attempts": 1,
+    "state": "unidentified",
+    "http_status": 200,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "error": "Career page loaded, but no ATS or job listing structure was identified.",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ClinChoice昆翎",
@@ -162,7 +192,7 @@
     "jobs_scanned": 8,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Deloitte China",
@@ -177,7 +207,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [Errno -2] Name or service not known>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "EY Greater China",
@@ -192,7 +222,7 @@
     "jobs_scanned": 4,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "IQVIA中国",
@@ -207,7 +237,7 @@
     "jobs_scanned": 394,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "KPMG China",
@@ -222,7 +252,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "L.E.K. Greater China",
@@ -237,7 +267,7 @@
     "jobs_scanned": 5,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "McKinsey Greater China",
@@ -252,7 +282,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Millennium",
@@ -267,7 +297,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "OPPO",
@@ -282,7 +312,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Oliver Wyman Greater China",
@@ -297,7 +327,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "PwC China",
@@ -312,7 +342,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Qube Research & Technologies",
@@ -327,7 +357,7 @@
     "jobs_scanned": 198,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Roland Berger Greater China",
@@ -342,7 +372,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "WorldQuant",
@@ -357,7 +387,7 @@
     "jobs_scanned": 8,
     "jobs_matched": 8,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "WuXi Clinical",
@@ -372,7 +402,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ZS China",
@@ -387,7 +417,7 @@
     "jobs_scanned": 5,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "vivo",
@@ -402,7 +432,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "上海交通大学医学院附属仁济医院",
@@ -417,7 +447,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
+  },
+  {
+    "company": "上海交通大学医学院附属第九人民医院口腔颅面及感官综合健康研究院",
+    "region": "中国",
+    "career_homepage": "",
+    "final_url": "",
+    "ats_type": "unidentified",
+    "ats_tenant": "",
+    "state": "unidentified",
+    "http_status": 0,
+    "attempts": 0,
+    "jobs_scanned": 0,
+    "jobs_matched": 0,
+    "error": "<urlopen error timed out>",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "上海启林投资管理有限公司",
@@ -432,37 +477,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
-  },
-  {
-    "company": "上海宝藤生物医药科技股份有限公司",
-    "region": "中国",
-    "career_homepage": "",
-    "final_url": "",
-    "ats_type": "unidentified",
-    "ats_tenant": "",
-    "state": "unidentified",
-    "http_status": 0,
-    "attempts": 0,
-    "jobs_scanned": 0,
-    "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
-  },
-  {
-    "company": "上海成均资产管理有限公司",
-    "region": "中国",
-    "career_homepage": "",
-    "final_url": "",
-    "ats_type": "unidentified",
-    "ats_tenant": "",
-    "state": "unidentified",
-    "http_status": 0,
-    "attempts": 0,
-    "jobs_scanned": 0,
-    "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "世纪前沿",
@@ -477,7 +492,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "东软医疗",
@@ -492,7 +507,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "中信证券",
@@ -507,7 +522,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "中国医学科学院阜外医院国家心血管疾病临床医学研究中心（董徽课题组）",
@@ -522,7 +537,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "中国电子信息产业发展研究院（赛迪研究院）",
@@ -537,7 +552,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "中国科学院北京基因组研究所（国家生物信息中心）",
@@ -552,7 +567,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "中金公司",
@@ -567,7 +582,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "临港实验室数据科学中心",
@@ -582,7 +597,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "乐普医疗",
@@ -597,7 +612,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "九坤投资",
@@ -612,7 +627,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "九坤投资（北京）有限公司",
@@ -627,13 +642,13 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "京东",
     "region": "中国",
     "career_homepage": "https://zhaopin.jd.com/",
-    "final_url": "https://zhaopin.jd.com/home;jsessionid=0E38586CF59F6346ED78CB9FAF2567C7.s1",
+    "final_url": "https://zhaopin.jd.com/home;jsessionid=325AB5E788725D49354834849CD974BF.s1",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -642,13 +657,13 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "京东健康",
     "region": "中国",
     "career_homepage": "https://zhaopin.jd.com/",
-    "final_url": "https://zhaopin.jd.com/home;jsessionid=D95359BDD6569E7059BFEF199560D473.s1",
+    "final_url": "https://zhaopin.jd.com/home;jsessionid=18C4B80901B0B554C625F9B4B1CCAFCF.s1",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -657,7 +672,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "传奇生物",
@@ -672,7 +687,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "佳期投资",
@@ -687,7 +702,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "信达生物",
@@ -702,7 +717,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "信达生物制药（苏州）有限公司",
@@ -717,7 +732,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "健帆生物",
@@ -732,22 +747,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "再鼎医药",
     "region": "中国",
     "career_homepage": "https://cn.zailaboratory.com/jobs/",
-    "final_url": "https://cn.zailaboratory.com/jobs/",
+    "final_url": "https://cn.zailaboratory.com/careers/",
     "ats_type": "generic",
     "ats_tenant": "",
-    "state": "success",
+    "state": "unidentified",
     "http_status": 200,
-    "attempts": 9,
-    "jobs_scanned": 8,
+    "attempts": 2,
+    "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "error": "Career page loaded, but no ATS or job listing structure was identified.",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "北京大学临床医学高等研究院",
@@ -762,7 +777,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "北京大学临床医学高等研究院真实世界证据评价中心",
@@ -777,7 +792,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "北京康特瑞科统计科技有限责任公司",
@@ -792,7 +807,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "北京微观博易私募基金管理有限公司",
@@ -807,7 +822,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "北京道泰量合私募基金管理有限公司（DTL）",
@@ -822,7 +837,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "医渡科技",
@@ -837,7 +852,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "医联",
@@ -852,7 +867,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "华为",
@@ -867,7 +882,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "华为运动健康",
@@ -882,7 +897,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "华大基因",
@@ -897,7 +912,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "华泰证券",
@@ -912,7 +927,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "南京驯鹿生物技术股份有限公司",
@@ -927,7 +942,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "南微医学",
@@ -942,7 +957,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "卡斯柯信号有限公司",
@@ -957,7 +972,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "卫宁健康",
@@ -972,22 +987,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
-  },
-  {
-    "company": "厦门特宝生物工程股份有限公司",
-    "region": "中国",
-    "career_homepage": "",
-    "final_url": "",
-    "ats_type": "unidentified",
-    "ats_tenant": "",
-    "state": "unidentified",
-    "http_status": 0,
-    "attempts": 0,
-    "jobs_scanned": 0,
-    "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "君实生物",
@@ -1002,7 +1002,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "启林投资",
@@ -1017,7 +1017,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "和黄医药",
@@ -1032,7 +1032,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "哔哩哔哩",
@@ -1047,7 +1047,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "四川百利天恒药业股份有限公司",
@@ -1062,7 +1062,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "国泰海通证券",
@@ -1077,7 +1077,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [SSL: UNSAFE_LEGACY_RENEGOTIATION_DISABLED] unsafe legacy renegotiation disabled (_ssl.c:1016)>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "国药赛诺根生物科学（北京）有限公司",
@@ -1092,7 +1092,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "复旦大学类脑智能科学与技术研究院",
@@ -1107,7 +1107,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "天津杰纳医药科技发展有限公司",
@@ -1122,7 +1122,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "太美医疗科技",
@@ -1137,7 +1137,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "奕瑞科技",
@@ -1152,7 +1152,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "字节跳动",
@@ -1167,7 +1167,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "安图生物",
@@ -1182,7 +1182,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "宽德投资",
@@ -1197,7 +1197,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "小米",
@@ -1212,7 +1212,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "小米健康",
@@ -1227,7 +1227,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "小红书",
@@ -1242,7 +1242,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "平安健康/平安科技",
@@ -1257,7 +1257,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "幻方量化",
@@ -1272,7 +1272,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "广东横琴均成私募基金管理有限公司（均成基金）",
@@ -1287,7 +1287,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "康方生物",
@@ -1302,7 +1302,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "康龙化成",
@@ -1317,7 +1317,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "开立医疗",
@@ -1332,7 +1332,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "强生创新制药中国",
@@ -1347,7 +1347,7 @@
     "jobs_scanned": 390,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "微创医疗",
@@ -1362,7 +1362,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "微医",
@@ -1377,7 +1377,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "心脉医疗",
@@ -1392,7 +1392,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "快手",
@@ -1407,7 +1407,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "思路迪医药股份有限公司（3D Medicines）",
@@ -1422,7 +1422,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "恒瑞医药",
@@ -1437,7 +1437,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "惠泰医疗",
@@ -1452,7 +1452,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "拼多多",
@@ -1467,7 +1467,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "拼多多（上海）网络科技有限公司",
@@ -1482,7 +1482,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "推想医疗",
@@ -1497,7 +1497,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "携程集团",
@@ -1512,7 +1512,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "数坤科技",
@@ -1527,7 +1527,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "新产业生物",
@@ -1542,7 +1542,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "方达控股",
@@ -1557,7 +1557,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "明汯投资",
@@ -1572,7 +1572,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "普蕊斯",
@@ -1587,7 +1587,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "晶泰科技（XtalPi）",
@@ -1602,7 +1602,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "朱雀基金管理有限公司",
@@ -1617,7 +1617,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "杭州嘉合杉升私募基金管理有限公司",
@@ -1632,7 +1632,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "杭州橡木私募基金管理有限公司",
@@ -1647,7 +1647,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "杭州炎魂网络科技有限公司",
@@ -1662,7 +1662,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "森亿智能",
@@ -1677,7 +1677,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "河南心血管病中心（国家心血管病中心华中分中心）",
@@ -1692,7 +1692,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "泰格医药",
@@ -1707,7 +1707,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "洛书投资",
@@ -1722,7 +1722,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "浙江三生蔓迪药业有限公司",
@@ -1737,7 +1737,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "浙江大学智能创新药物研究院",
@@ -1752,7 +1752,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "浙江奥默生物医药有限公司",
@@ -1767,7 +1767,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "海南盛丰私募基金管理有限公司",
@@ -1782,7 +1782,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "深势科技",
@@ -1797,7 +1797,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "深圳信立泰药业股份有限公司",
@@ -1812,7 +1812,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "深圳医学科学院",
@@ -1827,7 +1827,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 500",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "深圳市鲸驰寰宇科技有限公司",
@@ -1842,7 +1842,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "深圳知行通达私募证券基金管理合伙企业（有限合伙）",
@@ -1857,7 +1857,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "深睿医疗",
@@ -1872,7 +1872,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "滴滴",
@@ -1887,7 +1887,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "灵均投资",
@@ -1902,7 +1902,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "燃石医学",
@@ -1917,7 +1917,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "爱思开海力士半导体（大连）有限公司",
@@ -1932,7 +1932,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [Errno -2] Name or service not known>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "申万宏源证券",
@@ -1947,7 +1947,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "百图生科",
@@ -1962,7 +1962,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "百度",
@@ -1977,7 +1977,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "百度健康/灵医智惠",
@@ -1992,7 +1992,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "石药控股集团有限公司",
@@ -2007,7 +2007,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "石药集团",
@@ -2022,7 +2022,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "礼来中国",
@@ -2037,7 +2037,7 @@
     "jobs_scanned": 197,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "科大讯飞医疗",
@@ -2052,7 +2052,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "科美通信",
@@ -2067,7 +2067,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "网易",
@@ -2082,7 +2082,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "罗氏中国",
@@ -2097,7 +2097,7 @@
     "jobs_scanned": 182,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "美团",
@@ -2112,7 +2112,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "翰森制药",
@@ -2127,7 +2127,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "联影医疗",
@@ -2142,7 +2142,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "联影智能",
@@ -2157,7 +2157,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "联想",
@@ -2172,7 +2172,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "腾讯",
@@ -2187,7 +2187,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "腾讯医疗健康",
@@ -2202,7 +2202,7 @@
     "jobs_scanned": 66,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "英矽智能（Insilico Medicine）",
@@ -2217,7 +2217,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "荣昌生物",
@@ -2232,7 +2232,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "葛兰素史克中国",
@@ -2247,7 +2247,7 @@
     "jobs_scanned": 147,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "蚂蚁集团",
@@ -2262,7 +2262,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "衍复投资",
@@ -2277,7 +2277,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "诺华中国",
@@ -2292,7 +2292,7 @@
     "jobs_scanned": 284,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "诺思格",
@@ -2307,7 +2307,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "赛诺菲中国",
@@ -2322,7 +2322,7 @@
     "jobs_scanned": 332,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "辉瑞中国",
@@ -2337,7 +2337,7 @@
     "jobs_scanned": 107,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "迈瑞医疗",
@@ -2352,22 +2352,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "迪安诊断",
     "region": "中国",
-    "career_homepage": "",
-    "final_url": "",
+    "career_homepage": "http://www.dazd.cn/",
+    "final_url": "https://www.dazd.cn/",
     "ats_type": "unidentified",
     "ats_tenant": "",
-    "state": "unidentified",
-    "http_status": 0,
-    "attempts": 0,
+    "state": "failed",
+    "http_status": 403,
+    "attempts": 1,
     "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "error": "HTTP Error 403: Forbidden",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "金域医学",
@@ -2382,7 +2382,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "银泰证券",
@@ -2397,7 +2397,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "锐天投资",
@@ -2412,7 +2412,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "长沙诺民医疗科技有限公司",
@@ -2427,7 +2427,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "阿斯利康中国",
@@ -2442,7 +2442,7 @@
     "jobs_scanned": 266,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "阿里健康",
@@ -2457,7 +2457,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "阿里巴巴",
@@ -2472,7 +2472,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "零氪科技",
@@ -2487,7 +2487,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "首都医学科学创新中心",
@@ -2502,7 +2502,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 400: ",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "高帆破浪科技（浙江）有限责任公司",
@@ -2517,7 +2517,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "鱼跃医疗",
@@ -2532,7 +2532,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "鸣石基金",
@@ -2547,7 +2547,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "鹏扬基金管理有限公司",
@@ -2562,7 +2562,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "鹰瞳科技 Airdoc",
@@ -2577,7 +2577,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "默沙东中国",
@@ -2592,7 +2592,7 @@
     "jobs_scanned": 218,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "齐鲁制药集团有限公司",
@@ -2607,7 +2607,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "1910 Genetics",
@@ -2622,7 +2622,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "AbbVie",
@@ -2637,7 +2637,7 @@
     "jobs_scanned": 100,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Abbott",
@@ -2652,7 +2652,7 @@
     "jobs_scanned": 430,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Abridge",
@@ -2667,7 +2667,7 @@
     "jobs_scanned": 42,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Acadia Pharmaceuticals",
@@ -2682,7 +2682,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ActiGraph",
@@ -2697,7 +2697,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Aetion",
@@ -2712,7 +2712,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Aidoc",
@@ -2727,7 +2727,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Airbnb",
@@ -2742,7 +2742,7 @@
     "jobs_scanned": 180,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Alcon",
@@ -2757,7 +2757,7 @@
     "jobs_scanned": 35,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "AliveCor",
@@ -2772,12 +2772,12 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Alnylam Pharmaceuticals",
     "region": "美国",
-    "career_homepage": "https://www.alnylam.com/careers",
+    "career_homepage": "https://www.alnylam.com/careers#main-content",
     "final_url": "https://www.alnylam.com/careers#main-content",
     "ats_type": "generic",
     "ats_tenant": "",
@@ -2787,13 +2787,13 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Amazon",
     "region": "美国",
     "career_homepage": "https://www.amazon.jobs/",
-    "final_url": "https://www.amazon.jobs/en/#main-1785609250",
+    "final_url": "https://www.amazon.jobs/en/#main-1785610833",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -2802,13 +2802,13 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Amazon Health Services",
     "region": "美国",
     "career_homepage": "https://www.amazon.jobs/",
-    "final_url": "https://www.amazon.jobs/en/#main-1785609248",
+    "final_url": "https://www.amazon.jobs/en/#main-1785610832",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -2817,7 +2817,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Amgen",
@@ -2832,7 +2832,7 @@
     "jobs_scanned": 457,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Analysis Group",
@@ -2847,7 +2847,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Apple",
@@ -2862,12 +2862,12 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Apple Health",
     "region": "美国",
-    "career_homepage": "https://www.apple.com/careers/at/",
+    "career_homepage": "https://www.apple.com/careers/at/index.html",
     "final_url": "https://www.apple.com/careers/at/index.html",
     "ats_type": "generic",
     "ats_tenant": "",
@@ -2877,7 +2877,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ArteraAI",
@@ -2892,7 +2892,7 @@
     "jobs_scanned": 10,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Astellas Pharma",
@@ -2907,7 +2907,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "AstraZeneca",
@@ -2922,7 +2922,7 @@
     "jobs_scanned": 266,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "BD (Becton, Dickinson and Company)",
@@ -2937,7 +2937,7 @@
     "jobs_scanned": 47,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "BGBx Consulting",
@@ -2952,7 +2952,7 @@
     "jobs_scanned": 9,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Bank of America",
@@ -2967,7 +2967,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Baxter",
@@ -2982,7 +2982,7 @@
     "jobs_scanned": 33,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Beghou Consulting",
@@ -2997,7 +2997,7 @@
     "jobs_scanned": 84,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "BioMarin",
@@ -3012,7 +3012,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Biofourmis",
@@ -3027,7 +3027,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Biogen",
@@ -3042,7 +3042,7 @@
     "jobs_scanned": 37,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Boston Red Sox",
@@ -3057,7 +3057,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Boston Scientific",
@@ -3072,7 +3072,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Bristol Myers Squibb",
@@ -3087,7 +3087,7 @@
     "jobs_scanned": 196,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Butterfly Network",
@@ -3102,7 +3102,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Charles River Associates",
@@ -3117,7 +3117,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Chiesi USA",
@@ -3132,7 +3132,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Clario",
@@ -3147,7 +3147,7 @@
     "jobs_scanned": 28,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ClearView Healthcare Partners",
@@ -3162,7 +3162,7 @@
     "jobs_scanned": 33,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ClinChoice",
@@ -3177,7 +3177,7 @@
     "jobs_scanned": 8,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ConcertAI",
@@ -3192,7 +3192,7 @@
     "jobs_scanned": 11,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Cytel",
@@ -3207,7 +3207,7 @@
     "jobs_scanned": 39,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "D. E. Shaw Research / D. E. Shaw Group",
@@ -3222,7 +3222,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "DRW",
@@ -3237,7 +3237,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Datavant",
@@ -3252,7 +3252,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Denali Therapeutics",
@@ -3267,7 +3267,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Dexcom",
@@ -3282,7 +3282,7 @@
     "jobs_scanned": 37,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "DoubleVerify",
@@ -3297,7 +3297,7 @@
     "jobs_scanned": 35,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Duke University",
@@ -3312,7 +3312,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Edison Scientific",
@@ -3327,7 +3327,7 @@
     "jobs_scanned": 27,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Edwards Lifesciences",
@@ -3342,7 +3342,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Eikon Therapeutics",
@@ -3357,7 +3357,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Element Biosciences",
@@ -3372,7 +3372,7 @@
     "jobs_scanned": 16,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Eli Lilly",
@@ -3387,22 +3387,22 @@
     "jobs_scanned": 197,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Eli Lilly and Company",
     "region": "美国",
     "career_homepage": "https://careers.lilly.com/",
-    "final_url": "https://careers.lilly.com/",
-    "ats_type": "unidentified",
+    "final_url": "https://careers.lilly.com/us/en",
+    "ats_type": "generic",
     "ats_tenant": "",
-    "state": "failed",
-    "http_status": 403,
-    "attempts": 1,
+    "state": "unidentified",
+    "http_status": 200,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "error": "Career page loaded, but no ATS or job listing structure was identified.",
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Empatica",
@@ -3417,7 +3417,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "EpiA Neuro",
@@ -3432,7 +3432,7 @@
     "jobs_scanned": 12,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Epic",
@@ -3447,7 +3447,7 @@
     "jobs_scanned": 5,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Evidation",
@@ -3462,7 +3462,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Evidera",
@@ -3477,7 +3477,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error timed out>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Exact Sciences",
@@ -3492,7 +3492,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Fenix Group",
@@ -3507,7 +3507,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Flatiron Health",
@@ -3522,7 +3522,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Formation Bio",
@@ -3537,7 +3537,7 @@
     "jobs_scanned": 23,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Fortrea",
@@ -3552,7 +3552,7 @@
     "jobs_scanned": 29,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Foundation Medicine",
@@ -3567,7 +3567,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Freenome",
@@ -3582,7 +3582,7 @@
     "jobs_scanned": 28,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "GE HealthCare",
@@ -3597,7 +3597,7 @@
     "jobs_scanned": 102,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "GRAIL",
@@ -3612,7 +3612,7 @@
     "jobs_scanned": 35,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "GSK",
@@ -3627,7 +3627,7 @@
     "jobs_scanned": 147,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Geisinger",
@@ -3642,7 +3642,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Genentech",
@@ -3657,7 +3657,7 @@
     "jobs_scanned": 182,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Genentech/Roche",
@@ -3672,7 +3672,7 @@
     "jobs_scanned": 182,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Generate Biomedicines",
@@ -3687,7 +3687,7 @@
     "jobs_scanned": 13,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Genesis Research",
@@ -3702,7 +3702,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 503",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Gilead Sciences",
@@ -3717,7 +3717,7 @@
     "jobs_scanned": 84,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Google",
@@ -3732,7 +3732,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Google/Fitbit",
@@ -3747,7 +3747,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Gopuff",
@@ -3762,7 +3762,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Guardant Health",
@@ -3777,7 +3777,7 @@
     "jobs_scanned": 15,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "HeartFlow",
@@ -3792,7 +3792,7 @@
     "jobs_scanned": 66,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Hologic",
@@ -3807,7 +3807,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Hudson River Trading",
@@ -3822,7 +3822,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ICON",
@@ -3837,7 +3837,7 @@
     "jobs_scanned": 212,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ICON plc",
@@ -3852,7 +3852,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "IMC Trading",
@@ -3867,7 +3867,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "IQVIA",
@@ -3882,7 +3882,7 @@
     "jobs_scanned": 394,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Illumina",
@@ -3897,7 +3897,7 @@
     "jobs_scanned": 10,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Insulet",
@@ -3912,7 +3912,7 @@
     "jobs_scanned": 18,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Intuitive Surgical",
@@ -3927,7 +3927,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Johnson & Johnson",
@@ -3942,7 +3942,7 @@
     "jobs_scanned": 390,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Johnson & Johnson Innovative Medicine",
@@ -3957,7 +3957,7 @@
     "jobs_scanned": 390,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Komodo Health",
@@ -3972,7 +3972,7 @@
     "jobs_scanned": 33,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Koneksa",
@@ -3987,7 +3987,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Lyft",
@@ -4002,7 +4002,7 @@
     "jobs_scanned": 160,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Masimo",
@@ -4017,7 +4017,7 @@
     "jobs_scanned": 99,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Medable",
@@ -4032,7 +4032,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Medpace",
@@ -4047,7 +4047,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Medtronic",
@@ -4062,7 +4062,7 @@
     "jobs_scanned": 89,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Merck & Co.",
@@ -4077,7 +4077,7 @@
     "jobs_scanned": 218,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Merck & Co., Inc.",
@@ -4092,7 +4092,7 @@
     "jobs_scanned": 218,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Meta",
@@ -4107,7 +4107,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Microsoft Health & Life Sciences",
@@ -4122,7 +4122,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Millennium Management",
@@ -4137,7 +4137,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Muon Space",
@@ -4152,7 +4152,7 @@
     "jobs_scanned": 54,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "NERA Economic Consulting",
@@ -4167,7 +4167,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "NVIDIA Healthcare",
@@ -4182,7 +4182,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Natera",
@@ -4197,7 +4197,7 @@
     "jobs_scanned": 229,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Neurocrine Biosciences",
@@ -4212,7 +4212,7 @@
     "jobs_scanned": 31,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Novartis",
@@ -4227,7 +4227,7 @@
     "jobs_scanned": 284,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Novo Nordisk",
@@ -4242,7 +4242,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "OM1",
@@ -4257,7 +4257,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Optiver",
@@ -4272,13 +4272,13 @@
     "jobs_scanned": 5,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Optum",
     "region": "美国",
-    "career_homepage": "https://www.optum.com/en/",
-    "final_url": "https://www.optum.com/en/careers.html",
+    "career_homepage": "https://www.optum.com/en/careers.html",
+    "final_url": "https://www.optum.com/en/careers.html#o5-legal-banner-container",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "unidentified",
@@ -4287,7 +4287,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Oracle Health",
@@ -4302,7 +4302,7 @@
     "jobs_scanned": 4,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Owkin",
@@ -4317,7 +4317,7 @@
     "jobs_scanned": 8,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "PPD/Thermo Fisher Scientific",
@@ -4332,7 +4332,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Paige",
@@ -4347,7 +4347,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Parexel",
@@ -4362,7 +4362,7 @@
     "jobs_scanned": 46,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "PathAI",
@@ -4377,7 +4377,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Penumbra",
@@ -4392,7 +4392,7 @@
     "jobs_scanned": 84,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Pfizer",
@@ -4407,7 +4407,7 @@
     "jobs_scanned": 107,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Philips",
@@ -4422,7 +4422,7 @@
     "jobs_scanned": 69,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Point72",
@@ -4437,7 +4437,7 @@
     "jobs_scanned": 231,
     "jobs_matched": 17,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Precision AQ",
@@ -4452,7 +4452,7 @@
     "jobs_scanned": 51,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Precision Medicine Group",
@@ -4467,7 +4467,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [Errno -2] Name or service not known>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Precision for Medicine",
@@ -4482,7 +4482,7 @@
     "jobs_scanned": 151,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Prior Labs",
@@ -4497,7 +4497,7 @@
     "jobs_scanned": 17,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Prolaio",
@@ -4512,7 +4512,7 @@
     "jobs_scanned": 8,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Putnam (Inizio Ignite)",
@@ -4527,7 +4527,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [Errno -2] Name or service not known>",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Quince",
@@ -4542,7 +4542,7 @@
     "jobs_scanned": 148,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Qure.ai",
@@ -4557,7 +4557,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "RTI Health Solutions",
@@ -4572,7 +4572,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "RTI International",
@@ -4587,7 +4587,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "RTI International / RTI Health Solutions",
@@ -4602,7 +4602,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "RapidAI",
@@ -4617,7 +4617,7 @@
     "jobs_scanned": 9,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Recursion",
@@ -4632,7 +4632,7 @@
     "jobs_scanned": 20,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Regeneron",
@@ -4647,7 +4647,7 @@
     "jobs_scanned": 88,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ResMed",
@@ -4662,7 +4662,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "SDC (Statistics & Data Corporation)",
@@ -4677,7 +4677,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Sage Therapeutics",
@@ -4692,7 +4692,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Sakata Seed America, Inc.",
@@ -4707,7 +4707,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Samba TV",
@@ -4722,7 +4722,7 @@
     "jobs_scanned": 59,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Sanofi",
@@ -4737,7 +4737,7 @@
     "jobs_scanned": 332,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Schrödinger",
@@ -4752,7 +4752,7 @@
     "jobs_scanned": 19,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "SentiLink",
@@ -4767,7 +4767,7 @@
     "jobs_scanned": 44,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Siemens Healthineers",
@@ -4782,7 +4782,7 @@
     "jobs_scanned": 210,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Signant Health",
@@ -4797,7 +4797,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Solace Health",
@@ -4812,7 +4812,7 @@
     "jobs_scanned": 30,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Sony Interactive Entertainment",
@@ -4827,7 +4827,7 @@
     "jobs_scanned": 202,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "St. Jude Children's Research Hospital",
@@ -4842,7 +4842,7 @@
     "jobs_scanned": 79,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Stryker",
@@ -4857,7 +4857,7 @@
     "jobs_scanned": 51,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Syneos Health",
@@ -4872,7 +4872,7 @@
     "jobs_scanned": 181,
     "jobs_matched": 5,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "SystImmune",
@@ -4887,7 +4887,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Takeda",
@@ -4902,7 +4902,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Talkiatry",
@@ -4917,7 +4917,7 @@
     "jobs_scanned": 176,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Tempus AI",
@@ -4932,7 +4932,7 @@
     "jobs_scanned": 46,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Teza Technologies",
@@ -4947,7 +4947,7 @@
     "jobs_scanned": 11,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Tiny Health",
@@ -4962,7 +4962,7 @@
     "jobs_scanned": 11,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Too Good To Go",
@@ -4977,7 +4977,7 @@
     "jobs_scanned": 80,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "TriNetX",
@@ -4992,7 +4992,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Twitch",
@@ -5007,7 +5007,7 @@
     "jobs_scanned": 62,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Two Sigma",
@@ -5022,7 +5022,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "UTHealth Houston",
@@ -5037,7 +5037,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "University of Southern California",
@@ -5052,7 +5052,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Variant Bio",
@@ -5067,7 +5067,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Verana Health",
@@ -5082,7 +5082,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Verily",
@@ -5097,7 +5097,7 @@
     "jobs_scanned": 29,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Veristat",
@@ -5112,7 +5112,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Vertex Pharmaceuticals",
@@ -5127,7 +5127,7 @@
     "jobs_scanned": 61,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Viz.ai",
@@ -5142,7 +5142,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Voyager Therapeutics",
@@ -5157,7 +5157,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Zimmer Biomet",
@@ -5172,7 +5172,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "ZipRecruiter",
@@ -5187,7 +5187,7 @@
     "jobs_scanned": 37,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Zoox",
@@ -5202,7 +5202,7 @@
     "jobs_scanned": 226,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "iRhythm Technologies",
@@ -5217,7 +5217,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "insitro",
@@ -5232,7 +5232,7 @@
     "jobs_scanned": 14,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   },
   {
     "company": "Ōura",
@@ -5247,6 +5247,6 @@
     "jobs_scanned": 104,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-01T18:30:21.236729+00:00"
+    "checked_at": "2026-08-01T18:56:51.109914+00:00"
   }
 ]

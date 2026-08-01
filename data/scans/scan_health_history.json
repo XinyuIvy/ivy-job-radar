@@ -86,5 +86,38 @@
         "severity": "warning"
       }
     ]
+  },
+  {
+    "generated_at": "2026-08-01T19:01:05.090399+00:00",
+    "state": "warning",
+    "imported": 338,
+    "fetched": 346,
+    "failed_source_count": 175,
+    "company_attempted": 350,
+    "company_succeeded": 175,
+    "company_success_rate": 0.5,
+    "china_matched": 0,
+    "china_company_attempted": 169,
+    "china_company_succeeded": 27,
+    "china_company_success_rate": 0.1598,
+    "anomalies": [
+      {
+        "type": "zero_china_search_matches",
+        "current": 0,
+        "severity": "high"
+      },
+      {
+        "type": "low_china_company_portal_success_rate",
+        "current": 0.1598,
+        "attempted": 169,
+        "succeeded": 27,
+        "severity": "high"
+      },
+      {
+        "type": "source_failures",
+        "count": 175,
+        "severity": "warning"
+      }
+    ]
   }
 ]
