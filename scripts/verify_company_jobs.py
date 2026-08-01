@@ -226,22 +226,38 @@ def infer_sponsorship(text: str) -> tuple[str, str]:
     return "JD 未明确", ""
 
 
+def normalize_application_id(value: object) -> str:
+    """Return a bounded ATS identifier or reject malformed captured content."""
+    identifier = clean_text(value)
+    if not identifier or len(identifier) > 80:
+        return ""
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{1,79}", identifier):
+        return ""
+    return identifier
+
+
 def extract_application_id(url: str, text: str, posting: dict[str, object] | None) -> str:
     if posting:
         identifier = posting.get("identifier")
-        if isinstance(identifier, dict) and clean_text(identifier.get("value")):
-            return clean_text(identifier.get("value"))
-        if isinstance(identifier, str) and identifier.strip():
-            return identifier.strip()
+        if isinstance(identifier, dict):
+            normalized = normalize_application_id(identifier.get("value"))
+            if normalized:
+                return normalized
+        elif isinstance(identifier, str):
+            normalized = normalize_application_id(identifier)
+            if normalized:
+                return normalized
     patterns = (
-        r"[?&](?:jobId|job_id|jobReq|gh_jid)=([^&]+)",
-        r"/jobs?/([A-Za-z]*\d[A-Za-z0-9_-]{2,})(?:/|\s|$)",
-        r"\b(?:requisition|req(?:uisition)? id|job id)\s*[:#]?\s*([A-Z]{0,4}\d[A-Z0-9-]{2,})",
+        r"[?&](?:jobId|job_id|jobReq|gh_jid)=([A-Za-z0-9._-]{2,80})",
+        r"/jobs?/([A-Za-z]{0,12}\d[A-Za-z0-9_-]{2,63})(?:/|\s|$)",
+        r"\b(?:requisition|req(?:uisition)? id|job id)\s*[:#]?\s*([A-Z]{0,4}\d[A-Z0-9-]{2,63})",
     )
     for pattern in patterns:
         match = re.search(pattern, f"{url} {text}", flags=re.IGNORECASE)
         if match:
-            return clean_text(match.group(1))
+            normalized = normalize_application_id(match.group(1))
+            if normalized:
+                return normalized
     return ""
 
 
@@ -285,7 +301,7 @@ def verify_job(job: dict[str, object], checked_at: str) -> dict[str, object]:
     result["full_description"] = description[:120_000]
     result["application_id"] = (
         extract_application_id(final_url, page_text, posting)
-        or clean_text(job.get("application_id"))
+        or normalize_application_id(job.get("application_id"))
     )
     visa, visa_evidence = infer_sponsorship(description or page_text)
     result["visa"] = visa
