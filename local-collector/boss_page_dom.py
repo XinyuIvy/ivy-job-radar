@@ -166,8 +166,26 @@ def wait_for_render(
         time.sleep(1)
     if allow_missing:
         return None
+    diagnostics = page.evaluate(
+        "({"
+        "url: location.href, "
+        "title: document.title, "
+        "ready_state: document.readyState, "
+        f"expected_selector_matches: document.querySelectorAll({json.dumps(selector)}).length, "
+        "job_detail_links: document.querySelectorAll('a[href*=\"/job_detail/\"]').length, "
+        "job_card_wrappers: document.querySelectorAll('.job-card-wrapper').length, "
+        "job_card_boxes: document.querySelectorAll('.job-card-box').length, "
+        "search_results: document.querySelectorAll('.search-job-result').length"
+        "})"
+    ) or {}
+    diagnostics["expected_url_match"] = (
+        urls_match(str(diagnostics.get("url", "")), expected_url)
+        if expected_url
+        else True
+    )
     raise PageCollectionError(
-        f"The BOSS page did not render the expected content within {timeout} seconds."
+        f"The BOSS page did not render the expected content within {timeout} seconds. "
+        f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}"
     )
 
 
@@ -284,6 +302,7 @@ def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, A
         wait_for_render(
             page,
             'a[href*="/job_detail/"], .search-job-result',
+            timeout=60,
             expected_url=requested_search_url,
         )
         page.evaluate("window.scrollTo(0, Math.min(document.body.scrollHeight, 1400))")
