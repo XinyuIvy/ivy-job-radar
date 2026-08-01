@@ -478,6 +478,7 @@ export default function JobRadar() {
   const [track, setTrack] = useState("全部");
   const [region, setRegion] = useState("全部地区");
   const [jobSort, setJobSort] = useState<(typeof sortOptions)[number]["value"]>("score");
+  const [jobQuery, setJobQuery] = useState("");
   const [saved, setSaved] = useState<number[]>([]);
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
   const [savedBucket, setSavedBucket] = useState<SavedBucket>("saved");
@@ -965,11 +966,20 @@ export default function JobRadar() {
 
   const jobs = useMemo(
     () => {
+      const normalizedQuery = jobQuery.trim().toLowerCase();
       const filtered = dailyJobs.filter(
         (job) =>
           (track === "全部" || job.track === track) &&
           (region === "全部地区" || job.region === region) &&
-          (view !== "saved" || savedBucket !== "saved" || saved.includes(job.id)),
+          (view !== "saved" || savedBucket !== "saved" || saved.includes(job.id)) &&
+          (!normalizedQuery || [
+            job.title,
+            job.company,
+            job.location,
+            job.track,
+            job.source,
+            ...job.skills,
+          ].some((value) => value.toLowerCase().includes(normalizedQuery))),
       );
 
       return [...filtered].sort((a, b) => {
@@ -985,13 +995,13 @@ export default function JobRadar() {
         return b.score - a.score || newestFirst;
       });
     },
-    [dailyJobs, track, region, saved, savedBucket, view, jobSort],
+    [dailyJobs, track, region, saved, savedBucket, view, jobSort, jobQuery],
   );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setVisibleJobCount(20), 0);
     return () => window.clearTimeout(timer);
-  }, [track, region, jobSort, view, savedBucket]);
+  }, [track, region, jobSort, view, savedBucket, jobQuery]);
 
   const visibleJobs = jobs.slice(0, visibleJobCount);
   const bossJobs = dailyJobs.filter((job) => sourceLabel(job) === "BOSS直聘");
@@ -1608,6 +1618,16 @@ export default function JobRadar() {
             <div className="section-heading">
               <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? (savedBucket === "saved" ? "我的收藏" : "我的待提交申请") : `今日岗位（${jobs.length}）`}</h2></div>
               <div className="job-controls">
+                <label className="job-search">
+                  <span aria-hidden="true">⌕</span>
+                  <input
+                    type="search"
+                    value={jobQuery}
+                    onChange={(event) => setJobQuery(event.target.value)}
+                    placeholder="搜索岗位、公司或技能"
+                    aria-label="搜索岗位、公司或技能"
+                  />
+                </label>
                 <select value={jobSort} onChange={(event) => setJobSort(event.target.value as (typeof sortOptions)[number]["value"])} aria-label="岗位排序">
                   {sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                 </select>
