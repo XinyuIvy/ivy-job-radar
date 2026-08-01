@@ -41,6 +41,17 @@ class JdInboxServerTests(unittest.TestCase):
             "BOSS capture requires a stable job-detail URL",
         )
 
+    def test_rejects_truncated_description(self) -> None:
+        payload = {
+            "title": "高级生物统计师",
+            "url": "https://www.zhipin.com/job_detail/example.html",
+            "description": "参与临床研究设计、统计分析计划、监管文件及跨团队可交付成果的规划和",
+        }
+        self.assertEqual(
+            SERVER.capture_error(payload),
+            "capture appears to contain a truncated job description",
+        )
+
     def test_rejects_install_page_and_incomplete_description(self) -> None:
         self.assertEqual(
             SERVER.capture_error(
