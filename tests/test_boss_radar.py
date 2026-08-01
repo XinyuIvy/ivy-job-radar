@@ -1,8 +1,10 @@
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "local-collector" / "boss_radar.py"
@@ -106,6 +108,36 @@ class BossRadarTransformTest(unittest.TestCase):
             transformed = BOSS_RADAR.transform_result_files(pairs)
 
             self.assertEqual({item["application_id"] for item in transformed}, {"job-1", "job-2"})
+
+    def test_sync_uses_private_site_header_and_chunks_payloads(self):
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self):
+                return json.dumps({"received": 1, "created": 1, "updated": 0, "skipped": 0}).encode()
+
+        requests = []
+
+        def fake_urlopen(request, timeout):
+            requests.append((request, timeout))
+            return FakeResponse()
+
+        env = {
+            "IVY_JOB_RADAR_URL": "https://example.test",
+            "IVY_JOB_RADAR_SYNC_TOKEN": "sync-secret",
+            "IVY_JOB_RADAR_SITES_BYPASS_TOKEN": "sites-secret",
+        }
+        with patch.dict(os.environ, env, clear=False), patch.object(BOSS_RADAR.urllib.request, "urlopen", side_effect=fake_urlopen):
+            result = BOSS_RADAR.sync_jobs([{"application_id": str(index)} for index in range(51)])
+
+        self.assertEqual(len(requests), 2)
+        self.assertEqual(requests[0][0].get_header("Authorization"), "Bearer sync-secret")
+        self.assertEqual(requests[0][0].get_header("Oai-sites-authorization"), "Bearer sites-secret")
+        self.assertEqual(result["received"], 2)
 
 
 if __name__ == "__main__":
