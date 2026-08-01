@@ -54,7 +54,8 @@ class BossOneClickTest(unittest.TestCase):
         content = BOSS_ONE_CLICK.launcher_content(Path("/Users/ivy/My Projects/ivy-job-radar"))
 
         self.assertIn("cd '/Users/ivy/My Projects/ivy-job-radar'", content)
-        self.assertIn("boss_one_click.py' run", content)
+        self.assertIn("china_one_click.py' run", content)
+        self.assertIn("China multi-source scan", content)
         self.assertIn("Press Return to close", content)
 
     def test_save_summary_persists_latest_report(self):
