@@ -344,7 +344,7 @@ def city_landing_url(city: str) -> str:
 
 def submit_visible_search(page: CDPPage, keyword: str) -> None:
     """Fill and submit BOSS's visible search form like a normal page interaction."""
-    input_result = page.evaluate(
+    input_state = page.evaluate(
         """
 (() => {
   const selectors = [
@@ -362,42 +362,29 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
   if (!input) {
     return {ok: false, input_count: document.querySelectorAll('input').length};
   }
-  input.focus();
-  input.select();
-  return {ok: true, prior_value_length: input.value.length};
-})()
-        """
-    ) or {}
-    if not input_result.get("ok"):
-        raise PageCollectionError(
-            "The BOSS city page did not expose a visible search input. "
-            f"Diagnostics: {json.dumps(input_result, ensure_ascii=False)}"
-        )
 
-    # Use Chrome's native text input path so the page framework receives the
-    # same beforeinput/input events as it does during a manual search.
-    page.send("Input.insertText", {"text": keyword})
-    time.sleep(0.5)
-    input_state = page.evaluate(
-        """
-(() => {
-  const visible = (node) => Boolean(
-    node && (node.offsetWidth || node.offsetHeight || node.getClientRects().length)
-  );
-  const input = [
-    'input[name="query"]',
-    'input.ipt-search',
-    '.search-form input',
-    '.search-form-con input',
-    'input[placeholder*="职位"]',
-    'input[placeholder*="搜索"]'
-  ].map((selector) => document.querySelector(selector)).find(visible);
-  if (!input || input.value !== KEYWORD) {
+  // Use the native value setter so Vue/React cannot keep a stale internal
+  // value after the visible input is updated.
+  const valueSetter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype, 'value'
+  )?.set;
+  if (!valueSetter) {
+    return {ok: false, reason: 'native_value_setter_not_found'};
+  }
+  input.focus();
+  valueSetter.call(input, KEYWORD);
+  input.dispatchEvent(new InputEvent('input', {
+    bubbles: true,
+    composed: true,
+    data: KEYWORD,
+    inputType: 'insertText'
+  }));
+  input.dispatchEvent(new Event('change', {bubbles: true, composed: true}));
+  if (input.value !== KEYWORD) {
     return {
       ok: false,
       reason: 'keyword_not_committed',
-      input_value: input ? input.value : '',
-      active_tag: document.activeElement ? document.activeElement.tagName : ''
+      input_value: input.value
     };
   }
   const scope = input.closest('form')
@@ -431,7 +418,6 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
   return {
     ok: true,
     input_value: input.value,
-    active_is_input: document.activeElement === input,
     submit_x: rect.left + rect.width / 2,
     submit_y: rect.top + rect.height / 2,
     submit_label: (submitter.innerText || submitter.value || '').trim().slice(0, 80)
@@ -439,9 +425,9 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
 })()
         """.replace("KEYWORD", json.dumps(keyword, ensure_ascii=False))
     ) or {}
-    if not input_state.get("ok") or not input_state.get("active_is_input"):
+    if not input_state.get("ok"):
         raise PageCollectionError(
-            "The BOSS search keyword was not committed to the active input. "
+            "The BOSS search keyword could not be committed to the visible input. "
             f"Diagnostics: {json.dumps(input_state, ensure_ascii=False)}"
         )
 
@@ -457,6 +443,36 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
         "Input.dispatchMouseEvent",
         {"type": "mouseReleased", "button": "left", "clickCount": 1, **pointer},
     )
+
+
+def prepare_search_page(page: CDPPage, keyword: str, city: str) -> str:
+    """Reuse matching results or submit one search without reloading the city page."""
+    requested_search_url = search_url(keyword, city)
+    requested_city_url = city_landing_url(city)
+    snapshot = page_snapshot(page)
+    assert_page_is_usable(snapshot)
+
+    # Never overwrite a result page that the user or a previous batch already
+    # opened successfully.
+    if urls_match(snapshot.get("url", ""), requested_search_url):
+        return requested_search_url
+
+    # The city home page may include tracking parameters. It is already the
+    # correct starting page, so navigating to it again only causes a visible
+    # reload and can reset the search input.
+    if not urls_match(snapshot.get("url", ""), requested_city_url):
+        page.navigate(requested_city_url)
+        wait_for_render(
+            page,
+            'input[name="query"], input.ipt-search, .search-form input, .search-form-con input, '
+            'input[placeholder*="职位"], input[placeholder*="搜索"]',
+            timeout=60,
+            expected_url=requested_city_url,
+        )
+
+    submit_visible_search(page, keyword)
+    page.adopt_page_for_url(requested_search_url, timeout=15)
+    return requested_search_url
 
 
 def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, Any]]:
@@ -480,23 +496,7 @@ def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, 
 def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     page = CDPPage()
     try:
-        # Direct navigation is redirected to the city landing page by BOSS. Use
-        # the same visible search form that succeeds during a manual search.
-        requested_search_url = search_url(keyword, city)
-        requested_city_url = city_landing_url(city)
-        page.navigate(requested_city_url)
-        wait_for_render(
-            page,
-            'input[name="query"], input.ipt-search, .search-form input, .search-form-con input, '
-            'input[placeholder*="职位"], input[placeholder*="搜索"]',
-            timeout=60,
-            expected_url=requested_city_url,
-        )
-        submit_visible_search(page, keyword)
-        # The BOSS city form can open search results in a new tab. Attach to
-        # that tab before waiting so diagnostics do not keep reading the old
-        # city landing page.
-        page.adopt_page_for_url(requested_search_url, timeout=15)
+        requested_search_url = prepare_search_page(page, keyword, city)
         wait_for_render(
             page,
             'a[href*="/job_detail/"], .search-job-result',
