@@ -28,7 +28,7 @@ def capture_error(payload: object) -> str | None:
     if len(description) < 20:
         return "capture requires a complete job description"
     if re.search(
-        r"(?:和|与|及|以及|或|包括|包含|and|or|including|such as|[,，:：;；(（])\\s*$",
+        r"(?:和|与|及|以及|或|包括|包含|and|or|including|such as|[,，:：;；(（])\s*$",
         description,
         re.IGNORECASE,
     ):
