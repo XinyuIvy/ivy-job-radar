@@ -13,43 +13,105 @@
   </head>
   <body>
     <h1>Ivy Job Radar JD 捕获</h1>
-    <p>把下面按钮拖到 Chrome 书签栏。打开任意职位详情页后点击一次；它只读取当前可见页面，不读取 Cookie，也不会自动投递。</p>
+    <p>把下面按钮拖到 Chrome 书签栏。打开职位详情后点击一次；它只读取当前可见职位，不读取 Cookie，也不会自动投递。</p>
     <p><a id="capture" class="capture" href="#">保存当前 JD</a></p>
-    <p class="note">适用于 BOSS、猎聘、智联、前程无忧、拉勾、就业在线、Moka、飞书招聘及公司官网。使用前先运行 <code>python3 local-collector/jd_inbox_server.py</code>。</p>
+    <p class="note">BOSS 搜索页必须先点选一个职位并显示右侧详情。使用前先运行 <code>python3 local-collector/jd_inbox_server.py</code>。</p>
     <script>
       function captureVisibleJob() {
-        const pick = (selectors) => {
+        const text = (node) => ((node && (node.innerText || node.textContent)) || "").replace(/\s+/g, " ").trim();
+        const pickNode = (root, selectors) => {
+          if (!root) return null;
           for (const selector of selectors) {
-            const node = document.querySelector(selector);
-            const value = node && (node.innerText || node.textContent || "").trim();
-            if (value) return value;
+            const node = root.querySelector(selector);
+            if (text(node)) return node;
           }
-          return "";
+          return null;
+        };
+        const pick = (root, selectors) => text(pickNode(root, selectors));
+        const absoluteUrl = (value) => {
+          try { return new URL(value || "", location.href).href; } catch (_) { return ""; }
+        };
+        const walkJson = (value) => {
+          if (!value || typeof value !== "object") return null;
+          if (Array.isArray(value)) {
+            for (const item of value) {
+              const found = walkJson(item);
+              if (found) return found;
+            }
+            return null;
+          }
+          if (value["@type"] === "JobPosting" || (Array.isArray(value["@type"]) && value["@type"].includes("JobPosting"))) return value;
+          return walkJson(value["@graph"]);
+        };
+        const jsonLdJob = () => {
+          for (const node of document.querySelectorAll("script[type='application/ld+json']")) {
+            try {
+              const found = walkJson(JSON.parse(node.textContent || "null"));
+              if (found) return found;
+            } catch (_) {}
+          }
+          return null;
         };
         const host = location.hostname.replace(/^www\./, "");
-        const title = pick([
-          "h1", ".job-name", ".job-title", ".position-name", ".position-title",
-          "[class*='jobTitle']", "[class*='positionName']"
-        ]) || document.title;
-        const company = pick([
-          ".company-name", ".company-info h3", ".company-card h3",
-          "[class*='companyName']", "[class*='company-name']"
-        ]);
-        const description = pick([
-          ".job-detail", ".job-intro", ".job-description", ".position-detail",
-          ".job_msg", "[class*='jobDescription']", "[class*='job-description']",
-          "[class*='positionDescription']"
-        ]) || (document.body.innerText || "");
-        const locationText = pick([
-          ".job-location", ".job-area", ".work-address", ".position-address",
-          "[class*='jobAddress']", "[class*='location']"
-        ]);
+        let title = "";
+        let company = "";
+        let locationText = "";
+        let description = "";
+        let jobUrl = "";
+
+        if (/(^|\.)zhipin\.com$/.test(host)) {
+          const detail = document.querySelector(".job-detail-box") || document.querySelector(".job-detail");
+          title = pick(detail, [".job-name", ".job-title", "h1"]);
+          description = pick(detail, [".desc", ".job-sec-text", ".job-description"]);
+          company = pick(detail, [".company-name", ".boss-name", ".company-info .name"]);
+          locationText = pick(detail, [".job-area", ".job-location", ".location-name", ".company-location"]);
+
+          const cards = Array.from(document.querySelectorAll(".job-card-box, .job-card-wrapper"));
+          const normalizedTitle = title.replace(/\s+/g, "");
+          const card = cards.find((node) => node.matches(".active, .selected, [class*='active']"))
+            || cards.find((node) => pick(node, ["a.job-name", ".job-name"]).replace(/\s+/g, "") === normalizedTitle);
+          if (card) {
+            company = company || pick(card, [".boss-name", ".company-name"]);
+            locationText = locationText || pick(card, [".company-location", ".job-area", ".job-location"]);
+            const link = pickNode(card, ["a.job-name[href*='/job_detail/']", "a[href*='/job_detail/']"]);
+            jobUrl = absoluteUrl(link && link.getAttribute("href"));
+          }
+          if (!jobUrl && /\/job_detail\//.test(location.pathname)) jobUrl = location.href;
+          if (!title || !description || !/\/job_detail\//.test(jobUrl)) {
+            alert("没有识别到完整的 BOSS 职位详情。请先在搜索结果中点选一个职位，确认右侧显示职位描述后再保存。");
+            return;
+          }
+        } else {
+          const structured = jsonLdJob();
+          if (structured) {
+            title = String(structured.title || "").trim();
+            company = String((structured.hiringOrganization && structured.hiringOrganization.name) || "").trim();
+            description = String(structured.description || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+            const address = structured.jobLocation && (Array.isArray(structured.jobLocation) ? structured.jobLocation[0] : structured.jobLocation);
+            const postal = address && address.address;
+            locationText = postal ? [postal.addressLocality, postal.addressRegion, postal.addressCountry].filter(Boolean).join(" ") : "";
+            jobUrl = absoluteUrl(structured.url || location.href);
+          } else {
+            const detail = document.querySelector(".job-detail, .job-intro, .job-description, .position-detail, .job_msg, [class*='jobDescription'], [class*='job-description'], [class*='positionDescription']");
+            title = pick(document, ["h1", ".job-name", ".job-title", ".position-name", ".position-title", "[class*='jobTitle']", "[class*='positionName']"]);
+            company = pick(document, [".company-name", ".company-info h3", ".company-card h3", "[class*='companyName']", "[class*='company-name']"]);
+            description = text(detail);
+            locationText = pick(document, [".job-location", ".job-area", ".work-address", ".position-address", "[class*='jobAddress']", "[class*='location']"]);
+            jobUrl = location.href;
+          }
+          if (!/^https?:$/.test(location.protocol) || !title || description.length < 30) {
+            alert("当前页面没有识别到完整职位详情，因此没有保存。请打开具体职位页面后重试。");
+            return;
+          }
+        }
+
         const payload = {
           title: title.slice(0, 500),
           company: company.slice(0, 500),
           location: locationText.slice(0, 500),
           description: description.slice(0, 120000),
-          url: location.href,
+          url: jobUrl,
+          pageUrl: location.href,
           source: host,
           capturedAt: new Date().toISOString()
         };
@@ -60,7 +122,7 @@
           body: JSON.stringify(payload)
         }).then(async (response) => {
           if (!response.ok) throw new Error((await response.text()) || `HTTP ${response.status}`);
-          alert("✓ JD 已保存到 Ivy Job Radar inbox");
+          alert("✓ 已保存：" + payload.title + (payload.company ? " · " + payload.company : ""));
         }).catch((error) => {
           alert("JD 保存失败：" + error.message + "\n请确认本地 inbox server 正在运行。");
         });
