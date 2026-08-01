@@ -24,8 +24,15 @@ def capture_error(payload: object) -> str | None:
         return "capture must be a JSON object"
     if not str(payload.get("title") or "").strip():
         return "capture requires a title"
-    if len(str(payload.get("description") or "").strip()) < 20:
+    description = str(payload.get("description") or "").strip()
+    if len(description) < 20:
         return "capture requires a complete job description"
+    if re.search(
+        r"(?:和|与|及|以及|或|包括|包含|and|or|including|such as|[,，:：;；(（])\\s*$",
+        description,
+        re.IGNORECASE,
+    ):
+        return "capture appears to contain a truncated job description"
     url = str(payload.get("url") or payload.get("jobUrl") or "").strip()
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"} or not parsed.netloc:
