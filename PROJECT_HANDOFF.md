@@ -3,8 +3,8 @@
 > 最后更新：2026-08-01 15:50（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
-> 当前开发分支：`agent/show-boss-jobs-search`  
-> 最近完成：[PR #3 - Sync eligible BOSS captures directly to Job Radar](https://github.com/XinyuIvy/ivy-job-radar/pull/3)，merge commit `7a435b9...`；当前 [PR #4](https://github.com/XinyuIvy/ivy-job-radar/pull/4) 修复 BOSS 隐藏状态并增加岗位搜索。
+> 当前开发分支：`agent/boss-one-click-production`  
+> 最近完成：[PR #4](https://github.com/XinyuIvy/ivy-job-radar/pull/4) 已合并；BOSS 一键批量扫描在新分支等待生产验收。
 
 ## 0. 给下一位 Chat 的最短说明
 
@@ -537,3 +537,22 @@ python3 scripts/apify_zhaopin_scan.py --max-results 25
 - 下一步优先级。
 
 不要只追加流水账；如果旧状态已经失效，应同步修改相关章节，保持本文能直接代表当前事实。
+
+
+## 16. BOSS Mac 一键批量扫描（2026-08-01）
+
+用户明确取消固定时间的本地定时任务作为主方案，因为无法保证 Mac 每天固定时间开机。正式方案改为按需手动触发：用户保持 BOSS 专用 Chrome 登录，双击桌面 `一键扫描BOSS.command`，之后自动完成搜索、详情读取、筛选、去重、网站同步和汇总。
+
+当前实现：
+
+- 新增 `local-collector/boss_one_click.py`，可安装桌面双击入口；
+- 搜索计划为 8 个城市 × 8 个关键词，共 64 个组合；
+- 每次运行 8 个组合、每组合 1 页，从 `~/.ivy-job-radar/boss-state.json` 的 cursor 断点续扫；
+- 输出发现、合格、排除/字段不完整、新增、更新/重复以及本轮剩余组合数；
+- 最近汇总保存为 `~/.ivy-job-radar/reports/boss-latest.json`；
+- 网站同步失败时回滚本批 cursor，下次重试不会静默丢失岗位；
+- 登录、验证码或访问异常时暂停，不绕过验证；
+- 不上传 Cookie、招聘者身份、联系方式、聊天或简历；
+- 原有“保存当前 JD”书签保留为单岗补录备用。
+
+本地 9 项相关测试、Python 编译与 JSON 校验已通过。合并后仍需在用户 Mac 上安装桌面入口，并使用真实 BOSS 登录会话完成一次生产验收；在此之前状态应记录为 `ready-for-production-verification`，不能称为完全生产验证成功。
