@@ -17,19 +17,21 @@ The China pipeline uses multiple collection modes because protected job boards d
 
 ## Capture a protected JD
 
-Start the local inbox:
+Start the capture-and-sync service:
+
+```bash
+python3 local-collector/china_capture_service.py
+```
+
+The default private configuration is `~/.ivy-job-radar/collector.env`. It must define `IVY_JOB_RADAR_URL`, `IVY_JOB_RADAR_SYNC_TOKEN`, and either `IVY_JOB_RADAR_SITES_BYPASS_TOKEN` or `SITES_SIWC_BYPASS_TOKEN`. Secrets stay on the local Mac and are never written into a capture file.
+
+Open `local-collector/bookmarklets.html` and drag **保存当前 JD** to the Chrome bookmarks bar. On a visible job detail page, click the bookmark once. The bookmarklet sends only the visible title, company, location, page text, URL, source host, and capture time to `127.0.0.1`; it does not read cookies, messages, resumes, or credentials. Eligible captures are normalized and synced directly to Ivy Job Radar. Excluded titles are saved locally with an explicit exclusion reason.
+
+The previous save-only server remains available for offline capture:
 
 ```bash
 python3 local-collector/jd_inbox_server.py
-```
-
-Open `local-collector/bookmarklets.html` and drag **保存当前 JD** to the Chrome bookmarks bar. On a visible job detail page, click the bookmark once. The bookmarklet sends only the visible title, company, location, page text, URL, source host, and capture time to `127.0.0.1`; it does not read cookies, messages, resumes, or credentials.
-
-Normalize captured jobs:
-
-```bash
 python3 scripts/china_snapshot_import.py ~/.ivy-job-radar/inbox
-python3 scripts/merge_china_sources.py
 ```
 
 ## Import browser-extension snapshots
