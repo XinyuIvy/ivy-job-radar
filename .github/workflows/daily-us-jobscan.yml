@@ -153,7 +153,8 @@ jobs:
           python scripts/split_json_batches.py \
             data/scans/all_jobs_latest.json \
             "${import_batch_dir}" \
-            --batch-size 40
+            --batch-size 40 \
+            --max-bytes 1000000
 
           shopt -s nullglob
           import_batches=("${import_batch_dir}"/batch-*.json)
