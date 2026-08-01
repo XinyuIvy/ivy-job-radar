@@ -408,7 +408,8 @@ def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, A
         page.navigate(requested_city_url)
         wait_for_render(
             page,
-            'input[name="query"], input.ipt-search, .search-form input, .search-form-con input',
+            'input[name="query"], input.ipt-search, .search-form input, .search-form-con input, '
+            'input[placeholder*="职位"], input[placeholder*="搜索"]',
             timeout=60,
             expected_url=requested_city_url,
         )
