@@ -1,6 +1,6 @@
 # BOSS 本地采集器
 
-这个采集器把 BOSS 登录状态和 Cookie 留在你的 Mac 上。它每次只运行一小批轮换搜索，删除招聘者身份、活跃状态和联系方式，只把符合目标岗位的公司、职位、地点、完整 JD、技能和职位链接发送到 Ivy Job Radar。
+这个采集器把 BOSS 登录状态和 Cookie 留在你的 Mac 上。它通过专用 Chrome 中正常渲染的搜索页和职位详情页读取岗位，不调用触发 `code 37` 的 BOSS 内部搜索接口。它每次只运行一小批轮换搜索，删除招聘者身份、活跃状态和联系方式，只把符合目标岗位的公司、职位、地点、完整 JD、技能和职位链接发送到 Ivy Job Radar。
 
 ## 首次安装（macOS）
 
@@ -22,7 +22,7 @@ chmod 600 ~/.ivy-job-radar/collector.env
 python3 local-collector/boss_radar.py setup
 ```
 
-`setup` 会安装上游开源采集器并打开独立 Chrome。请在这个窗口中登录一次 BOSS；它与日常 Chrome profile 分开，不会复制 Gmail、GitHub、密码或浏览历史。登录成功后，脚本会自动做一次环境检查。
+`setup` 会安装启动依赖并打开独立 Chrome。请在这个窗口中登录一次 BOSS；它与日常 Chrome profile 分开，不会复制 Gmail、GitHub、密码或浏览历史。登录后先手动打开一次职位搜索页，再回到 Terminal 运行 `doctor`。
 
 ## 先做一次小规模测试
 
@@ -31,7 +31,7 @@ python3 local-collector/boss_radar.py doctor
 python3 local-collector/boss_radar.py run --dry-run
 ```
 
-`--dry-run` 会真实搜索并在 Terminal 显示经过清洗的结果，但不会上传。确认公司名、职位、城市和 JD 正常后，再运行一次正式同步：
+`--dry-run` 会在专用 Chrome 中真实打开搜索页和职位详情页，并在 Terminal 显示经过清洗的结果，但不会上传。确认公司名、职位、城市和 JD 正常后，再运行一次正式同步：
 
 ```bash
 python3 local-collector/boss_radar.py run
@@ -76,4 +76,4 @@ python3 local-collector/boss_radar.py uninstall-schedule
 
 编辑 `local-collector/search-plan.json` 可以修改城市和关键词。建议把 `pages` 保持为 1 或 2，并通过轮换批次扩大覆盖范围。如果修改后希望定时任务采用新配置，请重新运行 `install-schedule`。
 
-底层采集由独立维护的 [eatmoreduck/boss-zhipin-scraper](https://github.com/eatmoreduck/boss-zhipin-scraper) 提供。它不是 BOSS 官方 API，其可用性会随平台变化。
+专用 Chrome 的启动与隔离 profile 由独立维护的 [eatmoreduck/boss-zhipin-scraper](https://github.com/eatmoreduck/boss-zhipin-scraper) 提供；岗位采集使用本仓库的渲染页面模式。它不是 BOSS 官方 API，其可用性会随平台页面变化。

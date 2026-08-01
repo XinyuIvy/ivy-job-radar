@@ -25,6 +25,7 @@ DEFAULT_SCRAPER_DIR = APP_DIR / "vendor" / "boss-zhipin-scraper"
 DEFAULT_RESULT_DIR = Path.home() / ".boss-zhipin-scraper" / "job-result"
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_PLAN = SCRIPT_DIR / "search-plan.json"
+DEFAULT_PAGE_COLLECTOR = SCRIPT_DIR / "boss_page_dom.py"
 SCRAPER_REPOSITORY = "https://github.com/eatmoreduck/boss-zhipin-scraper.git"
 SCHEDULE_LABEL = "com.ivy.jobradar.boss"
 
@@ -294,11 +295,17 @@ def next_batch(plan_path: Path) -> tuple[list[tuple[str, str]], int, int]:
     return batch, cursor, len(combinations)
 
 
-def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[tuple[Path, Path | None]]:
+def run_searches(
+    scraper_dir: Path,
+    plan_path: Path,
+    result_dir: Path,
+) -> tuple[list[tuple[Path, Path | None]], bool]:
     venv_python = ensure_scraper(scraper_dir)
     plan = load_json(plan_path)
     pages = max(1, min(int(plan.get("pages", 1)), 2))
-    script = scraper_dir / "scripts" / "boss_cdp_raw.py"
+    script = Path(__file__).resolve().parent / "boss_page_dom.py"
+    if not script.exists():
+        raise SystemExit(f"Missing rendered-page collector: {script}")
     batch, cursor, combination_count = next_batch(plan_path)
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = result_dir / "ivy-runs" / run_id
@@ -316,10 +323,9 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
             str(venv_python), str(script),
             "--keyword", keyword,
             "--city", city,
-            "--pages", str(pages),
-            "--format", "json",
             "--output", str(jobs_path),
             "--detail-output", str(details_path),
+            "--max-details", str(10 * pages),
         ]
         result = subprocess.run(command, check=False)
         if result.returncode != 0:
@@ -340,7 +346,7 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
         "status": "completed" if completed == len(batch) else "attention_required",
         "failure": failure,
     })
-    return outputs
+    return outputs, completed == len(batch)
 
 
 def install_schedule(script_path: Path, env_path: Path, scraper_dir: Path, plan_path: Path) -> None:
@@ -352,8 +358,13 @@ def install_schedule(script_path: Path, env_path: Path, scraper_dir: Path, plan_
     installed_dir.mkdir(parents=True, exist_ok=True)
     installed_script = installed_dir / "boss_radar.py"
     installed_plan = installed_dir / "search-plan.json"
+    installed_page_collector = installed_dir / "boss_page_dom.py"
     shutil.copy2(script_path, installed_script)
     shutil.copy2(plan_path, installed_plan)
+    page_collector = script_path.parent / "boss_page_dom.py"
+    if not page_collector.exists():
+        raise SystemExit(f"Missing rendered-page collector: {page_collector}")
+    shutil.copy2(page_collector, installed_page_collector)
     plist_path = launch_agents / f"{SCHEDULE_LABEL}.plist"
     arguments = [
         sys.executable,
@@ -415,13 +426,15 @@ def doctor(env_path: Path, scraper_dir: Path, plan_path: Path) -> int:
     ))
     upstream_script = scraper_dir / "scripts" / "boss_cdp_raw.py"
     checks.append(("Upstream scraper", upstream_script.exists(), str(upstream_script)))
+    page_collector = Path(__file__).resolve().parent / "boss_page_dom.py"
+    checks.append(("Rendered-page collector", page_collector.exists(), str(page_collector)))
     for label, ok, detail in checks:
         print(f"{'OK' if ok else 'FAIL':4}  {label}: {detail}")
-    if upstream_script.exists():
+    if page_collector.exists():
         venv_python = scraper_dir / ".venv" / "bin" / "python3"
         if venv_python.exists():
-            result = subprocess.run([str(venv_python), str(upstream_script), "--check"], check=False)
-            login_check = ("BOSS login session", result.returncode == 0, f"exit {result.returncode}")
+            result = subprocess.run([str(venv_python), str(page_collector), "--check"], check=False)
+            login_check = ("BOSS rendered-page session", result.returncode == 0, f"exit {result.returncode}")
             checks.append(login_check)
             print(f"{'OK' if login_check[1] else 'FAIL':4}  {login_check[0]}: {login_check[2]}")
     return 0 if all(ok for _, ok, _ in checks) else 1
@@ -459,8 +472,11 @@ def main() -> None:
     if args.command == "setup":
         venv_python = ensure_scraper(args.scraper_dir)
         script = args.scraper_dir / "scripts" / "boss_cdp_raw.py"
-        subprocess.run([str(venv_python), str(script), "--setup-chrome"], check=True)
-        subprocess.run([str(venv_python), str(script), "--check"], check=True)
+        subprocess.run(
+            [str(venv_python), str(script), "--setup-chrome", "--no-wait-login"],
+            check=True,
+        )
+        print("Log in to BOSS in the dedicated Chrome, then run the doctor command.")
         return
     if args.command == "install-schedule":
         load_env(args.env_file)
@@ -468,14 +484,18 @@ def main() -> None:
         return
 
     load_env(args.env_file)
+    collection_ok = True
     if args.command == "run":
-        result_files = run_searches(args.scraper_dir, args.plan, args.result_dir)
+        result_files, collection_ok = run_searches(args.scraper_dir, args.plan, args.result_dir)
         jobs = transform_result_files(result_files)
     else:
         jobs = transform_latest_jobs(args.result_dir)
     if args.dry_run:
-        print(json.dumps({"ok": True, "dry_run": True, "jobs": jobs}, ensure_ascii=False, indent=2))
-        return
+        print(json.dumps({"ok": collection_ok, "dry_run": True, "jobs": jobs}, ensure_ascii=False, indent=2))
+        raise SystemExit(0 if collection_ok else 1)
+    if not collection_ok:
+        print(json.dumps({"ok": False, "jobs_collected": len(jobs)}, ensure_ascii=False, indent=2))
+        raise SystemExit(1)
     result = sync_jobs(jobs)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
