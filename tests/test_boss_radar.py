@@ -23,6 +23,42 @@ with patch.dict("sys.modules", {"websocket": types.ModuleType("websocket")}):
 
 
 class BossRadarTransformTest(unittest.TestCase):
+    def test_render_timeout_reports_safe_page_diagnostics(self):
+        class FakePage:
+            def evaluate(self, expression):
+                if "document.body.innerText" in expression:
+                    return {
+                        "url": "https://www.zhipin.com/web/geek/job?query=test&city=1",
+                        "title": "BOSS Search",
+                        "text": "",
+                    }
+                if expression.startswith("document.readyState"):
+                    return False
+                return {
+                    "url": "https://www.zhipin.com/web/geek/job?query=test&city=1",
+                    "title": "BOSS Search",
+                    "ready_state": "complete",
+                    "expected_selector_matches": 0,
+                    "job_detail_links": 0,
+                    "job_card_wrappers": 0,
+                    "job_card_boxes": 0,
+                    "search_results": 0,
+                }
+
+        expected = "https://www.zhipin.com/web/geek/job?query=test&city=1"
+        with self.assertRaises(BOSS_PAGE_DOM.PageCollectionError) as caught:
+            BOSS_PAGE_DOM.wait_for_render(
+                FakePage(),
+                'a[href*="/job_detail/"]',
+                timeout=0,
+                expected_url=expected,
+            )
+
+        message = str(caught.exception)
+        self.assertIn('"expected_url_match": true', message)
+        self.assertIn('"job_detail_links": 0', message)
+        self.assertNotIn("text", message)
+
     def test_navigation_url_must_match_path_and_search_parameters(self):
         expected = "https://www.zhipin.com/web/geek/job?query=%E7%94%9F%E7%89%A9%E7%BB%9F%E8%AE%A1&city=101020100"
 
