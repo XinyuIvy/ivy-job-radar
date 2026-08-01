@@ -20,14 +20,38 @@ class JdInboxServerTests(unittest.TestCase):
             "title": "生物统计师",
             "company": "示例药企",
             "url": "https://example.cn/jobs/1",
-            "description": "博士，R，SAS",
+            "description": "要求博士学历，熟悉 R、SAS、临床试验设计以及统计编程。",
         }
+        self.assertIsNone(SERVER.capture_error(payload))
         with tempfile.TemporaryDirectory() as directory:
             path = SERVER.save_capture(payload, Path(directory))
             saved = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(saved["title"], payload["title"])
         self.assertIn("capturedAt", saved)
         self.assertNotIn("cookie", saved)
+
+    def test_rejects_boss_search_page_capture(self) -> None:
+        payload = {
+            "title": "生物统计总监",
+            "url": "https://www.zhipin.com/web/geek/jobs?query=生物统计",
+            "description": "这是从整个搜索结果页面误抓取的足够长文本，不应该被本地接收器保存。",
+        }
+        self.assertEqual(
+            SERVER.capture_error(payload),
+            "BOSS capture requires a stable job-detail URL",
+        )
+
+    def test_rejects_install_page_and_incomplete_description(self) -> None:
+        self.assertEqual(
+            SERVER.capture_error(
+                {
+                    "title": "Ivy Job Radar JD 捕获",
+                    "url": "file:///tmp/bookmarklets.html",
+                    "description": "安装说明",
+                }
+            ),
+            "capture requires a complete job description",
+        )
 
 
 if __name__ == "__main__":
