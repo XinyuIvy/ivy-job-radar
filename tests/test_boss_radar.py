@@ -139,6 +139,52 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertEqual(requests[0][0].get_header("Oai-sites-authorization"), "Bearer sites-secret")
         self.assertEqual(result["received"], 2)
 
+    def test_searches_use_the_rendered_page_collector(self):
+        class Result:
+            returncode = 0
+
+        commands = []
+
+        def fake_run(command, check):
+            commands.append(command)
+            Path(command[command.index("--output") + 1]).write_text(
+                json.dumps({"jobs": []}), encoding="utf-8"
+            )
+            Path(command[command.index("--detail-output") + 1]).write_text(
+                json.dumps([]), encoding="utf-8"
+            )
+            return Result()
+
+        with tempfile.TemporaryDirectory() as temporary_dir, \
+                patch.object(BOSS_RADAR, "ensure_scraper", return_value=Path("/usr/bin/python3")), \
+                patch.object(BOSS_RADAR, "next_batch", return_value=([("生物统计", "上海")], 0, 1)), \
+                patch.object(BOSS_RADAR, "write_state"), \
+                patch.object(BOSS_RADAR.subprocess, "run", side_effect=fake_run):
+            outputs, ok = BOSS_RADAR.run_searches(
+                Path(temporary_dir), MODULE_PATH.parent / "search-plan.json", Path(temporary_dir)
+            )
+
+        self.assertTrue(ok)
+        self.assertEqual(len(outputs), 1)
+        self.assertTrue(str(commands[0][1]).endswith("boss_page_dom.py"))
+        self.assertNotIn("--pages", commands[0])
+
+    def test_failed_page_search_is_not_reported_as_success(self):
+        class Result:
+            returncode = 1
+
+        with tempfile.TemporaryDirectory() as temporary_dir, \
+                patch.object(BOSS_RADAR, "ensure_scraper", return_value=Path("/usr/bin/python3")), \
+                patch.object(BOSS_RADAR, "next_batch", return_value=([("生物统计", "上海")], 0, 1)), \
+                patch.object(BOSS_RADAR, "write_state"), \
+                patch.object(BOSS_RADAR.subprocess, "run", return_value=Result()):
+            outputs, ok = BOSS_RADAR.run_searches(
+                Path(temporary_dir), MODULE_PATH.parent / "search-plan.json", Path(temporary_dir)
+            )
+
+        self.assertFalse(ok)
+        self.assertEqual(outputs, [])
+
 
 if __name__ == "__main__":
     unittest.main()
