@@ -114,21 +114,21 @@ def run_scan(dry_run: bool = False) -> dict[str, Any]:
 
 
 def launcher_content(repo_dir: Path) -> str:
-    script = repo_dir / "local-collector" / "boss_one_click.py"
+    script = repo_dir / "local-collector" / "china_one_click.py"
     quoted_repo = shlex.quote(str(repo_dir))
     quoted_script = shlex.quote(str(script))
     return f'''#!/bin/zsh
 set -u
 cd {quoted_repo}
 clear
-echo "Starting Ivy Job Radar BOSS scan..."
+echo "Starting Ivy Job Radar China multi-source scan..."
 /usr/bin/env python3 {quoted_script} run
 status=$?
 echo ""
 if [ "$status" -eq 0 ]; then
   echo "Scan finished. New eligible jobs are already in Ivy Job Radar."
 else
-  echo "Scan paused. Check the dedicated BOSS Chrome window for login or verification."
+  echo "Scan finished with warnings. Review the source summary above."
 fi
 echo "Press Return to close this window."
 read
@@ -144,7 +144,7 @@ def install_launcher(destination: Path) -> None:
     destination.write_text(launcher_content(repo_dir), encoding="utf-8")
     destination.chmod(0o755)
     print(f"Installed one-click launcher: {destination}")
-    print("Double-click it whenever the dedicated BOSS Chrome profile is logged in.")
+    print("It scans BOSS plus every enabled public China source in one run.")
 
 
 def open_boss_browser() -> None:
