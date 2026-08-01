@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from scripts.company_portal_scan import (
+    additional_company_portals,
     aggregator_portals,
     company_match_keys,
     company_names_match,
@@ -53,6 +54,35 @@ class CompanyPortalScanTests(unittest.TestCase):
             path = Path(directory) / "pool.json"
             path.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
             self.assertEqual(len(company_rows(path)), 2)
+
+    def test_company_pool_loads_additions_without_treating_old_jds_as_sources(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            pool = Path(directory) / "company-pool.json"
+            additions = Path(directory) / "company-pool-additions.json"
+            sources = Path(directory) / "company-source-additions.json"
+            pool.write_text(json.dumps([{"company": "Base", "region": "美国"}]), encoding="utf-8")
+            additions.write_text(json.dumps([{"company": "Added", "region": "中国"}]), encoding="utf-8")
+            sources.write_text(
+                json.dumps(
+                    [
+                        {
+                            "company": "Current Portal",
+                            "careersUrl": "https://jobs.example.com/current",
+                            "collectionMode": "public-page",
+                        },
+                        {
+                            "company": "Historical Only",
+                            "careersUrl": "https://jobs.example.com/old-job",
+                            "collectionMode": "manual",
+                        },
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual({row["company"] for row in company_rows(pool)}, {"Base", "Added"})
+            portals = additional_company_portals(sources)
+            self.assertIn("currentportal", portals)
+            self.assertNotIn("historicalonly", portals)
 
     def test_matches_regional_company_aliases_to_upstream_names(self) -> None:
         self.assertIn("pfizer", company_match_keys("辉瑞中国"))
