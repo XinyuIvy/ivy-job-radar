@@ -66,6 +66,22 @@
       "query": "site:51job.com (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)"
     },
     {
+      "source": "拉勾",
+      "query": "site:lagou.com/jobs (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)"
+    },
+    {
+      "source": "拉勾",
+      "query": "site:lagou.com/jobs (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)"
+    },
+    {
+      "source": "拉勾",
+      "query": "site:lagou.com/jobs (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)"
+    },
+    {
+      "source": "拉勾",
+      "query": "site:lagou.com/jobs (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)"
+    },
+    {
       "source": "牛客招聘",
       "query": "site:nowcoder.com/jobs/detail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)"
     },
