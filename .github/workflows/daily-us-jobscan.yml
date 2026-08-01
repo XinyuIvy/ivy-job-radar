@@ -84,7 +84,7 @@ jobs:
 
       - name: Run scanner fixture tests
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python -m unittest discover -s tests -p 'test_*scan*.py'
+        run: python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Collect US jobs
         if: steps.schedule_guard.outputs.run == 'true'
