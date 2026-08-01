@@ -733,7 +733,13 @@ export async function GET() {
   const rows = await db
     .select()
     .from(jobs)
-    .where(or(eq(jobs.status, "开放"), eq(jobs.status, "待官网核验")))
+    .where(or(
+      eq(jobs.status, "开放"),
+      eq(jobs.status, "待官网核验"),
+      // Keep captures imported before status normalization visible.
+      eq(jobs.status, "已捕获完整JD"),
+      eq(jobs.status, "待核验"),
+    ))
     .orderBy(desc(jobs.discoveredAt));
 
   const seen = new Set<string>();

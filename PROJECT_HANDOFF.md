@@ -1,10 +1,10 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01 15:04（America/New_York）  
+> 最后更新：2026-08-01 15:50（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
-> 当前开发分支：无；`agent/china-multisource` 已通过 PR #2 合并  
-> 最近完成：[PR #2 - Add multi-source China job collection](https://github.com/XinyuIvy/ivy-job-radar/pull/2)，squash merge commit `7443f4fe7b45785638aed8baff8a6fd42bf796be`
+> 当前开发分支：`agent/show-boss-jobs-search`  
+> 最近完成：[PR #3 - Sync eligible BOSS captures directly to Job Radar](https://github.com/XinyuIvy/ivy-job-radar/pull/3)，merge commit `7a435b9...`；当前 [PR #4](https://github.com/XinyuIvy/ivy-job-radar/pull/4) 修复 BOSS 隐藏状态并增加岗位搜索。
 
 ## 0. 给下一位 Chat 的最短说明
 
@@ -17,10 +17,12 @@
 3. 中国公开索引在最近一次生产扫描中命中 0 条，主要缺口是 BOSS、猎聘、智联、51job、拉勾等受保护平台无法稳定进行云端无人值守采集。
 4. PR #2 已于 2026-08-01 squash merge 到 `main`，merge commit 为 `7443f4fe7b45785638aed8baff8a6fd42bf796be`；生产 run `30713268976` 已完成端到端验证，25 个步骤全部成功，网站按字节分批导入、completed 状态、artifact 和 snapshot push 均已通过。
 5. BOSS 真实页面链路已验证：能保存职位名、公司、地点、独立详情 URL；最初 JD 正文截断问题已修复。测试岗位“高级生物统计师（上海）”被排除是正确行为，因为系统面向应届/早期职业岗位并排除“高级”。
-6. 本地书签保存的 JSON 不会自动上传 GitHub。它只有经过隐私检查、复制到 `data/imports/china/` 并提交后，GitHub Actions 才能看到。
+6. PR #3 已打通 BOSS 可见详情页 → Mac 本地隐私过滤 → 网站实时导入；不再需要复制 JSON、提交 GitHub 或运行 20 分钟全量 workflow。原始捕获仍保留在本地，远端只接收规范化字段。
 7. 第二次生产 run `30712239542` 已验证固定 40 条分批：前 3 批共 120 条成功，第 4 批失败。根因是 Figma 一条记录的 `application_id` 正则误捕获约 1.35 MB 嵌入式岗位 JSON，并重复进入 `evidence`，令单条记录约 3.2 MB、第 4 批约 4.6 MB。修复已提交：ID 提取限制格式/长度，批次同时限制 40 条和 1,000,000 字节，异常超大单条会在上传前失败。8 个相关测试、YAML 解析和真实 artifact 回放均通过；回放为 10 批，最大 999,796 字节。
 8. 已新增 `.github/workflows/sync-latest-job-snapshot.yml`（commit `7d68ca1...`）：网站同步失败后无需重新跑约 20 分钟的全量采集，可直接从 `main` 最新扫描快照重试分批导入。该 workflow 与全量扫描共用 concurrency group，避免两条导入链路并发写入。
 9. 生产 run `30713268976` 将 338 条职位拆成 10 个合规批次并全部导入成功：created 0、updated 210、skipped 128；网站最终 `totalJobs: 361`，P0 已完成。
+10. 2026-08-01 用户真实测试“生物统计师 · 基绪康生物科技”时，本地服务和远端导入均成功，但今日页未显示。根因是捕获器发送状态 `已捕获完整JD`，而 `GET /api/jobs` 只读取 `开放` / `待官网核验`。
+11. Sites version 48 已修复状态映射、兼容显示旧捕获记录，并在今日/收藏页增加按岗位、公司、地点、行业、来源或技能搜索。相同源代码在 PR #4 中等待合并回 GitHub `main`。
 
 任何新 Chat 开始工作前，应先读取本文件、`docs/INTEGRATION_LOG.md`、`docs/job-collection.md`、PR #2 描述以及最新 `data/scans/*summary*.json`，再核对 GitHub 当前状态。本文件中的数字是时间截面，不可替代实时核对。
 

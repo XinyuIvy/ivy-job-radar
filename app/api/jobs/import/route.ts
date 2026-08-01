@@ -47,6 +47,12 @@ function isExcludedTitle(title: string) {
     || /\bresearch scientist\s+(?:iii|iv|v|[3-9])\b/i.test(title);
 }
 
+function displayStatus(incomingStatus: string) {
+  if (incomingStatus === "已捕获完整JD") return "开放";
+  if (incomingStatus === "待核验") return "待官网核验";
+  return incomingStatus;
+}
+
 function canonicalizeJobUrl(raw: string) {
   try {
     const url = new URL(raw);
@@ -107,7 +113,7 @@ export async function POST(request: NextRequest) {
     const region = cleanText(raw.region) || "美国";
     const score = Math.max(0, Math.min(100, Number(raw.score ?? 0)));
     const visa = cleanText(raw.visa) || "JD 未明确";
-    const incomingStatus = cleanText(raw.status) || "待官网核验";
+    const incomingStatus = displayStatus(cleanText(raw.status) || "待官网核验");
 
     // Recheck hard filters at the website boundary.
     if (
