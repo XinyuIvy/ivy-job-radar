@@ -49,9 +49,17 @@ class CDPPage:
         pages = [item for item in targets if item.get("type") == "page"]
         zhipin_pages = [item for item in pages if "zhipin.com" in item.get("url", "")]
         if not zhipin_pages:
-            raise PageCollectionError(
-                "No BOSS page is open in the dedicated Chrome. Open zhipin.com and try again."
+            encoded_url = urllib.parse.quote("https://www.zhipin.com", safe="")
+            self._read_json(
+                f"http://127.0.0.1:{port}/json/new?{encoded_url}",
+                method="PUT",
             )
+            time.sleep(1)
+            targets = self._read_json(f"http://127.0.0.1:{port}/json")
+            pages = [item for item in targets if item.get("type") == "page"]
+            zhipin_pages = [item for item in pages if "zhipin.com" in item.get("url", "")]
+        if not zhipin_pages:
+            raise PageCollectionError("The dedicated Chrome could not open a BOSS page.")
         target = zhipin_pages[0]
         self.ws = websocket.create_connection(
             target["webSocketDebuggerUrl"],
@@ -62,9 +70,10 @@ class CDPPage:
         self.send("Runtime.enable")
 
     @staticmethod
-    def _read_json(url: str) -> Any:
+    def _read_json(url: str, method: str = "GET") -> Any:
         try:
-            with urllib.request.urlopen(url, timeout=10) as response:
+            request = urllib.request.Request(url, method=method)
+            with urllib.request.urlopen(request, timeout=10) as response:
                 return json.loads(response.read().decode("utf-8"))
         except Exception as error:
             raise PageCollectionError(
