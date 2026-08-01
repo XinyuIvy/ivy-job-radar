@@ -85,6 +85,15 @@ EXCLUDED_TITLE = re.compile(
     r"software engineer|data engineer|generative ai|large language model|\bllm\b|\bnlp\b",
     re.IGNORECASE,
 )
+def title_exclusion_reason(title: str) -> str:
+    if not TARGET_TITLE.search(title):
+        return "non_target_title"
+    excluded = EXCLUDED_TITLE.search(title)
+    if excluded:
+        return f"excluded_title:{excluded.group(0).casefold()}"
+    return ""
+
+
 SOURCE_HOSTS = {
     "zhipin.com": "BOSS直聘·人工捕获",
     "liepin.com": "猎聘·人工捕获",
@@ -228,7 +237,7 @@ def read_rows(path: Path) -> list[dict[str, Any]]:
 
 def normalize(row: dict[str, Any], imported_at: str, fallback_source: str) -> dict[str, Any] | None:
     title = first_value(row, TITLE_KEYS)
-    if not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
+    if title_exclusion_reason(title):
         return None
     company = first_value(row, COMPANY_KEYS) or "待核验公司"
     url = canonical_url(first_value(row, URL_KEYS))
@@ -285,6 +294,7 @@ def run(paths: list[Path], fallback_source: str = "中国招聘网站·导入快
     records: dict[str, dict[str, Any]] = {}
     files = collect_inputs(paths)
     raw_rows = 0
+    exclusion_counts: dict[str, int] = {}
     errors: list[dict[str, str]] = []
     for path in files:
         try:
@@ -296,6 +306,8 @@ def run(paths: list[Path], fallback_source: str = "中国招聘网站·导入快
         for row in rows:
             normalized = normalize(row, imported_at, fallback_source)
             if normalized is None:
+                reason = title_exclusion_reason(first_value(row, TITLE_KEYS)) or "other"
+                exclusion_counts[reason] = exclusion_counts.get(reason, 0) + 1
                 continue
             key = str(normalized["job_key"])
             current = records.get(key)
@@ -308,6 +320,8 @@ def run(paths: list[Path], fallback_source: str = "中国招聘网站·导入快
         "files_scanned": len(files),
         "raw_rows": raw_rows,
         "matched_jobs": len(jobs),
+        "excluded_rows": sum(exclusion_counts.values()),
+        "excluded_reasons": dict(sorted(exclusion_counts.items())),
         "failed_sources": [
             {"source": f"china_snapshot:{item['file']}", "error": item["error"]}
             for item in errors
