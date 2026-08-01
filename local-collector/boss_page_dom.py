@@ -141,18 +141,22 @@ def wait_for_render(page: CDPPage, selector: str, timeout: int = 25) -> dict[str
 
 EXTRACT_CARDS_JS = r"""
 (() => {
-  const cards = Array.from(document.querySelectorAll(
-    'li.job-card-box, .job-card-wrapper, .search-job-result .job-card-box'
-  ));
   const clean = (node) => node ? node.innerText.trim() : '';
-  return cards.map((card) => {
-    const titleLink = card.querySelector('a.job-name, .job-name a, a[href*="/job_detail/"]');
-    const titleNode = card.querySelector('.job-name') || titleLink;
-    const companyNode = card.querySelector(
-      'h3.company-name a, .company-name a, .company-name, [class*="company-name"]'
+  const links = Array.from(document.querySelectorAll('a[href*="/job_detail/"]'));
+  const seen = new Set();
+  return links.map((titleLink) => {
+    const card = titleLink.closest(
+      'li.job-card-wrapper, li.job-card-box, .job-card-wrapper, .job-card-box, [class*="job-card"]'
+    ) || titleLink.closest('li') || titleLink.parentElement;
+    const titleNode = card?.querySelector('.job-name, [class*="job-name"]') || titleLink;
+    const companyNode = card?.querySelector(
+      'h3.company-name a, .company-name a, .company-name, '
+      + '.company-info h3 a, .company-info a[href*="/gongsi/"], [class*="company-name"]'
     );
-    const locationNode = card.querySelector('.job-area, .company-location, [class*="job-area"]');
-    const tagNodes = Array.from(card.querySelectorAll('.tag-list li, .job-info li'));
+    const locationNode = card?.querySelector(
+      '.job-area, .company-location, [class*="job-area"], [class*="location"]'
+    );
+    const tagNodes = Array.from(card?.querySelectorAll('.tag-list li, .job-info li') || []);
     const rawHref = titleLink ? titleLink.getAttribute('href') || '' : '';
     const jobUrl = rawHref ? new URL(rawHref, location.origin).href : '';
     const match = jobUrl.match(/\/job_detail\/([^./?]+)\.html/);
@@ -166,8 +170,25 @@ EXTRACT_CARDS_JS = r"""
       job_link: jobUrl,
       salary_source: 'rendered_page'
     };
-  }).filter((job) => job.title && job.company && job.job_link);
+  }).filter((job) => {
+    if (!job.title || !job.job_link || seen.has(job.job_link)) return false;
+    seen.add(job.job_link);
+    return true;
+  });
 })()
+"""
+
+
+PAGE_DIAGNOSTICS_JS = r"""
+(() => ({
+  url: location.href,
+  title: document.title,
+  ready_state: document.readyState,
+  job_detail_links: document.querySelectorAll('a[href*="/job_detail/"]').length,
+  job_card_wrappers: document.querySelectorAll('.job-card-wrapper').length,
+  job_card_boxes: document.querySelectorAll('.job-card-box').length,
+  search_results: document.querySelectorAll('.search-job-result').length
+}))()
 """
 
 
@@ -208,13 +229,17 @@ def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, A
     page = CDPPage()
     try:
         page.navigate(search_url(keyword, city))
-        wait_for_render(page, "li.job-card-box, .job-card-wrapper, .search-job-result")
+        wait_for_render(page, 'a[href*="/job_detail/"], .search-job-result')
         page.evaluate("window.scrollTo(0, Math.min(document.body.scrollHeight, 1400))")
         time.sleep(2)
         assert_page_is_usable(page_snapshot(page))
         jobs = page.evaluate(EXTRACT_CARDS_JS) or []
         if not jobs:
-            raise PageCollectionError("The rendered search page contained no readable job cards.")
+            diagnostics = page.evaluate(PAGE_DIAGNOSTICS_JS) or {}
+            raise PageCollectionError(
+                "The rendered search page contained no readable job cards. "
+                f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}"
+            )
 
         details: list[dict[str, Any]] = []
         for job in jobs[:max_details]:
