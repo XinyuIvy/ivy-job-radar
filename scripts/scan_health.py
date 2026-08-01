@@ -19,6 +19,7 @@ def load(path: Path, default: Any) -> Any:
 def run(scan_dir: Path, history_limit: int) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     receipt = load(scan_dir / "run_receipt_latest.json", {})
     company = load(scan_dir / "company_portal_summary.json", {})
+    china = load(scan_dir / "china_scan_summary.json", {})
     history = load(scan_dir / "scan_health_history.json", [])
     history = history if isinstance(history, list) else []
     previous = history[-1] if history and isinstance(history[-1], dict) else {}
@@ -46,6 +47,41 @@ def run(scan_dir: Path, history_limit: int) -> tuple[dict[str, Any], list[dict[s
                 "severity": "warning",
             }
         )
+    china_matched = int(china.get("matched_jobs") or 0)
+    previous_china_matched = int(previous.get("china_matched") or 0)
+    if previous_china_matched and china_matched < previous_china_matched * 0.4:
+        anomalies.append(
+            {
+                "type": "large_china_job_count_drop",
+                "current": china_matched,
+                "previous": previous_china_matched,
+                "severity": "high",
+            }
+        )
+    if china_matched == 0:
+        anomalies.append(
+            {
+                "type": "zero_china_search_matches",
+                "current": 0,
+                "severity": "high",
+            }
+        )
+
+    china_portals = company.get("region_counts", {}).get("中国", {})
+    china_attempted = int(china_portals.get("companies_attempted") or 0)
+    china_succeeded = int(china_portals.get("companies_succeeded") or 0)
+    china_success_rate = china_succeeded / china_attempted if china_attempted else 0.0
+    if china_attempted and china_success_rate < 0.5:
+        anomalies.append(
+            {
+                "type": "low_china_company_portal_success_rate",
+                "current": round(china_success_rate, 4),
+                "attempted": china_attempted,
+                "succeeded": china_succeeded,
+                "severity": "high",
+            }
+        )
+
     failed_sources = receipt.get("failed_sources", [])
     if failed_sources:
         anomalies.append(
@@ -65,6 +101,10 @@ def run(scan_dir: Path, history_limit: int) -> tuple[dict[str, Any], list[dict[s
         "company_attempted": attempted,
         "company_succeeded": succeeded,
         "company_success_rate": round(success_rate, 4),
+        "china_matched": china_matched,
+        "china_company_attempted": china_attempted,
+        "china_company_succeeded": china_succeeded,
+        "china_company_success_rate": round(china_success_rate, 4),
         "anomalies": anomalies,
     }
     history.append(snapshot)
