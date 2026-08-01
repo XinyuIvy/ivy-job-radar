@@ -55,7 +55,8 @@ class BossOneClickTest(unittest.TestCase):
 
         self.assertIn("cd '/Users/ivy/My Projects/ivy-job-radar'", content)
         self.assertIn("china_one_click.py' run", content)
-        self.assertIn("China multi-source scan", content)\n        self.assertIn("Press Return to close", content)
+        self.assertIn("China multi-source scan", content)
+        self.assertIn("Press Return to close", content)
 
     def test_save_summary_persists_latest_report(self):
         class FakeRadar:
