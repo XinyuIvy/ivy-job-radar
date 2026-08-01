@@ -27,8 +27,9 @@ TARGET_TITLE = re.compile(
     r"quantitative researcher|quantitative analyst|quant researcher|"
     r"epidemiolog|health econom|outcomes research|real.world evidence|"
     r"healthcare consultant|life sciences consultant|clinical data scientist|"
-    r"生物统计|统计科学|数据科学|应用科学|量化研究|流行病|卫生经济|"
-    r"真实世界|医药咨询|医疗咨询|算法科学|医学数据)",
+    r"生物统计|临床统计|医学统计|统计科学|统计师|数据科学|应用科学|"
+    r"量化研究|定量研究|量化分析|流行病|卫生经济|健康经济|结局研究|"
+    r"真实世界|医药咨询|医疗咨询|生命科学咨询|算法科学|医学数据|医学影像)",
     re.IGNORECASE,
 )
 EXCLUDED_TITLE = re.compile(
@@ -62,7 +63,10 @@ US_LOCATION = re.compile(
 )
 CHINA_LOCATION = re.compile(
     r"(?:中国|北京|上海|深圳|广州|杭州|南京|苏州|成都|武汉|西安|天津|重庆|"
-    r"\bchina\b|\bbeijing\b|\bshanghai\b|\bshenzhen\b|\bguangzhou\b|\bhangzhou\b)",
+    r"无锡|厦门|青岛|合肥|长沙|大连|珠海|东莞|沈阳|济南|福州|"
+    r"\bchina\b|\bgreater china\b|\bbeijing\b|\bshanghai\b|\bshenzhen\b|"
+    r"\bguangzhou\b|\bhangzhou\b|\bnanjing\b|\bsuzhou\b|\bchengdu\b|"
+    r"\bwuhan\b|\btianjin\b|\bwuxi\b|\bxiamen\b|\bqingdao\b)",
     re.I,
 )
 NON_US_LOCATION = re.compile(
@@ -173,6 +177,14 @@ VERIFIED_COMPANY_PORTALS = {
     "vertexpharmaceuticals": "https://vrtx.wd501.myworkdayjobs.com/Vertex_Careers",
     "veristat": "https://veristat.wd503.myworkdayjobs.com/Veristatcareers",
     "腾讯医疗健康": "https://tencent.wd1.myworkdayjobs.com/Tencent_Careers",
+    "roche": "https://roche.wd3.myworkdayjobs.com/roche-ext",
+    "astrazeneca": "https://astrazeneca.wd3.myworkdayjobs.com/Careers",
+    "sanofi": "https://sanofi.wd3.myworkdayjobs.com/SanofiCareers",
+    "gsk": "https://gsk.wd5.myworkdayjobs.com/GSKCareers",
+    "beonemedicines": "https://beigene.wd5.myworkdayjobs.com/BeiGene",
+    "恒瑞医药": "https://www.hengrui.com/development/recruit.html",
+    "信达生物": "https://en.innoventbio.com/Careers",
+    "再鼎医药": "https://cn.zailaboratory.com/jobs/",
 }
 
 
@@ -953,10 +965,16 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
             "statistical scientist",
             "data scientist",
             "quantitative researcher",
+            "epidemiology",
             "health economics",
+            "outcomes research",
+            "生物统计",
+            "数据科学",
+            "统计",
+            "量化研究",
         )
         for search_text in search_terms:
-            for page in range(3):
+            for page in range(10):
                 page_body = json.dumps(
                     {
                         "appliedFacets": {},
