@@ -314,17 +314,11 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
   if (!input) {
     return {ok: false, input_count: document.querySelectorAll('input').length};
   }
-  const setter = Object.getOwnPropertyDescriptor(
-    window.HTMLInputElement.prototype, 'value'
-  )?.set;
   input.focus();
-  if (setter) setter.call(input, KEYWORD);
-  else input.value = KEYWORD;
-  input.dispatchEvent(new Event('input', {bubbles: true}));
-  input.dispatchEvent(new Event('change', {bubbles: true}));
-  return {ok: true};
+  input.select();
+  return {ok: true, prior_value_length: input.value.length};
 })()
-        """.replace("KEYWORD", json.dumps(keyword, ensure_ascii=False))
+        """
     ) or {}
     if not input_result.get("ok"):
         raise PageCollectionError(
@@ -332,7 +326,9 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
             f"Diagnostics: {json.dumps(input_result, ensure_ascii=False)}"
         )
 
-    # Give the page framework time to consume the input event before submitting.
+    # Use Chrome's native text input path so the page framework receives the
+    # same beforeinput/input events as it does during a manual search.
+    page.send("Input.insertText", {"text": keyword})
     time.sleep(0.5)
     submit_result = page.evaluate(
         """
@@ -348,36 +344,66 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
     'input[placeholder*="职位"]',
     'input[placeholder*="搜索"]'
   ].map((selector) => document.querySelector(selector)).find(visible);
-  const button = [
-    '.btn-search',
-    '.search-form button[type="submit"]',
-    '.search-form button',
-    '.search-form-con button',
-    'button[type="submit"]'
-  ].map((selector) => document.querySelector(selector)).find(visible);
-  if (button) {
-    button.click();
-    return {ok: true, method: 'button'};
+  if (!input || input.value !== KEYWORD) {
+    return {
+      ok: false,
+      reason: 'keyword_not_committed',
+      input_value: input ? input.value : '',
+      active_tag: document.activeElement ? document.activeElement.tagName : ''
+    };
   }
-  const form = input?.closest('form');
-  if (form) {
-    if (form.requestSubmit) form.requestSubmit();
-    else form.submit();
-    return {ok: true, method: 'form'};
+  const scopes = [
+    input.closest('form'),
+    input.closest('.search-form'),
+    input.closest('.search-form-con'),
+    input.closest('[class*="search"]')
+  ].filter(Boolean);
+  let button = null;
+  for (const scope of scopes) {
+    button = [
+      '.btn-search',
+      'button[type="submit"]',
+      'button',
+      '[role="button"]'
+    ].map((selector) => scope.querySelector(selector)).find(visible);
+    if (button) break;
+  }
+  if (button) {
+    const rect = button.getBoundingClientRect();
+    return {
+      ok: true,
+      method: 'mouse',
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+      input_value: input.value
+    };
   }
   return {
-    ok: false,
-    button_count: document.querySelectorAll('button').length,
-    form_count: document.querySelectorAll('form').length
+    ok: true,
+    method: 'enter',
+    input_value: input.value
   };
 })()
-        """
+        """.replace("KEYWORD", json.dumps(keyword, ensure_ascii=False))
     ) or {}
     if not submit_result.get("ok"):
         raise PageCollectionError(
             "The BOSS city page did not expose a usable search button or form. "
             f"Diagnostics: {json.dumps(submit_result, ensure_ascii=False)}"
         )
+    if submit_result.get("method") == "mouse":
+        coordinates = {"x": submit_result["x"], "y": submit_result["y"]}
+        page.send("Input.dispatchMouseEvent", {"type": "mousePressed", "button": "left", "clickCount": 1, **coordinates})
+        page.send("Input.dispatchMouseEvent", {"type": "mouseReleased", "button": "left", "clickCount": 1, **coordinates})
+    else:
+        key = {
+            "key": "Enter",
+            "code": "Enter",
+            "windowsVirtualKeyCode": 13,
+            "nativeVirtualKeyCode": 13,
+        }
+        page.send("Input.dispatchKeyEvent", {"type": "rawKeyDown", **key})
+        page.send("Input.dispatchKeyEvent", {"type": "keyUp", **key})
 
 
 def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, Any]]:
