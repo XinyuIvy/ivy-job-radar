@@ -248,7 +248,7 @@ def extract_application_id(url: str, text: str, posting: dict[str, object] | Non
             if normalized:
                 return normalized
     patterns = (
-        r"[?&](?:jobId|job_id|jobReq|gh_jid)=([A-Za-z0-9._-]{2,80})",
+        r"(?:[?&]|\b)(?:jobId|job_id|jobReq|gh_jid)=([A-Za-z0-9._-]{2,80})",
         r"/jobs?/([A-Za-z]{0,12}\d[A-Za-z0-9_-]{2,63})(?:/|\s|$)",
         r"\b(?:requisition|req(?:uisition)? id|job id)\s*[:#]?\s*([A-Z]{0,4}\d[A-Z0-9-]{2,63})",
     )
