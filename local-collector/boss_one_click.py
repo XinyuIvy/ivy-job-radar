@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
-import os
 import shlex
 import subprocess
 import sys
@@ -89,15 +88,21 @@ def run_scan(dry_run: bool = False) -> dict[str, Any]:
     radar = load_radar()
     radar.APP_DIR.mkdir(parents=True, exist_ok=True)
     radar.load_env(radar.DEFAULT_ENV_FILE)
+    state_before = radar.read_state()
+    starting_cursor = int(state_before.get("cursor", 0))
     result_files = radar.run_searches(radar.DEFAULT_SCRAPER_DIR, radar.DEFAULT_PLAN, radar.DEFAULT_RESULT_DIR)
     discovered = count_raw_rows(radar, result_files)
     jobs = radar.transform_result_files(result_files)
-    sync_result = (
-        {"received": 0, "created": 0, "updated": 0, "skipped": 0}
-        if dry_run
-        else radar.sync_jobs(jobs)
-    )
     state = radar.read_state()
+    sync_result = {"received": 0, "created": 0, "updated": 0, "skipped": 0}
+    if not dry_run:
+        try:
+            sync_result = radar.sync_jobs(jobs)
+        except SystemExit as exc:
+            # Repeat this batch on the next run so a website outage cannot lose jobs.
+            state["cursor"] = starting_cursor
+            state["status"] = "attention_required"
+            state["failure"] = str(exc)
     plan = radar.load_json(radar.DEFAULT_PLAN)
     state["combination_count"] = len(plan.get("cities", [])) * len(plan.get("keywords", []))
     summary = build_summary(state, discovered, len(jobs), sync_result, dry_run)
