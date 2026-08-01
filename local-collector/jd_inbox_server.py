@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 
 MAX_BODY_BYTES = 1_000_000
@@ -16,6 +17,22 @@ MAX_BODY_BYTES = 1_000_000
 def safe_slug(value: object) -> str:
     slug = re.sub(r"[^0-9A-Za-z\u4e00-\u9fff]+", "-", str(value or "")).strip("-")
     return slug[:60] or "job"
+
+
+def capture_error(payload: object) -> str | None:
+    if not isinstance(payload, dict):
+        return "capture must be a JSON object"
+    if not str(payload.get("title") or "").strip():
+        return "capture requires a title"
+    if len(str(payload.get("description") or "").strip()) < 20:
+        return "capture requires a complete job description"
+    url = str(payload.get("url") or payload.get("jobUrl") or "").strip()
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return "capture requires an HTTP job URL"
+    if parsed.hostname and parsed.hostname.lower().endswith("zhipin.com") and "/job_detail/" not in parsed.path:
+        return "BOSS capture requires a stable job-detail URL"
+    return None
 
 
 def save_capture(payload: dict[str, Any], inbox: Path) -> Path:
@@ -76,8 +93,9 @@ def handler_factory(inbox: Path) -> type[BaseHTTPRequestHandler]:
             except (UnicodeError, json.JSONDecodeError):
                 self.write_json(400, {"ok": False, "error": "invalid JSON"})
                 return
-            if not isinstance(payload, dict) or not str(payload.get("title") or "").strip():
-                self.write_json(422, {"ok": False, "error": "capture requires a title"})
+            error = capture_error(payload)
+            if error:
+                self.write_json(422, {"ok": False, "error": error})
                 return
             path = save_capture(payload, inbox)
             self.write_json(201, {"ok": True, "file": path.name})
