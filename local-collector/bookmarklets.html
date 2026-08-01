@@ -28,6 +28,16 @@
           return null;
         };
         const pick = (root, selectors) => text(pickNode(root, selectors));
+        const pickAll = (root, selectors) => {
+          if (!root) return "";
+          for (const selector of selectors) {
+            const values = Array.from(root.querySelectorAll(selector))
+              .map((node) => text(node))
+              .filter(Boolean);
+            if (values.length) return Array.from(new Set(values)).join("\n");
+          }
+          return "";
+        };
         const absoluteUrl = (value) => {
           try { return new URL(value || "", location.href).href; } catch (_) { return ""; }
         };
@@ -62,7 +72,7 @@
         if (/(^|\.)zhipin\.com$/.test(host)) {
           const detail = document.querySelector(".job-detail-box") || document.querySelector(".job-detail");
           title = pick(detail, [".job-name", ".job-title", "h1"]);
-          description = pick(detail, [".desc", ".job-sec-text", ".job-description"]);
+          description = pickAll(detail, [".job-sec-text", ".job-description", ".desc"]);
           company = pick(detail, [".company-name", ".boss-name", ".company-info .name"]);
           locationText = pick(detail, [".job-area", ".job-location", ".location-name", ".company-location"]);
 
