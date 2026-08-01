@@ -1,6 +1,6 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01 14:49（America/New_York）  
+> 最后更新：2026-08-01 14:52（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
 > 当前开发分支：无；`agent/china-multisource` 已通过 PR #2 合并  
@@ -19,6 +19,7 @@
 5. BOSS 真实页面链路已验证：能保存职位名、公司、地点、独立详情 URL；最初 JD 正文截断问题已修复。测试岗位“高级生物统计师（上海）”被排除是正确行为，因为系统面向应届/早期职业岗位并排除“高级”。
 6. 本地书签保存的 JSON 不会自动上传 GitHub。它只有经过隐私检查、复制到 `data/imports/china/` 并提交后，GitHub Actions 才能看到。
 7. 第二次生产 run `30712239542` 已验证固定 40 条分批：前 3 批共 120 条成功，第 4 批失败。根因是 Figma 一条记录的 `application_id` 正则误捕获约 1.35 MB 嵌入式岗位 JSON，并重复进入 `evidence`，令单条记录约 3.2 MB、第 4 批约 4.6 MB。修复已提交：ID 提取限制格式/长度，批次同时限制 40 条和 1,000,000 字节，异常超大单条会在上传前失败。8 个相关测试、YAML 解析和真实 artifact 回放均通过；回放为 10 批，最大 999,796 字节。
+8. 已新增 `.github/workflows/sync-latest-job-snapshot.yml`（commit `7d68ca1...`）：网站同步失败后无需重新跑约 20 分钟的全量采集，可直接从 `main` 最新扫描快照重试分批导入。该 workflow 与全量扫描共用 concurrency group，避免两条导入链路并发写入。
 
 任何新 Chat 开始工作前，应先读取本文件、`docs/INTEGRATION_LOG.md`、`docs/job-collection.md`、PR #2 描述以及最新 `data/scans/*summary*.json`，再核对 GitHub 当前状态。本文件中的数字是时间截面，不可替代实时核对。
 
@@ -339,8 +340,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 4. [x] 新开 production run `30712239542`；固定条数分批得到真实验证，前 3 批成功，第 4 批失败。
 5. [x] 修正 `extract_application_id` 的无界捕获，增加按字节切批与异常单条测试。关键 commits：`aaa810e...`、`ccf1edb...`、`92c3401...`、`9087e86...`、`a782238...`、`f4e63fd...`。
 6. [x] 8 个相关单元测试、Python 编译、YAML 解析和 run `30712239542` artifact 回放通过；337 条修正后数据拆成 10 批，最大 999,796 字节、每批最多 40 条。
-7. [next] 从修复后的最新 `main` 再新开 production workflow；不要 rerun 旧 run。
-8. 核对网站 scan status 为 `completed`、created/updated/skipped 和网站岗位总数，再关闭 P0。
+7. [in progress] 已从修复后的最新 `main` 新开 production run `30713268976`，当前正在执行；不要 rerun 旧 run。
+8. [x] 新增独立快速重试 workflow `.github/workflows/sync-latest-job-snapshot.yml`。若全量扫描的网站同步失败，直接运行它，不再重新采集全部来源。
+9. 核对网站 scan status 为 `completed`、created/updated/skipped 和网站岗位总数，再关闭 P0。
 
 ### P1：中国来源实际覆盖
 
@@ -381,6 +383,7 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 ### 生产和架构
 
 - `.github/workflows/daily-us-jobscan.yml`：每日全局扫描和网站同步。
+- `.github/workflows/sync-latest-job-snapshot.yml`：从 `main` 最新扫描快照快速重试网站同步，不重新抓取职位。
 - `app/api/jobs/route.ts`：网站职位 API、部分官方 ATS refresh、GitHub workflow dispatch。
 - `app/api/jobs/import/route.ts`：GitHub Actions 合并结果导入网站。
 - `app/api/scan-status/route.ts`：扫描状态。
