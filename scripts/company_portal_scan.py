@@ -187,6 +187,9 @@ VERIFIED_COMPANY_PORTALS = {
     "再鼎医药": "https://cn.zailaboratory.com/jobs/",
 }
 
+ADDITIONAL_SOURCE_CATALOG = Path("app/company-source-additions.json")
+_additional_company_portals: dict[str, str] | None = None
+
 
 class PortalParser(HTMLParser):
     def __init__(self) -> None:
@@ -540,6 +543,11 @@ def common_crawl_career_url(seed_url: str) -> str:
 
 def company_rows(path: Path) -> list[dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    additions_path = path.with_name("company-pool-additions.json")
+    if additions_path.exists():
+        additions = json.loads(additions_path.read_text(encoding="utf-8"))
+        if isinstance(additions, list):
+            payload.extend(additions)
     unique: dict[str, dict[str, Any]] = {}
     for row in payload:
         company = clean(row.get("company"))
@@ -571,10 +579,44 @@ def company_match_keys(company: str) -> list[str]:
     return keys
 
 
+def additional_company_portals(path: Path = ADDITIONAL_SOURCE_CATALOG) -> dict[str, str]:
+    """Load reviewed current career portals without importing historical JD links."""
+    global _additional_company_portals
+    if path == ADDITIONAL_SOURCE_CATALOG and _additional_company_portals is not None:
+        return _additional_company_portals
+    portals: dict[str, str] = {}
+    if path.exists():
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            payload = []
+        for row in payload if isinstance(payload, list) else []:
+            if not isinstance(row, dict) or clean(row.get("collectionMode")) == "manual":
+                continue
+            url = clean(row.get("careersUrl"))
+            if not url:
+                continue
+            labels = [clean(row.get("company"))]
+            aliases = row.get("aliases")
+            if isinstance(aliases, list):
+                labels.extend(clean(alias) for alias in aliases)
+            for label in labels:
+                for key in company_match_keys(label):
+                    portals.setdefault(key, url)
+    if path == ADDITIONAL_SOURCE_CATALOG:
+        _additional_company_portals = portals
+    return portals
+
+
 def verified_company_portal(company: str) -> str:
     """Return a reviewed public portal seed for a company or one of its aliases."""
+    catalog = additional_company_portals()
     return next(
-        (VERIFIED_COMPANY_PORTALS[key] for key in company_match_keys(company) if key in VERIFIED_COMPANY_PORTALS),
+        (
+            VERIFIED_COMPANY_PORTALS.get(key) or catalog.get(key, "")
+            for key in company_match_keys(company)
+            if VERIFIED_COMPANY_PORTALS.get(key) or catalog.get(key)
+        ),
         "",
     )
 
