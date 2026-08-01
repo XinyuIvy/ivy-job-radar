@@ -88,18 +88,28 @@ class CDPPage:
         self.send("Page.enable")
         self.send("Runtime.enable")
 
-    def adopt_page_for_url(self, expected_url: str, timeout: int = 10) -> bool:
-        """Switch to a newly opened tab when BOSS submits search with target=_blank."""
+    def adopt_page_for_url(self, expected_url: str, timeout: int = 15) -> None:
+        """Switch to the submitted search tab or fail with target diagnostics."""
         deadline = time.time() + timeout
+        last_urls: list[str] = []
         while time.time() < deadline:
             targets = self._read_json(f"http://127.0.0.1:{self.port}/json")
+            last_urls = [
+                str(target.get("url", ""))
+                for target in targets
+                if target.get("type") == "page" and "zhipin.com" in str(target.get("url", ""))
+            ]
             target = find_matching_page_target(targets, expected_url)
             if target:
                 if str(target.get("id", "")) != self.target_id:
                     self._connect(target)
-                return True
+                return
             time.sleep(0.5)
-        return False
+        raise PageCollectionError(
+            "The submitted search did not produce a matching BOSS results page within "
+            f"{timeout} seconds. Diagnostics: "
+            f"{json.dumps({'boss_page_urls': last_urls}, ensure_ascii=False)}"
+        )
 
     @staticmethod
     def _read_json(url: str, method: str = "GET") -> Any:
@@ -412,8 +422,9 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
         "windowsVirtualKeyCode": 13,
         "nativeVirtualKeyCode": 13,
     }
+    # A key-down followed by a key-up is one Enter press. Sending an extra
+    # char event for Enter can submit the same form twice on framework pages.
     page.send("Input.dispatchKeyEvent", {"type": "rawKeyDown", **key})
-    page.send("Input.dispatchKeyEvent", {"type": "char", "text": "\r", **key})
     page.send("Input.dispatchKeyEvent", {"type": "keyUp", **key})
 
 
@@ -454,7 +465,7 @@ def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, A
         # The BOSS city form can open search results in a new tab. Attach to
         # that tab before waiting so diagnostics do not keep reading the old
         # city landing page.
-        page.adopt_page_for_url(requested_search_url, timeout=10)
+        page.adopt_page_for_url(requested_search_url, timeout=15)
         wait_for_render(
             page,
             'a[href*="/job_detail/"], .search-job-result',
