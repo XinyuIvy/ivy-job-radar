@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-08-01T17:59:01.859217+00:00",
+  "generated_at": "2026-08-01T18:29:19.251237+00:00",
   "matched_jobs": 0,
   "sources": [
     {
       "source": "BOSS直聘公开索引",
       "query": "site:zhipin.com/job_detail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -31,11 +31,11 @@
     {
       "source": "BOSS直聘公开索引",
       "query": "site:zhipin.com/job_detail (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -44,11 +44,11 @@
     {
       "source": "BOSS直聘公开索引",
       "query": "site:zhipin.com/job_detail (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 9,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 9,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -57,11 +57,11 @@
     {
       "source": "猎聘",
       "query": "site:liepin.com/job (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -109,11 +109,11 @@
     {
       "source": "智联招聘",
       "query": "site:zhaopin.com/jobdetail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -135,11 +135,11 @@
     {
       "source": "智联招聘",
       "query": "site:zhaopin.com/jobdetail (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 6,
+      "scanned": 10,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 6,
+        "title_not_targeted": 10,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -161,11 +161,11 @@
     {
       "source": "前程无忧",
       "query": "site:51job.com (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -213,11 +213,11 @@
     {
       "source": "牛客招聘",
       "query": "site:nowcoder.com/jobs/detail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -226,11 +226,11 @@
     {
       "source": "牛客招聘",
       "query": "site:nowcoder.com/jobs/detail (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 9,
+      "scanned": 11,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 9,
+        "title_not_targeted": 11,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -252,11 +252,11 @@
     {
       "source": "国聘",
       "query": "site:iguopin.com (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -291,11 +291,11 @@
     {
       "source": "应届生求职网",
       "query": "site:yingjiesheng.com (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
-      "scanned": 10,
+      "scanned": 7,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 7,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0
@@ -356,11 +356,11 @@
     {
       "source": "中国公司官网",
       "query": "(招聘 OR careers OR 职位) (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士) -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
-      "scanned": 10,
+      "scanned": 11,
       "matched": 0,
       "rejected": {
         "missing_title_or_url": 0,
-        "title_not_targeted": 10,
+        "title_not_targeted": 11,
         "excluded_seniority_or_role": 0,
         "degree_experience_or_skill_gap": 0,
         "score_below_discovery_threshold": 0

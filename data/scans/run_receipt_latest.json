@@ -1,31 +1,27 @@
 {
-  "run_started_at": "2026-08-01T18:04:29.908063+00:00",
+  "run_started_at": "2026-08-01T18:34:30.528255+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 14,
+    "us_jobs_verified_latest.json": 13,
     "china_jobs_latest.json": 0,
     "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 250,
     "company_portal_jobs_latest.json": 82
   },
-  "fetched": 346,
+  "fetched": 345,
   "verified_or_open": 118,
   "rejected": 10,
   "deduplicated": 16,
-  "imported": 336,
-  "new": 72,
-  "updated_or_unchanged": 248,
-  "temporarily_retained": 16,
+  "imported": 337,
+  "new": 1,
+  "updated_or_unchanged": 318,
+  "temporarily_retained": 18,
   "pruned_as_stale": 0,
-  "no_longer_seen": 16,
+  "no_longer_seen": 18,
   "stale_policy_days": 14,
   "failed_sources": [
     {
-      "source": "company_portal:君实生物",
-      "error": "HTTP 202"
-    },
-    {
-      "source": "company_portal:石药集团",
+      "source": "company_portal:康方生物",
       "error": "HTTP 202"
     },
     {
@@ -33,24 +29,24 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:荣昌生物",
-      "error": "HTTP 202"
-    },
-    {
       "source": "company_portal:和黄医药",
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:康方生物",
+      "source": "company_portal:荣昌生物",
+      "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:石药集团",
+      "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:君实生物",
       "error": "HTTP 202"
     },
     {
       "source": "company_portal:传奇生物",
       "error": "HTTP 202"
-    },
-    {
-      "source": "company_portal:信达生物",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:恒瑞医药",
@@ -81,7 +77,7 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:金域医学",
+      "source": "company_portal:燃石医学",
       "error": "HTTP 202"
     },
     {
@@ -89,7 +85,15 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:泰格医药",
+      "source": "company_portal:信达生物",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:金域医学",
+      "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:迪安诊断",
       "error": "HTTP 202"
     },
     {
@@ -97,7 +101,11 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:燃石医学",
+      "source": "company_portal:太美医疗科技",
+      "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:泰格医药",
       "error": "HTTP 202"
     },
     {
@@ -105,12 +113,12 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:太美医疗科技",
+      "source": "company_portal:诺思格",
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:迪安诊断",
-      "error": "HTTP Error 403: Forbidden"
+      "source": "company_portal:深势科技",
+      "error": "HTTP 202"
     },
     {
       "source": "company_portal:晶泰科技（XtalPi）",
@@ -121,19 +129,7 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:诺思格",
-      "error": "HTTP 202"
-    },
-    {
       "source": "company_portal:普蕊斯",
-      "error": "HTTP 202"
-    },
-    {
-      "source": "company_portal:深势科技",
-      "error": "HTTP 202"
-    },
-    {
-      "source": "company_portal:零氪科技",
       "error": "HTTP 202"
     },
     {
@@ -145,11 +141,11 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:森亿智能",
+      "source": "company_portal:零氪科技",
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:华为运动健康",
+      "source": "company_portal:森亿智能",
       "error": "HTTP 202"
     },
     {
@@ -157,7 +153,7 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:鱼跃医疗",
+      "source": "company_portal:华为运动健康",
       "error": "HTTP 202"
     },
     {
@@ -165,11 +161,11 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:微创医疗",
+      "source": "company_portal:鱼跃医疗",
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:方达控股",
+      "source": "company_portal:微创医疗",
       "error": "HTTP 202"
     },
     {
@@ -177,31 +173,19 @@
       "error": "Remote end closed connection without response"
     },
     {
-      "source": "company_portal:惠泰医疗",
-      "error": "<urlopen error [Errno 111] Connection refused>"
-    },
-    {
-      "source": "company_portal:鹰瞳科技 Airdoc",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:方达控股",
+      "error": "HTTP 202"
     },
     {
       "source": "company_portal:迈瑞医疗",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:健帆生物",
+      "source": "company_portal:鹰瞳科技 Airdoc",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:安图生物",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:新产业生物",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:南微医学",
+      "source": "company_portal:惠泰医疗",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -209,11 +193,27 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:南微医学",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:安图生物",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:健帆生物",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:爱思开海力士半导体（大连）有限公司",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "source": "company_portal:心脉医疗",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:奕瑞科技",
+      "source": "company_portal:新产业生物",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -221,16 +221,20 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:爱思开海力士半导体（大连）有限公司",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "source": "company_portal:北京康特瑞科统计科技有限责任公司",
       "error": "HTTP 202"
     },
     {
+      "source": "company_portal:奕瑞科技",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:北京微观博易私募基金管理有限公司",
       "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:北京大学临床医学高等研究院真实世界证据评价中心",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:高帆破浪科技（浙江）有限责任公司",
@@ -249,16 +253,16 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:百度健康/灵医智惠",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:杭州嘉合杉升私募基金管理有限公司",
       "error": "HTTP 202"
     },
     {
       "source": "company_portal:杭州橡木私募基金管理有限公司",
       "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:复旦大学类脑智能科学与技术研究院",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:杭州炎魂网络科技有限公司",
@@ -269,11 +273,15 @@
       "error": "HTTP 202"
     },
     {
+      "source": "company_portal:九坤投资（北京）有限公司",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:卡斯柯信号有限公司",
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:科大讯飞医疗",
+      "source": "company_portal:百度健康/灵医智惠",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -289,31 +297,27 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:鹏扬基金管理有限公司",
-      "error": "HTTP Error 403: Forbidden"
+      "source": "company_portal:拼多多（上海）网络科技有限公司",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:科大讯飞医疗",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:南京驯鹿生物技术股份有限公司",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:拼多多（上海）网络科技有限公司",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:微医",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:九坤投资（北京）有限公司",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:上海成均资产管理有限公司",
-      "error": "Remote end closed connection without response"
+      "source": "company_portal:鹏扬基金管理有限公司",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "source": "company_portal:上海泓信投资管理有限公司",
+      "error": "Remote end closed connection without response"
+    },
+    {
+      "source": "company_portal:上海交通大学医学院附属第九人民医院口腔颅面及感官综合健康研究院",
       "error": "Remote end closed connection without response"
     },
     {
@@ -321,19 +325,15 @@
       "error": "HTTP Error 403: Forbidden"
     },
     {
-      "source": "company_portal:阿里健康",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:厦门特宝生物工程股份有限公司",
       "error": "HTTP Error 403: Forbidden"
     },
     {
-      "source": "company_portal:上海交通大学医学院附属仁济医院",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:上海宝藤生物医药科技股份有限公司",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
-      "source": "company_portal:上海宝藤生物医药科技股份有限公司",
+      "source": "company_portal:上海成均资产管理有限公司",
       "error": "HTTP Error 403: Forbidden"
     },
     {
@@ -341,12 +341,12 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:深圳医学科学院",
-      "error": "HTTP 500"
+      "source": "company_portal:阿里健康",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:首都医学科学创新中心",
-      "error": "HTTP Error 400: "
+      "source": "company_portal:微医",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:平安健康/平安科技",
@@ -357,15 +357,15 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:首都医学科学创新中心",
+      "error": "HTTP Error 400: "
+    },
+    {
+      "source": "company_portal:深圳医学科学院",
+      "error": "HTTP 500"
+    },
+    {
       "source": "company_portal:北京大学临床医学高等研究院",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:北京大学临床医学高等研究院真实世界证据评价中心",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:复旦大学类脑智能科学与技术研究院",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -373,8 +373,8 @@
       "error": "<urlopen error timed out>"
     },
     {
-      "source": "company_portal:上海交通大学医学院附属第九人民医院口腔颅面及感官综合健康研究院",
-      "error": "<urlopen error timed out>"
+      "source": "company_portal:上海交通大学医学院附属仁济医院",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:深圳市鲸驰寰宇科技有限公司",
@@ -385,12 +385,16 @@
       "error": "<urlopen error timed out>"
     },
     {
+      "source": "company_portal:中国科学院北京基因组研究所（国家生物信息中心）",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:深圳知行通达私募证券基金管理合伙企业（有限合伙）",
       "error": "<urlopen error timed out>"
     },
     {
-      "source": "company_portal:中国科学院北京基因组研究所（国家生物信息中心）",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:石药控股集团有限公司",
+      "error": "<urlopen error timed out>"
     },
     {
       "source": "company_portal:字节跳动",
@@ -406,22 +410,10 @@
     },
     {
       "source": "company_portal:Citadel Securities",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:石药控股集团有限公司",
-      "error": "<urlopen error timed out>"
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "source": "company_portal:Millennium",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:腾讯",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:阿里巴巴",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -429,11 +421,7 @@
       "error": "<urlopen error timed out>"
     },
     {
-      "source": "company_portal:百度",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:蚂蚁集团",
+      "source": "company_portal:腾讯",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -441,7 +429,23 @@
       "error": "<urlopen error timed out>"
     },
     {
+      "source": "company_portal:阿里巴巴",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:信达生物制药（苏州）有限公司",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "source": "company_portal:百度",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:滴滴",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:蚂蚁集团",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -449,15 +453,19 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:银泰证券",
+      "error": "<urlopen error timed out>"
+    },
+    {
       "source": "company_portal:小红书",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:美团",
+      "source": "company_portal:快手",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:快手",
+      "source": "company_portal:美团",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -469,27 +477,7 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:信达生物制药（苏州）有限公司",
-      "error": "<urlopen error timed out>"
-    },
-    {
-      "source": "company_portal:银泰证券",
-      "error": "<urlopen error timed out>"
-    },
-    {
-      "source": "company_portal:华为",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:OPPO",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:哔哩哔哩",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:vivo",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -497,8 +485,20 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:长沙诺民医疗科技有限公司",
-      "error": "<urlopen error timed out>"
+      "source": "company_portal:OPPO",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:华为",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:vivo",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:九坤投资",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:灵均投资",
@@ -506,6 +506,10 @@
     },
     {
       "source": "company_portal:明汯投资",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:佳期投资",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -517,23 +521,15 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:佳期投资",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:九坤投资",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:中信证券",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:华泰证券",
+      "source": "company_portal:中金公司",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:中金公司",
+      "source": "company_portal:华泰证券",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -545,28 +541,32 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:鸣石基金",
+      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)>"
+    },
+    {
       "source": "company_portal:Bain Greater China",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:鸣石基金",
-      "error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1016)>"
+      "source": "company_portal:长沙诺民医疗科技有限公司",
+      "error": "<urlopen error timed out>"
     },
     {
       "source": "company_portal:国泰海通证券",
       "error": "<urlopen error [SSL: UNSAFE_LEGACY_RENEGOTIATION_DISABLED] unsafe legacy renegotiation disabled (_ssl.c:1016)>"
     },
     {
-      "source": "company_portal:浙江奥默生物医药有限公司",
-      "error": "<urlopen error timed out>"
+      "source": "company_portal:Deloitte China",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "source": "company_portal:KPMG China",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Deloitte China",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "source": "company_portal:浙江奥默生物医药有限公司",
+      "error": "<urlopen error timed out>"
     },
     {
       "source": "company_portal:Roland Berger Greater China",
@@ -613,6 +613,10 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:Evidation",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:Genesis Research",
       "error": "HTTP 503"
     },
@@ -625,23 +629,11 @@
       "error": "<urlopen error timed out>"
     },
     {
-      "source": "company_portal:Optum",
-      "error": "<urlopen error timed out>"
-    },
-    {
-      "source": "company_portal:Aetion",
-      "error": "<urlopen error timed out>"
-    },
-    {
       "source": "company_portal:Hologic",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Zimmer Biomet",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Evidation",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -653,12 +645,24 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:Optum",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Aetion",
+      "error": "<urlopen error timed out>"
+    },
+    {
       "source": "company_portal:Qure.ai",
       "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:DRW",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Eli Lilly and Company",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "source": "company_portal:Eikon Therapeutics",
@@ -669,7 +673,11 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Eli Lilly and Company",
+      "source": "company_portal:IMC Trading",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Meta",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -677,15 +685,7 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Meta",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:NERA Economic Consulting",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "source": "company_portal:Sakata Seed America, Inc.",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -693,28 +693,28 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:SystImmune",
+      "source": "company_portal:Sakata Seed America, Inc.",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Putnam (Inizio Ignite)",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "source": "company_portal:SystImmune",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Precision Medicine Group",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
-      "source": "company_portal:UTHealth Houston",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:Putnam (Inizio Ignite)",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "source": "company_portal:Two Sigma",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:IMC Trading",
-      "error": "HTTP Error 404: Not Found"
+      "source": "company_portal:UTHealth Houston",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     }
   ]
 }
