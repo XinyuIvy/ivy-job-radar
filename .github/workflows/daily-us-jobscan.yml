@@ -81,6 +81,7 @@ jobs:
           scripts/company_portal_scan.py
           scripts/merge_scan_results.py
           scripts/scan_health.py
+          scripts/split_json_batches.py
 
       - name: Run scanner fixture tests
         if: steps.schedule_guard.outputs.run == 'true'
@@ -148,13 +149,29 @@ jobs:
             echo "::error::Website sync credentials are not fully configured."
             exit 1
           fi
-          curl --fail-with-body --retry 3 --retry-all-errors \
-            --request POST \
-            --header "Content-Type: application/json" \
-            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
-            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-            --data-binary @data/scans/all_jobs_latest.json \
-            "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
+          import_batch_dir="$(mktemp -d)"
+          python scripts/split_json_batches.py \
+            data/scans/all_jobs_latest.json \
+            "${import_batch_dir}" \
+            --batch-size 40
+
+          shopt -s nullglob
+          import_batches=("${import_batch_dir}"/batch-*.json)
+          if [[ "${#import_batches[@]}" -eq 0 ]]; then
+            echo "::error::No website import batches were generated."
+            exit 1
+          fi
+
+          for batch_path in "${import_batches[@]}"; do
+            echo "Importing $(basename "${batch_path}") of ${#import_batches[@]}"
+            curl --fail-with-body --retry 3 --retry-all-errors \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+              --data-binary @"${batch_path}" \
+              "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
+          done
 
       - name: Publish completed run receipt
         if: steps.schedule_guard.outputs.run == 'true'
