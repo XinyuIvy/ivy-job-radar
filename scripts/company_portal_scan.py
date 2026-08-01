@@ -1521,6 +1521,24 @@ def run(
             name: sum(1 for receipt in receipts if receipt.ats_type == name)
             for name in sorted({receipt.ats_type for receipt in receipts})
         },
+        "region_counts": {
+            region: {
+                "companies_attempted": sum(1 for receipt in receipts if receipt.region == region),
+                "companies_succeeded": sum(
+                    1 for receipt in receipts if receipt.region == region and receipt.state == "success"
+                ),
+                "companies_failed": sum(
+                    1 for receipt in receipts if receipt.region == region and receipt.state == "failed"
+                ),
+                "companies_unidentified": sum(
+                    1 for receipt in receipts if receipt.region == region and receipt.state == "unidentified"
+                ),
+                "jobs_matched": sum(
+                    1 for job in deduplicated.values() if clean(job.get("region")) == region
+                ),
+            }
+            for region in sorted({receipt.region for receipt in receipts})
+        },
         "failure_companies": [
             {"company": receipt.company, "url": receipt.career_homepage, "error": receipt.error}
             for receipt in receipts
