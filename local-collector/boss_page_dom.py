@@ -131,18 +131,41 @@ def assert_page_is_usable(snapshot: dict[str, str]) -> None:
         raise PageCollectionError("The dedicated Chrome is not logged in to BOSS.")
 
 
-def wait_for_render(page: CDPPage, selector: str, timeout: int = 25) -> dict[str, str]:
+def urls_match(actual_url: str, expected_url: str) -> bool:
+    """Return whether Chrome has reached the requested BOSS page."""
+    actual = urllib.parse.urlparse(actual_url)
+    expected = urllib.parse.urlparse(expected_url)
+    if actual.netloc != expected.netloc or actual.path.rstrip("/") != expected.path.rstrip("/"):
+        return False
+    actual_query = urllib.parse.parse_qs(actual.query)
+    expected_query = urllib.parse.parse_qs(expected.query)
+    return all(actual_query.get(key) == value for key, value in expected_query.items())
+
+
+def wait_for_render(
+    page: CDPPage,
+    selector: str,
+    timeout: int = 25,
+    expected_url: str | None = None,
+    allow_missing: bool = False,
+) -> dict[str, str] | None:
+    """Wait for the requested navigation and its new DOM, not a stale prior page."""
     deadline = time.time() + timeout
     last_snapshot: dict[str, str] = {}
     while time.time() < deadline:
         last_snapshot = page_snapshot(page)
         assert_page_is_usable(last_snapshot)
+        if expected_url and not urls_match(last_snapshot.get("url", ""), expected_url):
+            time.sleep(1)
+            continue
         ready = page.evaluate(
             f"document.readyState === 'complete' && Boolean(document.querySelector({json.dumps(selector)}))"
         )
         if ready:
             return last_snapshot
         time.sleep(1)
+    if allow_missing:
+        return None
     raise PageCollectionError(
         f"The BOSS page did not render the expected content within {timeout} seconds."
     )
@@ -153,7 +176,7 @@ EXTRACT_CARDS_JS = r"""
   const clean = (node) => node ? node.innerText.trim() : '';
   const links = Array.from(document.querySelectorAll('a[href*="/job_detail/"]'));
   const seen = new Set();
-  return links.map((titleLink) => {
+    return links.map((titleLink) => {
     const card = titleLink.closest(
       'li.job-card-wrapper, li.job-card-box, .job-card-wrapper, .job-card-box, [class*="job-card"]'
     ) || titleLink.closest('li') || titleLink.parentElement;
@@ -175,6 +198,7 @@ EXTRACT_CARDS_JS = r"""
       location: clean(locationNode),
       tags: tagNodes.map(clean).filter(Boolean),
       skills: tagNodes.map(clean).filter(Boolean),
+      card_text: clean(card),
       job_id: match ? match[1] : jobUrl,
       job_link: jobUrl,
       salary_source: 'rendered_page'
@@ -234,15 +258,38 @@ def search_url(keyword: str, city: str) -> str:
     return f"https://www.zhipin.com/web/geek/job?{query}"
 
 
+def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, Any]]:
+    """Put cards that visibly contain the requested keyword first."""
+    needle = keyword.casefold().strip()
+    if not needle:
+        return jobs
+
+    def relevance(job: dict[str, Any]) -> int:
+        title = str(job.get("title", "")).casefold()
+        card_text = str(job.get("card_text", "")).casefold()
+        if needle in title:
+            return 2
+        if needle in card_text:
+            return 1
+        return 0
+
+    return sorted(jobs, key=relevance, reverse=True)
+
+
 def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     page = CDPPage()
     try:
-        page.navigate(search_url(keyword, city))
-        wait_for_render(page, 'a[href*="/job_detail/"], .search-job-result')
+        requested_search_url = search_url(keyword, city)
+        page.navigate(requested_search_url)
+        wait_for_render(
+            page,
+            'a[href*="/job_detail/"], .search-job-result',
+            expected_url=requested_search_url,
+        )
         page.evaluate("window.scrollTo(0, Math.min(document.body.scrollHeight, 1400))")
         time.sleep(2)
         assert_page_is_usable(page_snapshot(page))
-        jobs = page.evaluate(EXTRACT_CARDS_JS) or []
+        jobs = prioritize_jobs(page.evaluate(EXTRACT_CARDS_JS) or [], keyword)
         if not jobs:
             diagnostics = page.evaluate(PAGE_DIAGNOSTICS_JS) or {}
             raise PageCollectionError(
@@ -250,16 +297,36 @@ def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, A
                 f"Diagnostics: {json.dumps(diagnostics, ensure_ascii=False)}"
             )
 
+        for job in jobs:
+            job["source_keyword"] = keyword
+            job["source_city"] = city
+            job.pop("card_text", None)
+
         details: list[dict[str, Any]] = []
-        for job in jobs[:max_details]:
+        for job in jobs:
+            if len(details) >= max_details:
+                break
             page.navigate(job["job_link"])
-            wait_for_render(page, ".job-detail-box, .job-sec-text, .job-detail-section")
+            rendered = wait_for_render(
+                page,
+                ".job-detail-box, .job-sec-text, .job-detail-section",
+                expected_url=job["job_link"],
+                allow_missing=True,
+            )
+            if rendered is None:
+                print(
+                    f"Skipped {job.get('title', 'a job')}: the detail page did not render.",
+                    file=sys.stderr,
+                )
+                continue
             time.sleep(1)
             detail = page.evaluate(EXTRACT_DETAIL_JS) or {}
             if len(detail.get("jd", "")) < 40:
-                raise PageCollectionError(
-                    f"The job description did not render for {job.get('title', 'a job')}."
+                print(
+                    f"Skipped {job.get('title', 'a job')}: no readable job description.",
+                    file=sys.stderr,
                 )
+                continue
             detail["job_id"] = job["job_id"]
             detail["job_link"] = job["job_link"]
             detail["company"] = detail.get("company") or job["company"]
