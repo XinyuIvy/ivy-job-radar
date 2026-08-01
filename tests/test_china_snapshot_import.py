@@ -57,6 +57,30 @@ class ChinaSnapshotImportTests(unittest.TestCase):
             )
         )
 
+    def test_reports_why_rows_were_excluded(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            payload = {
+                "title": "高级生物统计师",
+                "company": "示例药企",
+                "url": "https://www.zhipin.com/job_detail/senior.html",
+                "description": "要求博士学历，熟悉 R、SAS 和临床试验。",
+                "location": "上海",
+            }
+            (root / "first.json").write_text(
+                json.dumps(payload, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            (root / "second.json").write_text(
+                json.dumps(payload, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            jobs, summary = IMPORTER.run([root])
+        self.assertEqual(jobs, [])
+        self.assertEqual(summary["raw_rows"], 2)
+        self.assertEqual(summary["excluded_rows"], 2)
+        self.assertEqual(summary["excluded_reasons"], {"excluded_title:高级": 2})
+
     def test_reads_csv_and_deduplicates_by_canonical_url(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
