@@ -1,0 +1,130 @@
+name: Sync latest job snapshot
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Share the full-scan concurrency group so a sync retry cannot race a live scan.
+concurrency:
+  group: daily-global-jobscan
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out latest main snapshot
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Validate sync inputs
+        run: |
+          python -m py_compile scripts/split_json_batches.py
+          test -s data/scans/all_jobs_latest.json
+          test -s data/scans/run_receipt_latest.json
+
+      - name: Mark website sync as running
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" || -z "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
+            echo "::error::Website sync credentials are not fully configured."
+            exit 1
+          fi
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+            --data '{"state":"running","message":"正在重新同步最新岗位快照。"}' \
+            "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status"
+
+      - name: Sync jobs to Ivy Job Radar
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          import_batch_dir="$(mktemp -d)"
+          python scripts/split_json_batches.py \
+            data/scans/all_jobs_latest.json \
+            "${import_batch_dir}" \
+            --batch-size 40 \
+            --max-bytes 1000000
+
+          shopt -s nullglob
+          import_batches=("${import_batch_dir}"/batch-*.json)
+          if [[ "${#import_batches[@]}" -eq 0 ]]; then
+            echo "::error::No website import batches were generated."
+            exit 1
+          fi
+
+          for batch_path in "${import_batches[@]}"; do
+            echo "Importing $(basename "${batch_path}") of ${#import_batches[@]}"
+            curl --fail-with-body --retry 3 --retry-all-errors \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+              --data-binary @"${batch_path}" \
+              "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
+          done
+
+      - name: Publish completed sync status
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          receipt = json.loads(Path("data/scans/run_receipt_latest.json").read_text(encoding="utf-8"))
+          payload = {
+              "state": "completed",
+              "message": (
+                  f"最新快照同步完成：导入 {receipt['imported']}，"
+                  f"新增 {receipt['new']}，失败来源 {len(receipt['failed_sources'])}。"
+              ),
+          }
+          Path("data/scans/scan_status_payload.json").write_text(
+              json.dumps(payload, ensure_ascii=False), encoding="utf-8"
+          )
+          PY
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+            --data-binary @data/scans/scan_status_payload.json \
+            "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status"
+
+      - name: Mark website sync as failed
+        if: failure()
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -n "${IVY_JOB_RADAR_SYNC_TOKEN}" && -n "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
+            curl --fail-with-body --retry 3 --retry-all-errors \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+              --data '{"state":"failed","message":"最新岗位快照重新同步失败。"}' \
+              "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status" \
+              || echo "Warning: could not publish failure status."
+          fi
