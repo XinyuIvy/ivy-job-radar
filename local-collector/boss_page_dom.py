@@ -330,7 +330,7 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
     # same beforeinput/input events as it does during a manual search.
     page.send("Input.insertText", {"text": keyword})
     time.sleep(0.5)
-    submit_result = page.evaluate(
+    input_state = page.evaluate(
         """
 (() => {
   const visible = (node) => Boolean(
@@ -352,58 +352,31 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
       active_tag: document.activeElement ? document.activeElement.tagName : ''
     };
   }
-  const scopes = [
-    input.closest('form'),
-    input.closest('.search-form'),
-    input.closest('.search-form-con'),
-    input.closest('[class*="search"]')
-  ].filter(Boolean);
-  let button = null;
-  for (const scope of scopes) {
-    button = [
-      '.btn-search',
-      'button[type="submit"]',
-      'button',
-      '[role="button"]'
-    ].map((selector) => scope.querySelector(selector)).find(visible);
-    if (button) break;
-  }
-  if (button) {
-    const rect = button.getBoundingClientRect();
-    return {
-      ok: true,
-      method: 'mouse',
-      x: rect.left + rect.width / 2,
-      y: rect.top + rect.height / 2,
-      input_value: input.value
-    };
-  }
   return {
     ok: true,
-    method: 'enter',
-    input_value: input.value
+    input_value: input.value,
+    active_is_input: document.activeElement === input
   };
 })()
         """.replace("KEYWORD", json.dumps(keyword, ensure_ascii=False))
     ) or {}
-    if not submit_result.get("ok"):
+    if not input_state.get("ok") or not input_state.get("active_is_input"):
         raise PageCollectionError(
-            "The BOSS city page did not expose a usable search button or form. "
-            f"Diagnostics: {json.dumps(submit_result, ensure_ascii=False)}"
+            "The BOSS search keyword was not committed to the active input. "
+            f"Diagnostics: {json.dumps(input_state, ensure_ascii=False)}"
         )
-    if submit_result.get("method") == "mouse":
-        coordinates = {"x": submit_result["x"], "y": submit_result["y"]}
-        page.send("Input.dispatchMouseEvent", {"type": "mousePressed", "button": "left", "clickCount": 1, **coordinates})
-        page.send("Input.dispatchMouseEvent", {"type": "mouseReleased", "button": "left", "clickCount": 1, **coordinates})
-    else:
-        key = {
-            "key": "Enter",
-            "code": "Enter",
-            "windowsVirtualKeyCode": 13,
-            "nativeVirtualKeyCode": 13,
-        }
-        page.send("Input.dispatchKeyEvent", {"type": "rawKeyDown", **key})
-        page.send("Input.dispatchKeyEvent", {"type": "keyUp", **key})
+
+    # Submit from the focused input. Clicking a broadly matched search button
+    # can hit a different control after BOSS changes the city-page layout.
+    key = {
+        "key": "Enter",
+        "code": "Enter",
+        "windowsVirtualKeyCode": 13,
+        "nativeVirtualKeyCode": 13,
+    }
+    page.send("Input.dispatchKeyEvent", {"type": "rawKeyDown", **key})
+    page.send("Input.dispatchKeyEvent", {"type": "char", "text": "\r", **key})
+    page.send("Input.dispatchKeyEvent", {"type": "keyUp", **key})
 
 
 def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, Any]]:
