@@ -71,13 +71,35 @@ class CDPPage:
         if not zhipin_pages:
             raise PageCollectionError("The dedicated Chrome could not open a BOSS page.")
         target = zhipin_pages[0]
+        self.target_id = ""
+        self.ws = None
+        self._connect(target)
+
+    def _connect(self, target: dict[str, Any]) -> None:
+        """Connect this client to a specific visible Chrome page target."""
+        if self.ws is not None:
+            self.ws.close()
+        self.target_id = str(target.get("id", ""))
         self.ws = websocket.create_connection(
             target["webSocketDebuggerUrl"],
             timeout=45,
-            origin=f"http://127.0.0.1:{port}",
+            origin=f"http://127.0.0.1:{self.port}",
         )
         self.send("Page.enable")
         self.send("Runtime.enable")
+
+    def adopt_page_for_url(self, expected_url: str, timeout: int = 10) -> bool:
+        """Switch to a newly opened tab when BOSS submits search with target=_blank."""
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            targets = self._read_json(f"http://127.0.0.1:{self.port}/json")
+            target = find_matching_page_target(targets, expected_url)
+            if target:
+                if str(target.get("id", "")) != self.target_id:
+                    self._connect(target)
+                return True
+            time.sleep(0.5)
+        return False
 
     @staticmethod
     def _read_json(url: str, method: str = "GET") -> Any:
@@ -117,7 +139,8 @@ class CDPPage:
         self.send("Page.navigate", {"url": url})
 
     def close(self) -> None:
-        self.ws.close()
+        if self.ws is not None:
+            self.ws.close()
 
 
 def page_snapshot(page: CDPPage) -> dict[str, str]:
@@ -150,6 +173,21 @@ def urls_match(actual_url: str, expected_url: str) -> bool:
     actual_query = urllib.parse.parse_qs(actual.query)
     expected_query = urllib.parse.parse_qs(expected.query)
     return all(actual_query.get(key) == value for key, value in expected_query.items())
+
+
+def find_matching_page_target(
+    targets: list[dict[str, Any]], expected_url: str
+) -> dict[str, Any] | None:
+    """Find the Chrome page target that contains the requested search results."""
+    return next(
+        (
+            target
+            for target in targets
+            if target.get("type") == "page"
+            and urls_match(str(target.get("url", "")), expected_url)
+        ),
+        None,
+    )
 
 
 def wait_for_render(
@@ -413,6 +451,10 @@ def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, A
             expected_url=requested_city_url,
         )
         submit_visible_search(page, keyword)
+        # The BOSS city form can open search results in a new tab. Attach to
+        # that tab before waiting so diagnostics do not keep reading the old
+        # city landing page.
+        page.adopt_page_for_url(requested_search_url, timeout=10)
         wait_for_render(
             page,
             'a[href*="/job_detail/"], .search-job-result',
