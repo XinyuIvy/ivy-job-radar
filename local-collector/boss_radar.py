@@ -222,8 +222,12 @@ def sync_jobs(jobs: list[dict[str, Any]]) -> dict[str, Any]:
         return {"ok": True, "received": 0, "created": 0, "updated": 0, "skipped": 0}
     base_url = os.environ.get("IVY_JOB_RADAR_URL", "").rstrip("/")
     token = os.environ.get("IVY_JOB_RADAR_SYNC_TOKEN", "")
-    if not base_url or not token:
-        raise SystemExit("collector.env must define IVY_JOB_RADAR_URL and IVY_JOB_RADAR_SYNC_TOKEN")
+    sites_token = os.environ.get("IVY_JOB_RADAR_SITES_BYPASS_TOKEN", "")
+    if not base_url or not token or not sites_token:
+        raise SystemExit(
+            "collector.env must define IVY_JOB_RADAR_URL, IVY_JOB_RADAR_SYNC_TOKEN, "
+            "and IVY_JOB_RADAR_SITES_BYPASS_TOKEN"
+        )
 
     total = {"ok": True, "received": 0, "created": 0, "updated": 0, "skipped": 0}
     for start in range(0, len(jobs), 50):
@@ -231,7 +235,11 @@ def sync_jobs(jobs: list[dict[str, Any]]) -> dict[str, Any]:
         request = urllib.request.Request(
             f"{base_url}/api/jobs/import",
             data=json.dumps(chunk, ensure_ascii=False).encode("utf-8"),
-            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            headers={
+                "Authorization": f"Bearer {token}",
+                "OAI-Sites-Authorization": f"Bearer {sites_token}",
+                "Content-Type": "application/json",
+            },
             method="POST",
         )
         try:
@@ -400,6 +408,11 @@ def doctor(env_path: Path, scraper_dir: Path, plan_path: Path) -> int:
         load_env(env_path)
     checks.append(("Radar URL", bool(os.environ.get("IVY_JOB_RADAR_URL")), "configured" if os.environ.get("IVY_JOB_RADAR_URL") else "missing"))
     checks.append(("Sync token", bool(os.environ.get("IVY_JOB_RADAR_SYNC_TOKEN")), "configured" if os.environ.get("IVY_JOB_RADAR_SYNC_TOKEN") else "missing"))
+    checks.append((
+        "Private Site access token",
+        bool(os.environ.get("IVY_JOB_RADAR_SITES_BYPASS_TOKEN")),
+        "configured" if os.environ.get("IVY_JOB_RADAR_SITES_BYPASS_TOKEN") else "missing",
+    ))
     upstream_script = scraper_dir / "scripts" / "boss_cdp_raw.py"
     checks.append(("Upstream scraper", upstream_script.exists(), str(upstream_script)))
     for label, ok, detail in checks:
