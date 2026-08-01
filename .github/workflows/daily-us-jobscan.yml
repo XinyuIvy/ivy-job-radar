@@ -72,6 +72,9 @@ jobs:
           scripts/jobspy_scan.py
           scripts/verify_company_jobs.py
           scripts/china_scan.py
+          scripts/china_snapshot_import.py
+          scripts/apify_zhaopin_scan.py
+          scripts/merge_china_sources.py
           scripts/cloud_sources_scan.py
           scripts/aggregator_scan.py
           scripts/verify_aggregator_jobs.py
@@ -81,7 +84,7 @@ jobs:
 
       - name: Run scanner fixture tests
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python -m unittest discover -s tests -p 'test_*scan*.py'
+        run: python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Collect US jobs
         if: steps.schedule_guard.outputs.run == 'true'
@@ -94,6 +97,21 @@ jobs:
       - name: Collect China jobs
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/china_scan.py
+
+      - name: Import committed China browser snapshots
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/china_snapshot_import.py data/imports/china
+
+      - name: Collect optional paid Zhaopin source
+        if: steps.schedule_guard.outputs.run == 'true'
+        env:
+          APIFY_ZHAOPIN_ENABLED: ${{ secrets.APIFY_ZHAOPIN_ENABLED }}
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+        run: python scripts/apify_zhaopin_scan.py --max-results 25
+
+      - name: Merge every China collection route
+        if: steps.schedule_guard.outputs.run == 'true'
+        run: python scripts/merge_china_sources.py
 
       - name: Collect credential-free cloud sources
         if: steps.schedule_guard.outputs.run == 'true'
@@ -127,8 +145,8 @@ jobs:
         shell: bash
         run: |
           if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" || -z "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
-            echo "Website sync credentials are not fully configured; skipping website sync."
-            exit 0
+            echo "::error::Website sync credentials are not fully configured."
+            exit 1
           fi
           curl --fail-with-body --retry 3 --retry-all-errors \
             --request POST \

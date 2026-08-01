@@ -1,0 +1,47 @@
+{
+  "updated_at": "2026-08-01",
+  "routes": [
+    {
+      "source": "中国公司官网与ATS",
+      "mode": "cloud-automatic",
+      "status": "production",
+      "cost": "free",
+      "notes": "优先来源；读取公开公司招聘页、Workday、Moka、飞书招聘等。"
+    },
+    {
+      "source": "BOSS直聘",
+      "mode": "user-triggered-bookmarklet",
+      "status": "production-fallback",
+      "cost": "free",
+      "notes": "CDP 自动控制会触发回退；由用户在可见详情页点击保存。"
+    },
+    {
+      "source": "职位猎人 job-hunting",
+      "mode": "browser-extension-export",
+      "status": "ready-for-user-test",
+      "cost": "free",
+      "notes": "覆盖 BOSS、前程无忧、智联、拉勾、猎聘、就业在线；导出的 JSON/CSV 由统一 importer 接收。"
+    },
+    {
+      "source": "mcp-jobs 1.4.0",
+      "mode": "local-playwright-experiment",
+      "status": "limited",
+      "cost": "free",
+      "notes": "发布包仅实现猎聘和移动版 BOSS 规则；拉勾、智联、前程无忧只有 URL 条目，没有解析配置。"
+    },
+    {
+      "source": "智联招聘 Apify Actor",
+      "mode": "cloud-api-optional",
+      "status": "disabled-until-paid-use-approved",
+      "cost": "paid",
+      "notes": "仅在 APIFY_ZHAOPIN_ENABLED=true 且配置 APIFY_TOKEN 时运行，并限制每轮结果数。"
+    },
+    {
+      "source": "猎聘、智联、前程无忧、拉勾、就业在线",
+      "mode": "user-triggered-bookmarklet",
+      "status": "production-fallback",
+      "cost": "free",
+      "notes": "统一读取用户当前可见的职位详情正文，保存到本地 inbox 后导入。"
+    }
+  ]
+}

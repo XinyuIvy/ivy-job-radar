@@ -1,0 +1,47 @@
+name: PR Python tests
+
+on:
+  pull_request:
+    paths:
+      - "scripts/**"
+      - "local-collector/**"
+      - "tests/**"
+      - "requirements-jobscan.txt"
+      - ".github/workflows/pr-python-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-python-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-jobscan.txt
+
+      - name: Install dependencies
+        run: python -m pip install --requirement requirements-jobscan.txt
+
+      - name: Validate changed Python syntax
+        run: >-
+          python -m py_compile
+          local-collector/jd_inbox_server.py
+          scripts/apify_zhaopin_scan.py
+          scripts/china_snapshot_import.py
+          scripts/merge_china_sources.py
+
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py'
