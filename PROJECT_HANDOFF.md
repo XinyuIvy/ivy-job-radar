@@ -1,6 +1,6 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01 14:52（America/New_York）  
+> 最后更新：2026-08-01 15:04（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
 > 当前开发分支：无；`agent/china-multisource` 已通过 PR #2 合并  
@@ -15,11 +15,12 @@
 1. `main` 上已经有完整网站、D1 持久化、申请管理、公司研究、质量监控、导出和每日 GitHub Actions 扫描框架。
 2. 美国公开招聘源、公开 ATS、公司官网、聚合数据源已进入生产流水线，但公司官网成功率仍低，最近一次健康状态为 `warning`。
 3. 中国公开索引在最近一次生产扫描中命中 0 条，主要缺口是 BOSS、猎聘、智联、51job、拉勾等受保护平台无法稳定进行云端无人值守采集。
-4. PR #2 已于 2026-08-01 squash merge 到 `main`，merge commit 为 `7443f4fe7b45785638aed8baff8a6fd42bf796be`；生产 run `30711130632` 已验证全部采集、合并、health、artifact 和 snapshot push，但网站 `/api/jobs/import` 对约 9.4 MB 单次 payload 连续返回 HTTP 500，因此网站职位尚未完成本轮回写。
+4. PR #2 已于 2026-08-01 squash merge 到 `main`，merge commit 为 `7443f4fe7b45785638aed8baff8a6fd42bf796be`；生产 run `30713268976` 已完成端到端验证，25 个步骤全部成功，网站按字节分批导入、completed 状态、artifact 和 snapshot push 均已通过。
 5. BOSS 真实页面链路已验证：能保存职位名、公司、地点、独立详情 URL；最初 JD 正文截断问题已修复。测试岗位“高级生物统计师（上海）”被排除是正确行为，因为系统面向应届/早期职业岗位并排除“高级”。
 6. 本地书签保存的 JSON 不会自动上传 GitHub。它只有经过隐私检查、复制到 `data/imports/china/` 并提交后，GitHub Actions 才能看到。
 7. 第二次生产 run `30712239542` 已验证固定 40 条分批：前 3 批共 120 条成功，第 4 批失败。根因是 Figma 一条记录的 `application_id` 正则误捕获约 1.35 MB 嵌入式岗位 JSON，并重复进入 `evidence`，令单条记录约 3.2 MB、第 4 批约 4.6 MB。修复已提交：ID 提取限制格式/长度，批次同时限制 40 条和 1,000,000 字节，异常超大单条会在上传前失败。8 个相关测试、YAML 解析和真实 artifact 回放均通过；回放为 10 批，最大 999,796 字节。
 8. 已新增 `.github/workflows/sync-latest-job-snapshot.yml`（commit `7d68ca1...`）：网站同步失败后无需重新跑约 20 分钟的全量采集，可直接从 `main` 最新扫描快照重试分批导入。该 workflow 与全量扫描共用 concurrency group，避免两条导入链路并发写入。
+9. 生产 run `30713268976` 将 338 条职位拆成 10 个合规批次并全部导入成功：created 0、updated 210、skipped 128；网站最终 `totalJobs: 361`，P0 已完成。
 
 任何新 Chat 开始工作前，应先读取本文件、`docs/INTEGRATION_LOG.md`、`docs/job-collection.md`、PR #2 描述以及最新 `data/scans/*summary*.json`，再核对 GitHub 当前状态。本文件中的数字是时间截面，不可替代实时核对。
 
@@ -179,9 +180,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ---
 
-## 4. 最近一次生产扫描基线（run 30711130632，2026-08-01）
+## 4. 最近一次生产扫描基线（run 30713268976，2026-08-01）
 
-本轮扫描与快照生成成功，但网站导入失败；因此以下是仓库快照基线，不代表网站已完成回写。数据来自 `data/scans/run_receipt_latest.json`、`scan_health_latest.json` 和 `company_portal_summary.json`：
+本轮端到端运行成功，仓库快照、网站导入和 scan status 已一致完成。数据来自 `data/scans/run_receipt_latest.json`、`scan_health_latest.json`、`company_portal_summary.json` 和 Actions 日志：
 
 | 指标 | 数值 |
 |---|---:|
@@ -189,21 +190,21 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 | verified/open | 118 |
 | rejected | 10 |
 | deduplicated | 16 |
-| imported（待网站回写） | 336 |
-| new | 72 |
-| updated/unchanged | 248 |
-| temporarily retained | 16 |
+| imported | 338 |
+| new | 1 |
+| updated/unchanged | 319 |
+| temporarily retained | 18 |
 | stale pruned | 0 |
-| failed sources | 174 |
+| failed sources | 175 |
 | company pool | 350 |
 | company portals attempted | 350 |
-| company portals succeeded | 176 |
-| company success rate | 50.3% |
-| company portal jobs scanned | 12,925 |
+| company portals succeeded | 175 |
+| company success rate | 50.0% |
+| company portal jobs scanned | 12,909 |
 | company portal jobs matched | 82 |
 | China indexed jobs matched | 0 |
 
-健康状态仍为 `warning`。美国公司门户成功 148/176；中国公司门户仅成功 28/171，且中国公开索引命中 0，仍是主要覆盖缺口。公司池从此前 176 扩至 350，整体成功数和职位命中显著增加，但 `attempted 350/350` 仍不能表述为全部成功覆盖。
+健康状态仍为 `warning`。美国公司门户成功 148/176；中国公司门户仅成功 27/169，且中国公开索引命中 0，仍是主要覆盖缺口。公司池共 350 家，本轮成功识别/采集 175 家，职位命中 82；`attempted 350/350` 不能表述为全部成功覆盖。
 
 本轮来源计数：
 
@@ -213,7 +214,7 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 - `aggregator_jobs_verified_latest.json`: 250
 - `company_portal_jobs_latest.json`: 82
 
-生产 run `30711130632` 的唯一失败步骤是 `Sync jobs to Ivy Job Radar`。两个同步 secrets 均存在且有效：workflow 成功把网站状态改为 `running`，失败后也成功改为 `failed`。失败请求把约 9.4 MB 的 `all_jobs_latest.json` 一次性 POST 到 `/api/jobs/import`；站点约 39 秒后返回 HTTP 500，curl 三次重试仍失败。artifact `global-jobscan-30711130632`（ID `8822107906`）已保留，扫描快照已安全 rebase/push 到 `main` commit `6b95f49...`。
+生产 run `30713268976` 的 25 个步骤全部成功。338 条职位被拆为 10 批并全部获得 `ok: true`：created 0、updated 210、skipped 128。网站 completed 回执为 `totalJobs: 361`；artifact `global-jobscan-30713268976`（ID `8822726352`）保留至 2026-08-31，扫描快照已安全 rebase/push 到 `main` commit `8cda00d...`。
 
 ---
 
@@ -322,15 +323,15 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### P0：使 PR #2 真正进入生产
 
-当前进度：第 1–4、7 项已完成；第 6 项完成仓库侧核对；第 5 项仍在修复验证。run `30712239542` 从 `main` commit `de8ad77...` 启动，所有采集、核验、公司池、canonicalize、health、artifact 和 snapshot push 均成功。网站同步前 3 批共 120 条成功，第 4 批约 4.6 MB 连续 HTTP 500。artifact ID `8822434861`；扫描快照 commit `0694474...`。失败批次包含一条约 3.2 MB 的异常 Figma 记录：`application_id` 正则误捕获了约 1.35 MB 的嵌入式岗位 JSON，并再次拼入 `evidence`。
+当前进度：P0 已完成。生产 run `30713268976` 从修复后的 `main` 启动，采集、核验、公司池、canonicalize、health、10 批网站导入、completed status、artifact 和 snapshot push 全部成功。网站最终回执为 `totalJobs: 361`；artifact ID `8822726352`，扫描快照 commit `8cda00d...`。
 
 1. [x] 复核 PR #2 当前 diff 和 CI 后合并到 `main`。Merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`。
 2. [x] 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。run：`30711130632`。
 3. [x] 观察每一步，包括中国快照导入、来源 merge、公司池扫描、canonicalize 和 health；这些步骤全部成功。
 4. [x] 验证 `IVY_JOB_RADAR_SYNC_TOKEN` 与 `SITES_SIWC_BYPASS_TOKEN`；两个 secret 均存在且能写入 scan status。
-5. [awaiting production verification] `/api/jobs/import` 首轮 9.4 MB 单次导入失败；第二轮固定 40 条分批时前 3 批成功、第 4 批因异常超大 Figma 记录失败。修复已完成：`verify_company_jobs.py` 约束 ID 捕获；`split_json_batches.py` 同时限制 40 条与 1,000,000 字节；新增 5 个分批测试和 3 个 ID 测试。
-6. [partial] artifact、receipt、health、中国 summary 和仓库快照已核对；网站职位仍需在修复后核对。
-7. [x] 两轮生成快照均安全 rebase/push 回 `main`；最新 commit `0694474...`，最新 artifact ID `8822434861` 保留至 2026-08-31。
+5. [x] `/api/jobs/import` 生产验证通过：run `30713268976` 将 338 条拆为 10 批，全部返回 `ok: true`；created 0、updated 210、skipped 128。
+6. [x] artifact、receipt、health、中国 summary、仓库快照和网站 completed 回执均已核对；网站 `totalJobs: 361`。
+7. [x] 最新快照已安全 rebase/push 回 `main`；commit `8cda00d...`，artifact ID `8822726352` 保留至 2026-08-31。
 
 下一步执行顺序：
 
@@ -340,9 +341,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 4. [x] 新开 production run `30712239542`；固定条数分批得到真实验证，前 3 批成功，第 4 批失败。
 5. [x] 修正 `extract_application_id` 的无界捕获，增加按字节切批与异常单条测试。关键 commits：`aaa810e...`、`ccf1edb...`、`92c3401...`、`9087e86...`、`a782238...`、`f4e63fd...`。
 6. [x] 8 个相关单元测试、Python 编译、YAML 解析和 run `30712239542` artifact 回放通过；337 条修正后数据拆成 10 批，最大 999,796 字节、每批最多 40 条。
-7. [in progress] 已从修复后的最新 `main` 新开 production run `30713268976`，当前正在执行；不要 rerun 旧 run。
+7. [x] 已从修复后的最新 `main` 完成 production run `30713268976`；25 个步骤全部成功。
 8. [x] 新增独立快速重试 workflow `.github/workflows/sync-latest-job-snapshot.yml`。若全量扫描的网站同步失败，直接运行它，不再重新采集全部来源。
-9. 核对网站 scan status 为 `completed`、created/updated/skipped 和网站岗位总数，再关闭 P0。
+9. [x] 网站 scan status 为 `completed`；created 0、updated 210、skipped 128、网站岗位总数 361。P0 关闭。
 
 ### P1：中国来源实际覆盖
 
