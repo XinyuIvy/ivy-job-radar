@@ -56,12 +56,15 @@ This log covers cloud-runnable sources and capabilities found in comparable open
 | Posting legitimacy / ghost-job / repost detection | career-ops | Integrated |
 | Required vs preferred skill extraction | career-ops-style evaluation | Integrated |
 | Explicit uncertainty penalties for missing degree/experience evidence | Ivy scoring audit | Integrated |
-| Company research workspace with job/application/interview rollups and persistent notes | career-ops | Integrated |\n| Persistent recruiter, hiring-manager, alumni, and referral contact management | career-ops | Integrated |
+| Company research workspace with job/application/interview rollups and persistent notes | career-ops | Integrated |
+| Persistent recruiter, hiring-manager, alumni, and referral contact management | career-ops | Integrated |
 | Automated external contact discovery | career-ops | Planned |
-| Interview scheduling, contacts, notes, thank-you status, and follow-up cadence | career-ops | Integrated |\n| Interview preparation workspace, source-linked experience library, readiness checklist, mock notes, and interviewer questions | career-ops | Integrated |
+| Interview scheduling, contacts, notes, thank-you status, and follow-up cadence | career-ops | Integrated |
+| Interview preparation workspace, source-linked experience library, readiness checklist, mock notes, and interviewer questions | career-ops | Integrated |
 | Automated interview-experience ingestion and refresh | Ivy requirement | Partial |
 | Email reply classification | career-ops | Planned |
-| Application deadlines, planned-application dates, tasks, and reminders | Ivy requirement | Integrated |\n| Funnel analytics and per-source application success rates | career-ops | Integrated |
+| Application deadlines, planned-application dates, tasks, and reminders | Ivy requirement | Integrated |
+| Funnel analytics and per-source application success rates | career-ops | Integrated |
 | Complete CSV, Excel, JSON, and SQLite export | Ivy requirement | Integrated |
 | Scan-completion notification center and browser alerts | Ivy requirement | Integrated |
 | Email, Telegram, or ChatGPT completion notifications | Ivy requirement | Planned |
@@ -80,6 +83,8 @@ The website now renders the job pool progressively in 20-record batches while pr
 Application planning now stores an automatically extracted JD deadline, deadline type (explicit date, rolling, or not published), evidence source, and a separate user-planned application date. Manual deadline edits take precedence over automated extraction. The notification center creates deadline reminders at 14, 7, 3, 1, and 0 days and surfaces due application tasks. Application tasks are durable records with due/reminder dates and completion state. Interview records separately store round, schedule, format, contact, notes, outcome, thank-you status/deadline, and follow-up date. The company workspace now aggregates current jobs, applications, and interviews for each company and stores persistent website, careers link, business summary, recent developments, and personal research notes. Tasks, interviews, company research, and deadline metadata are included in all four complete export formats.
 
 Contact management now stores recruiter, hiring-manager, alumni, referral, interviewer, and other contacts; records may link to an application and retain contact status, email, LinkedIn URL, last-contact date, next follow-up, and notes. Contact follow-ups feed the unified job-search calendar alongside planned applications, deadlines, tasks, interviews, thank-you deadlines, and application/interview follow-ups. The interview-preparation center links a saved interview to a readiness score, reusable preparation checklist, mock-interview or technical-practice notes, interviewer questions, and selected historical experience sources. Its initial evidence library contains 15 source-linked summaries spanning Glassdoor, Reddit, 一亩三分地, and 牛客 across pharma/biostatistics, healthcare data science, general data science, and quantitative research. Forum reports are labeled as candidate experience rather than current company policy; automated ongoing ingestion remains partial. Data-quality automation now writes durable per-run counts and normalized failure reasons for monitoring. Contacts, interview preparation, and quality-run history are included in all four complete export formats. Geographic normalization and map/heatmap work were explicitly removed from scope on 2026-07-31.
+
+The website navigation was consolidated on 2026-07-31 by removing the standalone Data Quality destination and merging it into Job Verification. The existing submission form remains first, followed by one verification queue that includes both user-submitted requests and jobs currently being processed, retried, or escalated by automated quality control. Aggregate data-health counts, recent automated runs, and failure reasons appear below the queue without duplicating every affected job. The contact page now explains that contacts are entered manually, may be linked to an application, and feed follow-up dates into the unified calendar; it does not claim automatic contact discovery or messaging.
 
 ### Remaining cloud limitations, not reported as completed
 
