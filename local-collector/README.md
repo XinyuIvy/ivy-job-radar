@@ -4,7 +4,18 @@
 
 ## 首次安装
 
-先确保仓库已经更新，并且 `~/.ivy-job-radar/collector.env` 已配置。然后运行：
+第一次安装时，先取得仓库并准备网站提供的私有配置：
+
+```bash
+cd ~/Documents/Development_Projects
+git clone https://github.com/XinyuIvy/ivy-job-radar.git
+cd ivy-job-radar
+mkdir -p ~/.ivy-job-radar
+mv ~/Downloads/collector.env ~/.ivy-job-radar/collector.env
+chmod 600 ~/.ivy-job-radar/collector.env
+```
+
+如果电脑上已经有仓库和 `collector.env`，只需进入原目录并运行 `git pull --ff-only`。然后运行：
 
 ```bash
 python3 local-collector/boss_radar.py setup
@@ -12,6 +23,12 @@ python3 local-collector/boss_one_click.py install
 ```
 
 第一条命令会安装采集依赖并打开独立的 BOSS Chrome profile。请只在这个窗口登录 BOSS。第二条命令会在桌面创建 **一键扫描BOSS.command**。
+
+首次同步前可运行一次不上传的真实小批测试：
+
+```bash
+python3 local-collector/boss_one_click.py run --dry-run
+```
 
 以后使用时：
 
