@@ -1,10 +1,49 @@
 {
-  "generated_at": "2026-07-31T12:53:06.715491+00:00",
+  "generated_at": "2026-08-01T17:59:01.859217+00:00",
   "matched_jobs": 0,
   "sources": [
     {
       "source": "BOSS直聘公开索引",
-      "query": "site:zhipin.com/job_detail (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士",
+      "query": "site:zhipin.com/job_detail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "BOSS直聘公开索引",
+      "query": "site:zhipin.com/job_detail (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "BOSS直聘公开索引",
+      "query": "site:zhipin.com/job_detail (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "BOSS直聘公开索引",
+      "query": "site:zhipin.com/job_detail (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -17,7 +56,7 @@
     },
     {
       "source": "猎聘",
-      "query": "site:liepin.com/job (生物统计 OR 统计科学家 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士",
+      "query": "site:liepin.com/job (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -29,8 +68,8 @@
       }
     },
     {
-      "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail (数据科学家 OR 量化研究 OR 生物统计 OR 医疗咨询) 博士",
+      "source": "猎聘",
+      "query": "site:liepin.com/job (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -42,8 +81,21 @@
       }
     },
     {
-      "source": "前程无忧",
-      "query": "site:51job.com (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士",
+      "source": "猎聘",
+      "query": "site:liepin.com/job (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "猎聘",
+      "query": "site:liepin.com/job (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -56,7 +108,7 @@
     },
     {
       "source": "智联招聘",
-      "query": "site:zhaopin.com/jobdetail (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士",
+      "query": "site:zhaopin.com/jobdetail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -68,8 +120,203 @@
       }
     },
     {
-      "source": "拉勾",
-      "query": "site:lagou.com/jobs (数据科学家 OR 量化研究 OR 生物统计 OR 医疗咨询) 博士",
+      "source": "智联招聘",
+      "query": "site:zhaopin.com/jobdetail (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "智联招聘",
+      "query": "site:zhaopin.com/jobdetail (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 6,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 6,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "智联招聘",
+      "query": "site:zhaopin.com/jobdetail (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "前程无忧",
+      "query": "site:51job.com (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "前程无忧",
+      "query": "site:51job.com (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "前程无忧",
+      "query": "site:51job.com (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "前程无忧",
+      "query": "site:51job.com (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "牛客招聘",
+      "query": "site:nowcoder.com/jobs/detail (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "牛客招聘",
+      "query": "site:nowcoder.com/jobs/detail (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 9,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 9,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "牛客招聘",
+      "query": "site:nowcoder.com/jobs/detail (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "国聘",
+      "query": "site:iguopin.com (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "国聘",
+      "query": "site:iguopin.com (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "国聘",
+      "query": "site:iguopin.com (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "应届生求职网",
+      "query": "site:yingjiesheng.com (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "应届生求职网",
+      "query": "site:yingjiesheng.com (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士)",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "应届生求职网",
+      "query": "site:yingjiesheng.com (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士)",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -82,7 +329,46 @@
     },
     {
       "source": "中国公司官网",
-      "query": "(招聘 OR careers) (生物统计 OR 医学统计 OR 数据科学家 OR 量化研究 OR 医疗咨询) 博士 -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
+      "query": "(招聘 OR careers OR 职位) (生物统计 OR 临床统计 OR 医学统计 OR 统计科学家 OR 统计师) (博士 OR 硕士及以上 OR 应届博士) -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "中国公司官网",
+      "query": "(招聘 OR careers OR 职位) (数据科学家 OR 临床数据科学 OR 医学数据 OR 算法科学家 OR 应用科学家) (博士 OR 硕士及以上 OR 应届博士) -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "中国公司官网",
+      "query": "(招聘 OR careers OR 职位) (量化研究 OR 定量研究 OR 量化分析 OR quantitative researcher) (博士 OR 硕士及以上 OR 应届博士) -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
+      "scanned": 10,
+      "matched": 0,
+      "rejected": {
+        "missing_title_or_url": 0,
+        "title_not_targeted": 10,
+        "excluded_seniority_or_role": 0,
+        "degree_experience_or_skill_gap": 0,
+        "score_below_discovery_threshold": 0
+      }
+    },
+    {
+      "source": "中国公司官网",
+      "query": "(招聘 OR careers OR 职位) (真实世界研究 OR 卫生经济 OR 健康经济 OR 医疗咨询 OR 医药咨询 OR 生命科学咨询) (博士 OR 硕士及以上 OR 应届博士) -site:zhipin.com -site:liepin.com -site:51job.com -site:zhaopin.com",
       "scanned": 10,
       "matched": 0,
       "rejected": {
@@ -146,5 +432,11 @@
       }
     }
   ],
-  "note": "Chinese platform results are public-index discoveries. BOSS and other protected pages remain pending until a specific JD can be opened."
+  "note": "Chinese platform results are public-index discoveries. BOSS and other protected pages remain pending until a specific JD can be opened.",
+  "source_counts": {
+    "china_jobs_latest.json": 0,
+    "china_local_import_latest.json": 0,
+    "zhaopin_apify_jobs_latest.json": 0
+  },
+  "collection_note": "Combined indexed discovery, user-triggered visible-page captures, browser-extension exports, and the optional explicitly enabled Zhaopin Actor."
 }
