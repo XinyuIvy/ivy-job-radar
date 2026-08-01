@@ -1,6 +1,6 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01（America/New_York）  
+> 最后更新：2026-08-01 13:42（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
 > 当前开发分支：`agent/china-multisource`  
@@ -305,9 +305,10 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 - URL：https://github.com/XinyuIvy/ivy-job-radar/pull/2
 - 分支：`agent/china-multisource`
-- 核对时 HEAD：`0517e80a0e0d09bb18c78d43bae88d4ea9c89c1c`（本交接文件提交后会变化）。
-- 状态：Open、非 Draft、mergeable、尚未合并。
-- CI：PR Python tests 已全绿；包含依赖安装、syntax validation、全部 unit tests。
+- 2026-08-01 合并前代码核对 HEAD：`3e51970cb398381dca36dc9a8e6dcb87f4ba3994`（本交接文件更新后 HEAD 会再次变化）。
+- 状态：Open、非 Draft、mergeable、尚未合并；14 个文件变更，`+1803/-3`。
+- CI：`PR Python tests` run `30710359764` 已成功完成；依赖安装、Python syntax validation、全部 unit tests 均为 success。
+- 合并前 diff 复核已完成：未发现阻塞合并的问题；付费 Apify 仍保持默认关闭，PR #1 的失败路线未混入。
 - 主要提交节点：
   - `f6bd073`：BOSS bookmarklet selector 和无效页面拒绝。
   - `72566583...`：完整 JD/截断检查和排除原因统计。
@@ -319,6 +320,8 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 ## 8. 还没有完成的工作：按优先级排序
 
 ### P0：使 PR #2 真正进入生产
+
+当前进度：PR #2 的完整 diff、14 个变更文件、mergeability 和 HEAD Actions 已完成复核；run `30710359764` 全绿。因本次 handoff 更新会产生新 HEAD，需等待新一轮 PR CI 成功后再合并。
 
 1. 复核 PR #2 当前 diff 和 CI 后合并到 `main`。
 2. 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。
