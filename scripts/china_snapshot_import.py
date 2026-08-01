@@ -85,6 +85,8 @@ EXCLUDED_TITLE = re.compile(
     r"software engineer|data engineer|generative ai|large language model|\bllm\b|\bnlp\b",
     re.IGNORECASE,
 )
+
+
 def title_exclusion_reason(title: str) -> str:
     if not TARGET_TITLE.search(title):
         return "non_target_title"
