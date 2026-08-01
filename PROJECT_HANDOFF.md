@@ -1,6 +1,6 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01 13:35（America/New_York）  
+> 最后更新：2026-08-01 13:39（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
 > 当前开发分支：无；`agent/china-multisource` 已通过 PR #2 合并  
@@ -288,7 +288,7 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### 7.1 `main`
 
-- PR #2 合并后 HEAD：`7443f4fe7b45785638aed8baff8a6fd42bf796be`（本 handoff 更新提交后 HEAD 会继续变化）。
+- PR #2 merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`；随后 handoff 状态提交：`cf13ff0fcd4eaebe44a905bf4a79507449f1daa1`（本次更新后 HEAD 会继续变化）。
 - 包含网站、生产扫描框架、2026-07-31 快照，以及 PR #2 的中国多来源采集代码。
 - 下一状态门槛：手动 dispatch `daily-us-jobscan.yml` 并验证网站回写。
 
@@ -321,10 +321,10 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### P0：使 PR #2 真正进入生产
 
-当前进度：P0 第 1 项已完成。PR #2 最终 CI run `30710568256` 全绿，已 squash merge；现在执行第 2 项手动生产 dispatch。
+当前进度：P0 第 1 项已完成。PR #2 最终 CI run `30710568256` 全绿，已 squash merge。第 2 项尚未触发：GitHub 连接器无 workflow-dispatch 接口，本环境无 `gh`，Cloud Browser 当前显示 GitHub 未登录；需用户在 Cloud Browser 中自行登录后继续。
 
 1. [x] 复核 PR #2 当前 diff 和 CI 后合并到 `main`。Merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`。
-2. 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。
+2. [blocked] 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。阻塞原因：当前可用 GitHub 写接口不含 workflow dispatch，Cloud Browser 尚未登录。
 3. 观察每一步是否运行，包括中国快照导入和来源 merge。
 4. 验证 `IVY_JOB_RADAR_SYNC_TOKEN` 与 `SITES_SIWC_BYPASS_TOKEN`；缺失时现在应明确失败。
 5. 确认 `/api/jobs/import` 成功，网站 scan status 从 running/queued 进入 completed。
