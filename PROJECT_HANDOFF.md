@@ -1,6 +1,6 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01 13:51（America/New_York）  
+> 最后更新：2026-08-01 14:12（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
 > 当前开发分支：无；`agent/china-multisource` 已通过 PR #2 合并  
@@ -15,10 +15,10 @@
 1. `main` 上已经有完整网站、D1 持久化、申请管理、公司研究、质量监控、导出和每日 GitHub Actions 扫描框架。
 2. 美国公开招聘源、公开 ATS、公司官网、聚合数据源已进入生产流水线，但公司官网成功率仍低，最近一次健康状态为 `warning`。
 3. 中国公开索引在最近一次生产扫描中命中 0 条，主要缺口是 BOSS、猎聘、智联、51job、拉勾等受保护平台无法稳定进行云端无人值守采集。
-4. PR #2 已于 2026-08-01 squash merge 到 `main`，merge commit 为 `7443f4fe7b45785638aed8baff8a6fd42bf796be`；中国多来源补充框架和对应 CI 已进入生产分支，但生产 workflow 尚未手动验证。
+4. PR #2 已于 2026-08-01 squash merge 到 `main`，merge commit 为 `7443f4fe7b45785638aed8baff8a6fd42bf796be`；生产 run `30711130632` 已验证全部采集、合并、health、artifact 和 snapshot push，但网站 `/api/jobs/import` 对约 9.4 MB 单次 payload 连续返回 HTTP 500，因此网站职位尚未完成本轮回写。
 5. BOSS 真实页面链路已验证：能保存职位名、公司、地点、独立详情 URL；最初 JD 正文截断问题已修复。测试岗位“高级生物统计师（上海）”被排除是正确行为，因为系统面向应届/早期职业岗位并排除“高级”。
 6. 本地书签保存的 JSON 不会自动上传 GitHub。它只有经过隐私检查、复制到 `data/imports/china/` 并提交后，GitHub Actions 才能看到。
-7. 下一步是：**从 `main` 手动运行一次每日工作流 → 验证网站同步 secrets 和真实回写 → 检查生成的 run receipt/health/网站数据**。
+7. 下一步是：**把网站同步改为小批次导入 → 重新运行/重试同步 → 验证 scan status completed 与网站数据 → 完成 P0**。
 
 任何新 Chat 开始工作前，应先读取本文件、`docs/INTEGRATION_LOG.md`、`docs/job-collection.md`、PR #2 描述以及最新 `data/scans/*summary*.json`，再核对 GitHub 当前状态。本文件中的数字是时间截面，不可替代实时核对。
 
@@ -178,41 +178,41 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ---
 
-## 4. 最近一次生产数据基线（`main`，2026-07-31）
+## 4. 最近一次生产扫描基线（run 30711130632，2026-08-01）
 
-这些数字来自 `data/scans/run_receipt_latest.json`、`scan_health_latest.json` 和 `company_portal_summary.json`：
+本轮扫描与快照生成成功，但网站导入失败；因此以下是仓库快照基线，不代表网站已完成回写。数据来自 `data/scans/run_receipt_latest.json`、`scan_health_latest.json` 和 `company_portal_summary.json`：
 
 | 指标 | 数值 |
 |---|---:|
-| fetched | 278 |
-| verified/open | 51 |
-| rejected | 9 |
-| deduplicated | 10 |
-| imported | 264 |
-| new | 247 |
-| updated/unchanged | 12 |
-| temporarily retained | 5 |
+| fetched | 346 |
+| verified/open | 118 |
+| rejected | 10 |
+| deduplicated | 16 |
+| imported（待网站回写） | 336 |
+| new | 72 |
+| updated/unchanged | 248 |
+| temporarily retained | 16 |
 | stale pruned | 0 |
-| failed sources | 110 |
-| company pool | 176 |
-| company portals attempted | 176 |
-| company portals succeeded | 66 |
-| company success rate | 37.5% |
-| company portal jobs scanned | 2,060 |
-| company portal jobs matched | 11 |
+| failed sources | 174 |
+| company pool | 350 |
+| company portals attempted | 350 |
+| company portals succeeded | 176 |
+| company success rate | 50.3% |
+| company portal jobs scanned | 12,925 |
+| company portal jobs matched | 82 |
 | China indexed jobs matched | 0 |
 
-健康状态为 `warning`，主要异常是 company portal 成功率低和 110 个失败/未识别来源。`attempted 176/176` 不能表述为“176 家全部成功覆盖”。
+健康状态仍为 `warning`。美国公司门户成功 148/176；中国公司门户仅成功 28/171，且中国公开索引命中 0，仍是主要覆盖缺口。公司池从此前 176 扩至 350，整体成功数和职位命中显著增加，但 `attempted 350/350` 仍不能表述为全部成功覆盖。
 
-`main` 最近一次来源计数：
+本轮来源计数：
 
-- `us_jobs_verified_latest.json`: 16
+- `us_jobs_verified_latest.json`: 14
 - `china_jobs_latest.json`: 0
-- `cloud_sources_jobs_latest.json`: 1
+- `cloud_sources_jobs_latest.json`: 0
 - `aggregator_jobs_verified_latest.json`: 250
-- `company_portal_jobs_latest.json`: 11
+- `company_portal_jobs_latest.json`: 82
 
-代码中已补充一批 parent-company alias 和 reviewed official portal seeds，但必须由下一次生产 run receipt 验证是否真的提高成功率，不能提前计为生产成功。
+生产 run `30711130632` 的唯一失败步骤是 `Sync jobs to Ivy Job Radar`。两个同步 secrets 均存在且有效：workflow 成功把网站状态改为 `running`，失败后也成功改为 `failed`。失败请求把约 9.4 MB 的 `all_jobs_latest.json` 一次性 POST 到 `/api/jobs/import`；站点约 39 秒后返回 HTTP 500，curl 三次重试仍失败。artifact `global-jobscan-30711130632`（ID `8822107906`）已保留，扫描快照已安全 rebase/push 到 `main` commit `6b95f49...`。
 
 ---
 
@@ -288,9 +288,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### 7.1 `main`
 
-- PR #2 merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`；随后 handoff 状态提交：`cf13ff0fcd4eaebe44a905bf4a79507449f1daa1`（本次更新后 HEAD 会继续变化）。
+- PR #2 merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`；生产扫描快照已由 run `30711130632` push 到 commit `6b95f49...`（本次 handoff 更新后 HEAD 会继续变化）。
 - 包含网站、生产扫描框架、2026-07-31 快照，以及 PR #2 的中国多来源采集代码。
-- 下一状态门槛：手动 dispatch `daily-us-jobscan.yml` 并验证网站回写。
+- 下一状态门槛：将约 9.4 MB 的网站导入拆成小批次，重新验证 `/api/jobs/import`、completed 状态和网站实际数据。
 
 ### 7.2 PR #1：失败/停止路线
 
@@ -321,15 +321,22 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### P0：使 PR #2 真正进入生产
 
-当前进度：P0 第 1–2 项已完成。PR #2 最终 CI run `30710568256` 全绿并已 squash merge；用户已于 2026-08-01 约 13:45–13:50（America/New_York）从 `main` 手动触发 `daily-us-jobscan.yml`。第 3–7 项正在通过 Actions 结果、生成快照和网站状态验证。
+当前进度：第 1–4、7 项已完成；第 6 项完成仓库侧核对；第 5 项因网站单次导入 HTTP 500 未完成。生产 run `30711130632` 证明 PR #2 的中国快照导入、来源 merge、全局扫描、health、artifact 和 snapshot push 均能运行。唯一阻塞是约 9.4 MB payload 被一次性发送到网站，导入 API 顺序执行大量 D1 查询/写入并在约 39 秒后返回 500。
 
 1. [x] 复核 PR #2 当前 diff 和 CI 后合并到 `main`。Merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`。
-2. [x] 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。由用户在已登录的 GitHub 页面触发。
-3. [in progress] 观察每一步是否运行，包括中国快照导入和来源 merge。
-4. 验证 `IVY_JOB_RADAR_SYNC_TOKEN` 与 `SITES_SIWC_BYPASS_TOKEN`；缺失时现在应明确失败。
-5. 确认 `/api/jobs/import` 成功，网站 scan status 从 running/queued 进入 completed。
-6. 核对 workflow artifact、`run_receipt_latest.json`、`scan_health_latest.json`、`china_scan_summary.json` 和网站实际职位。
-7. 确认生成快照能安全 rebase/push 回 `main`；若失败，artifact 仍应保留。
+2. [x] 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。run：`30711130632`。
+3. [x] 观察每一步，包括中国快照导入、来源 merge、公司池扫描、canonicalize 和 health；这些步骤全部成功。
+4. [x] 验证 `IVY_JOB_RADAR_SYNC_TOKEN` 与 `SITES_SIWC_BYPASS_TOKEN`；两个 secret 均存在且能写入 scan status。
+5. [blocked] `/api/jobs/import` 未成功；需把 `all_jobs_latest.json` 拆成小批次导入，避免单次函数超时/数据库顺序处理过久。
+6. [partial] artifact、receipt、health、中国 summary 和仓库快照已核对；网站职位仍需在修复后核对。
+7. [x] 生成快照已安全 rebase/push 回 `main`，commit `6b95f49...`；artifact ID `8822107906` 保留至 2026-08-31。
+
+下一步执行顺序：
+
+1. 修改 daily workflow，把职位数组切成小批次后逐批 POST；每批保持可重试、失败即停止。
+2. 更新并运行测试/语法检查。
+3. 将修复提交到 `main`，重新运行生产 workflow 或只重试可安全复用的导入步骤。
+4. 核对网站 scan status 为 `completed`、created/updated/skipped 和网站岗位总数，再关闭 P0。
 
 ### P1：中国来源实际覆盖
 
@@ -341,9 +348,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### P1：生产可靠性
 
-1. 跑下一次 176-company 生产扫描，验证新 alias 和 reviewed portal seeds 是否提高 37.5% 成功率。
+1. [x] 2026-08-01 已跑 350-company 生产扫描：整体成功 176/350；美国 148/176，中国 28/171。alias/seeds 确实扩大命中，但中国成功率仍低。
 2. 对 HTTP 202、timeout、403、404、unidentified 做分类 remediation，不要把全部失败简单重试。
-3. 明确当前 website sync 失败的历史 run 日志；之前只知道某次 “Sync daily scan to Ivy Job Radar” 失败，没有完整日志证据。
+3. [x] run `30711130632` 已取得完整日志：约 9.4 MB 单次 POST 到 `/api/jobs/import`，约 39 秒后连续 HTTP 500；不是 secrets 缺失。
 4. 确认 ChatGPT Automation 和 GitHub schedule 都按预期运行，并在用户界面上清楚区分。
 
 ### P2：尚未接入的外部来源/平台能力
@@ -486,7 +493,7 @@ python3 scripts/apify_zhaopin_scan.py --max-results 25
 - 不要保存 BOSS 左侧列表/整个搜索结果页；应捕获右侧当前详情和稳定 job detail URL。
 - 不要仅用 20 字长度判断 JD 完整；已增加明显截断检测，但仍应继续测试不同平台。
 - 不要声称 BOSS 已全自动接入。它当前是用户触发的 manual fallback。
-- 不要声称 PR #2 已上线。只有合并、手动 dispatch、网站回写成功后才算生产接入。
+- 不要声称 PR #2 已完整上线。采集与快照已进入生产，但只有网站分批回写成功后才算端到端生产接入。
 - 不要把 ChatGPT 每日任务成功等同于 GitHub Actions/网站同步成功。
 - 不要把 `mcp-jobs` 说成五平台采集器；1.4.0 发布内容不支持这个结论。
 - 不要未经用户批准启用 Apify 付费源。
