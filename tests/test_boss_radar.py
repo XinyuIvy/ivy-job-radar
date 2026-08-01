@@ -75,24 +75,59 @@ class BossRadarTransformTest(unittest.TestCase):
             "https://www.zhipin.com/shanghai/",
         )
 
-    def test_visible_search_fills_input_then_clicks_button(self):
+    def test_visible_search_uses_native_input_then_clicks_button(self):
         class FakePage:
             def __init__(self):
                 self.expressions = []
+                self.commands = []
 
             def evaluate(self, expression):
                 self.expressions.append(expression)
-                if "setter.call" in expression:
-                    return {"ok": True}
-                return {"ok": True, "method": "button"}
+                if "input.select()" in expression:
+                    return {"ok": True, "prior_value_length": 0}
+                return {
+                    "ok": True,
+                    "method": "mouse",
+                    "x": 125,
+                    "y": 48,
+                    "input_value": "生物统计",
+                }
+
+            def send(self, method, params):
+                self.commands.append((method, params))
 
         page = FakePage()
         with patch.object(BOSS_PAGE_DOM.time, "sleep"):
             BOSS_PAGE_DOM.submit_visible_search(page, "生物统计")
 
         self.assertEqual(len(page.expressions), 2)
-        self.assertIn('"生物统计"', page.expressions[0])
-        self.assertIn("button.click()", page.expressions[1])
+        self.assertEqual(page.commands[0], ("Input.insertText", {"text": "生物统计"}))
+        self.assertEqual(page.commands[1][0], "Input.dispatchMouseEvent")
+        self.assertEqual(page.commands[2][0], "Input.dispatchMouseEvent")
+        self.assertIn('"生物统计"', page.expressions[1])
+
+    def test_visible_search_uses_enter_without_a_scoped_button(self):
+        class FakePage:
+            def __init__(self):
+                self.calls = 0
+                self.commands = []
+
+            def evaluate(self, expression):
+                self.calls += 1
+                if self.calls == 1:
+                    return {"ok": True, "prior_value_length": 0}
+                return {"ok": True, "method": "enter", "input_value": "生物统计"}
+
+            def send(self, method, params):
+                self.commands.append((method, params))
+
+        page = FakePage()
+        with patch.object(BOSS_PAGE_DOM.time, "sleep"):
+            BOSS_PAGE_DOM.submit_visible_search(page, "生物统计")
+
+        self.assertEqual(page.commands[0], ("Input.insertText", {"text": "生物统计"}))
+        self.assertEqual(page.commands[1][0], "Input.dispatchKeyEvent")
+        self.assertEqual(page.commands[2][0], "Input.dispatchKeyEvent")
 
     def test_requested_keyword_cards_are_prioritized(self):
         jobs = [
