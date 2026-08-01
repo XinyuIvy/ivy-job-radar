@@ -2,6 +2,7 @@ import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "local-collector" / "boss_one_click.py"
@@ -74,6 +75,49 @@ class BossOneClickTest(unittest.TestCase):
 
             self.assertTrue(report.exists())
             self.assertEqual(radar.saved_state["last_summary"], summary)
+
+    def test_sync_failure_rewinds_search_cursor(self):
+        class FakeRadar:
+            APP_DIR = Path("/tmp/ivy-test")
+            DEFAULT_ENV_FILE = Path("env")
+            DEFAULT_SCRAPER_DIR = Path("scraper")
+            DEFAULT_PLAN = Path("plan")
+            DEFAULT_RESULT_DIR = Path("results")
+
+            def __init__(self):
+                self.states = [{"cursor": 16}, {"cursor": 24, "status": "completed", "completed_searches": 8}]
+                self.saved = None
+
+            def load_env(self, _path):
+                return None
+
+            def read_state(self):
+                return dict(self.states.pop(0)) if self.states else dict(self.saved)
+
+            def run_searches(self, *_args):
+                return []
+
+            def transform_result_files(self, _files):
+                return [{"application_id": "job-1"}]
+
+            def sync_jobs(self, _jobs):
+                raise SystemExit("website unavailable")
+
+            def load_json(self, _path):
+                return {"cities": ["上海"], "keywords": ["生物统计"]}
+
+            def write_state(self, state):
+                self.saved = dict(state)
+
+        fake = FakeRadar()
+        with patch.object(BOSS_ONE_CLICK, "load_radar", return_value=fake), \
+                patch.object(BOSS_ONE_CLICK, "count_raw_rows", return_value=1), \
+                patch.object(BOSS_ONE_CLICK, "save_summary", side_effect=lambda radar, state, summary: radar.write_state(state) or Path("report")):
+            summary = BOSS_ONE_CLICK.run_scan()
+
+        self.assertEqual(fake.saved["cursor"], 16)
+        self.assertEqual(summary["status"], "attention_required")
+        self.assertIn("website unavailable", summary["attention"])
 
 
 if __name__ == "__main__":
