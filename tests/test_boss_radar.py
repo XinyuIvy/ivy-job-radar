@@ -2,6 +2,7 @@ import importlib.util
 import json
 import os
 import tempfile
+import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -13,8 +14,35 @@ assert SPEC and SPEC.loader
 BOSS_RADAR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(BOSS_RADAR)
 
+PAGE_MODULE_PATH = Path(__file__).resolve().parents[1] / "local-collector" / "boss_page_dom.py"
+PAGE_SPEC = importlib.util.spec_from_file_location("boss_page_dom", PAGE_MODULE_PATH)
+assert PAGE_SPEC and PAGE_SPEC.loader
+BOSS_PAGE_DOM = importlib.util.module_from_spec(PAGE_SPEC)
+with patch.dict("sys.modules", {"websocket": types.ModuleType("websocket")}):
+    PAGE_SPEC.loader.exec_module(BOSS_PAGE_DOM)
+
 
 class BossRadarTransformTest(unittest.TestCase):
+    def test_navigation_url_must_match_path_and_search_parameters(self):
+        expected = "https://www.zhipin.com/web/geek/job?query=%E7%94%9F%E7%89%A9%E7%BB%9F%E8%AE%A1&city=101020100"
+
+        self.assertTrue(BOSS_PAGE_DOM.urls_match(expected + "&page=1", expected))
+        self.assertFalse(BOSS_PAGE_DOM.urls_match("https://www.zhipin.com/", expected))
+        self.assertFalse(BOSS_PAGE_DOM.urls_match(
+            "https://www.zhipin.com/web/geek/job?query=%E6%97%85%E6%B8%B8&city=101020100",
+            expected,
+        ))
+
+    def test_requested_keyword_cards_are_prioritized(self):
+        jobs = [
+            {"title": "旅游地陪", "card_text": "旅游地陪 50-150元/时"},
+            {"title": "生物统计师", "card_text": "生物统计师 上海"},
+        ]
+
+        ordered = BOSS_PAGE_DOM.prioritize_jobs(jobs, "生物统计")
+
+        self.assertEqual(ordered[0]["title"], "生物统计师")
+
     def test_transforms_api_rows_and_removes_recruiter_fields(self):
         with tempfile.TemporaryDirectory() as temporary_dir:
             result_dir = Path(temporary_dir)
