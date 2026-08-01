@@ -10,10 +10,17 @@
     },
     {
       "source": "BOSS直聘",
+      "mode": "user-triggered-local-batch-automation",
+      "status": "ready-for-production-verification",
+      "cost": "free",
+      "notes": "用户双击桌面入口后自动续扫关键词和城市、读取完整JD、筛选、去重并实时同步；登录或验证码异常时暂停。"
+    },
+    {
+      "source": "BOSS直聘单岗书签",
       "mode": "user-triggered-bookmarklet",
       "status": "production-fallback",
       "cost": "free",
-      "notes": "CDP 自动控制会触发回退；由用户在可见详情页点击保存。"
+      "notes": "用于补录批量扫描遗漏的当前可见职位详情。"
     },
     {
       "source": "职位猎人 job-hunting",
@@ -34,7 +41,7 @@
       "mode": "cloud-api-optional",
       "status": "disabled-until-paid-use-approved",
       "cost": "paid",
-      "notes": "仅在 APIFY_ZHAOPIN_ENABLED=true 且配置 APIFY_TOKEN 时运行，并限制每轮结果数。"
+      "notes": "仅在明确批准付费使用后启用，并限制每轮结果数。"
     },
     {
       "source": "猎聘、智联、前程无忧、拉勾、就业在线",
