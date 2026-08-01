@@ -95,7 +95,7 @@ class BossRadarTransformTest(unittest.TestCase):
             "https://www.zhipin.com/shanghai/",
         )
 
-    def test_visible_search_uses_native_input_then_clicks_its_submitter(self):
+    def test_visible_search_sets_framework_value_then_clicks_its_submitter(self):
         class FakePage:
             def __init__(self):
                 self.expressions = []
@@ -103,12 +103,9 @@ class BossRadarTransformTest(unittest.TestCase):
 
             def evaluate(self, expression):
                 self.expressions.append(expression)
-                if "input.select()" in expression:
-                    return {"ok": True, "prior_value_length": 0}
                 return {
                     "ok": True,
                     "input_value": "生物统计",
-                    "active_is_input": True,
                     "submit_x": 640.0,
                     "submit_y": 120.0,
                     "submit_label": "搜索",
@@ -121,16 +118,17 @@ class BossRadarTransformTest(unittest.TestCase):
         with patch.object(BOSS_PAGE_DOM.time, "sleep"):
             BOSS_PAGE_DOM.submit_visible_search(page, "生物统计")
 
-        self.assertEqual(len(page.expressions), 2)
-        self.assertEqual(page.commands[0], ("Input.insertText", {"text": "生物统计"}))
-        self.assertEqual(page.commands[1], (
+        self.assertEqual(len(page.expressions), 1)
+        self.assertIn("HTMLInputElement.prototype", page.expressions[0])
+        self.assertIn("InputEvent('input'", page.expressions[0])
+        self.assertEqual(page.commands[0], (
             "Input.dispatchMouseEvent",
             {"type": "mouseMoved", "x": 640.0, "y": 120.0},
         ))
-        self.assertEqual(page.commands[2][1]["type"], "mousePressed")
-        self.assertEqual(page.commands[3][1]["type"], "mouseReleased")
-        self.assertEqual(len(page.commands), 4)
-        self.assertIn('"生物统计"', page.expressions[1])
+        self.assertEqual(page.commands[1][1]["type"], "mousePressed")
+        self.assertEqual(page.commands[2][1]["type"], "mouseReleased")
+        self.assertEqual(len(page.commands), 3)
+        self.assertIn('"生物统计"', page.expressions[0])
 
     def test_missing_search_result_tab_fails_with_target_urls(self):
         page = object.__new__(BOSS_PAGE_DOM.CDPPage)
@@ -156,32 +154,26 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertIn("did not produce a matching BOSS results page", message)
         self.assertIn("https://www.zhipin.com/shanghai/?seoRefer=index", message)
 
-    def test_visible_search_rejects_an_input_that_lost_focus(self):
+    def test_matching_search_page_is_reused_without_navigation(self):
         class FakePage:
             def __init__(self):
-                self.calls = 0
-                self.commands = []
+                self.navigations = []
 
             def evaluate(self, expression):
-                self.calls += 1
-                if self.calls == 1:
-                    return {"ok": True, "prior_value_length": 0}
                 return {
-                    "ok": True,
-                    "input_value": "生物统计",
-                    "active_is_input": False,
+                    "url": BOSS_PAGE_DOM.search_url("生物统计", "上海"),
+                    "title": "BOSS Search",
+                    "text": "生物统计师",
                 }
 
-            def send(self, method, params):
-                self.commands.append((method, params))
+            def navigate(self, url):
+                self.navigations.append(url)
 
         page = FakePage()
-        with patch.object(BOSS_PAGE_DOM.time, "sleep"), self.assertRaises(
-            BOSS_PAGE_DOM.PageCollectionError
-        ):
-            BOSS_PAGE_DOM.submit_visible_search(page, "生物统计")
+        result = BOSS_PAGE_DOM.prepare_search_page(page, "生物统计", "上海")
 
-        self.assertEqual(page.commands, [("Input.insertText", {"text": "生物统计"})])
+        self.assertEqual(result, BOSS_PAGE_DOM.search_url("生物统计", "上海"))
+        self.assertEqual(page.navigations, [])
 
     def test_visible_search_rejects_a_missing_submitter(self):
         class FakePage:
@@ -190,9 +182,6 @@ class BossRadarTransformTest(unittest.TestCase):
                 self.commands = []
 
             def evaluate(self, expression):
-                self.calls += 1
-                if self.calls == 1:
-                    return {"ok": True, "prior_value_length": 0}
                 return {
                     "ok": False,
                     "reason": "visible_submitter_not_found",
@@ -210,7 +199,7 @@ class BossRadarTransformTest(unittest.TestCase):
             BOSS_PAGE_DOM.submit_visible_search(page, "生物统计")
 
         self.assertIn("visible_submitter_not_found", str(caught.exception))
-        self.assertEqual(page.commands, [("Input.insertText", {"text": "生物统计"})])
+        self.assertEqual(page.commands, [])
 
     def test_requested_keyword_cards_are_prioritized(self):
         jobs = [
