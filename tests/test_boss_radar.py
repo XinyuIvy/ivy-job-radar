@@ -69,6 +69,31 @@ class BossRadarTransformTest(unittest.TestCase):
             expected,
         ))
 
+    def test_city_landing_url_uses_the_public_city_page(self):
+        self.assertEqual(
+            BOSS_PAGE_DOM.city_landing_url("上海"),
+            "https://www.zhipin.com/shanghai/",
+        )
+
+    def test_visible_search_fills_input_then_clicks_button(self):
+        class FakePage:
+            def __init__(self):
+                self.expressions = []
+
+            def evaluate(self, expression):
+                self.expressions.append(expression)
+                if "setter.call" in expression:
+                    return {"ok": True}
+                return {"ok": True, "method": "button"}
+
+        page = FakePage()
+        with patch.object(BOSS_PAGE_DOM.time, "sleep"):
+            BOSS_PAGE_DOM.submit_visible_search(page, "生物统计")
+
+        self.assertEqual(len(page.expressions), 2)
+        self.assertIn('"生物统计"', page.expressions[0])
+        self.assertIn("button.click()", page.expressions[1])
+
     def test_requested_keyword_cards_are_prioritized(self):
         jobs = [
             {"title": "旅游地陪", "card_text": "旅游地陪 50-150元/时"},
