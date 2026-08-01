@@ -7,11 +7,12 @@ import re
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 
 MAX_BODY_BYTES = 1_000_000
+CaptureCallback = Callable[[dict[str, Any], Path], dict[str, Any] | None]
 
 
 def safe_slug(value: object) -> str:
@@ -55,9 +56,9 @@ def save_capture(payload: dict[str, Any], inbox: Path) -> Path:
     return path
 
 
-def handler_factory(inbox: Path) -> type[BaseHTTPRequestHandler]:
+def handler_factory(inbox: Path, on_capture: CaptureCallback | None = None) -> type[BaseHTTPRequestHandler]:
     class InboxHandler(BaseHTTPRequestHandler):
-        server_version = "IvyJobInbox/1.0"
+        server_version = "IvyJobInbox/1.1"
 
         def cors(self) -> None:
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -80,7 +81,7 @@ def handler_factory(inbox: Path) -> type[BaseHTTPRequestHandler]:
 
         def do_GET(self) -> None:  # noqa: N802
             if self.path == "/health":
-                self.write_json(200, {"ok": True, "inbox": str(inbox)})
+                self.write_json(200, {"ok": True, "inbox": str(inbox), "sync_enabled": on_capture is not None})
             else:
                 self.write_json(404, {"ok": False, "error": "not found"})
 
@@ -105,7 +106,15 @@ def handler_factory(inbox: Path) -> type[BaseHTTPRequestHandler]:
                 self.write_json(422, {"ok": False, "error": error})
                 return
             path = save_capture(payload, inbox)
-            self.write_json(201, {"ok": True, "file": path.name})
+            response: dict[str, Any] = {"ok": True, "file": path.name, "saved": True}
+            if on_capture is not None:
+                try:
+                    sync_result = on_capture(payload, path)
+                    if sync_result:
+                        response.update(sync_result)
+                except Exception as exc:  # Keep the local capture when remote sync fails.
+                    response.update({"synced": False, "sync_error": str(exc)})
+            self.write_json(201, response)
 
         def log_message(self, format: str, *args: object) -> None:
             print(f"{self.address_string()} - {format % args}")
