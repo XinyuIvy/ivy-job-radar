@@ -400,10 +400,41 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
       active_tag: document.activeElement ? document.activeElement.tagName : ''
     };
   }
+  const scope = input.closest('form')
+    || input.closest('.search-form')
+    || input.closest('[class*="search-form"]')
+    || document;
+  const submitters = Array.from(scope.querySelectorAll(
+    '.btn-search, button[type="submit"], input[type="submit"], '
+    + 'button[class*="search"], a[class*="search"]'
+  )).filter(visible);
+  const submitter = submitters.find((node) => {
+    const label = (node.innerText || node.value || node.getAttribute('aria-label') || '').trim();
+    return label.includes('搜索');
+  }) || submitters[0];
+  if (!submitter) {
+    return {
+      ok: false,
+      reason: 'visible_submitter_not_found',
+      input_value: input.value,
+      submitter_count: submitters.length
+    };
+  }
+  const rect = submitter.getBoundingClientRect();
+  if (!rect.width || !rect.height) {
+    return {
+      ok: false,
+      reason: 'submitter_has_no_clickable_area',
+      input_value: input.value
+    };
+  }
   return {
     ok: true,
     input_value: input.value,
-    active_is_input: document.activeElement === input
+    active_is_input: document.activeElement === input,
+    submit_x: rect.left + rect.width / 2,
+    submit_y: rect.top + rect.height / 2,
+    submit_label: (submitter.innerText || submitter.value || '').trim().slice(0, 80)
   };
 })()
         """.replace("KEYWORD", json.dumps(keyword, ensure_ascii=False))
@@ -414,18 +445,18 @@ def submit_visible_search(page: CDPPage, keyword: str) -> None:
             f"Diagnostics: {json.dumps(input_state, ensure_ascii=False)}"
         )
 
-    # Submit from the focused input. Clicking a broadly matched search button
-    # can hit a different control after BOSS changes the city-page layout.
-    key = {
-        "key": "Enter",
-        "code": "Enter",
-        "windowsVirtualKeyCode": 13,
-        "nativeVirtualKeyCode": 13,
-    }
-    # A key-down followed by a key-up is one Enter press. Sending an extra
-    # char event for Enter can submit the same form twice on framework pages.
-    page.send("Input.dispatchKeyEvent", {"type": "rawKeyDown", **key})
-    page.send("Input.dispatchKeyEvent", {"type": "keyUp", **key})
+    # Click the submitter that belongs to the selected input. A native mouse
+    # event works even when the landing page does not submit searches on Enter.
+    pointer = {"x": input_state["submit_x"], "y": input_state["submit_y"]}
+    page.send("Input.dispatchMouseEvent", {"type": "mouseMoved", **pointer})
+    page.send(
+        "Input.dispatchMouseEvent",
+        {"type": "mousePressed", "button": "left", "clickCount": 1, **pointer},
+    )
+    page.send(
+        "Input.dispatchMouseEvent",
+        {"type": "mouseReleased", "button": "left", "clickCount": 1, **pointer},
+    )
 
 
 def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, Any]]:
