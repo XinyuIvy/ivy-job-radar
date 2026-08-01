@@ -9,6 +9,13 @@
       "notes": "优先来源；读取公开公司招聘页、Workday、Moka、飞书招聘等。"
     },
     {
+      "source": "中国多来源桌面一键扫描",
+      "mode": "user-triggered-local-orchestrator",
+      "status": "ready-for-production-verification",
+      "cost": "free",
+      "notes": "同一次双击依次运行 BOSS 登录态批量采集，以及猎聘、智联、前程无忧、拉勾、牛客、国聘、应届生和中国公司官网公开索引；各来源独立失败，合格岗位直接同步网站。"
+    },
+    {
       "source": "BOSS直聘",
       "mode": "user-triggered-local-batch-automation",
       "status": "ready-for-production-verification",
