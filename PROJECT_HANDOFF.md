@@ -1,10 +1,10 @@
 # Ivy Job Radar 项目交接与持续进度记录
 
-> 最后更新：2026-08-01 13:42（America/New_York）  
+> 最后更新：2026-08-01 13:35（America/New_York）  
 > 仓库：`XinyuIvy/ivy-job-radar`（private）  
 > 生产分支：`main`  
-> 当前开发分支：`agent/china-multisource`  
-> 当前核心 PR：[PR #2 — Add multi-source China job collection](https://github.com/XinyuIvy/ivy-job-radar/pull/2)
+> 当前开发分支：无；`agent/china-multisource` 已通过 PR #2 合并  
+> 最近完成：[PR #2 - Add multi-source China job collection](https://github.com/XinyuIvy/ivy-job-radar/pull/2)，squash merge commit `7443f4fe7b45785638aed8baff8a6fd42bf796be`
 
 ## 0. 给下一位 Chat 的最短说明
 
@@ -15,10 +15,10 @@
 1. `main` 上已经有完整网站、D1 持久化、申请管理、公司研究、质量监控、导出和每日 GitHub Actions 扫描框架。
 2. 美国公开招聘源、公开 ATS、公司官网、聚合数据源已进入生产流水线，但公司官网成功率仍低，最近一次健康状态为 `warning`。
 3. 中国公开索引在最近一次生产扫描中命中 0 条，主要缺口是 BOSS、猎聘、智联、51job、拉勾等受保护平台无法稳定进行云端无人值守采集。
-4. PR #2 已实现中国多来源补充框架、BOSS/其他可见页面书签采集、快照导入、来源合并、付费智联适配器和 PR CI；CI 已全绿，PR 已 Ready for review，但 **尚未合并到 `main`**。
+4. PR #2 已于 2026-08-01 squash merge 到 `main`，merge commit 为 `7443f4fe7b45785638aed8baff8a6fd42bf796be`；中国多来源补充框架和对应 CI 已进入生产分支，但生产 workflow 尚未手动验证。
 5. BOSS 真实页面链路已验证：能保存职位名、公司、地点、独立详情 URL；最初 JD 正文截断问题已修复。测试岗位“高级生物统计师（上海）”被排除是正确行为，因为系统面向应届/早期职业岗位并排除“高级”。
 6. 本地书签保存的 JSON 不会自动上传 GitHub。它只有经过隐私检查、复制到 `data/imports/china/` 并提交后，GitHub Actions 才能看到。
-7. 下一步不是继续重写采集器，而是：**合并 PR #2 → 手动运行一次每日工作流 → 验证网站同步 secrets 和真实回写 → 检查生成的 run receipt/health/网站数据**。
+7. 下一步是：**从 `main` 手动运行一次每日工作流 → 验证网站同步 secrets 和真实回写 → 检查生成的 run receipt/health/网站数据**。
 
 任何新 Chat 开始工作前，应先读取本文件、`docs/INTEGRATION_LOG.md`、`docs/job-collection.md`、PR #2 描述以及最新 `data/scans/*summary*.json`，再核对 GitHub 当前状态。本文件中的数字是时间截面，不可替代实时核对。
 
@@ -288,9 +288,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### 7.1 `main`
 
-- 核对时 HEAD：`207a7d79faed3f8eb0a8d5bc6bcd0834091a6eff`。
-- 包含网站、生产扫描框架和 2026-07-31 快照。
-- 尚不包含 PR #2 的多来源中国采集代码。
+- PR #2 合并后 HEAD：`7443f4fe7b45785638aed8baff8a6fd42bf796be`（本 handoff 更新提交后 HEAD 会继续变化）。
+- 包含网站、生产扫描框架、2026-07-31 快照，以及 PR #2 的中国多来源采集代码。
+- 下一状态门槛：手动 dispatch `daily-us-jobscan.yml` 并验证网站回写。
 
 ### 7.2 PR #1：失败/停止路线
 
@@ -305,10 +305,10 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 - URL：https://github.com/XinyuIvy/ivy-job-radar/pull/2
 - 分支：`agent/china-multisource`
-- 2026-08-01 合并前代码核对 HEAD：`3e51970cb398381dca36dc9a8e6dcb87f4ba3994`（本交接文件更新后 HEAD 会再次变化）。
-- 状态：Open、非 Draft、mergeable、尚未合并；14 个文件变更，`+1803/-3`。
-- CI：`PR Python tests` run `30710359764` 已成功完成；依赖安装、Python syntax validation、全部 unit tests 均为 success。
-- 合并前 diff 复核已完成：未发现阻塞合并的问题；付费 Apify 仍保持默认关闭，PR #1 的失败路线未混入。
+- 最终 HEAD：`81b47e9392d9e7a7e0b47c529a3b9be7390fbad0`。
+- 状态：Merged；2026-08-01 squash merge 到 `main`，merge commit `7443f4fe7b45785638aed8baff8a6fd42bf796be`。
+- 最终 CI：`PR Python tests` run `30710568256` 成功；依赖安装、Python syntax validation、全部 unit tests 均为 success。
+- 合并前 diff 复核未发现阻塞问题；付费 Apify 保持默认关闭，PR #1 的失败路线未混入。
 - 主要提交节点：
   - `f6bd073`：BOSS bookmarklet selector 和无效页面拒绝。
   - `72566583...`：完整 JD/截断检查和排除原因统计。
@@ -321,9 +321,9 @@ PR #2 已把“缺少网站同步凭据时静默跳过并显示成功”改为�
 
 ### P0：使 PR #2 真正进入生产
 
-当前进度：PR #2 的完整 diff、14 个变更文件、mergeability 和 HEAD Actions 已完成复核；run `30710359764` 全绿。因本次 handoff 更新会产生新 HEAD，需等待新一轮 PR CI 成功后再合并。
+当前进度：P0 第 1 项已完成。PR #2 最终 CI run `30710568256` 全绿，已 squash merge；现在执行第 2 项手动生产 dispatch。
 
-1. 复核 PR #2 当前 diff 和 CI 后合并到 `main`。
+1. [x] 复核 PR #2 当前 diff 和 CI 后合并到 `main`。Merge commit：`7443f4fe7b45785638aed8baff8a6fd42bf796be`。
 2. 从 `main` 手动 dispatch `.github/workflows/daily-us-jobscan.yml`。
 3. 观察每一步是否运行，包括中国快照导入和来源 merge。
 4. 验证 `IVY_JOB_RADAR_SYNC_TOKEN` 与 `SITES_SIWC_BYPASS_TOKEN`；缺失时现在应明确失败。
