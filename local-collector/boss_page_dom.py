@@ -25,6 +25,16 @@ CITY_CODES = {
     "苏州": "101190400",
     "成都": "101270100",
 }
+CITY_PATHS = {
+    "北京": "beijing",
+    "上海": "shanghai",
+    "广州": "guangzhou",
+    "深圳": "shenzhen",
+    "杭州": "hangzhou",
+    "南京": "nanjing",
+    "苏州": "suzhou",
+    "成都": "chengdu",
+}
 BLOCK_MARKERS = (
     "环境存在异常",
     "访问频繁",
@@ -276,6 +286,100 @@ def search_url(keyword: str, city: str) -> str:
     return f"https://www.zhipin.com/web/geek/job?{query}"
 
 
+def city_landing_url(city: str) -> str:
+    """Return the public city page used by the normal BOSS search form."""
+    path = CITY_PATHS.get(city, "")
+    if not path:
+        raise PageCollectionError(f"Unsupported city for page mode: {city}")
+    return f"https://www.zhipin.com/{path}/"
+
+
+def submit_visible_search(page: CDPPage, keyword: str) -> None:
+    """Fill and submit BOSS's visible search form like a normal page interaction."""
+    input_result = page.evaluate(
+        """
+(() => {
+  const selectors = [
+    'input[name="query"]',
+    'input.ipt-search',
+    '.search-form input',
+    '.search-form-con input',
+    'input[placeholder*="职位"]',
+    'input[placeholder*="搜索"]'
+  ];
+  const visible = (node) => Boolean(
+    node && (node.offsetWidth || node.offsetHeight || node.getClientRects().length)
+  );
+  const input = selectors.map((selector) => document.querySelector(selector)).find(visible);
+  if (!input) {
+    return {ok: false, input_count: document.querySelectorAll('input').length};
+  }
+  const setter = Object.getOwnPropertyDescriptor(
+    window.HTMLInputElement.prototype, 'value'
+  )?.set;
+  input.focus();
+  if (setter) setter.call(input, KEYWORD);
+  else input.value = KEYWORD;
+  input.dispatchEvent(new Event('input', {bubbles: true}));
+  input.dispatchEvent(new Event('change', {bubbles: true}));
+  return {ok: true};
+})()
+        """.replace("KEYWORD", json.dumps(keyword, ensure_ascii=False))
+    ) or {}
+    if not input_result.get("ok"):
+        raise PageCollectionError(
+            "The BOSS city page did not expose a visible search input. "
+            f"Diagnostics: {json.dumps(input_result, ensure_ascii=False)}"
+        )
+
+    # Give the page framework time to consume the input event before submitting.
+    time.sleep(0.5)
+    submit_result = page.evaluate(
+        """
+(() => {
+  const visible = (node) => Boolean(
+    node && (node.offsetWidth || node.offsetHeight || node.getClientRects().length)
+  );
+  const input = [
+    'input[name="query"]',
+    'input.ipt-search',
+    '.search-form input',
+    '.search-form-con input',
+    'input[placeholder*="职位"]',
+    'input[placeholder*="搜索"]'
+  ].map((selector) => document.querySelector(selector)).find(visible);
+  const button = [
+    '.btn-search',
+    '.search-form button[type="submit"]',
+    '.search-form button',
+    '.search-form-con button',
+    'button[type="submit"]'
+  ].map((selector) => document.querySelector(selector)).find(visible);
+  if (button) {
+    button.click();
+    return {ok: true, method: 'button'};
+  }
+  const form = input?.closest('form');
+  if (form) {
+    if (form.requestSubmit) form.requestSubmit();
+    else form.submit();
+    return {ok: true, method: 'form'};
+  }
+  return {
+    ok: false,
+    button_count: document.querySelectorAll('button').length,
+    form_count: document.querySelectorAll('form').length
+  };
+})()
+        """
+    ) or {}
+    if not submit_result.get("ok"):
+        raise PageCollectionError(
+            "The BOSS city page did not expose a usable search button or form. "
+            f"Diagnostics: {json.dumps(submit_result, ensure_ascii=False)}"
+        )
+
+
 def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, Any]]:
     """Put cards that visibly contain the requested keyword first."""
     needle = keyword.casefold().strip()
@@ -297,8 +401,18 @@ def prioritize_jobs(jobs: list[dict[str, Any]], keyword: str) -> list[dict[str, 
 def collect(keyword: str, city: str, max_details: int) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     page = CDPPage()
     try:
+        # Direct navigation is redirected to the city landing page by BOSS. Use
+        # the same visible search form that succeeds during a manual search.
         requested_search_url = search_url(keyword, city)
-        page.navigate(requested_search_url)
+        requested_city_url = city_landing_url(city)
+        page.navigate(requested_city_url)
+        wait_for_render(
+            page,
+            'input[name="query"], input.ipt-search, .search-form input, .search-form-con input',
+            timeout=60,
+            expected_url=requested_city_url,
+        )
+        submit_visible_search(page, keyword)
         wait_for_render(
             page,
             'a[href*="/job_detail/"], .search-job-result',
