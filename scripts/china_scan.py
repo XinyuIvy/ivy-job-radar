@@ -508,7 +508,6 @@ def run_scan(
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "missing_title_or_url": 0,
             "salary_below_20k": 0,
             "salary_missing_or_negotiable": 0,
         }
@@ -538,6 +537,13 @@ def run_scan(
             "rejection_reasons": {
                 key: sum(int(row.get("rejected", {}).get(key, 0)) for row in source_stats)
                 for key in rejection_stats
+                if key != "salary_missing_or_negotiable"
+            },
+            "review_counts": {
+                "salary_missing_or_negotiable": sum(
+                    int(row.get("rejected", {}).get("salary_missing_or_negotiable", 0))
+                    for row in source_stats
+                )
             },
         })
         time.sleep(float(config.get("delay_seconds", 0.3)))
@@ -551,7 +557,6 @@ def run_scan(
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "missing_title_or_url": 0,
             "salary_below_20k": 0,
             "salary_missing_or_negotiable": 0,
         }
@@ -582,6 +587,13 @@ def run_scan(
             "rejection_reasons": {
                 key: sum(int(row.get("rejected", {}).get(key, 0)) for row in source_stats)
                 for key in rejection_stats
+                if key != "salary_missing_or_negotiable"
+            },
+            "review_counts": {
+                "salary_missing_or_negotiable": sum(
+                    int(row.get("rejected", {}).get("salary_missing_or_negotiable", 0))
+                    for row in source_stats
+                )
             },
         })
 
