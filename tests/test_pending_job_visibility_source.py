@@ -12,7 +12,7 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
 
         self.assertIn('row.status === "准备材料"', component)
         self.assertIn('toLocaleLowerCase()', component)
-        self.assertIn('card.hidden = shouldHide', component)
+        self.assertIn('card.hidden = pendingKeys.has', component)
         self.assertIn('<PendingJobVisibility />', layout)
 
     def test_application_post_deduplicates_case_insensitively(self):
