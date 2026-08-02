@@ -12,6 +12,26 @@ SPEC.loader.exec_module(CHINA_SCAN)
 
 
 class ChinaScanFilterTest(unittest.TestCase):
+    def test_parses_brave_result_without_unrelated_navigation_links(self):
+        body = '''
+        <a href="/images?q=test">Images</a>
+        <div class="snippet abc" data-pos="0" data-type="web">
+          <a href="https://www.zhipin.com/job_detail/abc.html" class="hash l1">
+            <div class="title search-snippet-title hash" title="生物统计师">生物统计师</div>
+          </a>
+          <div class="generic-snippet hash"><div class="content desktop line-clamp-dynamic hash">
+            博士，统计学相关专业，经验不限。
+          </div></div>
+        </div>
+        '''
+
+        rows = CHINA_SCAN.parse_brave_results(body)
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["title"], "生物统计师")
+        self.assertEqual(rows[0]["url"], "https://www.zhipin.com/job_detail/abc.html")
+        self.assertIn("经验不限", rows[0]["description"])
+
     def test_scientific_algorithm_role_is_kept(self):
         stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
