@@ -78,5 +78,13 @@
       "when": 1785628643791,
       "tag": "0010_broken_silvermane",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1785630467868,
+      "tag": "0011_slim_electro",
+      "breakpoints": true
     }
   ]
+}

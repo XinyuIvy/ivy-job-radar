@@ -129,6 +129,8 @@ button { color: inherit; }
   color: #5c451f; font-size: 12px; font-weight: 800;
 }
 .preview-banner .refresh-jobs:disabled { cursor: wait; opacity: .65; }
+.scan-action-buttons { display: flex; align-items: center; gap: 8px; }
+.preview-banner .china-scan-button { background: var(--green-dark); color: white; }
 .preview-banner .ignored-list-link {
   flex: 0 0 auto; align-self: center; color: #765b31; font-size: 12px;
   text-decoration: underline; text-underline-offset: 3px;
@@ -155,9 +157,11 @@ button { color: inherit; }
 .scan-summary-failed .scan-summary-dot {
   background: #ad4b45; box-shadow: 0 0 0 4px rgba(173,75,69,.14);
 }
-.scan-summary-partial .scan-summary-dot {
+.scan-summary-partial .scan-summary-dot,
+.scan-summary-attention_required .scan-summary-dot {
   background: #c68820; box-shadow: 0 0 0 4px rgba(198,136,32,.15);
 }
+.china-control-summary { padding-top: 10px; }
 .china-scan-summary { padding-top: 10px; }
 .china-source-results { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .china-source-results span {
@@ -772,6 +776,7 @@ button { color: inherit; }
   .scan-status { margin-top: 20px; width: fit-content; }
   .preview-banner { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
   .preview-banner .live-data-copy { grid-column: 1 / -1; }
+  .scan-action-buttons { flex-wrap: wrap; }
   .preview-banner .refresh-jobs { align-self: center; }
   .preview-banner .ignored-list-link { justify-self: end; }
   .scan-summary { grid-column: 1 / -1; }
