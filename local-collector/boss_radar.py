@@ -487,7 +487,7 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
     )
 
     # Phase 2 opens details only for new, plausible jobs, once per job ID.
-    if candidates:
+    if candidates and completed == len(batch):
         candidates_path = run_dir / "boss_jobs_candidates.json"
         details_path = run_dir / "boss_details_candidates.json"
         candidates_path.write_text(
