@@ -423,10 +423,12 @@ def normalize_result(
 
     years = required_experience(combined)
     salary_floor = monthly_salary_floor_k(combined)
-    if salary_floor is None or salary_floor < 20:
+    if salary_floor is not None and salary_floor < 20:
         if rejection_stats is not None:
-            rejection_stats["salary_below_20k_or_missing"] += 1
+            rejection_stats["salary_below_20k"] += 1
         return None
+    if salary_floor is None and rejection_stats is not None:
+        rejection_stats["salary_missing_or_negotiable"] += 1
     score, details, eligible = score_job(title, description, years)
     if not eligible:
         if rejection_stats is not None:
@@ -446,8 +448,9 @@ def normalize_result(
         "score": score,
         "visa": "不适用",
         "evidence": (
-            f"月薪下限约 {salary_floor:g}K；"
-            f"{source_name(url, query['source'])}公开索引发现，需打开具体 JD 核验；"
+            (f"月薪下限约 {salary_floor:g}K；" if salary_floor is not None
+             else "工资未公布或面议，已保留待核验；")
+            + f"{source_name(url, query['source'])}公开索引发现，需打开具体 JD 核验；"
             + "；".join(details)
         ),
         "salary": combined,
@@ -505,7 +508,9 @@ def run_scan(
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "salary_below_20k_or_missing": 0,
+            "missing_title_or_url": 0,
+            "salary_below_20k": 0,
+            "salary_missing_or_negotiable": 0,
         }
         for result in results:
             normalized = normalize_result(result, item, scanned_at, rejection_stats)
@@ -546,7 +551,9 @@ def run_scan(
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "salary_below_20k_or_missing": 0,
+            "missing_title_or_url": 0,
+            "salary_below_20k": 0,
+            "salary_missing_or_negotiable": 0,
         }
         query = {"source": str(page["source"]), "query": str(page["url"])}
         for result in results:
