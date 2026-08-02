@@ -77,6 +77,7 @@ WANTED_TITLE_SIGNALS = (
 
 EXCLUDED_TITLE_SIGNALS = (
     "实习",
+    "兼职",
     "高级",
     "资深",
     "首席",
@@ -118,6 +119,7 @@ OBVIOUSLY_IRRELEVANT_SIGNALS = (
     "客服",
     "行政专员",
     "新闻编辑",
+    "新媒体运营",
 )
 
 # Search indexes sometimes surface career explainers under URLs that look like
@@ -524,6 +526,10 @@ def monthly_salary_floor_k(text: str) -> float | None:
     for pattern, multiplier in annual_patterns:
         if match := re.search(pattern, content, re.IGNORECASE):
             return float(match.group(1)) * multiplier
+    # Convert advertised day rates using the standard 21.75 paid workdays per
+    # month so low-paid temporary roles cannot bypass the monthly salary rule.
+    if match := re.search(r"(\d+(?:\.\d+)?)\s*元\s*(?:/|每)\s*(?:天|日)", content):
+        return float(match.group(1)) * 21.75 / 1000
     monthly_patterns = (
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
