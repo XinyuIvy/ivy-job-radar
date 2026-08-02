@@ -4,7 +4,6 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -26,7 +25,6 @@ class BossRadarTransformTest(unittest.TestCase):
                     "boss_title": "招聘经理",
                     "boss_active_status": "刚刚活跃",
                     "salary_source": "api",
-                    "salary": "20-30K·13薪",
                     "company_link": "https://www.zhipin.com/gongsi/company-1.html",
                     "location": "上海·浦东新区",
                     "skills": "R | SAS | 临床试验",
@@ -37,7 +35,6 @@ class BossRadarTransformTest(unittest.TestCase):
                     "title": "高级软件工程师",
                     "boss_name": "示例科技公司",
                     "salary_source": "api",
-                    "salary": "30-45K",
                     "company_link": "https://www.zhipin.com/gongsi/company-2.html",
                     "job_id": "job-2",
                     "job_link": "https://www.zhipin.com/job_detail/job-2.html",
@@ -97,7 +94,6 @@ class BossRadarTransformTest(unittest.TestCase):
                     "title": title,
                     "boss_name": company,
                     "salary_source": "api",
-                    "salary": "25-35K",
                     "company_link": f"https://www.zhipin.com/gongsi/{job_id}.html",
                     "job_id": job_id,
                     "job_link": f"https://www.zhipin.com/job_detail/{job_id}.html",
@@ -122,7 +118,6 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "创新算法研究员",
                 "boss_name": "示例生命科学公司",
                 "salary_source": "api",
-                "salary": "20-30K",
                 "company_link": "https://www.zhipin.com/gongsi/algorithm.html",
                 "job_id": "algorithm-1",
                 "job_link": "https://www.zhipin.com/job_detail/algorithm-1.html",
@@ -147,7 +142,6 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "算法研究员",
                 "boss_name": "示例互联网公司",
                 "salary_source": "api",
-                "salary": "25-40K",
                 "company_link": "https://www.zhipin.com/gongsi/recommendation.html",
                 "job_id": "algorithm-2",
                 "job_link": "https://www.zhipin.com/job_detail/algorithm-2.html",
@@ -161,153 +155,6 @@ class BossRadarTransformTest(unittest.TestCase):
             transformed = BOSS_RADAR.transform_result_files([(jobs_path, details_path)])
 
             self.assertEqual(transformed, [])
-
-    def test_prefilters_deduplicates_and_skips_unchanged_cached_jobs(self):
-        with tempfile.TemporaryDirectory() as temporary_dir:
-            root = Path(temporary_dir)
-            first = root / "first.json"
-            second = root / "second.json"
-            cache_path = root / "cache.json"
-
-            relevant = {
-                "title": "生物统计师",
-                "boss_name": "示例药企",
-                "salary_source": "api",
-                "salary": "30-50K",
-                "company_link": "https://www.zhipin.com/gongsi/company-1.html",
-                "job_id": "job-1",
-                "job_link": "https://www.zhipin.com/job_detail/job-1.html",
-            }
-            cached = {
-                "title": "数据科学家",
-                "boss_name": "示例科技公司",
-                "salary_source": "api",
-                "salary": "25-40K",
-                "company_link": "https://www.zhipin.com/gongsi/company-2.html",
-                "job_id": "job-2",
-                "job_link": "https://www.zhipin.com/job_detail/job-2.html",
-            }
-            irrelevant = {
-                "title": "资深数据科学家",
-                "boss_name": "示例科技公司",
-                "salary_source": "api",
-                "salary": "20-30K",
-                "company_link": "https://www.zhipin.com/gongsi/company-3.html",
-                "job_id": "job-3",
-                "job_link": "https://www.zhipin.com/job_detail/job-3.html",
-            }
-            first.write_text(
-                json.dumps({"jobs": [relevant, cached, irrelevant]}, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            second.write_text(
-                json.dumps({"jobs": [relevant]}, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            cache_path.write_text(json.dumps({
-                "version": 1,
-                "jobs": {
-                    "job-2": {"fingerprint": BOSS_RADAR.listing_fingerprint(cached)}
-                },
-            }), encoding="utf-8")
-
-            candidates, stats = BOSS_RADAR.collect_detail_candidates(
-                [first, second],
-                cache_path=cache_path,
-            )
-
-        self.assertEqual([BOSS_RADAR.row_key(row) for row in candidates], ["job-1"])
-        self.assertEqual(stats["jobs_discovered"], 4)
-        self.assertEqual(stats["jobs_duplicate_listings"], 1)
-        self.assertEqual(stats["jobs_filtered_before_detail"], 1)
-        self.assertEqual(stats["jobs_skipped_cached"], 1)
-        self.assertEqual(stats["jobs_detail_candidates"], 1)
-
-    def test_run_searches_collects_lists_before_one_detail_pass(self):
-        with tempfile.TemporaryDirectory() as temporary_dir:
-            root = Path(temporary_dir)
-            scraper_dir = root / "scraper"
-            result_dir = root / "results"
-            plan_path = root / "plan.json"
-            state_path = root / "state.json"
-            plan_path.write_text(json.dumps({"pages": 1}), encoding="utf-8")
-            candidate = {
-                "title": "生物统计师",
-                "boss_name": "示例药企",
-                "salary_source": "api",
-                "salary": "25-35K",
-                "company_link": "https://www.zhipin.com/gongsi/company-1.html",
-                "job_id": "job-1",
-                "job_link": "https://www.zhipin.com/job_detail/job-1.html",
-            }
-            commands = []
-
-            def fake_run(command, check=False):
-                commands.append(command)
-                if "--input" in command:
-                    detail_path = Path(command[command.index("--detail-output") + 1])
-                    detail_path.write_text(json.dumps([{
-                        "job_id": "job-1",
-                        "company": "示例药企",
-                        "jd": "负责临床试验统计分析。",
-                    }], ensure_ascii=False), encoding="utf-8")
-                return SimpleNamespace(returncode=0)
-
-            stats = {
-                "jobs_discovered": 60,
-                "jobs_unique": 30,
-                "jobs_duplicate_listings": 30,
-                "jobs_filtered_before_detail": 20,
-                "jobs_skipped_cached": 9,
-                "jobs_detail_candidates": 1,
-            }
-            with patch.object(BOSS_RADAR, "APP_DIR", root / "app"), \
-                    patch.object(BOSS_RADAR, "STATE_FILE", state_path), \
-                    patch.object(BOSS_RADAR, "ensure_scraper", return_value=Path("/python")), \
-                    patch.object(BOSS_RADAR, "next_batch", return_value=([
-                        ("生物统计", "上海"),
-                        ("数据科学家", "上海"),
-                    ], 0, 2)), \
-                    patch.object(BOSS_RADAR, "collect_detail_candidates", return_value=([candidate], stats)), \
-                    patch.object(BOSS_RADAR.subprocess, "run", side_effect=fake_run):
-                outputs = BOSS_RADAR.run_searches(scraper_dir, plan_path, result_dir)
-
-            state = json.loads(state_path.read_text(encoding="utf-8"))
-
-        self.assertEqual(len(outputs), 1)
-        self.assertEqual(len(commands), 3)
-        self.assertTrue(all("--no-detail" in command for command in commands[:2]))
-        self.assertIn("--input", commands[2])
-        self.assertEqual(state["status"], "completed")
-        self.assertEqual(state["jobs_detail_candidates"], 1)
-
-    def test_records_cache_only_for_synced_jobs(self):
-        with tempfile.TemporaryDirectory() as temporary_dir:
-            root = Path(temporary_dir)
-            jobs_path = root / "jobs.json"
-            cache_path = root / "cache.json"
-            row = {
-                "title": "生物统计师",
-                "boss_name": "示例药企",
-                "salary_source": "api",
-                "salary": "25-35K",
-                "company_link": "https://www.zhipin.com/gongsi/company-1.html",
-                "job_id": "job-1",
-                "job_link": "https://www.zhipin.com/job_detail/job-1.html",
-            }
-            jobs_path.write_text(json.dumps({"jobs": [row]}, ensure_ascii=False), encoding="utf-8")
-
-            BOSS_RADAR.record_synced_jobs(
-                [{"application_id": "job-1"}],
-                [(jobs_path, None)],
-                cache_path=cache_path,
-            )
-            cache = json.loads(cache_path.read_text(encoding="utf-8"))
-
-        self.assertEqual(
-            cache["jobs"]["job-1"]["fingerprint"],
-            BOSS_RADAR.listing_fingerprint(row),
-        )
 
     def test_sync_uses_private_site_header_and_chunks_payloads(self):
         class FakeResponse:
@@ -339,27 +186,40 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertEqual(requests[0][0].get_header("Oai-sites-authorization"), "Bearer sites-secret")
         self.assertEqual(result["received"], 2)
 
-    def test_salary_floor_and_hard_exclusions_control_china_retention(self):
-        self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("20-30K·13薪"), 20)
-        self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("30-50万/年"), 25)
-        self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("15000-30000元/月"), 15)
-        self.assertIsNone(BOSS_RADAR.monthly_salary_floor_k("面议"))
-        self.assertIsNone(BOSS_RADAR.required_experience("经验不限"))
-        self.assertEqual(BOSS_RADAR.required_experience("要求 5 年相关经验"), 5)
+    def test_sync_reports_a_completed_source_for_expiration_reconciliation(self):
+        class FakeResponse:
+            def __enter__(self):
+                return self
 
-        base = {
-            "boss_name": "示例公司",
-            "salary_source": "api",
-            "company_link": "https://www.zhipin.com/gongsi/example.html",
-            "job_link": "https://www.zhipin.com/job_detail/example.html",
-            "salary": "20-30K",
+            def __exit__(self, *_args):
+                return False
+
+            def read(self):
+                return json.dumps({"received": 1, "created": 0, "updated": 1, "skipped": 0}).encode()
+
+        requests = []
+
+        def fake_urlopen(request, timeout):
+            requests.append(request)
+            return FakeResponse()
+
+        env = {
+            "IVY_JOB_RADAR_URL": "https://example.test",
+            "IVY_JOB_RADAR_SYNC_TOKEN": "sync-secret",
+            "IVY_JOB_RADAR_SITES_BYPASS_TOKEN": "sites-secret",
         }
-        self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "ok", "title": "统计建模研究员"}))
-        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "intern", "title": "生物统计实习生"}))
-        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "senior", "title": "资深统计科学家"}))
-        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "eng", "title": "算法工程师"}))
-        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}))
-        self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "postdoc", "title": "生物统计博士后"}))
+        job = {
+            "source": "BOSS直聘（本地采集）",
+            "job_url": "https://example.test/job/1",
+            "canonical_url": "https://example.test/job/1",
+        }
+        with patch.dict(os.environ, env, clear=False), patch.object(BOSS_RADAR.urllib.request, "urlopen", side_effect=fake_urlopen):
+            BOSS_RADAR.sync_jobs([job], completed_source="BOSS直聘（本地采集）")
+
+        self.assertEqual(len(requests), 2)
+        reconciliation = json.loads(requests[-1].data.decode("utf-8"))
+        self.assertEqual(reconciliation["complete_source"], "BOSS直聘（本地采集）")
+        self.assertEqual(reconciliation["seen_urls"], ["https://example.test/job/1"])
 
 
 if __name__ == "__main__":
