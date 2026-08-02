@@ -24,21 +24,24 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
 
         self.assertIn('application/ld+json', installer)
         self.assertIn('type==="JobPosting"', installer)
-        self.assertIn('encodeURIComponent(JSON.stringify(payload))', installer)
         self.assertIn('/bookmarklet/capture', installer)
-        self.assertIn('window.open(destination', installer)
+        self.assertIn('window.open(captureUrl.href', installer)
+        self.assertIn('popup.postMessage({type:"ivy-job-radar-capture",payload}', installer)
+        self.assertIn('event.origin!==captureUrl.origin', installer)
         self.assertIn('window.location.href', installer)
         self.assertIn('hiringOrganization', installer)
         self.assertNotIn('form.method="POST"', installer)
+        self.assertNotIn('encodeURIComponent(JSON.stringify(payload))', installer)
 
-    def test_capture_window_posts_to_private_endpoint(self):
+    def test_capture_window_receives_message_and_posts_to_private_endpoint(self):
         capture_page = (ROOT / "app" / "bookmarklet" / "capture" / "page.tsx").read_text(encoding="utf-8")
 
-        self.assertIn('window.location.hash.slice(1)', capture_page)
-        self.assertIn('decodeURIComponent(encoded)', capture_page)
+        self.assertIn('event.source !== window.opener', capture_page)
+        self.assertIn('event.data?.type !== "ivy-job-radar-capture"', capture_page)
+        self.assertIn('postMessage("ivy-job-radar-ready", "*")', capture_page)
         self.assertIn('fetch("/api/bookmark-capture"', capture_page)
         self.assertIn('"Content-Type": "application/json"', capture_page)
-        self.assertIn('window.history.replaceState', capture_page)
+        self.assertNotIn('window.location.hash', capture_page)
 
     def test_install_entry_and_scoped_key_are_present(self):
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
