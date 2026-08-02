@@ -551,13 +551,17 @@ def monthly_salary_floor_k(text: str) -> float | None:
             prefix.rfind(label)
             for label in ("日薪", "月薪", "年薪", "时薪", "工资", "薪资", "薪酬")
         )
-        if allowance_pos > salary_pos:
+        included_benefit = salary_pos >= 0 and re.search(
+            rf"(?:含|包含|包括|不含)[^，,；;。|]*?(?:{'|'.join(allowance_labels)})",
+            prefix[salary_pos:],
+        )
+        if allowance_pos > salary_pos and not included_benefit:
             return True
         following_separators = [content.find(separator, end) for separator in separators]
         clause_end = min((position for position in following_separators if position >= 0), default=len(content))
         suffix = content[end:clause_end]
         return re.match(
-            rf"\s*(?:作为|用于)?\s*(?:{'|'.join(allowance_labels)})",
+            rf"\s*(?:的|作为|用于|用作)?\s*(?:{'|'.join(allowance_labels)})",
             suffix,
         ) is not None
     annual_patterns = (
