@@ -19,6 +19,7 @@ class ChinaScanFilterTest(unittest.TestCase):
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
+            "salary_below_20k_or_missing": 0,
         }
         row = CHINA_SCAN.normalize_result(
             {
@@ -26,7 +27,7 @@ class ChinaScanFilterTest(unittest.TestCase):
                 "url": "https://example.cn/jobs/algorithm-scientist",
                 "description": (
                     "博士，应用数学、人工智能或生命科学背景；使用 Python "
-                    "开展生物信息、新药研发和分子模拟研究。经验不限。"
+                    "开展生物信息、新药研发和分子模拟研究。经验不限。月薪 20-35K。"
                 ),
             },
             {"source": "中国公司官网", "query": "生物统计"},
@@ -45,6 +46,7 @@ class ChinaScanFilterTest(unittest.TestCase):
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
+            "salary_below_20k_or_missing": 0,
         }
         row = CHINA_SCAN.normalize_result(
             {
@@ -58,7 +60,35 @@ class ChinaScanFilterTest(unittest.TestCase):
         )
 
         self.assertIsNone(row)
-        self.assertEqual(stats["title_not_targeted"], 1)
+        self.assertEqual(stats["excluded_seniority_or_role"], 1)
+
+    def test_salary_experience_and_role_exclusions_are_hard_filters(self):
+        base = {
+            "url": "https://example.cn/jobs/role",
+            "description": "统计建模，月薪 20-30K，要求 2 年经验。",
+        }
+        query = {"source": "中国公司官网", "query": "统计"}
+        scanned_at = "2026-08-01T00:00:00+00:00"
+
+        kept = CHINA_SCAN.normalize_result({**base, "title": "统计建模研究员"}, query, scanned_at)
+        low_salary = CHINA_SCAN.normalize_result(
+            {**base, "title": "统计建模研究员", "description": "统计建模，月薪 15-30K。"},
+            query,
+            scanned_at,
+        )
+        too_experienced = CHINA_SCAN.normalize_result(
+            {**base, "title": "统计建模研究员", "description": "统计建模，月薪 25-35K，要求 5 年经验。"},
+            query,
+            scanned_at,
+        )
+        senior = CHINA_SCAN.normalize_result({**base, "title": "资深统计科学家"}, query, scanned_at)
+        postdoc = CHINA_SCAN.normalize_result({**base, "title": "生物统计博士后"}, query, scanned_at)
+
+        self.assertIsNotNone(kept)
+        self.assertIsNone(low_salary)
+        self.assertIsNone(too_experienced)
+        self.assertIsNone(senior)
+        self.assertIsNotNone(postdoc)
 
 
 if __name__ == "__main__":

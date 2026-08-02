@@ -16,6 +16,9 @@ type ImportJob = {
   visa?: unknown;
   evidence?: unknown;
   description?: unknown;
+  full_description?: unknown;
+  salary?: unknown;
+  salary_min_monthly_k?: unknown;
   skills?: unknown;
   job_url?: unknown;
   original_job_url?: unknown;
@@ -45,6 +48,58 @@ function isExcludedTitle(title: string) {
     || /\bsr\.?(?:\s|$)/i.test(title)
     || /\bvice president\b|\bhead of\b|\bexperienced hire\b/i.test(title)
     || /\bresearch scientist\s+(?:iii|iv|v|[3-9])\b/i.test(title);
+}
+
+const chinaRelevant = /生物统计|临床统计|医学统计|统计科学|统计分析|统计建模|统计师|统计|数据科学|应用科学|研究科学|算法研究|科学计算|计算生物|ai\s*for\s*science|量化研究|定量研究|量化分析|真实世界|流行病|卫生经济|健康经济|结局研究|医疗咨询|医药咨询|生命科学咨询|医学影像|biostat|statistical|data scientist|applied scientist|research scientist|quantitative|epidemiolog|health economics/i;
+const chinaExcludedTitle = /实习|兼职|高级|资深|首席|专家|总监|经理|负责人|主管|架构师|软件工程|数据工程|算法工程|intern|part.?time|senior|principal|staff|manager|director|lead|head of|vice president|software engineer|data engineer|algorithm engineer/i;
+const chinaIrrelevant = /物流统计|仓库统计|生产统计|财务统计|销售统计|门店统计|猪场统计|养殖统计|统计文员|数据录入|文员|会计|出纳|客服|行政专员|logistics|warehouse|bookkeep|accounting clerk|data entry/i;
+const chinaExcludedCore = /大语言模型|大模型|自然语言处理|\bllm\b|\bnlp\b|large language model|生成式\s*ai|generative\s*ai/i;
+
+function requiredExperience(content: string) {
+  const years = Array.from(content.matchAll(/(?:至少|最低|要求|需具备)\s*(\d+)\s*年|(\d+)\s*年(?:以上)?(?:相关|工作|行业|专业)?经验|(?:minimum|at least)\s+(\d+)\+?\s+years?|((?:\d+))\+?\s+years?(?:\s+of)?\s+(?:relevant|related|professional|industry|work)?\s*experience/gi))
+    .flatMap((match) => match.slice(1).filter(Boolean).map(Number));
+  return years.length ? Math.max(...years) : null;
+}
+
+function monthlySalaryFloorK(content: string) {
+  const normalized = content.replace(/,/g, "");
+  const annual = [
+    [/(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:\/|每)?年/i, 10 / 12],
+    [/年薪\s*(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万/i, 10 / 12],
+    [/年薪\s*(\d+(?:\.\d+)?)\s*万(?:元)?(?:起|以上)/i, 10 / 12],
+  ] as const;
+  for (const [pattern, multiplier] of annual) {
+    const match = normalized.match(pattern);
+    if (match) return Number(match[1]) * multiplier;
+  }
+  const monthly = [
+    [/(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*k(?:\s*\/?\s*月)?/i, 1],
+    [/(?:月薪\s*)?(\d+(?:\.\d+)?)\s*k(?:\s*(?:起|以上))/i, 1],
+    [/(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:\/|每)?月/i, 10],
+    [/(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:\/|每)?月/i, 0.001],
+  ] as const;
+  for (const [pattern, multiplier] of monthly) {
+    const match = normalized.match(pattern);
+    if (match) return Number(match[1]) * multiplier;
+  }
+  return null;
+}
+
+function isEligibleChinaImport(raw: ImportJob, title: string, description: string, evidence: string) {
+  const salary = cleanText(raw.salary);
+  const content = `${title} ${description} ${evidence} ${salary}`;
+  const suppliedFloor = Number(raw.salary_min_monthly_k);
+  const salaryFloor = Number.isFinite(suppliedFloor) && suppliedFloor > 0
+    ? suppliedFloor
+    : monthlySalaryFloorK(content);
+  const years = requiredExperience(content);
+  return chinaRelevant.test(content)
+    && !chinaExcludedTitle.test(title)
+    && !chinaIrrelevant.test(title)
+    && !chinaExcludedCore.test(content)
+    && (years === null || years <= 3)
+    && salaryFloor !== null
+    && salaryFloor >= 20;
 }
 
 function displayStatus(incomingStatus: string) {
@@ -114,6 +169,9 @@ export async function POST(request: NextRequest) {
     const score = Math.max(0, Math.min(100, Number(raw.score ?? 0)));
     const visa = cleanText(raw.visa) || "JD 未明确";
     const incomingStatus = displayStatus(cleanText(raw.status) || "待官网核验");
+    const description = cleanText(raw.description) || cleanText(raw.full_description);
+    const evidence = cleanText(raw.evidence);
+    const chinaEligible = region !== "中国" || isEligibleChinaImport(raw, title, description, evidence);
 
     // Recheck hard filters at the website boundary.
     if (
@@ -121,8 +179,9 @@ export async function POST(request: NextRequest) {
       !title ||
       !jobUrl ||
       !["美国", "中国"].includes(region) ||
-      score < 55 ||
-      isExcludedTitle(title) ||
+      (region !== "中国" && score < 55) ||
+      (region !== "中国" && isExcludedTitle(title)) ||
+      !chinaEligible ||
       ignored.has(fingerprint(company, title))
     ) {
       skipped += 1;
@@ -155,8 +214,8 @@ export async function POST(request: NextRequest) {
       track: cleanText(raw.track) || "Technology",
       score,
       visa,
-      evidence: cleanText(raw.evidence),
-      description: cleanText(raw.description).slice(0, 50000),
+      evidence,
+      description: description.slice(0, 50000),
       skills: JSON.stringify(skills),
       jobUrl,
       canonicalUrl,

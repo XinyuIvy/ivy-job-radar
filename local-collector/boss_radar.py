@@ -31,7 +31,8 @@ SCRAPER_REPOSITORY = "https://github.com/eatmoreduck/boss-zhipin-scraper.git"
 SCHEDULE_LABEL = "com.ivy.jobradar.boss"
 
 TARGET_TITLE = re.compile(
-    r"生物统计|临床统计|医学统计|统计科学家|数据科学|数据科学家|应用科学家|"
+    r"生物统计|临床统计|医学统计|统计科学家|统计分析|统计建模|统计师|统计|"
+    r"数据科学|数据科学家|应用科学家|"
     r"研究科学家|算法研究员|算法科学家|创新算法|科学计算|计算科学家|计算生物|"
     r"量化研究|量化分析|医疗咨询|医药咨询|生命科学咨询|"
     r"真实世界|流行病|卫生经济|健康经济|结局研究|医学影像|"
@@ -54,9 +55,21 @@ EXCLUDED_ALGORITHM_DOMAIN = re.compile(
     re.IGNORECASE,
 )
 EXCLUDED_TITLE = re.compile(
-    r"实习|兼职|博士后|总监|经理|负责人|高级|资深|首席|专家|架构师|主管|统计员|"
-    r"intern|part.time|postdoc|postdoctoral|director|principal|staff|senior|manager|lead|head of|vice president|"
-    r"软件工程|software engineer|数据工程|data engineer|生成式|generative|\bllm\b|\bnlp\b",
+    r"实习|兼职|总监|经理|负责人|高级|资深|首席|专家|架构师|主管|"
+    r"intern|part.time|director|principal|staff|senior|manager|lead|head of|vice president|"
+    r"软件工程|software engineer|数据工程|data engineer|算法工程|algorithm engineer|"
+    r"生成式|大模型|自然语言处理|generative|large language model|\bllm\b|\bnlp\b",
+    re.IGNORECASE,
+)
+OBVIOUSLY_IRRELEVANT = re.compile(
+    r"物流统计|仓库统计|生产统计|财务统计|销售统计|门店统计|猪场统计|养殖统计|"
+    r"统计文员|数据录入|文员|会计|出纳|客服|行政专员|"
+    r"logistics|warehouse|bookkeep|accounting clerk|data entry",
+    re.IGNORECASE,
+)
+EXCLUDED_CORE_CONTENT = re.compile(
+    r"大语言模型|大模型|自然语言处理|\bllm\b|\bnlp\b|large language model|"
+    r"生成式\s*ai|generative\s*ai",
     re.IGNORECASE,
 )
 SKILL_RULES = [
@@ -107,6 +120,59 @@ def rows_from_payload(payload: Any) -> list[dict[str, Any]]:
 
 def text(value: Any) -> str:
     return str(value or "").strip()
+
+
+def required_experience(content: str) -> int | None:
+    """Return the largest explicitly required experience floor."""
+    years: list[int] = []
+    patterns = (
+        r"(?:至少|最低|要求|需具备)\s*(\d+)\s*年",
+        r"(\d+)\s*年(?:以上)?(?:相关|工作|行业|专业)?经验",
+        r"经验\s*(\d+)\s*[-–—至]\s*(\d+)\s*年",
+        r"(?:minimum|at least)\s+(\d+)\+?\s+years?",
+        r"(\d+)\+?\s+years?(?:\s+of)?\s+(?:relevant|related|professional|industry|work)?\s*experience",
+    )
+    for pattern in patterns:
+        for match in re.finditer(pattern, content, re.IGNORECASE):
+            years.extend(int(value) for value in match.groups() if value)
+    return max(years) if years else None
+
+
+def monthly_salary_floor_k(*values: Any) -> float | None:
+    """Parse the advertised gross monthly salary floor in thousands of RMB."""
+    content = " ".join(text(value) for value in values if text(value)).replace(",", "")
+    if not content:
+        return None
+    annual_patterns = (
+        (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:/|每)?年", 10 / 12),
+        (r"年薪\s*(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万", 10 / 12),
+        (r"年薪\s*(\d+(?:\.\d+)?)\s*万(?:元)?(?:起|以上)", 10 / 12),
+    )
+    for pattern, multiplier in annual_patterns:
+        if match := re.search(pattern, content, re.IGNORECASE):
+            return float(match.group(1)) * multiplier
+    monthly_patterns = (
+        (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:/|每)?月", 10),
+        (r"(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:/|每)?月", 0.001),
+    )
+    for pattern, multiplier in monthly_patterns:
+        if match := re.search(pattern, content, re.IGNORECASE):
+            return float(match.group(1)) * multiplier
+    return None
+
+
+def salary_text(row: dict[str, Any], detail: dict[str, Any] | None = None) -> str:
+    detail = detail or {}
+    return text(
+        row.get("salary")
+        or row.get("salary_range")
+        or row.get("salary_desc")
+        or detail.get("salary")
+        or detail.get("salary_range")
+        or detail.get("salary_desc")
+    )
 
 
 def split_tags(value: Any) -> list[str]:
@@ -165,7 +231,12 @@ def write_detail_cache(cache: dict[str, Any], path: Path = DETAIL_CACHE_FILE) ->
 def title_prefilter(row: dict[str, Any]) -> bool:
     """Reject obvious mismatches before opening the slower detail page."""
     title = text(row.get("title") or row.get("job_name"))
-    if not title or not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
+    if (
+        not title
+        or not TARGET_TITLE.search(title)
+        or EXCLUDED_TITLE.search(title)
+        or OBVIOUSLY_IRRELEVANT.search(title)
+    ):
         return False
     listing_content = " ".join([
         title,
@@ -175,6 +246,10 @@ def title_prefilter(row: dict[str, Any]) -> bool:
         text(row.get("company_industry")),
     ])
     if ALGORITHM_TITLE.search(title) and EXCLUDED_ALGORITHM_DOMAIN.search(listing_content):
+        return False
+    if EXCLUDED_CORE_CONTENT.search(listing_content):
+        return False
+    if (salary_floor := monthly_salary_floor_k(salary_text(row))) is None or salary_floor < 20:
         return False
     key = row_key(row)
     job_url = text(row.get("job_link") or row.get("url"))
@@ -299,7 +374,11 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
 
         for row in jobs:
             title = text(row.get("title") or row.get("job_name"))
-            if not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
+            if (
+                not TARGET_TITLE.search(title)
+                or EXCLUDED_TITLE.search(title)
+                or OBVIOUSLY_IRRELEVANT.search(title)
+            ):
                 continue
 
             key = row_key(row)
@@ -317,6 +396,13 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
                 + split_tags(detail.get("tags"))
             )
             content = " ".join([title, jd, " ".join(tags)])
+            salary = salary_text(row, detail)
+            salary_floor = monthly_salary_floor_k(salary, content)
+            years = required_experience(content)
+            if salary_floor is None or salary_floor < 20 or (years is not None and years > 3):
+                continue
+            if EXCLUDED_CORE_CONTENT.search(content):
+                continue
             if ALGORITHM_TITLE.search(title) and (
                 not ALGORITHM_DOMAIN.search(content) or EXCLUDED_ALGORITHM_DOMAIN.search(content)
             ):
@@ -333,8 +419,13 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
                 "track": classify_track(content),
                 "score": score,
                 "visa": "不适用",
-                "evidence": "BOSS 当前职位页由本地登录会话采集；职位开放性仍需以平台页面为准。",
+                "evidence": (
+                    f"薪资：{salary}（月薪下限约 {salary_floor:g}K）；"
+                    "BOSS 当前职位页由本地登录会话采集；职位开放性仍需以平台页面为准。"
+                ),
                 "description": jd,
+                "salary": salary,
+                "salary_min_monthly_k": salary_floor,
                 "skills": skills,
                 "job_url": job_url,
                 "canonical_url": job_url,

@@ -31,6 +31,7 @@ TRACKING_PARAMETERS = {
 
 WANTED_TITLE_SIGNALS = (
     "生物统计",
+    "统计",
     "统计科学",
     "数据科学",
     "数据科学家",
@@ -60,7 +61,6 @@ WANTED_TITLE_SIGNALS = (
 
 EXCLUDED_TITLE_SIGNALS = (
     "实习",
-    "博士后",
     "高级",
     "资深",
     "首席",
@@ -84,6 +84,24 @@ EXCLUDED_TITLE_SIGNALS = (
     "manager",
     "director",
     "lead",
+)
+
+OBVIOUSLY_IRRELEVANT_SIGNALS = (
+    "物流统计",
+    "仓库统计",
+    "生产统计",
+    "财务统计",
+    "销售统计",
+    "门店统计",
+    "猪场统计",
+    "养殖统计",
+    "统计文员",
+    "数据录入",
+    "文员",
+    "会计",
+    "出纳",
+    "客服",
+    "行政专员",
 )
 
 UNSUPPORTED_CORE_SIGNALS = (
@@ -282,6 +300,29 @@ def required_experience(text: str) -> int | None:
     return max(years) if years else None
 
 
+def monthly_salary_floor_k(text: str) -> float | None:
+    """Parse the advertised gross monthly salary floor in thousands of RMB."""
+    content = clean_text(text).replace(",", "")
+    annual_patterns = (
+        (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:/|每)?年", 10 / 12),
+        (r"年薪\s*(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万", 10 / 12),
+        (r"年薪\s*(\d+(?:\.\d+)?)\s*万(?:元)?(?:起|以上)", 10 / 12),
+    )
+    for pattern, multiplier in annual_patterns:
+        if match := re.search(pattern, content, re.IGNORECASE):
+            return float(match.group(1)) * multiplier
+    monthly_patterns = (
+        (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:/|每)?月", 10),
+        (r"(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:/|每)?月", 0.001),
+    )
+    for pattern, multiplier in monthly_patterns:
+        if match := re.search(pattern, content, re.IGNORECASE):
+            return float(match.group(1)) * multiplier
+    return None
+
+
 def infer_track(text: str) -> str:
     lower = text.lower()
     if re.search(r"量化|quantitative|systematic", lower):
@@ -348,7 +389,7 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
 
     experience_blocked = years is not None and years > 3
     # Discovery must tolerate incomplete search snippets; final degree eligibility is verified from the full JD.
-    eligible = (quantitative_degree or targeted_role) and not experience_blocked and gap_count < 2
+    eligible = (quantitative_degree or targeted_role) and not experience_blocked and gap_count == 0
     return max(0, min(100, round(score))), details, eligible
 
 
@@ -367,7 +408,7 @@ def normalize_result(
         if rejection_stats is not None:
             rejection_stats["missing_title_or_url"] += 1
         return None
-    if not any(signal in lower_title for signal in WANTED_TITLE_SIGNALS):
+    if not any(signal in combined.lower() for signal in WANTED_TITLE_SIGNALS):
         if rejection_stats is not None:
             rejection_stats["title_not_targeted"] += 1
         return None
@@ -375,18 +416,22 @@ def normalize_result(
         if rejection_stats is not None:
             rejection_stats["excluded_seniority_or_role"] += 1
         return None
+    if any(signal in lower_title for signal in OBVIOUSLY_IRRELEVANT_SIGNALS):
+        if rejection_stats is not None:
+            rejection_stats["excluded_seniority_or_role"] += 1
+        return None
 
     years = required_experience(combined)
+    salary_floor = monthly_salary_floor_k(combined)
+    if salary_floor is None or salary_floor < 20:
+        if rejection_stats is not None:
+            rejection_stats["salary_below_20k_or_missing"] += 1
+        return None
     score, details, eligible = score_job(title, description, years)
     if not eligible:
         if rejection_stats is not None:
             rejection_stats["degree_experience_or_skill_gap"] += 1
         return None
-    if score < 45:
-        if rejection_stats is not None:
-            rejection_stats["score_below_discovery_threshold"] += 1
-        return None
-
     company = clean_text(result.get("company")) or company_from_result(title, description)
     company_key = re.sub(r"\W+", "", company.lower())
     title_key = re.sub(r"\W+", "", title.lower())
@@ -400,7 +445,13 @@ def normalize_result(
         "track": infer_track(combined),
         "score": score,
         "visa": "不适用",
-        "evidence": f"{source_name(url, query['source'])}公开索引发现，需打开具体 JD 核验；" + "；".join(details),
+        "evidence": (
+            f"月薪下限约 {salary_floor:g}K；"
+            f"{source_name(url, query['source'])}公开索引发现，需打开具体 JD 核验；"
+            + "；".join(details)
+        ),
+        "salary": combined,
+        "salary_min_monthly_k": salary_floor,
         "skills": [
             label
             for label, pattern in (
@@ -454,6 +505,7 @@ def run_scan(
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
+            "salary_below_20k_or_missing": 0,
         }
         for result in results:
             normalized = normalize_result(result, item, scanned_at, rejection_stats)
@@ -494,6 +546,7 @@ def run_scan(
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
+            "salary_below_20k_or_missing": 0,
         }
         query = {"source": str(page["source"]), "query": str(page["url"])}
         for result in results:
