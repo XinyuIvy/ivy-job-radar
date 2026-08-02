@@ -20,6 +20,7 @@ class ChinaOneClickTest(unittest.TestCase):
 
         self.assertNotIn("苏州", plan["cities"])
         self.assertEqual(len(plan["cities"]) * len(plan["keywords"]), 56)
+        self.assertEqual(plan["batch_size"], 8)
 
     def test_summary_keeps_independent_source_failure(self):
         summary = CHINA_ONE_CLICK.build_summary(
