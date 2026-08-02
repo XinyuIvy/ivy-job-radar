@@ -63,46 +63,14 @@ function requiredExperience(content: string) {
   return years.length ? Math.max(...years) : null;
 }
 
-function monthlySalaryFloorK(content: string) {
-  const normalized = content.replace(/,/g, "");
-  const annual = [
-    [/(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:\/|每)?年/i, 10 / 12],
-    [/年薪\s*(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万/i, 10 / 12],
-    [/年薪\s*(\d+(?:\.\d+)?)\s*万(?:元)?(?:起|以上)/i, 10 / 12],
-  ] as const;
-  for (const [pattern, multiplier] of annual) {
-    const match = normalized.match(pattern);
-    if (match) return Number(match[1]) * multiplier;
-  }
-  const monthly = [
-    [/(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*k(?:\s*\/?\s*月)?/i, 1],
-    [/(?:月薪\s*)?(\d+(?:\.\d+)?)\s*k(?:\s*(?:起|以上))/i, 1],
-    [/(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:\/|每)?月/i, 10],
-    [/(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:\/|每)?月/i, 0.001],
-  ] as const;
-  for (const [pattern, multiplier] of monthly) {
-    const match = normalized.match(pattern);
-    if (match) return Number(match[1]) * multiplier;
-  }
-  return null;
-}
-
 function isEligibleChinaImport(raw: ImportJob, title: string, description: string, evidence: string) {
-  const salary = cleanText(raw.salary);
-  const content = `${title} ${description} ${evidence} ${salary}`;
-  const suppliedFloor = Number(raw.salary_min_monthly_k);
-  const salaryFloor = Number.isFinite(suppliedFloor) && suppliedFloor > 0
-    ? suppliedFloor
-    : monthlySalaryFloorK(content);
+  const content = `${title} ${description} ${evidence} ${cleanText(raw.salary)}`;
   const years = requiredExperience(content);
   return chinaRelevant.test(content)
     && !chinaExcludedTitle.test(title)
     && !chinaIrrelevant.test(title)
     && !chinaExcludedCore.test(content)
-    && (years === null || years <= 3)
-    // Keep missing or negotiable salary for manual verification.
-    // Only exclude a salary when its parsed floor is explicitly below 20K.
-    && (salaryFloor === null || salaryFloor >= 20);
+    && (years === null || years <= 3);
 }
 
 function displayStatus(incomingStatus: string) {
