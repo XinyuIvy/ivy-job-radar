@@ -101,7 +101,8 @@ class BossOneClickTest(unittest.TestCase):
             def transform_result_files(self, _files):
                 return [{"application_id": "job-1"}]
 
-            def sync_jobs(self, _jobs):
+            def sync_jobs(self, _jobs, incomplete_sources=None):
+                self.incomplete_sources = incomplete_sources
                 raise SystemExit("website unavailable")
 
             def load_json(self, _path):
