@@ -2,10 +2,6 @@ name: Daily US job scan
 
 on:
   workflow_dispatch:
-  schedule:
-    # Run at both possible UTC offsets; the guard keeps only 6 AM New York time.
-    - cron: "7 10 * * *"
-    - cron: "7 11 * * *"
 
 permissions:
   contents: write
@@ -19,20 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Check New York schedule
-        id: schedule_guard
-        shell: bash
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          elif [[ "$(TZ=America/New_York date +%H)" == "06" ]]; then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Mark website scan as running
-        if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
@@ -44,17 +27,15 @@ jobs:
               --header "Content-Type: application/json" \
               --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
               --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-              --data '{"state":"running"}' \
+              --data '{"state":"running","phase":"等待云端任务","current_source":"GitHub Actions","steps_completed":1,"steps_total":10,"message":"美国 ATS 已完成，云端扫描正在启动。"}' \
               "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status" \
               || echo "Warning: could not publish running status."
           fi
 
       - name: Check out repository
-        if: steps.schedule_guard.outputs.run == 'true'
         uses: actions/checkout@v4
 
       - name: Set up Python
-        if: steps.schedule_guard.outputs.run == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -62,11 +43,9 @@ jobs:
           cache-dependency-path: requirements-jobscan.txt
 
       - name: Install scanner dependencies
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python -m pip install --requirement requirements-jobscan.txt
 
       - name: Validate scanner syntax
-        if: steps.schedule_guard.outputs.run == 'true'
         run: >-
           python -m py_compile
           scripts/jobspy_scan.py
@@ -82,45 +61,132 @@ jobs:
           scripts/merge_scan_results.py
           scripts/scan_health.py
           scripts/split_json_batches.py
+          scripts/publish_us_scan_progress.py
 
       - name: Run scanner fixture tests
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Collect US jobs
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/jobspy_scan.py
 
+
+      - name: Publish JobSpy progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "聚合平台搜索"
+          --source "JobSpy"
+          --completed 2
+          --message "JobSpy 搜索完成，正在官网核验候选岗位。"
+
       - name: Verify US candidates on company career sites
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/verify_company_jobs.py
 
+
+      - name: Publish company verification progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "官网核验"
+          --source "美国公司官网"
+          --completed 3
+          --message "JobSpy 候选的公司官网核验已完成。"
+
       - name: Collect credential-free cloud sources
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/cloud_sources_scan.py
 
+
+      - name: Publish cloud-source progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "公开来源搜索"
+          --source "无需登录的公开来源"
+          --completed 4
+          --message "公开来源扫描完成，正在运行 Job Board Aggregator。"
+
       - name: Collect Job Board Aggregator candidates
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/aggregator_scan.py
 
+
+      - name: Publish aggregator progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "聚合平台搜索"
+          --source "Job Board Aggregator"
+          --completed 5
+          --message "Aggregator 候选收集完成，正在官方 ATS 核验。"
+
       - name: Verify Aggregator candidates on official ATS pages
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/verify_aggregator_jobs.py
 
+
+      - name: Publish aggregator verification progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "官网核验"
+          --source "官方 ATS"
+          --completed 6
+          --message "Aggregator 候选官网核验完成，正在扫描公司池官网。"
+
       - name: Scan every company-pool career portal
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/company_portal_scan.py --region 美国
 
+
+      - name: Publish company-pool progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "公司官网扫描"
+          --source "美国公司池官网"
+          --completed 7
+          --message "美国公司池官网扫描完成，正在统一去重和筛选。"
+
       - name: Canonicalize, prune, and write run receipt
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/merge_scan_results.py --region 美国
 
+
+      - name: Publish merge progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "去重与筛选"
+          --source "统一岗位池"
+          --completed 8
+          --message "所有来源已合并去重，正在核验过期状态和扫描质量。"
+
       - name: Record scan health and anomaly history
-        if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/scan_health.py
 
+
+      - name: Publish health-check progress
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --phase "过期与质量核验"
+          --source "岗位状态核验"
+          --completed 9
+          --message "过期状态与扫描质量检查完成，正在回写网站。"
+
       - name: Sync jobs to Ivy Job Radar
-        if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
@@ -156,60 +222,32 @@ jobs:
           done
 
       - name: Publish completed run receipt
-        if: steps.schedule_guard.outputs.run == 'true'
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        shell: bash
-        run: |
-          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" || -z "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
-            exit 0
-          fi
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          receipt = json.loads(Path("data/scans/run_receipt_latest.json").read_text(encoding="utf-8"))
-          payload = {
-              "state": "completed",
-              "message": (
-                  f"本轮扫描完成：抓取 {receipt['fetched']}，"
-                  f"去重后导入 {receipt['imported']}，新增 {receipt['new']}，"
-                  f"失败来源 {len(receipt['failed_sources'])}。"
-              ),
-          }
-          Path("data/scans/scan_status_payload.json").write_text(
-              json.dumps(payload, ensure_ascii=False), encoding="utf-8"
-          )
-          PY
-          curl --fail-with-body --retry 3 --retry-all-errors \
-            --request POST \
-            --header "Content-Type: application/json" \
-            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
-            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-            --data-binary @data/scans/scan_status_payload.json \
-            "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status"
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --state completed
+          --phase "完成"
+          --source "Ivy Job Radar"
+          --completed 10
+          --message "美国岗位扫描、筛选、过期核验和回写已完成。"
 
       - name: Mark website scan as failed
-        if: failure() && steps.schedule_guard.outputs.run == 'true'
+        if: failure()
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        shell: bash
-        run: |
-          if [[ -n "${IVY_JOB_RADAR_SYNC_TOKEN}" && -n "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
-            curl --fail-with-body --retry 3 --retry-all-errors \
-              --request POST \
-              --header "Content-Type: application/json" \
-              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
-              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-              --data '{"state":"failed","message":"GitHub Actions 执行失败，未完成本轮回写。"}' \
-              "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status" \
-              || echo "Warning: could not publish failure status."
-          fi
+        run: >-
+          python scripts/publish_us_scan_progress.py
+          --state failed
+          --phase "运行失败"
+          --source "GitHub Actions"
+          --completed 0
+          --message "美国岗位更新被中断；已完成的阶段和计数已保留，请查看本次运行日志。"
 
       - name: Upload scan artifact
-        if: always() && steps.schedule_guard.outputs.run == 'true'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: us-jobscan-${{ github.run_id }}
@@ -218,7 +256,7 @@ jobs:
           retention-days: 30
 
       - name: Commit latest scan snapshot
-        if: always() && steps.schedule_guard.outputs.run == 'true'
+        if: always()
         shell: bash
         run: |
           if [[ -z "$(git status --short -- data/scans)" ]]; then
