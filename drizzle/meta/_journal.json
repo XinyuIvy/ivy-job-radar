@@ -85,6 +85,13 @@
       "when": 1785630467868,
       "tag": "0011_slim_electro",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1785640408353,
+      "tag": "0012_fixed_namorita",
+      "breakpoints": true
     }
   ]
 }
