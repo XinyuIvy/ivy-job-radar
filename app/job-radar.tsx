@@ -183,6 +183,8 @@ type ChinaScanSource = {
   jobs_updated_or_duplicate?: number;
   rejectionReasons?: Record<string, number>;
   rejection_reasons?: Record<string, number>;
+  reviewCounts?: Record<string, number>;
+  review_counts?: Record<string, number>;
   attention?: string;
   attentionKind?: string;
   attention_kind?: string;
@@ -222,6 +224,7 @@ type ChinaScanControl = {
     created: number;
     duplicate: number;
     rejectionReasons: Record<string, number>;
+    reviewCounts: Record<string, number>;
     updatedAt: string;
   } | null;
 };
@@ -1770,7 +1773,7 @@ export default function JobRadar() {
                   <p className="scan-eta">已运行 {formatDuration(chinaElapsedSeconds)}{chinaEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(chinaEtaSeconds)}` : ""}。</p>
                   {Object.keys(chinaProgress.rejectionReasons || {}).length > 0 && (
                     <p className="scan-rejections">
-                      排除原因：缺少标题或链接 {chinaProgress.rejectionReasons.missing_title_or_url ?? 0}；关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；明确工资下限不足 20K {chinaProgress.rejectionReasons.salary_below_20k ?? chinaProgress.rejectionReasons.salary_below_20k_or_missing ?? 0}；工资缺失或面议、已保留待核验 {chinaProgress.rejectionReasons.salary_missing_or_negotiable ?? 0}。
+                      排除原因：缺少标题或链接 {chinaProgress.rejectionReasons.missing_title_or_url ?? chinaProgress.rejectionReasons.missing_required_fields ?? 0}；关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；明确工资下限不足 20K {chinaProgress.rejectionReasons.salary_below_20k ?? chinaProgress.rejectionReasons.salary_below_20k_or_missing ?? 0}。保留待核验：工资缺失或面议 {chinaProgress.reviewCounts?.salary_missing_or_negotiable ?? chinaProgress.rejectionReasons.salary_missing_or_negotiable ?? 0}。
                     </p>
                   )}
                 </>
@@ -1801,6 +1804,7 @@ export default function JobRadar() {
                           {(item.rejectionReasons ?? item.rejection_reasons)?.degree_experience_or_skill_gap ? ` · 经验/方向不符 ${(item.rejectionReasons ?? item.rejection_reasons)?.degree_experience_or_skill_gap}` : ""}
                           {(item.rejectionReasons ?? item.rejection_reasons)?.salary_below_20k ? ` · 工资不足 20K ${(item.rejectionReasons ?? item.rejection_reasons)?.salary_below_20k}` : ""}
                           {(item.rejectionReasons ?? item.rejection_reasons)?.salary_missing_or_negotiable ? ` · 工资待核验 ${(item.rejectionReasons ?? item.rejection_reasons)?.salary_missing_or_negotiable}` : ""}
+                          {(item.reviewCounts ?? item.review_counts)?.salary_missing_or_negotiable ? ` · 工资待核验 ${(item.reviewCounts ?? item.review_counts)?.salary_missing_or_negotiable}` : ""}
                           {item.attention ? " · 需处理" : ""}
                         </span>
                       ))}
