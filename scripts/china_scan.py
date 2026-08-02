@@ -530,7 +530,10 @@ def monthly_salary_floor_k(text: str) -> float | None:
     content = clean_text(text).replace(",", "")
 
     def is_allowance(start: int) -> bool:
-        prefix = content[max(0, start - 12) : start]
+        # Bind an allowance label to the amount in the same compensation
+        # clause. A label before a comma must not hide the salary after it.
+        clause_start = max(content.rfind(separator, 0, start) for separator in "，；;。|\n")
+        prefix = content[clause_start + 1 : start]
         return re.search(r"餐补|饭补|房补|住房补贴|交通补贴|补贴|津贴|补助", prefix) is not None
     annual_patterns = (
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:/|每)?年", 10 / 12),
