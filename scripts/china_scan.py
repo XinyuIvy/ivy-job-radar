@@ -120,6 +120,21 @@ OBVIOUSLY_IRRELEVANT_SIGNALS = (
     "新闻编辑",
 )
 
+# Search indexes sometimes surface career explainers under URLs that look like
+# individual job pages. These titles describe a profession instead of an open
+# vacancy and must not enter the live job pool.
+NON_VACANCY_TITLE_SIGNALS = (
+    "什么是",
+    "岗位职责",
+    "职位职责",
+    "工作职责",
+    "就业前景",
+    "职业前景",
+    "薪资待遇",
+    "工资待遇",
+    "面试经验",
+)
+
 UNSUPPORTED_CORE_SIGNALS = (
     "大语言模型",
     "大模型训练",
@@ -638,6 +653,10 @@ def normalize_result(
     # The query is the recall step, but it cannot prove that a returned page is
     # relevant because public search engines sometimes ignore query operators.
     if not content_is_targeted:
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
+        return None
+    if any(signal in lower_title for signal in NON_VACANCY_TITLE_SIGNALS):
         if rejection_stats is not None:
             rejection_stats["title_not_targeted"] += 1
         return None
