@@ -400,7 +400,12 @@ def normalize_result(
         if rejection_stats is not None:
             rejection_stats["missing_title_or_url"] += 1
         return None
-    if not any(signal in combined.lower() for signal in WANTED_TITLE_SIGNALS):
+    content_is_targeted = any(signal in combined.lower() for signal in WANTED_TITLE_SIGNALS)
+    discovery_query = clean_text(query.get("query", "")).lower()
+    discovery_is_targeted = any(signal in discovery_query for signal in WANTED_TITLE_SIGNALS)
+    # A targeted platform query is already the recall step. Search snippets are
+    # often truncated, so they must not be required to repeat the query terms.
+    if not content_is_targeted and not discovery_is_targeted:
         if rejection_stats is not None:
             rejection_stats["title_not_targeted"] += 1
         return None
@@ -422,7 +427,9 @@ def normalize_result(
     if salary_floor is None and rejection_stats is not None:
         rejection_stats["salary_missing_or_negotiable"] += 1
     score, details, eligible = score_job(title, description, years)
-    if not eligible:
+    # Keep incomplete results returned by an explicitly targeted platform
+    # query. Full-JD verification handles uncertain degree and skill evidence.
+    if not eligible and not (discovery_is_targeted and (years is None or years <= 3)):
         if rejection_stats is not None:
             rejection_stats["degree_experience_or_skill_gap"] += 1
         return None
