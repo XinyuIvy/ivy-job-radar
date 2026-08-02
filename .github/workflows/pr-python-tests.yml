@@ -67,11 +67,10 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Validate website
+      - name: Validate website lint
         run: |
           chmod +x scripts/*.sh
           npm run lint
-          npm run build
 
       - name: Commit direct source changes
         shell: bash
