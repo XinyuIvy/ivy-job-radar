@@ -41,18 +41,22 @@ def load_module(name: str, path: Path) -> ModuleType:
     return module
 
 
+def classify_attention(message: str) -> str:
+    """Classify a source interruption for a clear user-facing recovery step."""
+    lower = message.lower()
+    if any(token in lower for token in ("captcha", "验证码", "安全验证", "访问频繁", "verify")):
+        return "verification_required"
+    if any(token in lower for token in ("login", "登录", "未登录", "sign in")):
+        return "login_required"
+    if any(token in lower for token in ("timeout", "timed out", "network", "connection", "网络")):
+        return "network_error"
+    return "source_error"
+
+
 def failed_source(source: str, error: BaseException) -> dict[str, Any]:
     """Classify a source failure without treating it as a completed scan."""
     message = str(error)
-    lower = message.lower()
-    if any(token in lower for token in ("captcha", "验证码", "安全验证", "访问频繁", "verify")):
-        attention_kind = "verification_required"
-    elif any(token in lower for token in ("login", "登录", "未登录", "sign in")):
-        attention_kind = "login_required"
-    elif any(token in lower for token in ("timeout", "timed out", "network", "connection", "网络")):
-        attention_kind = "network_error"
-    else:
-        attention_kind = "source_error"
+    attention_kind = classify_attention(message)
     return {
         "source": source,
         "status": "failed",
@@ -133,6 +137,8 @@ def run_boss(dry_run: bool) -> dict[str, Any]:
         publish_progress({"source": "BOSS直聘", "phase": "准备", "message": "正在准备 BOSS 搜索", "completed": 0, "total": 8})
         boss = load_module("ivy_boss_one_click", BOSS_SCRIPT)
         summary = boss.run_scan(dry_run=dry_run, progress_callback=publish_progress)
+        if summary.get("status") != "completed" and summary.get("attention"):
+            summary["attention_kind"] = classify_attention(str(summary["attention"]))
         return {"source": "BOSS直聘", **summary}
     except KeyboardInterrupt:
         raise
