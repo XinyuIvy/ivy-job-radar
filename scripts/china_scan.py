@@ -459,6 +459,8 @@ def strip_site_suffix(title: str) -> str:
 
 
 def company_from_result(title: str, description: str) -> str:
+    if suffix_match := re.search(r"[-—]\s*([^|]{2,60}(?:公司|集团|研究院|中心))$", title):
+        return clean_text(suffix_match.group(1))
     patterns = (
         r"(?:招聘企业|公司)[:：]\s*([^，。；|]{2,40})",
         r"([^，。；|]{2,40})(?:正在招聘|招聘)",
@@ -663,7 +665,7 @@ def normalize_result(
             + f"{source_name(url, query['source'])}公开索引发现，需打开具体 JD 核验；"
             + "；".join(details)
         ),
-        "salary": combined,
+        "salary": f"月薪下限约 {salary_floor:g}K" if salary_floor is not None else "未公布或面议",
         "salary_min_monthly_k": salary_floor,
         "skills": [
             label
@@ -737,10 +739,19 @@ def run_scan(
             "source_status": (
                 LAST_SEARCH_STATUS if not results and LAST_SEARCH_STATUS != "ok"
                 else "no_results" if not results
+                else "job_pages_not_indexed" if (
+                    item["source"] == "拉勾"
+                    and valid_platform_urls == 0
+                    and rejection_stats["not_specific_job_page"] == len(results)
+                )
                 else "search_source_anomaly" if valid_platform_urls == 0
                 else "ok"
             ),
-            "source_detail": LAST_SEARCH_DETAIL,
+            "source_detail": (
+                "Public search returned only Lagou activity or listing pages; no specific job page is publicly indexed."
+                if item["source"] == "拉勾" and valid_platform_urls == 0 and results
+                else LAST_SEARCH_DETAIL
+            ),
             "rejected": rejection_stats,
         })
         completed_steps += 1
