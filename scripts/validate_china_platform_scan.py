@@ -54,21 +54,29 @@ def validate(
         if CHINA_SCAN.platform_rule(source) is not None and "·" not in source
     }
     usable_sources = sum(totals["valid"] > 0 for totals in platform_groups.values())
+    limited_statuses = {
+        "job_pages_not_indexed",
+        "rate_limited",
+        "verification_required",
+        "search_source_error",
+    }
+    limited_sources = {
+        str(row.get("source", ""))
+        for row in summary.get("sources", [])
+        if str(row.get("source_status", "")) in limited_statuses
+    }
+    all_platform_sources_limited = bool(platform_groups) and set(platform_groups) <= limited_sources
     explicitly_unavailable = False
     if platform_groups and usable_sources == 0:
         statuses = {str(row.get("source_status", "")) for row in summary.get("sources", [])}
-        explicitly_unavailable = statuses and statuses <= {
-            "job_pages_not_indexed",
-            "rate_limited",
-            "verification_required",
-            "search_source_error",
-        }
+        explicitly_unavailable = statuses and statuses <= limited_statuses
         if availability_policy != "allow-limited" or not explicitly_unavailable:
             errors.append("Every public platform source returned zero valid platform URLs.")
 
     total_matched = sum(totals["matched"] for totals in platform_groups.values())
     if total_matched < minimum_matched and not (
-        availability_policy == "allow-limited" and explicitly_unavailable
+        availability_policy == "allow-limited"
+        and (explicitly_unavailable or all_platform_sources_limited)
     ):
         errors.append(
             f"Expected at least {minimum_matched} relevant job(s), but found {total_matched}."
