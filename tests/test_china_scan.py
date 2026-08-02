@@ -62,6 +62,29 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNotNone(row)
         self.assertEqual(row["track"], "Healthcare AI")
 
+    def test_llm_mention_is_not_a_hard_filter_unless_it_is_core(self):
+        optional = CHINA_SCAN.normalize_result(
+            {
+                "title": "数据分析师",
+                "url": "https://jobs.example.cn/data-analyst",
+                "description": "统计学硕士；熟悉大模型技术应用者优先；月薪 25-35K。",
+            },
+            {"source": "中国公司官网", "query": "数据分析"},
+            "2026-08-02T00:00:00+00:00",
+        )
+        core = CHINA_SCAN.normalize_result(
+            {
+                "title": "数据科学家",
+                "url": "https://jobs.example.cn/llm-scientist",
+                "description": "核心工作是大语言模型与 NLP 研发，月薪 30-50K。",
+            },
+            {"source": "中国公司官网", "query": "数据科学"},
+            "2026-08-02T00:00:00+00:00",
+        )
+
+        self.assertIsNotNone(optional)
+        self.assertIsNone(core)
+
     def test_wrong_platform_domain_is_rejected_before_content_filter(self):
         stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
