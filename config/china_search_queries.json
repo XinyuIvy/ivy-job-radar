@@ -67,43 +67,43 @@
     },
     {
       "source": "拉勾",
-      "query": "site:lagou.com/jobs 生物统计 博士"
+      "query": "site:lagou.com 生物统计 招聘"
     },
     {
       "source": "拉勾",
-      "query": "site:lagou.com/jobs 数据科学家 博士"
+      "query": "site:lagou.com 数据科学家 招聘"
     },
     {
       "source": "拉勾",
-      "query": "site:lagou.com/jobs 量化研究 博士"
+      "query": "site:lagou.com 量化研究 招聘"
     },
     {
       "source": "拉勾",
-      "query": "site:lagou.com/jobs 卫生经济 博士"
+      "query": "site:lagou.com 卫生经济 招聘"
     },
     {
       "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail 生物统计 博士"
+      "query": "site:nowcoder.com/jobs/detail 生物统计 招聘"
     },
     {
       "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail 数据科学家 博士"
+      "query": "site:nowcoder.com/jobs/detail 数据科学 招聘"
     },
     {
       "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail 量化研究 博士"
+      "query": "site:nowcoder.com/jobs/detail 量化研究 招聘"
     },
     {
       "source": "国聘",
-      "query": "site:iguopin.com 生物统计 博士"
+      "query": "site:iguopin.com/job/detail 生物统计 博士"
     },
     {
       "source": "国聘",
-      "query": "site:iguopin.com 数据科学家 博士"
+      "query": "site:iguopin.com/job/detail 数据科学 博士"
     },
     {
       "source": "国聘",
-      "query": "site:iguopin.com 量化研究 博士"
+      "query": "site:iguopin.com/job/detail 量化研究 博士"
     },
     {
       "source": "应届生求职网",
