@@ -131,14 +131,20 @@ def run_scan(
     sync_result = {"received": 0, "created": 0, "updated": 0, "skipped": 0}
     if not dry_run:
         try:
-            sync_result = radar.sync_jobs(jobs)
+            sync_result = radar.sync_jobs(
+                jobs,
+                incomplete_sources=radar.incomplete_boss_sources(state),
+            )
         except SystemExit as exc:
             # Repeat this batch on the next run so a website outage cannot lose jobs.
             state["cursor"] = starting_cursor
             state["status"] = "attention_required"
             state["failure"] = str(exc)
         else:
-            radar.record_synced_jobs(jobs, result_files)
+            # A partial batch must be retried in full. Do not cache its rows or
+            # the completed retry would omit them from source reconciliation.
+            if not radar.incomplete_boss_sources(state):
+                radar.record_synced_jobs(jobs, result_files)
     plan = radar.load_json(radar.DEFAULT_PLAN)
     state["combination_count"] = len(plan.get("cities", [])) * len(plan.get("keywords", []))
     summary = build_summary(state, discovered, len(jobs), sync_result, dry_run)

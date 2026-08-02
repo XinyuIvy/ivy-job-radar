@@ -101,7 +101,11 @@ class BossOneClickTest(unittest.TestCase):
             def transform_result_files(self, _files):
                 return [{"application_id": "job-1"}]
 
-            def sync_jobs(self, _jobs):
+            def incomplete_boss_sources(self, state):
+                return set() if state.get("status") == "completed" else {"BOSS直聘（本地采集）"}
+
+            def sync_jobs(self, _jobs, incomplete_sources=None):
+                self.incomplete_sources = incomplete_sources
                 raise SystemExit("website unavailable")
 
             def load_json(self, _path):

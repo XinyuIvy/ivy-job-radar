@@ -541,6 +541,14 @@ def sync_jobs(
             raise SystemExit(f"Job Radar expiration reconciliation could not connect: {error.reason}") from error
     return total
 
+
+def incomplete_boss_sources(state: dict[str, Any]) -> set[str]:
+    """Guard BOSS history when the latest search batch was not complete."""
+    if state.get("status") == "completed":
+        return set()
+    return {"BOSS直聘（本地采集）"}
+
+
 def ensure_scraper(scraper_dir: Path) -> Path:
     script = scraper_dir / "scripts" / "boss_cdp_raw.py"
     if not script.exists():
@@ -584,6 +592,11 @@ def classify_boss_interruption(output: str) -> tuple[str, str]:
     """Return a stable interruption kind and a useful recovery message."""
     detail = " ".join(output.split())[-900:]
     lower = detail.lower()
+    if re.search(r"code\s*[:=]\s*37\b", lower) or "环境存在异常" in detail:
+        return (
+            "verification_required",
+            f"BOSS 返回环境限制（code: 37）；已停止后续请求并保留本轮已完成的搜索结果。{detail}",
+        )
     if any(token in lower for token in ("captcha", "验证码", "安全验证", "访问频繁", "verify")):
         return "verification_required", f"BOSS 触发验证码或安全验证。{detail}"
     if any(token in lower for token in ("login", "登录", "未登录", "sign in", "session")):
@@ -685,7 +698,9 @@ def run_searches(
         })
 
     # Phase 2 opens details only for new, plausible jobs, once per job ID.
-    if candidates and completed == len(batch):
+    # A later query can be blocked after earlier list searches succeeded. Read
+    # details for the completed subset so those jobs are not discarded.
+    if candidates and completed > 0:
         candidates_path = run_dir / "boss_jobs_candidates.json"
         details_path = run_dir / "boss_details_candidates.json"
         candidates_path.write_text(
@@ -863,8 +878,12 @@ def main() -> None:
     if args.dry_run:
         print(json.dumps({"ok": True, "dry_run": True, "jobs": jobs}, ensure_ascii=False, indent=2))
         return
-    result = sync_jobs(jobs, completed_source="BOSS直聘（本地采集）")
-    if args.command == "run":
+    result = sync_jobs(
+        jobs,
+        completed_source="BOSS直聘（本地采集）",
+        incomplete_sources=incomplete_boss_sources(read_state()),
+    )
+    if args.command == "run" and not incomplete_boss_sources(read_state()):
         record_synced_jobs(jobs, result_files)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
