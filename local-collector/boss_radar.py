@@ -30,11 +30,25 @@ SCHEDULE_LABEL = "com.ivy.jobradar.boss"
 
 TARGET_TITLE = re.compile(
     r"生物统计|临床统计|医学统计|统计科学家|数据科学|数据科学家|应用科学家|"
-    r"研究科学家|量化研究|量化分析|医疗咨询|医药咨询|生命科学咨询|"
+    r"研究科学家|算法研究员|算法科学家|创新算法|科学计算|计算科学家|计算生物|"
+    r"量化研究|量化分析|医疗咨询|医药咨询|生命科学咨询|"
     r"真实世界|流行病|卫生经济|健康经济|结局研究|医学影像|"
     r"biostat|statistical scientist|data scientist|applied scientist|"
     r"research scientist|quantitative research|quantitative analyst|"
     r"healthcare consultant|life sciences consultant|epidemiolog|health economics",
+    re.IGNORECASE,
+)
+ALGORITHM_TITLE = re.compile(r"算法研究员|算法科学家|创新算法|科学计算|计算科学家|计算生物", re.IGNORECASE)
+ALGORITHM_DOMAIN = re.compile(
+    r"生物统计|统计建模|生物信息|计算生物|新药|药物|医药|生命科学|医疗|健康|"
+    r"科学智能|科学计算|ai\s*for\s*science|bioinformatics|computational biology|"
+    r"drug discovery|pharma|life science|healthcare|medical|statistical modeling",
+    re.IGNORECASE,
+)
+EXCLUDED_ALGORITHM_DOMAIN = re.compile(
+    r"生成式|大模型|自然语言处理|推荐算法|广告算法|纯计算机视觉|"
+    r"generative\s+ai|large\s+language\s+model|\bllm\b|\bnlp\b|"
+    r"recommender|recommendation algorithm|advertising algorithm",
     re.IGNORECASE,
 )
 EXCLUDED_TITLE = re.compile(
@@ -178,6 +192,10 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
                 + split_tags(detail.get("tags"))
             )
             content = " ".join([title, jd, " ".join(tags)])
+            if ALGORITHM_TITLE.search(title) and (
+                not ALGORITHM_DOMAIN.search(content) or EXCLUDED_ALGORITHM_DOMAIN.search(content)
+            ):
+                continue
             detected_skills = [label for label, pattern in SKILL_RULES if pattern.search(content)]
             skills = list(dict.fromkeys(detected_skills + tags))[:12]
             score = min(92, 68 + min(18, len(detected_skills) * 3) + (5 if jd else 0))
