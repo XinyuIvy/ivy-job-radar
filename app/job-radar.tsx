@@ -169,6 +169,33 @@ type ScanStatus = {
   timeoutMinutes: number;
 };
 
+type ChinaScanSource = {
+  source?: string;
+  status?: string;
+  jobsDiscovered?: number;
+  jobsEligible?: number;
+  jobsCreated?: number;
+  jobsUpdatedOrDuplicate?: number;
+  jobs_discovered?: number;
+  jobs_eligible?: number;
+  jobs_created?: number;
+  jobs_updated_or_duplicate?: number;
+  attention?: string;
+};
+
+type ChinaScanStatus = {
+  status: "completed" | "partial" | "failed";
+  sourcesCompleted: number;
+  sourcesFailed: number;
+  jobsDiscovered: number;
+  jobsEligible: number;
+  jobsCreated: number;
+  jobsUpdatedOrDuplicate: number;
+  results: ChinaScanSource[];
+  finishedAt: string;
+  receivedAt: string;
+};
+
 type UserProfile = {
   userEmail: string;
   fullName: string;
@@ -503,6 +530,7 @@ export default function JobRadar() {
   const [ignoreTarget, setIgnoreTarget] = useState<Job | null>(null);
   const [ignoreSaving, setIgnoreSaving] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus | null>(null);
+  const [chinaScanStatus, setChinaScanStatus] = useState<ChinaScanStatus | null>(null);
   const [refreshConfirmationOpen, setRefreshConfirmationOpen] = useState(false);
   const [clock, setClock] = useState(0);
   const [profile, setProfile] = useState<UserProfile>(emptyProfile);
@@ -577,6 +605,12 @@ export default function JobRadar() {
         }
       }
     }
+  };
+
+  const loadChinaScanStatus = async () => {
+    const response = await fetch("/api/china-scan-status", { cache: "no-store" });
+    if (!response.ok) return;
+    setChinaScanStatus(await response.json() as ChinaScanStatus | null);
   };
 
   useEffect(() => {
@@ -663,9 +697,13 @@ export default function JobRadar() {
   useEffect(() => {
     const initialTimer = window.setTimeout(() => {
       void loadScanStatus();
+      void loadChinaScanStatus();
       setClock(Date.now());
     }, 0);
-    const statusTimer = window.setInterval(loadScanStatus, 15000);
+    const statusTimer = window.setInterval(() => {
+      void loadScanStatus();
+      void loadChinaScanStatus();
+    }, 15000);
     const clockTimer = window.setInterval(() => setClock(Date.now()), 1000);
     return () => {
       window.clearTimeout(initialTimer);
@@ -1605,6 +1643,37 @@ export default function JobRadar() {
                 <>
                   <strong>尚无完整回写记录</strong>
                   <p>下一次更新开始后，这里会显示 ATS 结果、GitHub 进度和完成时间。</p>
+                </>
+              )}
+            </div>
+          </div>
+          <div className={`scan-summary china-scan-summary scan-summary-${chinaScanStatus?.status ?? "idle"}`} aria-live="polite">
+            <span className="scan-summary-dot" />
+            <div>
+              {chinaScanStatus ? (
+                <>
+                  <strong>
+                    Mac 中国多来源扫描{chinaScanStatus.status === "completed" ? "完成" : chinaScanStatus.status === "partial" ? "部分完成" : "失败"}：{formatNewYorkTime(chinaScanStatus.finishedAt)}（美东时间）
+                  </strong>
+                  <p>
+                    发现 {chinaScanStatus.jobsDiscovered} 个，筛选后 {chinaScanStatus.jobsEligible} 个；新增 {chinaScanStatus.jobsCreated} 个，更新或重复 {chinaScanStatus.jobsUpdatedOrDuplicate} 个。
+                    {chinaScanStatus.sourcesFailed > 0 ? ` ${chinaScanStatus.sourcesFailed} 个来源需要处理。` : ""}
+                  </p>
+                  {chinaScanStatus.results.length > 0 && (
+                    <div className="china-source-results">
+                      {chinaScanStatus.results.map((item, index) => (
+                        <span key={`${item.source ?? "source"}-${index}`} className={item.status === "completed" ? "source-ok" : "source-warning"}>
+                          {item.source || "未知来源"}：新增 {item.jobsCreated ?? item.jobs_created ?? 0}
+                          {item.attention ? " · 需处理" : ""}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <strong>尚无 Mac 中国多来源扫描报告</strong>
+                  <p>下一次运行一键扫描后，岗位会自动进入今日岗位，分来源汇总也会自动显示在这里。</p>
                 </>
               )}
             </div>
