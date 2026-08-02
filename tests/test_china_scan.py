@@ -54,6 +54,23 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(rows[0]["url"], "https://www.zhipin.com/job_detail/abc.html")
         self.assertIn("经验不限", rows[0]["description"])
 
+    def test_parses_yahoo_result_and_decodes_redirect_url(self):
+        body = '''
+        <div class="dd algo algo-sr relsrch Sr">
+          <a href="https://r.search.yahoo.com/x/RU=https%3a%2f%2fm.liepin.com%2fjob%2f1976592433.shtml/RK=2/RS=x">
+            <h3 class="title"><span>高级<b>生物统计师</b></span></h3>
+          </a>
+          <div class="compText aAbs"><p>博士，<b>生物统计</b>或统计学专业。</p></div>
+        </div>
+        '''
+
+        rows = CHINA_SCAN.parse_yahoo_results(body)
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["title"], "高级生物统计师")
+        self.assertEqual(rows[0]["url"], "https://m.liepin.com/job/1976592433.shtml")
+        self.assertIn("统计学专业", rows[0]["description"])
+
     def test_scientific_algorithm_role_is_kept(self):
         stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
@@ -240,6 +257,9 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNone(too_experienced)
         self.assertIsNone(senior)
         self.assertIsNotNone(postdoc)
+
+    def test_single_explicit_monthly_salary_is_parsed(self):
+        self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("数据分析师 薪资8550"), 8.55)
 
 
 if __name__ == "__main__":
