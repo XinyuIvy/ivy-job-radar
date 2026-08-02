@@ -176,9 +176,11 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         sync_result = radar.sync_jobs(jobs)
 
     rejection_reasons: dict[str, int] = {}
+    review_counts: dict[str, int] = {}
     for item in source_summary.get("sources", []):
         for key, value in item.get("rejected", {}).items():
-            rejection_reasons[key] = rejection_reasons.get(key, 0) + int(value)
+            target = review_counts if key == "salary_missing_or_negotiable" else rejection_reasons
+            target[key] = target.get(key, 0) + int(value)
     summary = {
         "source": "中国公开索引",
         "status": "completed",
@@ -187,6 +189,7 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         "jobs_created": int(sync_result.get("created", 0)),
         "jobs_updated_or_duplicate": int(sync_result.get("updated", 0)) + int(sync_result.get("skipped", 0)),
         "rejection_reasons": rejection_reasons,
+        "review_counts": review_counts,
         "sources": source_summary.get("sources", []),
         "attention": "",
     }
@@ -202,6 +205,7 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         "created": summary["jobs_created"],
         "duplicate": summary["jobs_updated_or_duplicate"],
         "rejection_reasons": rejection_reasons,
+        "review_counts": review_counts,
     })
     return summary
 
