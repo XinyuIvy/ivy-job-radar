@@ -526,10 +526,6 @@ def monthly_salary_floor_k(text: str) -> float | None:
     for pattern, multiplier in annual_patterns:
         if match := re.search(pattern, content, re.IGNORECASE):
             return float(match.group(1)) * multiplier
-    # Convert advertised day rates using the standard 21.75 paid workdays per
-    # month so low-paid temporary roles cannot bypass the monthly salary rule.
-    if match := re.search(r"(\d+(?:\.\d+)?)\s*元\s*(?:/|每)\s*(?:天|日)", content):
-        return float(match.group(1)) * 21.75 / 1000
     monthly_patterns = (
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
@@ -542,6 +538,20 @@ def monthly_salary_floor_k(text: str) -> float | None:
     for pattern, multiplier in monthly_patterns:
         if match := re.search(pattern, content, re.IGNORECASE):
             return float(match.group(1)) * multiplier
+    # Convert advertised day rates using the standard 21.75 paid workdays per
+    # month. Check monthly salaries first so a daily meal or travel allowance
+    # cannot override an explicit monthly salary.
+    daily_range = re.search(
+        r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*元\s*(?:/|每)\s*(?:天|日)",
+        content,
+    )
+    if daily_range:
+        return float(daily_range.group(1)) * 21.75 / 1000
+    for match in re.finditer(r"(\d+(?:\.\d+)?)\s*元\s*(?:/|每)\s*(?:天|日)", content):
+        prefix = content[max(0, match.start() - 8) : match.start()]
+        if re.search(r"餐补|饭补|补贴|津贴|补助", prefix):
+            continue
+        return float(match.group(1)) * 21.75 / 1000
     return None
 
 
