@@ -27,9 +27,27 @@ TARGET_TITLE = re.compile(
     r"quantitative researcher|quantitative analyst|quant researcher|"
     r"epidemiolog|health econom|outcomes research|real.world evidence|"
     r"healthcare consultant|life sciences consultant|clinical data scientist|"
-    r"生物统计|临床统计|医学统计|统计科学|统计师|数据科学|应用科学|"
+    r"生物统计|临床统计|医学统计|统计科学|统计分析|统计建模|统计师|统计|数据科学|应用科学|"
     r"量化研究|定量研究|量化分析|流行病|卫生经济|健康经济|结局研究|"
     r"真实世界|医药咨询|医疗咨询|生命科学咨询|算法科学|医学数据|医学影像)",
+    re.IGNORECASE,
+)
+CHINA_EXCLUDED_TITLE = re.compile(
+    r"(?:实习|兼职|高级|资深|首席|专家|总监|经理|负责人|主管|架构师|"
+    r"软件工程|数据工程|算法工程|大模型|自然语言处理|"
+    r"\bintern\b|part.time|\bsenior\b|\bprincipal\b|\bstaff\b|\bmanager\b|"
+    r"\bdirector\b|\blead\b|head of|vice president|software engineer|data engineer|"
+    r"algorithm engineer|large language model|\bllm\b|\bnlp\b)",
+    re.IGNORECASE,
+)
+CHINA_IRRELEVANT_TITLE = re.compile(
+    r"物流统计|仓库统计|生产统计|财务统计|销售统计|门店统计|猪场统计|养殖统计|"
+    r"统计文员|数据录入|文员|会计|出纳|客服|行政专员",
+    re.IGNORECASE,
+)
+CHINA_EXCLUDED_CORE = re.compile(
+    r"大语言模型|大模型|自然语言处理|\bllm\b|\bnlp\b|large language model|"
+    r"生成式\s*ai|generative\s*ai",
     re.IGNORECASE,
 )
 EXCLUDED_TITLE = re.compile(
@@ -1178,6 +1196,57 @@ def value(row: dict[str, Any], *keys: str) -> str:
     return ""
 
 
+def required_experience(content: str) -> int | None:
+    years: list[int] = []
+    patterns = (
+        r"(?:至少|最低|要求|需具备)\s*(\d+)\s*年",
+        r"(\d+)\s*年(?:以上)?(?:相关|工作|行业|专业)?经验",
+        r"(?:minimum|at least)\s+(\d+)\+?\s+years?",
+        r"(\d+)\+?\s+years?(?:\s+of)?\s+(?:relevant|related|professional|industry|work)?\s*experience",
+    )
+    for pattern in patterns:
+        for match in re.finditer(pattern, content, re.IGNORECASE):
+            years.extend(int(item) for item in match.groups() if item)
+    return max(years) if years else None
+
+
+def monthly_salary_floor_k(content: str) -> float | None:
+    normalized = clean(content).replace(",", "")
+    annual = (
+        (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:/|每)?年", 10 / 12),
+        (r"年薪\s*(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万", 10 / 12),
+    )
+    for pattern, multiplier in annual:
+        if match := re.search(pattern, normalized, re.IGNORECASE):
+            return float(match.group(1)) * multiplier
+    monthly = (
+        (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:/|每)?月", 10),
+        (r"(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:/|每)?月", 0.001),
+    )
+    for pattern, multiplier in monthly:
+        if match := re.search(pattern, normalized, re.IGNORECASE):
+            return float(match.group(1)) * multiplier
+    return None
+
+
+def china_job_eligible(title: str, description: str, salary: str) -> tuple[bool, float | None]:
+    content = f"{title} {description} {salary}"
+    years = required_experience(content)
+    salary_floor = monthly_salary_floor_k(content)
+    eligible = (
+        bool(TARGET_TITLE.search(content))
+        and not CHINA_EXCLUDED_TITLE.search(title)
+        and not CHINA_IRRELEVANT_TITLE.search(title)
+        and not CHINA_EXCLUDED_CORE.search(content)
+        and (years is None or years <= 3)
+        and salary_floor is not None
+        and salary_floor >= 20
+    )
+    return eligible, salary_floor
+
+
 def normalize_api_job(
     company: str,
     region: str,
@@ -1201,7 +1270,14 @@ def normalize_api_job(
     )
     url = value(row, "absolute_url", "hostedUrl", "jobUrl", "careersPageUrl", "url", "externalPath")
     description = value(row, "content", "description", "jobAd.sections.jobDescription.text")
-    if not title or not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
+    salary = value(row, "salary", "salaryRange", "salaryDescription", "compensation", "payRange")
+    if not title or not TARGET_TITLE.search(title):
+        return None
+    if region == "中国":
+        eligible, salary_floor = china_job_eligible(title, description, salary)
+        if not eligible:
+            return None
+    elif EXCLUDED_TITLE.search(title):
         return None
     if not location_matches_region(location, region):
         return None
@@ -1223,6 +1299,8 @@ def normalize_api_job(
         "score": score_job(title, description),
         "visa": "不适用" if region == "中国" else "JD 未明确",
         "evidence": f"{company} 官方招聘门户通过 {ats_type} 适配器发现并读取。",
+        "salary": salary,
+        "salary_min_monthly_k": salary_floor if region == "中国" else None,
         "skills": extract_skills(description),
         "job_url": url,
         "canonical_url": url,
@@ -1243,9 +1321,17 @@ def normalize_posting(
     scanned_at: str,
 ) -> dict[str, Any] | None:
     title = clean(posting.get("title"))
-    if not title or not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
+    if not title or not TARGET_TITLE.search(title):
         return None
     description = clean(re.sub(r"<[^>]+>", " ", str(posting.get("description") or "")))
+    base_salary = posting.get("baseSalary")
+    salary = clean(json.dumps(base_salary, ensure_ascii=False)) if base_salary else ""
+    if region == "中国":
+        eligible, salary_floor = china_job_eligible(title, description, salary)
+        if not eligible:
+            return None
+    elif EXCLUDED_TITLE.search(title):
+        return None
     url = clean(posting.get("url")) or page_url
     location_obj = posting.get("jobLocation")
     locations = location_obj if isinstance(location_obj, list) else [location_obj]
@@ -1273,6 +1359,8 @@ def normalize_posting(
         "score": score_job(title, description),
         "visa": "不适用" if region == "中国" else "JD 未明确",
         "evidence": f"{company} 官方招聘页面的 schema.org JobPosting 结构化数据。",
+        "salary": salary,
+        "salary_min_monthly_k": salary_floor if region == "中国" else None,
         "skills": extract_skills(description),
         "job_url": url,
         "canonical_url": url,
