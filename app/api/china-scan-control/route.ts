@@ -137,6 +137,9 @@ export async function POST(request: NextRequest) {
       rejectionReasons: rawProgress.rejection_reasons && typeof rawProgress.rejection_reasons === "object"
         ? rawProgress.rejection_reasons
         : {},
+      reviewCounts: rawProgress.review_counts && typeof rawProgress.review_counts === "object"
+        ? rawProgress.review_counts
+        : {},
       updatedAt: now,
     };
     const updated = await db.update(chinaScanControl).set({

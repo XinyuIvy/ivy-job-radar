@@ -359,6 +359,11 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "senior", "title": "资深统计科学家"}))
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "eng", "title": "算法工程师"}))
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}))
+        self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "unknown", "title": "统计建模研究员", "salary": "面议"}))
+        self.assertEqual(
+            BOSS_RADAR.title_prefilter_reason({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}),
+            "salary_below_20k",
+        )
         self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "postdoc", "title": "生物统计博士后"}))
 
     def test_sync_reports_a_completed_source_for_expiration_reconciliation(self):

@@ -41,7 +41,22 @@ def load_module(name: str, path: Path) -> ModuleType:
     return module
 
 
+def classify_attention(message: str) -> str:
+    """Classify a source interruption for a clear user-facing recovery step."""
+    lower = message.lower()
+    if any(token in lower for token in ("captcha", "验证码", "安全验证", "访问频繁", "verify")):
+        return "verification_required"
+    if any(token in lower for token in ("login", "登录", "未登录", "sign in")):
+        return "login_required"
+    if any(token in lower for token in ("timeout", "timed out", "network", "connection", "网络")):
+        return "network_error"
+    return "source_error"
+
+
 def failed_source(source: str, error: BaseException) -> dict[str, Any]:
+    """Classify a source failure without treating it as a completed scan."""
+    message = str(error)
+    attention_kind = classify_attention(message)
     return {
         "source": source,
         "status": "failed",
@@ -49,7 +64,8 @@ def failed_source(source: str, error: BaseException) -> dict[str, Any]:
         "jobs_eligible": 0,
         "jobs_created": 0,
         "jobs_updated_or_duplicate": 0,
-        "attention": str(error),
+        "attention": message,
+        "attention_kind": attention_kind,
     }
 
 
@@ -121,6 +137,8 @@ def run_boss(dry_run: bool) -> dict[str, Any]:
         publish_progress({"source": "BOSS直聘", "phase": "准备", "message": "正在准备 BOSS 搜索", "completed": 0, "total": 8})
         boss = load_module("ivy_boss_one_click", BOSS_SCRIPT)
         summary = boss.run_scan(dry_run=dry_run, progress_callback=publish_progress)
+        if summary.get("status") != "completed" and summary.get("attention"):
+            summary["attention_kind"] = classify_attention(str(summary["attention"]))
         return {"source": "BOSS直聘", **summary}
     except KeyboardInterrupt:
         raise
@@ -158,9 +176,11 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         sync_result = radar.sync_jobs(jobs)
 
     rejection_reasons: dict[str, int] = {}
+    review_counts: dict[str, int] = {}
     for item in source_summary.get("sources", []):
         for key, value in item.get("rejected", {}).items():
-            rejection_reasons[key] = rejection_reasons.get(key, 0) + int(value)
+            target = review_counts if key == "salary_missing_or_negotiable" else rejection_reasons
+            target[key] = target.get(key, 0) + int(value)
     summary = {
         "source": "中国公开索引",
         "status": "completed",
@@ -169,6 +189,7 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         "jobs_created": int(sync_result.get("created", 0)),
         "jobs_updated_or_duplicate": int(sync_result.get("updated", 0)) + int(sync_result.get("skipped", 0)),
         "rejection_reasons": rejection_reasons,
+        "review_counts": review_counts,
         "sources": source_summary.get("sources", []),
         "attention": "",
     }
@@ -184,6 +205,7 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         "created": summary["jobs_created"],
         "duplicate": summary["jobs_updated_or_duplicate"],
         "rejection_reasons": rejection_reasons,
+        "review_counts": review_counts,
     })
     return summary
 

@@ -75,6 +75,17 @@ def summarize_report(report: dict[str, Any]) -> tuple[str, str]:
     )
     if int(report.get("sources_failed", 0)):
         message += f" {int(report.get('sources_failed', 0))} 个来源需要处理。"
+        attention_kinds = {
+            str(item.get("attention_kind", ""))
+            for item in report.get("results", [])
+            if isinstance(item, dict) and item.get("attention_kind")
+        }
+        if "login_required" in attention_kinds:
+            message += " BOSS 登录已失效：有空时打开专用 Chrome 登录后，再点一次更新中国岗位。"
+        elif "verification_required" in attention_kinds:
+            message += " BOSS 触发验证码或安全验证：有空时在专用 Chrome 完成验证后，再点一次更新中国岗位。"
+        elif "network_error" in attention_kinds:
+            message += " 网络连接失败；本轮不会据此判定岗位过期，下次更新会自动重试。"
     return state, message
 
 
