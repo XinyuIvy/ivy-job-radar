@@ -131,7 +131,10 @@ def run_scan(
     sync_result = {"received": 0, "created": 0, "updated": 0, "skipped": 0}
     if not dry_run:
         try:
-            sync_result = radar.sync_jobs(jobs)
+            sync_result = radar.sync_jobs(
+                jobs,
+                incomplete_sources=radar.incomplete_boss_sources(state),
+            )
         except SystemExit as exc:
             # Repeat this batch on the next run so a website outage cannot lose jobs.
             state["cursor"] = starting_cursor
