@@ -527,12 +527,14 @@ def required_experience(text: str) -> int | None:
 
 def monthly_salary_floor_k(text: str) -> float | None:
     """Parse the advertised gross monthly salary floor in thousands of RMB."""
-    content = clean_text(text).replace(",", "")
+    # Remove numeric thousands separators without erasing punctuation that
+    # separates an allowance clause from the real salary clause.
+    content = re.sub(r"(?<=\d),(?=\d)", "", clean_text(text))
 
     def is_allowance(start: int) -> bool:
         # Bind an allowance label to the amount in the same compensation
         # clause. A label before a comma must not hide the salary after it.
-        clause_start = max(content.rfind(separator, 0, start) for separator in "，；;。|\n")
+        clause_start = max(content.rfind(separator, 0, start) for separator in "，,；;。|\n")
         prefix = content[clause_start + 1 : start]
         return re.search(r"餐补|饭补|房补|住房补贴|交通补贴|补贴|津贴|补助", prefix) is not None
     annual_patterns = (
