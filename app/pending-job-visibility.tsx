@@ -35,11 +35,9 @@ export default function PendingJobVisibility() {
 
     const applyVisibility = () => {
       if (disposed) return;
-      const heading = Array.from(document.querySelectorAll("h2"))
-        .find((node) => node.textContent?.trim().startsWith("今日岗位"));
-      const onTodayView = Boolean(heading);
+      const onTodayView = Array.from(document.querySelectorAll("h2"))
+        .some((node) => node.textContent?.trim().startsWith("今日岗位"));
       const cards = Array.from(document.querySelectorAll<HTMLElement>(".job-list .job-card"));
-      let visibleCount = 0;
 
       for (const card of cards) {
         if (!onTodayView) {
@@ -49,13 +47,7 @@ export default function PendingJobVisibility() {
         const title = card.querySelector(".job-title h3")?.textContent ?? "";
         const companyLine = card.querySelector(".job-title p")?.textContent ?? "";
         const company = companyLine.split("·")[0]?.trim() ?? "";
-        const shouldHide = pendingKeys.has(`${normalize(company)}::${normalize(title)}`);
-        card.hidden = shouldHide;
-        if (!shouldHide) visibleCount += 1;
-      }
-
-      if (heading && /^今日岗位（\d+）$/.test(heading.textContent?.trim() ?? "")) {
-        heading.textContent = `今日岗位（${visibleCount}）`;
+        card.hidden = pendingKeys.has(`${normalize(company)}::${normalize(title)}`);
       }
     };
 
