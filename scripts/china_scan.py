@@ -518,13 +518,19 @@ def required_experience(text: str) -> int | None:
 def monthly_salary_floor_k(text: str) -> float | None:
     """Parse the advertised gross monthly salary floor in thousands of RMB."""
     content = clean_text(text).replace(",", "")
+
+    def is_allowance(start: int) -> bool:
+        prefix = content[max(0, start - 12) : start]
+        return re.search(r"餐补|饭补|房补|住房补贴|交通补贴|补贴|津贴|补助", prefix) is not None
     annual_patterns = (
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万\s*(?:/|每)?年", 10 / 12),
         (r"年薪\s*(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万", 10 / 12),
         (r"年薪\s*(\d+(?:\.\d+)?)\s*万(?:元)?(?:起|以上)", 10 / 12),
     )
     for pattern, multiplier in annual_patterns:
-        if match := re.search(pattern, content, re.IGNORECASE):
+        for match in re.finditer(pattern, content, re.IGNORECASE):
+            if is_allowance(match.start()):
+                continue
             return float(match.group(1)) * multiplier
     monthly_patterns = (
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
@@ -536,20 +542,22 @@ def monthly_salary_floor_k(text: str) -> float | None:
         (r"(?:月薪|薪资)[:：]?\s*(\d{4,6})\s*元?(?:\s*/?\s*月)?", 0.001),
     )
     for pattern, multiplier in monthly_patterns:
-        if match := re.search(pattern, content, re.IGNORECASE):
+        for match in re.finditer(pattern, content, re.IGNORECASE):
+            if is_allowance(match.start()):
+                continue
             return float(match.group(1)) * multiplier
     # Convert advertised day rates using the standard 21.75 paid workdays per
     # month. Check monthly salaries first so a daily meal or travel allowance
     # cannot override an explicit monthly salary.
-    daily_range = re.search(
+    for daily_range in re.finditer(
         r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*元\s*(?:/|每)\s*(?:天|日)",
         content,
-    )
-    if daily_range:
+    ):
+        if is_allowance(daily_range.start()):
+            continue
         return float(daily_range.group(1)) * 21.75 / 1000
     for match in re.finditer(r"(\d+(?:\.\d+)?)\s*元\s*(?:/|每)\s*(?:天|日)", content):
-        prefix = content[max(0, match.start() - 8) : match.start()]
-        if re.search(r"餐补|饭补|补贴|津贴|补助", prefix):
+        if is_allowance(match.start()):
             continue
         return float(match.group(1)) * 21.75 / 1000
     return None
