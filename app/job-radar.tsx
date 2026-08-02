@@ -610,7 +610,17 @@ export default function JobRadar() {
   const loadChinaScanStatus = async () => {
     const response = await fetch("/api/china-scan-status", { cache: "no-store" });
     if (!response.ok) return;
-    setChinaScanStatus(await response.json() as ChinaScanStatus | null);
+    const nextStatus = await response.json() as ChinaScanStatus | null;
+    setChinaScanStatus((currentStatus) => {
+      if (currentStatus?.receivedAt && nextStatus?.receivedAt !== currentStatus.receivedAt) {
+        void fetch("/api/jobs", { cache: "no-store" })
+          .then((jobsResponse) => jobsResponse.ok ? jobsResponse.json() : null)
+          .then((rows) => {
+            if (Array.isArray(rows)) setDailyJobs(rows);
+          });
+      }
+      return nextStatus;
+    });
   };
 
   useEffect(() => {
