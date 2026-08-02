@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
     const canonicalUrl = cleanText(raw.canonical_url) || canonicalizeJobUrl(jobUrl);
     const applicationId = cleanText(raw.application_id);
     const [existing] = await db
-      .select({ id: jobs.id, discoveredAt: jobs.discoveredAt })
+      .select()
       .from(jobs)
       .where(
         or(
@@ -171,7 +171,23 @@ export async function POST(request: NextRequest) {
     importedSources.add(values.source);
 
     if (existing) {
-      await db.update(jobs).set(values).where(eq(jobs.id, existing.id));
+      const incomingHasFullJd = values.description.length > 0;
+      const mergedValues = {
+        ...values,
+        company: values.company === "待核验公司" ? existing.company : values.company,
+        location: values.location || existing.location,
+        score: Math.max(values.score, existing.score),
+        visa: values.visa === "JD 未明确" ? existing.visa : values.visa,
+        evidence: values.evidence || existing.evidence,
+        description: values.description || existing.description,
+        skills: values.skills === "[]" ? existing.skills : values.skills,
+        canonicalUrl: values.canonicalUrl || existing.canonicalUrl,
+        applicationId: values.applicationId || existing.applicationId,
+        source: incomingHasFullJd || !existing.source ? values.source : existing.source,
+        status: values.status === "待官网核验" && existing.status === "开放" ? existing.status : values.status,
+        discoveredAt: existing.discoveredAt,
+      };
+      await db.update(jobs).set(mergedValues).where(eq(jobs.id, existing.id));
       updated += 1;
     } else {
       await db.insert(jobs).values(values);
