@@ -52,6 +52,8 @@ export default function VerificationQueueActions() {
         if (!actions) return;
 
         card.dataset.manualReviewEnhanced = "true";
+        actions.querySelectorAll("button").forEach((existing) => existing.remove());
+
         const run = async (action: "approve" | "ignore" | "delete" | "rerun", trigger: HTMLButtonElement) => {
           const prompts = {
             approve: `确认人工通过 ${item.company} · ${item.title}，并直接加入今日岗位吗？`,
