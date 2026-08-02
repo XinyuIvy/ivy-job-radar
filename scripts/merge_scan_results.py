@@ -213,7 +213,11 @@ def parse_time(value: object) -> datetime | None:
     return parsed.astimezone(timezone.utc)
 
 
-def run(scan_dir: Path, stale_days: int) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+def run(
+    scan_dir: Path,
+    stale_days: int,
+    region_filter: str = "",
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     started_at = datetime.now(timezone.utc)
     merged: dict[str, dict[str, Any]] = {}
     source_counts: dict[str, int] = {}
@@ -221,6 +225,8 @@ def run(scan_dir: Path, stale_days: int) -> tuple[list[dict[str, Any]], dict[str
     raw_count = 0
     for filename in SOURCE_FILES:
         rows = load_list(scan_dir / filename)
+        if region_filter:
+            rows = [row for row in rows if clean(row.get("region")) == region_filter]
         source_counts[filename] = len(rows)
         raw_count += len(rows)
         for job in rows:
@@ -235,6 +241,8 @@ def run(scan_dir: Path, stale_days: int) -> tuple[list[dict[str, Any]], dict[str
             merged[key] = job if current is None else merge_record(current, job)
 
     previous = load_list(scan_dir / "all_jobs_latest.json")
+    if region_filter:
+        previous = [row for row in previous if clean(row.get("region")) == region_filter]
     previous_keys = {identity(job) for job in previous}
     current_keys = set(merged)
     retained_missing = 0
@@ -328,9 +336,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Canonicalize and merge all cloud scan outputs.")
     parser.add_argument("--scan-dir", type=Path, default=Path("data/scans"))
     parser.add_argument("--stale-days", type=int, default=14)
+    parser.add_argument("--region", choices=("美国", "中国"), default="")
     args = parser.parse_args()
     args.scan_dir.mkdir(parents=True, exist_ok=True)
-    jobs, receipt = run(args.scan_dir, args.stale_days)
+    jobs, receipt = run(args.scan_dir, args.stale_days, args.region)
     (args.scan_dir / "all_jobs_latest.json").write_text(
         json.dumps(jobs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
