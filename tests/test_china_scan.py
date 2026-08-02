@@ -40,6 +40,55 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(row["title"], "创新算法研究员")
         self.assertEqual(row["region"], "中国")
 
+    def test_targeted_query_keeps_incomplete_platform_snippet(self):
+        stats = {
+            "missing_title_or_url": 0,
+            "title_not_targeted": 0,
+            "excluded_seniority_or_role": 0,
+            "degree_experience_or_skill_gap": 0,
+            "score_below_discovery_threshold": 0,
+            "salary_below_20k": 0,
+            "salary_missing_or_negotiable": 0,
+        }
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "研究员",
+                "url": "https://www.liepin.com/job/123456",
+                "description": "招聘平台仅返回截断摘要，完整职位信息待核验。",
+            },
+            {"source": "猎聘", "query": "site:liepin.com 生物统计"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNotNone(row)
+        self.assertEqual(stats["title_not_targeted"], 0)
+        self.assertIn("需打开具体 JD 核验", row["evidence"])
+
+    def test_untargeted_direct_page_still_rejects_unrelated_result(self):
+        stats = {
+            "missing_title_or_url": 0,
+            "title_not_targeted": 0,
+            "excluded_seniority_or_role": 0,
+            "degree_experience_or_skill_gap": 0,
+            "score_below_discovery_threshold": 0,
+            "salary_below_20k": 0,
+            "salary_missing_or_negotiable": 0,
+        }
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "普通研究员",
+                "url": "https://example.cn/jobs/researcher",
+                "description": "负责一般事务。",
+            },
+            {"source": "直接招聘页", "query": "https://example.cn/careers"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["title_not_targeted"], 1)
+
     def test_unrelated_result_records_rejection_reason(self):
         stats = {
             "missing_title_or_url": 0,
