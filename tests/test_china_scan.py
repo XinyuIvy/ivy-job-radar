@@ -72,6 +72,38 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(row["company"], "中国电子工程设计院股份有限公司")
         self.assertEqual(row["salary"], "未公布或面议")
 
+    def test_company_recruiting_index_is_not_saved_as_a_job(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "深圳某科技有限公司招聘_最新招聘信息",
+                "url": "https://jobs.51job.com/shenzhen/123456789.html",
+                "description": "公司另有数据分析和统计岗位，详情请查看招聘列表。",
+            },
+            {"source": "前程无忧", "query": "site:jobs.51job.com 数据分析师"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["title_not_targeted"], 1)
+
+    def test_explicitly_stale_platform_job_is_not_saved(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "某集团2020年校园招聘-数据分析师",
+                "url": "https://jobs.51job.com/shanghai/123456789.html",
+                "description": "统计学专业，经验不限。",
+            },
+            {"source": "前程无忧", "query": "site:jobs.51job.com 数据分析师"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["title_not_targeted"], 1)
+
     def test_parses_brave_result_without_unrelated_navigation_links(self):
         body = '''
         <a href="/images?q=test">Images</a>
