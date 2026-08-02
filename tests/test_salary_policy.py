@@ -1,4 +1,5 @@
 import importlib.util
+import sys
 import unittest
 from pathlib import Path
 
@@ -6,10 +7,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def load_module(name: str, path: Path):
-    spec = importlib.util.spec_from_file_location(name, path)
+def load_module(name: str, module_path: Path):
+    spec = importlib.util.spec_from_file_location(name, module_path)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -28,18 +30,21 @@ class SalaryPolicyTests(unittest.TestCase):
         self.assertTrue(eligible)
         self.assertEqual(salary_floor, 15)
 
-    def test_public_filter_stats_have_no_salary_rejection_lane(self):
-        scanner = load_module(
-            "ivy_china_salary_policy_test",
+    def test_no_salary_rejection_keys_or_thresholds_remain(self):
+        paths = [
+            ROOT / "local-collector" / "boss_radar.py",
             ROOT / "scripts" / "china_scan.py",
-        )
-        self.assertNotIn("salary_below_20k", scanner.empty_filter_stats())
-
-    def test_website_import_has_no_salary_gate(self):
-        route = (ROOT / "app" / "api" / "jobs" / "import" / "route.ts").read_text(encoding="utf-8")
-        self.assertNotIn("function monthlySalaryFloorK", route)
-        self.assertNotIn("salaryFloor >= 20", route)
-        self.assertNotIn("salaryFloor < 20", route)
+            ROOT / "scripts" / "company_portal_scan.py",
+            ROOT / "app" / "api" / "jobs" / "import" / "route.ts",
+            ROOT / "app" / "job-radar.tsx",
+        ]
+        combined = "\n".join(item.read_text(encoding="utf-8") for item in paths)
+        retired_key = "salary_" + "below_20k"
+        retired_threshold = "salary_floor" + r"[^\n]*(?:<\s*20|>=\s*20)"
+        retired_copy = "工资下限" + "不足 20K"
+        self.assertNotIn(retired_key, combined)
+        self.assertNotRegex(combined, retired_threshold)
+        self.assertNotIn(retired_copy, combined)
 
 
 if __name__ == "__main__":
