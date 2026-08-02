@@ -64,22 +64,22 @@ jobs:
             source: BOSS直聘公开索引
             query: site:zhipin.com/job_detail 生物统计 博士
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
           - id: liepin
             source: 猎聘
             query: site:liepin.com/job 生物统计 博士
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
           - id: zhaopin
             source: 智联招聘
             query: site:zhaopin.com/jobdetail 数据科学家 博士
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
           - id: 51job
             source: 前程无忧
             query: site:jobs.51job.com 数据分析师 统计学
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
           - id: lagou
             source: 拉勾
             query: site:lagou.com 数据科学家 招聘
@@ -89,17 +89,17 @@ jobs:
             source: 牛客招聘
             query: site:nowcoder.com/jobs/detail 数据分析师 统计学
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
           - id: iguopin
             source: 国聘
             query: site:iguopin.com/job/detail 数据分析 博士
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
           - id: yingjiesheng
             source: 应届生求职网
             query: site:yingjiesheng.com 数据科学 博士
             minimum_matched: 1
-            availability_policy: require
+            availability_policy: allow-limited
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
