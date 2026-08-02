@@ -8,7 +8,7 @@ import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import parse_qsl, quote_plus, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote_plus, unquote, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 import pandas as pd
@@ -281,6 +281,57 @@ def parse_brave_results(body: str) -> list[dict[str, str]]:
     return records
 
 
+def parse_yahoo_results(body: str) -> list[dict[str, str]]:
+    """Extract ordinary web results and decode Yahoo redirect URLs."""
+    starts = [match.start() for match in re.finditer(r'<div class="dd [^"]*\balgo\b', body)]
+    records: list[dict[str, str]] = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(body)
+        block = body[start:end]
+        redirect_match = re.search(
+            r'href="https://r\.search\.yahoo\.com/[^"]*/RU=([^/]+)/RK=',
+            block,
+            flags=re.IGNORECASE,
+        )
+        direct_match = re.search(r'href="(https?://[^"]+)"', block, flags=re.IGNORECASE)
+        title_match = re.search(r'<h3[^>]*>([\s\S]*?)</h3>', block, flags=re.IGNORECASE)
+        if not title_match or not (redirect_match or direct_match):
+            continue
+        raw_url = unquote(redirect_match.group(1)) if redirect_match else html.unescape(direct_match.group(1))
+        description_match = re.search(
+            r'<div class="compText[^"]*"[^>]*>[\s\S]*?<p[^>]*>([\s\S]*?)</p>',
+            block,
+            flags=re.IGNORECASE,
+        )
+        title = re.sub(r"<[^>]+>", "", title_match.group(1))
+        description = re.sub(r"<[^>]+>", " ", description_match.group(1)) if description_match else ""
+        records.append({
+            "title": clean_text(title),
+            "url": clean_text(raw_url),
+            "description": clean_text(description),
+        })
+    return records
+
+
+def fetch_yahoo_results(query: str, timeout: int = 20) -> list[dict[str, str]]:
+    url = f"https://search.yahoo.com/search?p={quote_plus(query)}"
+    request = Request(
+        url,
+        headers={
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150 Safari/537.36",
+        },
+    )
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            text = response.read(2_000_000).decode("utf-8", "replace")
+    except Exception as exc:
+        print(f"Yahoo fallback search failed: {query}: {exc}")
+        return []
+    return parse_yahoo_results(text)
+
+
 def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
     """Fetch public-index results; retain the legacy name for test compatibility."""
     url = f"https://search.brave.com/search?source=web&q={quote_plus(query)}"
@@ -302,7 +353,8 @@ def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
     if "challenge-form" in text or '<div class="captcha"' in text.lower():
         print(f"Public-index search requires verification: {query}")
         return []
-    return parse_brave_results(text)
+    records = parse_brave_results(text)
+    return records if records else fetch_yahoo_results(query, timeout)
 
 
 def fetch_text(url: str, timeout: int = 25) -> tuple[str, str]:
@@ -424,6 +476,7 @@ def monthly_salary_floor_k(text: str) -> float | None:
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:/|每)?月", 10),
         (r"(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:/|每)?月", 0.001),
+        (r"(?:月薪|薪资)[:：]?\s*(\d{4,6})\s*元?(?:\s*/?\s*月)?", 0.001),
     )
     for pattern, multiplier in monthly_patterns:
         if match := re.search(pattern, content, re.IGNORECASE):
