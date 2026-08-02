@@ -690,14 +690,14 @@ async function dispatchGlobalScan() {
     return {
       triggered: true,
       status: "queued",
-      message: "美国聚合平台、中国招聘网站和公司官网搜索已在后台启动。",
+      message: "美国聚合平台和美国公司官网搜索已在后台启动。",
     };
   }
 
   return {
     triggered: false,
     status: `github_${response.status}`,
-    message: "公司 ATS 已完成，但后台全网搜索启动失败。",
+      message: "美国公司 ATS 已完成，但美国后台搜索启动失败。",
   };
 }
 
@@ -800,7 +800,7 @@ export async function POST(request: NextRequest) {
       totalJobs,
       startedAt,
       completedAt: "",
-      message: "公司 ATS 已完成，正在启动 GitHub Actions。",
+      message: "美国公司 ATS 已完成，正在启动美国后台搜索。",
     }).onConflictDoUpdate({
       target: scanStatus.id,
       set: {
@@ -813,7 +813,7 @@ export async function POST(request: NextRequest) {
         totalJobs,
         startedAt,
         completedAt: "",
-        message: "公司 ATS 已完成，正在启动 GitHub Actions。",
+        message: "美国公司 ATS 已完成，正在启动美国后台搜索。",
       },
     });
     const backgroundScan = await dispatchGlobalScan();
@@ -821,7 +821,7 @@ export async function POST(request: NextRequest) {
       state: backgroundScan.triggered ? "queued" : "failed",
       completedAt: backgroundScan.triggered ? "" : new Date().toISOString(),
       message: backgroundScan.triggered
-        ? "ATS 已完成；GitHub Actions 已排队，等待全球搜索、核验和回写。"
+        ? "美国 ATS 已完成；后台任务已排队，等待美国搜索、核验和回写。"
         : backgroundScan.message,
     }).where(eq(scanStatus.id, 1));
     return NextResponse.json({ ...officialBoards, backgroundScan });
