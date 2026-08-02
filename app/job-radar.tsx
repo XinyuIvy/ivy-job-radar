@@ -203,6 +203,22 @@ type ChinaScanControl = {
   claimedAt: string;
   completedAt: string;
   message: string;
+  progress?: {
+    source: string;
+    phase: string;
+    message: string;
+    completed: number;
+    total: number;
+    scanned: number;
+    unique: number;
+    filtered: number;
+    detailCandidates: number;
+    eligible: number;
+    created: number;
+    duplicate: number;
+    rejectionReasons: Record<string, number>;
+    updatedAt: string;
+  } | null;
 };
 
 type UserProfile = {
@@ -955,7 +971,7 @@ export default function JobRadar() {
 
   const refreshJobs = async () => {
     setJobsRefreshing(true);
-    setJobsMessage("正在扫描公司 ATS，并启动美国与中国全网搜索…");
+    setJobsMessage("正在扫描美国公司 ATS，并启动美国聚合平台与官网核验…");
     const response = await fetch("/api/jobs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -975,7 +991,7 @@ export default function JobRadar() {
         ? result.sources.flatMap((item: { matchedJobs?: string[] }) => item.matchedJobs ?? [])
         : [];
       const backgroundMessage = result.backgroundScan?.triggered
-        ? " 美国 JobSpy、中国招聘网站与官网核验已在后台启动，通常几分钟后自动回写。"
+        ? " 美国 JobSpy 与美国公司官网核验已在后台启动，通常几分钟后自动回写。"
         : ` ${result.backgroundScan?.message ?? "后台全网搜索未启动。"}`
       setJobsMessage(
         `公司 ATS 已扫描 ${result.scanned} 个岗位，筛出 ${result.matched} 个候选岗位。${sourceSummary ? ` 来源连接：${sourceSummary}。` : ""}${matchedJobs.length ? ` 候选：${matchedJobs.join("；")}。` : ""}${backgroundMessage}`,
@@ -1008,6 +1024,17 @@ export default function JobRadar() {
   const scanStartedMs = scanStatus?.startedAt ? new Date(scanStatus.startedAt).getTime() : 0;
   const scanRunning = scanStatus?.state === "queued" || scanStatus?.state === "running" || scanStatus?.state === "ats_complete";
   const chinaScanRunning = chinaScanControl?.state === "queued" || chinaScanControl?.state === "running";
+  const chinaProgress = chinaScanControl?.progress;
+  const chinaProgressRatio = chinaProgress?.total
+    ? Math.min(1, chinaProgress.completed / chinaProgress.total)
+    : 0;
+  const chinaStartedMs = chinaScanControl?.claimedAt ? new Date(chinaScanControl.claimedAt).getTime() : 0;
+  const chinaElapsedSeconds = chinaScanRunning && chinaStartedMs
+    ? Math.max(0, (clock - chinaStartedMs) / 1000)
+    : 0;
+  const chinaEtaSeconds = chinaProgressRatio > 0 && chinaProgressRatio < 1
+    ? Math.max(0, chinaElapsedSeconds * (1 / chinaProgressRatio - 1))
+    : 0;
   const scanElapsedSeconds = scanRunning && scanStartedMs
     ? Math.max(0, (clock - scanStartedMs) / 1000)
     : 0;
@@ -1648,29 +1675,19 @@ export default function JobRadar() {
       )}
 
       {view === "today" && (
-        <section className="preview-banner live-data-banner">
-          <div className="live-data-copy">
-            <strong>真实招聘数据</strong>
-            <p>{jobsMessage || "一次更新会同时扫描公司 ATS、美国聚合平台、中国招聘网站和公司官网；结果统一去重后回写。"}</p>
+        <section className="scan-dashboard" aria-label="岗位扫描入口">
+          <div className="scan-dashboard-head">
+            <div><strong>真实招聘数据</strong><p>美国来源与中国来源独立运行、独立显示进度，结果进入同一个岗位库统一去重。</p></div>
+            <button className="ignored-list-link" onClick={() => setView("ignored")}>忽略名单 {ignoredJobs.length}</button>
           </div>
-          <div className="scan-action-buttons">
-            <button
-              className="refresh-jobs"
-              onClick={() => setRefreshConfirmationOpen(true)}
-              disabled={jobsRefreshing || scanRunning}
-            >
-              {jobsRefreshing ? "正在启动…" : scanRunning ? "云端更新中" : "更新云端来源"}
-            </button>
-            <button
-              className="refresh-jobs china-scan-button"
-              onClick={() => void startChinaScan()}
-              disabled={chinaScanStarting || chinaScanRunning}
-            >
-              {chinaScanStarting ? "正在提交…" : chinaScanControl?.state === "queued" ? "等待 Mac" : chinaScanControl?.state === "running" ? "中国扫描中" : "开始中国岗位扫描"}
-            </button>
-          </div>
-          <button className="ignored-list-link" onClick={() => setView("ignored")}>忽略名单 {ignoredJobs.length}</button>
-          <div className={`scan-summary scan-summary-${scanStatus?.state ?? "idle"}`} aria-live="polite">
+          <article className="scan-lane scan-lane-us">
+            <div className="scan-lane-head">
+              <div><span>美国岗位更新</span><p>{jobsMessage || "扫描美国公司 ATS、JobSpy 聚合平台和美国公司官网。"}</p></div>
+              <button className="refresh-jobs" onClick={() => setRefreshConfirmationOpen(true)} disabled={jobsRefreshing || scanRunning}>
+                {jobsRefreshing ? "正在启动…" : scanRunning ? "美国更新中" : "更新美国岗位"}
+              </button>
+            </div>
+            <div className={`scan-summary scan-summary-${scanStatus?.state ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
             <div>
               {scanRunning ? (
@@ -1700,17 +1717,43 @@ export default function JobRadar() {
                 </>
               )}
             </div>
-          </div>
-          <div className={`scan-summary china-control-summary scan-summary-${chinaScanControl?.state ?? "idle"}`} aria-live="polite">
+            </div>
+          </article>
+          <article className="scan-lane scan-lane-china">
+            <div className="scan-lane-head">
+              <div><span>中国岗位更新</span><p>BOSS、猎聘、智联、51job、拉勾、牛客、国聘、应届生及中国公司官网。</p></div>
+              <button className="refresh-jobs china-scan-button" onClick={() => void startChinaScan()} disabled={chinaScanStarting || chinaScanRunning}>
+                {chinaScanStarting ? "正在提交…" : chinaScanControl?.state === "queued" ? "等待 Mac" : chinaScanControl?.state === "running" ? "中国扫描中" : "开始中国岗位扫描"}
+              </button>
+            </div>
+            <div className={`scan-summary china-control-summary scan-summary-${chinaScanControl?.state ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
             <div>
               <strong>
                 {chinaScanControl?.state === "queued" ? "中国岗位扫描已排队" : chinaScanControl?.state === "running" ? "Mac 正在扫描中国招聘平台" : chinaScanControl?.state === "completed" ? "最近一次网站发起的中国扫描已完成" : chinaScanControl?.state === "attention_required" ? "中国扫描完成，但有来源需要处理" : chinaScanControl?.state === "failed" ? "最近一次中国扫描失败" : "中国岗位扫描等待启动"}
               </strong>
               <p>{chinaScanControl?.message || "点击“开始中国岗位扫描”，Mac 后台服务会自动领取任务；Mac 关机时任务会保留到下次登录。"}</p>
+              {chinaProgress && chinaScanControl?.state === "running" && (
+                <>
+                  <div className="scan-progress-track" aria-label={`当前阶段完成 ${Math.round(chinaProgressRatio * 100)}%`}>
+                    <span style={{ width: `${Math.max(2, chinaProgressRatio * 100)}%` }} />
+                  </div>
+                  <div className="scan-live-metrics">
+                    <span>当前来源<b>{chinaProgress.source || "中国多来源"}</b></span>
+                    <span>进度<b>{chinaProgress.completed}/{chinaProgress.total || "?"}</b></span>
+                    <span>已扫描<b>{chinaProgress.scanned}</b></span>
+                    <span>去重后<b>{chinaProgress.unique}</b></span>
+                    <span>初筛排除<b>{chinaProgress.filtered}</b></span>
+                    <span>待抓详情<b>{chinaProgress.detailCandidates}</b></span>
+                    <span>筛选保留<b>{chinaProgress.eligible}</b></span>
+                    <span>新增<b>{chinaProgress.created}</b></span>
+                  </div>
+                  <p className="scan-eta">已运行 {formatDuration(chinaElapsedSeconds)}{chinaEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(chinaEtaSeconds)}` : ""}。</p>
+                </>
+              )}
             </div>
-          </div>
-          <div className={`scan-summary china-scan-summary scan-summary-${chinaScanStatus?.status ?? "idle"}`} aria-live="polite">
+            </div>
+            <div className={`scan-summary china-scan-summary scan-summary-${chinaScanStatus?.status ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
             <div>
               {chinaScanStatus ? (
@@ -1740,7 +1783,8 @@ export default function JobRadar() {
                 </>
               )}
             </div>
-          </div>
+            </div>
+          </article>
         </section>
       )}
 
