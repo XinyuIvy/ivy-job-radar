@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import VerificationQueueActions from "./verification-queue-actions";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,10 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-CN">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
+        <VerificationQueueActions />
         <div
           style={{
             position: "fixed",
@@ -47,8 +47,8 @@ export default function RootLayout({
           }}
         >
           <a
-            href="/manual-review"
-            aria-label="人工处理核验失败岗位"
+            href="/screening-learning"
+            aria-label="查看筛选学习建议"
             style={{
               borderRadius: 999,
               padding: "11px 16px",
@@ -60,7 +60,7 @@ export default function RootLayout({
               boxShadow: "0 10px 30px rgba(24,34,29,.22)",
             }}
           >
-            ✓ 核验人工处理
+            ◇ 筛选学习
           </a>
           <a
             href="/bookmarklet"
