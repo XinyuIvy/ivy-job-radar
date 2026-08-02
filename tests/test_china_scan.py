@@ -57,6 +57,21 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(stats[0]["source_status"], "rate_limited")
         self.assertIn("HTTP 429", stats[0]["source_detail"])
 
+    def test_company_and_salary_fields_do_not_copy_javascript_shell_text(self):
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "数据分析师-中国电子工程设计院股份有限公司",
+                "url": "https://iguopin.com/job/detail?id=116004201351354501",
+                "description": "统计学相关专业，You need to enable JavaScript to run this app",
+            },
+            {"source": "国聘", "query": "site:iguopin.com/job/detail 数据分析"},
+            "2026-08-02T00:00:00+00:00",
+        )
+
+        self.assertIsNotNone(row)
+        self.assertEqual(row["company"], "中国电子工程设计院股份有限公司")
+        self.assertEqual(row["salary"], "未公布或面议")
+
     def test_parses_brave_result_without_unrelated_navigation_links(self):
         body = '''
         <a href="/images?q=test">Images</a>
