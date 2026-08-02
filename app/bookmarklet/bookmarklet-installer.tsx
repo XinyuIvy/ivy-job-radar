@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 type Props = {
   captureKey: string;
@@ -38,23 +39,19 @@ document.body.appendChild(form);form.submit();form.remove();
 
 export default function BookmarkletInstaller({ captureKey }: Props) {
   const linkRef = useRef<HTMLAnchorElement>(null);
-  const [origin, setOrigin] = useState("");
+  const bookmarkletRef = useRef("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
-
-  const bookmarklet = useMemo(
-    () => origin && captureKey ? buildBookmarklet(`${origin}/api/bookmark-capture`, captureKey) : "",
-    [captureKey, origin],
-  );
-
-  useEffect(() => {
-    if (bookmarklet && linkRef.current) linkRef.current.setAttribute("href", bookmarklet);
-  }, [bookmarklet]);
+    if (!captureKey || !linkRef.current) return;
+    const bookmarklet = buildBookmarklet(`${window.location.origin}/api/bookmark-capture`, captureKey);
+    bookmarkletRef.current = bookmarklet;
+    linkRef.current.setAttribute("href", bookmarklet);
+  }, [captureKey]);
 
   const copyCode = async () => {
+    const bookmarklet = bookmarkletRef.current
+      || buildBookmarklet(`${window.location.origin}/api/bookmark-capture`, captureKey);
     if (!bookmarklet) return;
     await navigator.clipboard.writeText(bookmarklet);
     setCopied(true);
@@ -64,7 +61,7 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
   return (
     <main style={{ minHeight: "100vh", background: "#f3f0e8", color: "#18221d", padding: "48px 20px" }}>
       <section style={{ maxWidth: 820, margin: "0 auto" }}>
-        <a href="/" style={{ color: "#536159", textDecoration: "none", fontWeight: 700 }}>← 返回 Ivy Job Radar</a>
+        <Link href="/" style={{ color: "#536159", textDecoration: "none", fontWeight: 700 }}>← 返回 Ivy Job Radar</Link>
         <p style={{ marginTop: 48, letterSpacing: ".16em", fontSize: 12, fontWeight: 800, color: "#718078" }}>CHROME BOOKMARK CAPTURE</p>
         <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(38px, 7vw, 70px)", lineHeight: 1.02, margin: "12px 0 20px" }}>浏览岗位时，一键加入岗位池</h1>
         <p style={{ maxWidth: 680, fontSize: 18, lineHeight: 1.75, color: "#536159" }}>
