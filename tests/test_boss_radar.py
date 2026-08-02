@@ -109,6 +109,53 @@ class BossRadarTransformTest(unittest.TestCase):
 
             self.assertEqual({item["application_id"] for item in transformed}, {"job-1", "job-2"})
 
+    def test_keeps_scientific_algorithm_role_found_by_biostatistics_search(self):
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            result_dir = Path(temporary_dir)
+            jobs_path = result_dir / "boss_jobs_algorithm.json"
+            details_path = result_dir / "boss_details_algorithm.json"
+            jobs_path.write_text(json.dumps({"jobs": [{
+                "title": "创新算法研究员",
+                "boss_name": "示例生命科学公司",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/algorithm.html",
+                "job_id": "algorithm-1",
+                "job_link": "https://www.zhipin.com/job_detail/algorithm-1.html",
+            }]}, ensure_ascii=False), encoding="utf-8")
+            details_path.write_text(json.dumps([{
+                "job_id": "algorithm-1",
+                "company": "示例生命科学公司",
+                "jd": "使用 Python 开展 AI for Science、生物信息和新药研发算法研究，接受博士申请。",
+            }], ensure_ascii=False), encoding="utf-8")
+
+            transformed = BOSS_RADAR.transform_result_files([(jobs_path, details_path)])
+
+            self.assertEqual(len(transformed), 1)
+            self.assertEqual(transformed[0]["title"], "创新算法研究员")
+
+    def test_rejects_unrelated_algorithm_role(self):
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            result_dir = Path(temporary_dir)
+            jobs_path = result_dir / "boss_jobs_recommendation.json"
+            details_path = result_dir / "boss_details_recommendation.json"
+            jobs_path.write_text(json.dumps({"jobs": [{
+                "title": "算法研究员",
+                "boss_name": "示例互联网公司",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/recommendation.html",
+                "job_id": "algorithm-2",
+                "job_link": "https://www.zhipin.com/job_detail/algorithm-2.html",
+            }]}, ensure_ascii=False), encoding="utf-8")
+            details_path.write_text(json.dumps([{
+                "job_id": "algorithm-2",
+                "company": "示例互联网公司",
+                "jd": "负责推荐算法与广告算法优化。",
+            }], ensure_ascii=False), encoding="utf-8")
+
+            transformed = BOSS_RADAR.transform_result_files([(jobs_path, details_path)])
+
+            self.assertEqual(transformed, [])
+
     def test_sync_uses_private_site_header_and_chunks_payloads(self):
         class FakeResponse:
             def __enter__(self):
