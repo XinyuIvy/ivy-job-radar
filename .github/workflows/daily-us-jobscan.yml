@@ -1,4 +1,4 @@
-name: Daily US job scan
+name: Manual US job scan
 
 on:
   workflow_dispatch:
@@ -243,7 +243,6 @@ jobs:
           --state failed
           --phase "运行失败"
           --source "GitHub Actions"
-          --completed 0
           --message "美国岗位更新被中断；已完成的阶段和计数已保留，请查看本次运行日志。"
 
       - name: Upload scan artifact
@@ -267,7 +266,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/scans/
-          git commit -m "Update daily global job scan"
+          git commit -m "Update manual US job scan"
 
           # The scan can run for a long time while main receives unrelated updates.
           # Rebase the generated snapshot onto the newest main before pushing.
