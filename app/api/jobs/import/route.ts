@@ -100,8 +100,9 @@ function isEligibleChinaImport(raw: ImportJob, title: string, description: strin
     && !chinaIrrelevant.test(title)
     && !chinaExcludedCore.test(content)
     && (years === null || years <= 3)
-    && salaryFloor !== null
-    && salaryFloor >= 20;
+    // Keep missing or negotiable salary for manual verification.
+    // Only exclude a salary when its parsed floor is explicitly below 20K.
+    && (salaryFloor === null || salaryFloor >= 20);
 }
 
 function displayStatus(incomingStatus: string) {
