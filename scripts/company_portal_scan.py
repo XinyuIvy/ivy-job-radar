@@ -1241,8 +1241,7 @@ def china_job_eligible(title: str, description: str, salary: str) -> tuple[bool,
         and not CHINA_IRRELEVANT_TITLE.search(title)
         and not CHINA_EXCLUDED_CORE.search(content)
         and (years is None or years <= 3)
-        and salary_floor is not None
-        and salary_floor >= 20
+        and (salary_floor is None or salary_floor >= 20)
     )
     return eligible, salary_floor
 
