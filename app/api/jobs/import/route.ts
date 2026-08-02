@@ -331,21 +331,14 @@ export async function POST(request: NextRequest) {
   }
 
   const totalJobs = (await db.select({ id: jobs.id }).from(jobs)).length;
-  const sourceSummary = Array.from(importedSources).join("、") || "外部采集器";
-  await db.insert(scanStatus).values({
-    id: 1,
-    state: "completed",
-    created,
-    updated,
-    skipped,
-    totalJobs,
-    completedAt: now,
-    message: created > 0
-      ? `${sourceSummary} 已完成同步，本轮新增 ${created} 个岗位。`
-      : `${sourceSummary} 已完成同步，本轮没有新增岗位。`,
-  }).onConflictDoUpdate({
-    target: scanStatus.id,
-    set: {
+  const includesUsJobs = importRows.some((row) => cleanText(row.region) === "美国");
+  const [currentUsScan] = await db.select().from(scanStatus).where(eq(scanStatus.id, 1)).limit(1);
+  // Workflow batches must not mark the scan complete before every source is imported.
+  // China imports also must not overwrite the independent US progress lane.
+  if (includesUsJobs && !["queued", "running", "ats_complete"].includes(currentUsScan?.state ?? "")) {
+    const sourceSummary = Array.from(importedSources).join("、") || "外部采集器";
+    await db.insert(scanStatus).values({
+      id: 1,
       state: "completed",
       created,
       updated,
@@ -355,8 +348,21 @@ export async function POST(request: NextRequest) {
       message: created > 0
         ? `${sourceSummary} 已完成同步，本轮新增 ${created} 个岗位。`
         : `${sourceSummary} 已完成同步，本轮没有新增岗位。`,
-    },
-  });
+    }).onConflictDoUpdate({
+      target: scanStatus.id,
+      set: {
+        state: "completed",
+        created,
+        updated,
+        skipped,
+        totalJobs,
+        completedAt: now,
+        message: created > 0
+          ? `${sourceSummary} 已完成同步，本轮新增 ${created} 个岗位。`
+          : `${sourceSummary} 已完成同步，本轮没有新增岗位。`,
+      },
+    });
+  }
 
   return NextResponse.json({
     ok: true,

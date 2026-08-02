@@ -194,10 +194,16 @@ def install(repo_dir: Path, env_file: Path) -> None:
     subprocess.run(["launchctl", "bootout", domain, str(plist_path)], check=False, capture_output=True)
     subprocess.run(["launchctl", "bootstrap", domain, str(plist_path)], check=True)
 
+    # Disable the legacy twice-daily BOSS schedule. The agent now waits for a
+    # manual request from the website and never starts a scan on its own.
+    legacy_plist = launch_agents / "com.ivy.jobradar.boss.plist"
+    subprocess.run(["launchctl", "bootout", domain, str(legacy_plist)], check=False, capture_output=True)
+    legacy_plist.unlink(missing_ok=True)
+
     # Remove the obsolete desktop entry after the website-controlled agent is installed.
     desktop_launcher = Path.home() / "Desktop" / "一键扫描BOSS.command"
     desktop_launcher.unlink(missing_ok=True)
-    print("Website-controlled China scanning is installed and running.")
+    print("Manual website-controlled China scanning is installed and waiting.")
 
 
 def uninstall() -> None:

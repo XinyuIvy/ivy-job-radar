@@ -181,10 +181,15 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         for key, value in item.get("rejected", {}).items():
             target = review_counts if key == "salary_missing_or_negotiable" else rejection_reasons
             target[key] = target.get(key, 0) + int(value)
+    matched_before_dedup = sum(
+        int(item.get("matched", 0)) for item in source_summary.get("sources", [])
+    )
     summary = {
         "source": "中国公开索引",
         "status": "completed",
         "jobs_discovered": sum(int(item.get("scanned", 0)) for item in source_summary.get("sources", [])),
+        "jobs_unique": len(jobs),
+        "jobs_duplicate_listings": max(0, matched_before_dedup - len(jobs)),
         "jobs_eligible": len(jobs),
         "jobs_created": int(sync_result.get("created", 0)),
         "jobs_updated_or_duplicate": int(sync_result.get("updated", 0)) + int(sync_result.get("skipped", 0)),
@@ -200,7 +205,8 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         "completed": len(source_summary.get("sources", [])),
         "total": len(source_summary.get("sources", [])),
         "scanned": summary["jobs_discovered"],
-        "filtered": max(0, summary["jobs_discovered"] - summary["jobs_eligible"]),
+        "unique": summary["jobs_unique"],
+        "filtered": sum(rejection_reasons.values()),
         "eligible": summary["jobs_eligible"],
         "created": summary["jobs_created"],
         "duplicate": summary["jobs_updated_or_duplicate"],

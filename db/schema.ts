@@ -195,6 +195,16 @@ export const scanStatus = sqliteTable("scan_status", {
   startedAt: text("started_at").notNull().default(""),
   completedAt: text("completed_at").notNull().default(""),
   message: text("message").notNull().default(""),
+  phase: text("phase").notNull().default(""),
+  currentSource: text("current_source").notNull().default(""),
+  stepsCompleted: integer("steps_completed").notNull().default(0),
+  stepsTotal: integer("steps_total").notNull().default(0),
+  scanned: integer("scanned").notNull().default(0),
+  uniqueJobs: integer("unique_jobs").notNull().default(0),
+  filtered: integer("filtered").notNull().default(0),
+  verified: integer("verified").notNull().default(0),
+  eligible: integer("eligible").notNull().default(0),
+  progressUpdatedAt: text("progress_updated_at").notNull().default(""),
 });
 
 export const chinaScanStatus = sqliteTable("china_scan_status", {

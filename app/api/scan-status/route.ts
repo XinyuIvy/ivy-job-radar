@@ -10,6 +10,10 @@ function cleanText(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function count(value: unknown) {
+  return Math.max(0, Math.floor(Number(value) || 0));
+}
+
 async function readStatus() {
   const db = await getDb();
   const [status] = await db.select().from(scanStatus).where(eq(scanStatus.id, 1)).limit(1);
@@ -26,6 +30,16 @@ async function readStatus() {
       startedAt: "",
       completedAt: "",
       message: "",
+      phase: "",
+      currentSource: "",
+      stepsCompleted: 0,
+      stepsTotal: 0,
+      scanned: 0,
+      uniqueJobs: 0,
+      filtered: 0,
+      verified: 0,
+      eligible: 0,
+      progressUpdatedAt: "",
     }),
     totalJobs,
     timeoutMinutes: 60,
@@ -50,35 +64,58 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json() as Record<string, unknown>;
   const state = cleanText(body.state);
-  if (!["running", "completed", "failed"].includes(state)) {
+  if (!["queued", "running", "completed", "failed"].includes(state)) {
     return NextResponse.json({ error: "Unsupported scan state." }, { status: 400 });
   }
 
   const db = await getDb();
   const now = new Date().toISOString();
-  const values = state === "running"
+  const [current] = await db.select().from(scanStatus).where(eq(scanStatus.id, 1)).limit(1);
+  const progressCount = (camel: string, snake: string, previous: number | undefined) =>
+    body[camel] !== undefined || body[snake] !== undefined
+      ? count(body[camel] ?? body[snake])
+      : previous ?? 0;
+  const progressValues = {
+    phase: cleanText(body.phase) || current?.phase || "",
+    currentSource: cleanText(body.current_source ?? body.currentSource) || current?.currentSource || "",
+    stepsCompleted: progressCount("stepsCompleted", "steps_completed", current?.stepsCompleted),
+    stepsTotal: progressCount("stepsTotal", "steps_total", current?.stepsTotal),
+    scanned: progressCount("scanned", "scanned", current?.scanned),
+    uniqueJobs: progressCount("uniqueJobs", "unique_jobs", current?.uniqueJobs),
+    filtered: progressCount("filtered", "filtered", current?.filtered),
+    verified: progressCount("verified", "verified", current?.verified),
+    eligible: progressCount("eligible", "eligible", current?.eligible),
+    progressUpdatedAt: now,
+  };
+  const values = state === "running" || state === "queued"
     ? {
       id: 1,
       state,
-      created: 0,
-      updated: 0,
-      skipped: 0,
-      startedAt: now,
+      created: body.created === undefined ? current?.created ?? 0 : count(body.created),
+      updated: body.updated === undefined ? current?.updated ?? 0 : count(body.updated),
+      skipped: body.skipped === undefined ? current?.skipped ?? 0 : count(body.skipped),
+      startedAt: cleanText(body.started_at ?? body.startedAt) || current?.startedAt || now,
       completedAt: "",
-      message: "GitHub Actions 正在执行美国聚合平台和美国公司官网扫描。",
+      message: cleanText(body.message) || "美国岗位更新正在运行。",
+      ...progressValues,
     }
     : state === "completed"
       ? {
         id: 1,
         state,
+        created: count(body.created),
+        updated: count(body.updated),
+        skipped: count(body.skipped),
         completedAt: now,
         message: cleanText(body.message) || "GitHub Actions 已完成本轮扫描和回写。",
+        ...progressValues,
       }
       : {
       id: 1,
       state,
       completedAt: now,
       message: cleanText(body.message) || "GitHub Actions 执行失败，请查看运行日志。",
+      ...progressValues,
     };
 
   await db.insert(scanStatus).values(values).onConflictDoUpdate({
