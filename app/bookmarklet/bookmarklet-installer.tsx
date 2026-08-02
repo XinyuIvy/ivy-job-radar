@@ -21,12 +21,12 @@ const selected=clean(window.getSelection&&window.getSelection().toString(),40000
 const description=stripHtml(posting&&posting.description)||selected||queryText(['[data-testid*="job-description"]','.job-description','.job-sec-text','[class*="job-description"]','[class*="jobDescription"]','main','article'])||clean(document.body&&document.body.innerText,40000);
 const title=clean(posting&&posting.title,500)||queryText(['h1','[data-testid*="job-title"]','.job-name','[class*="job-title"]','[class*="jobTitle"]'])||clean(document.title,500);
 const company=clean(organization&&(organization.name||organization.legalName),300)||queryText(['[data-testid*="company-name"]','.company-name','[class*="company-name"]','[class*="companyName"]','a[href*="company"] h2','a[href*="company"] h3'])||clean((document.querySelector('meta[property="og:site_name"]')||{}).content,300);
-const location=clean([address.addressLocality,address.addressRegion,address.addressCountry].filter(Boolean).join(" · "),500)||queryText(['[data-testid*="location"]','.job-location','.job-area','[class*="job-location"]','[class*="jobLocation"]']);
+const jobLocation=clean([address.addressLocality,address.addressRegion,address.addressCountry].filter(Boolean).join(" · "),500)||queryText(['[data-testid*="location"]','.job-location','.job-area','[class*="job-location"]','[class*="jobLocation"]']);
 const country=clean(address.addressCountry,200);
 const identifier=posting&&posting.identifier;
-const params=new URL(location.href).searchParams;
+const params=new URL(window.location.href).searchParams;
 const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("reqId")||params.get("requisitionId"),500);
-const payload={key:${JSON.stringify(key)},jobUrl:location.href,title,company,location,description,applicationId,addressCountry:country,sourcePageTitle:document.title};
+const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title};
 const target="ivy_job_radar_capture";
 window.open("about:blank",target,"popup,width=600,height=760");
 const form=document.createElement("form");form.method="POST";form.action=${JSON.stringify(endpoint)};form.target=target;
