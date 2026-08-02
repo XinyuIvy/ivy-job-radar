@@ -43,6 +43,37 @@ class ChinaPlatformValidationTest(unittest.TestCase):
         errors = self.validate_summary("ok")
         self.assertTrue(any("Expected at least 1 relevant job" in error for error in errors))
 
+    def test_one_limited_query_does_not_hide_healthy_queries_for_same_source(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            rows = []
+            for status in ("rate_limited", "ok"):
+                rows.append({
+                    "source": "牛客招聘",
+                    "query": f"query-{status}",
+                    "scanned": 1,
+                    "valid_platform_urls": 1,
+                    "matched": 0,
+                    "accounted_for": True,
+                    "source_status": status,
+                })
+            summary_path = root / "summary.json"
+            jobs_path = root / "jobs.json"
+            summary_path.write_text(json.dumps({
+                "all_counts_reconcile": True,
+                "sources": rows,
+            }), encoding="utf-8")
+            jobs_path.write_text("[]", encoding="utf-8")
+
+            errors = VALIDATOR.validate(
+                summary_path,
+                jobs_path,
+                minimum_matched=1,
+                availability_policy="allow-limited",
+            )
+
+        self.assertTrue(any("Expected at least 1 relevant job" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()
