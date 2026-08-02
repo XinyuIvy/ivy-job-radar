@@ -42,6 +42,14 @@ function cleanPayload(input: Record<string, unknown>) {
   return payload;
 }
 
+function normalize(value: unknown) {
+  return String(value ?? "")
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+}
+
 export async function GET() {
   const db = await getDb();
   const rows = await db
@@ -60,8 +68,23 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-  const now = new Date().toISOString();
+
   const db = await getDb();
+  const rows = await db.select().from(applications);
+  const companyKey = normalize(payload.company);
+  const titleKey = normalize(payload.title);
+  const jobUrl = String(payload.jobUrl ?? "").trim();
+  const applicationId = String(payload.applicationId ?? "").trim().toLocaleLowerCase();
+  const duplicate = rows.find((row) =>
+    (jobUrl && row.jobUrl.trim() === jobUrl)
+    || (applicationId && row.applicationId.trim().toLocaleLowerCase() === applicationId)
+    || (normalize(row.company) === companyKey && normalize(row.title) === titleKey),
+  );
+  if (duplicate) {
+    return NextResponse.json(duplicate, { status: 200 });
+  }
+
+  const now = new Date().toISOString();
   const [created] = await db
     .insert(applications)
     .values({
