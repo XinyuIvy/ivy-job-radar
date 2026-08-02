@@ -77,6 +77,7 @@ def build_summary(
         "jobs_updated_or_duplicate": int(sync_result.get("updated", 0)) + int(sync_result.get("skipped", 0)),
         "dry_run": dry_run,
         "attention": state.get("failure", ""),
+        "attention_kind": state.get("attention_kind", ""),
         "finished_at": datetime.now(timezone.utc).isoformat(),
     }
 
