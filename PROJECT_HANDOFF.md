@@ -614,3 +614,15 @@ PR #17 已合并，merge commit 为 `7f59d4b11591193a3eed532d5b03fe26e62e0387`�
 仍未完成：
 
 - GitHub 原生 Actions 通知邮箱属于 GitHub 账户级 Notifications 设置，不在仓库 workflow 内。目标邮箱是 `ivyzzzhang@gmail.com`；本次云浏览器无法连接 GitHub 设置页，因此尚未替用户完成账户级切换。若该邮箱未在 GitHub 验证，必须先完成 GitHub 发出的验证邮件。
+
+
+## 20. 中国招聘平台独立测试工作流（PR #19，2026-08-02）
+
+PR #19 已 squash merge，merge commit 为 `dbc3b1e57d085b09cd4b77422ae6b67021381fc2`，PR Python tests run `30732860656` 成功。
+
+- 新增手动 GitHub Actions 工作流 `Test China recruitment platforms`。
+- 该工作流只编译和测试 BOSS/中国平台采集代码，并运行中国公开招聘平台索引 smoke scan；不会运行 `company_portal_scan.py`。
+- 测试结果只作为 7 天 artifact 保存，不回写生产网站，也不提交岗位快照。
+- BOSS 在 GitHub Actions 中只运行真实页面 fixture、解析和筛选回归测试；实时 BOSS 页面仍依赖用户 Mac 的登录态，不能在 GitHub 云端绕过登录或验证码。
+- 网站继续只保留一个“更新中国岗位”入口，正常使用时仍运行完整中国来源。
+- 已修复公开索引的重复关键词门槛：通过明确目标查询召回的截断摘要，不再被要求重复出现相同关键词；完整 JD 不足时保留待核验，明确排除条件仍继续生效。
