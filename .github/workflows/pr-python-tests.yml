@@ -1,41 +1,29 @@
-name: Apply and validate salary-filter removal
+name: PR Python tests
 
 on:
   pull_request:
     paths:
-      - "scripts/apply_remove_salary_filters.py"
-      - "scripts/fix_salary_migration_tests.py"
-      - ".github/workflows/pr-python-tests.yml"
       - "scripts/**"
       - "local-collector/**"
-      - "app/**"
       - "tests/**"
-      - "vite.config.ts"
-      - "build/**"
+      - "requirements-jobscan.txt"
+      - ".github/workflows/pr-python-tests.yml"
+  workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: apply-salary-filter-removal-${{ github.event.pull_request.number }}
+  group: pr-python-tests-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  apply-and-validate:
-    if: github.actor != 'github-actions[bot]'
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 15
     steps:
-      - name: Check out P0 branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: agent/remove-china-salary-hard-filter
-          fetch-depth: 0
-
-      - name: Apply direct source migration
-        run: |
-          python scripts/apply_remove_salary_filters.py
-          python scripts/fix_salary_migration_tests.py
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,39 +35,15 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --requirement requirements-jobscan.txt
 
-      - name: Validate Python and policy
-        shell: bash
-        run: |
-          python -m py_compile local-collector/boss_radar.py scripts/china_scan.py scripts/company_portal_scan.py
-          python -m unittest discover -s tests -p 'test_*.py'
-          if git grep -nE 'salary_below_20k|salary_floor[^[:space:]]*.*(<[[:space:]]*20|>=[[:space:]]*20)|工资下限不足 20K' -- \
-            local-collector scripts app/api app/job-radar.tsx tests; then
-            echo 'Salary filtering code still exists.' >&2
-            exit 1
-          fi
+      - name: Validate changed Python syntax
+        run: >-
+          python -m py_compile
+          local-collector/jd_inbox_server.py
+          local-collector/boss_one_click.py
+          local-collector/china_one_click.py
+          scripts/apify_zhaopin_scan.py
+          scripts/china_snapshot_import.py
+          scripts/merge_china_sources.py
 
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-
-      - name: Install Node dependencies
-        run: npm ci
-
-      - name: Validate website lint
-        run: |
-          chmod +x scripts/*.sh
-          npm run lint
-
-      - name: Commit direct source changes
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -- .github/workflows .direct-salary-filter-removal-trigger
-          git checkout -- scripts/*.sh
-          find . -type d -name __pycache__ -prune -exec rm -rf {} +
-          git add -A -- local-collector scripts app tests vite.config.ts build
-          git commit -m "Remove China salary filters from direct sources"
-          git push origin HEAD:agent/remove-china-salary-hard-filter
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -p 'test_*.py'
