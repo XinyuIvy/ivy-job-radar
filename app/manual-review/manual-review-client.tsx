@@ -30,7 +30,17 @@ export default function ManualReviewClient() {
   };
 
   useEffect(() => {
-    void load();
+    let active = true;
+    fetch("/api/job-requests", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows: RequestItem[]) => {
+        if (!active) return;
+        setItems(rows);
+        setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const act = async (item: RequestItem, action: ActionName) => {
