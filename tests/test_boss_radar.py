@@ -26,6 +26,7 @@ class BossRadarTransformTest(unittest.TestCase):
                     "boss_title": "招聘经理",
                     "boss_active_status": "刚刚活跃",
                     "salary_source": "api",
+                    "salary": "20-30K·13薪",
                     "company_link": "https://www.zhipin.com/gongsi/company-1.html",
                     "location": "上海·浦东新区",
                     "skills": "R | SAS | 临床试验",
@@ -36,6 +37,7 @@ class BossRadarTransformTest(unittest.TestCase):
                     "title": "高级软件工程师",
                     "boss_name": "示例科技公司",
                     "salary_source": "api",
+                    "salary": "30-45K",
                     "company_link": "https://www.zhipin.com/gongsi/company-2.html",
                     "job_id": "job-2",
                     "job_link": "https://www.zhipin.com/job_detail/job-2.html",
@@ -95,6 +97,7 @@ class BossRadarTransformTest(unittest.TestCase):
                     "title": title,
                     "boss_name": company,
                     "salary_source": "api",
+                    "salary": "25-35K",
                     "company_link": f"https://www.zhipin.com/gongsi/{job_id}.html",
                     "job_id": job_id,
                     "job_link": f"https://www.zhipin.com/job_detail/{job_id}.html",
@@ -119,6 +122,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "创新算法研究员",
                 "boss_name": "示例生命科学公司",
                 "salary_source": "api",
+                "salary": "20-30K",
                 "company_link": "https://www.zhipin.com/gongsi/algorithm.html",
                 "job_id": "algorithm-1",
                 "job_link": "https://www.zhipin.com/job_detail/algorithm-1.html",
@@ -143,6 +147,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "算法研究员",
                 "boss_name": "示例互联网公司",
                 "salary_source": "api",
+                "salary": "25-40K",
                 "company_link": "https://www.zhipin.com/gongsi/recommendation.html",
                 "job_id": "algorithm-2",
                 "job_link": "https://www.zhipin.com/job_detail/algorithm-2.html",
@@ -168,6 +173,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "生物统计师",
                 "boss_name": "示例药企",
                 "salary_source": "api",
+                "salary": "30-50K",
                 "company_link": "https://www.zhipin.com/gongsi/company-1.html",
                 "job_id": "job-1",
                 "job_link": "https://www.zhipin.com/job_detail/job-1.html",
@@ -176,6 +182,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "数据科学家",
                 "boss_name": "示例科技公司",
                 "salary_source": "api",
+                "salary": "25-40K",
                 "company_link": "https://www.zhipin.com/gongsi/company-2.html",
                 "job_id": "job-2",
                 "job_link": "https://www.zhipin.com/job_detail/job-2.html",
@@ -184,6 +191,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "资深数据科学家",
                 "boss_name": "示例科技公司",
                 "salary_source": "api",
+                "salary": "20-30K",
                 "company_link": "https://www.zhipin.com/gongsi/company-3.html",
                 "job_id": "job-3",
                 "job_link": "https://www.zhipin.com/job_detail/job-3.html",
@@ -227,6 +235,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "生物统计师",
                 "boss_name": "示例药企",
                 "salary_source": "api",
+                "salary": "25-35K",
                 "company_link": "https://www.zhipin.com/gongsi/company-1.html",
                 "job_id": "job-1",
                 "job_link": "https://www.zhipin.com/job_detail/job-1.html",
@@ -281,6 +290,7 @@ class BossRadarTransformTest(unittest.TestCase):
                 "title": "生物统计师",
                 "boss_name": "示例药企",
                 "salary_source": "api",
+                "salary": "25-35K",
                 "company_link": "https://www.zhipin.com/gongsi/company-1.html",
                 "job_id": "job-1",
                 "job_link": "https://www.zhipin.com/job_detail/job-1.html",
@@ -328,6 +338,28 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertEqual(requests[0][0].get_header("Authorization"), "Bearer sync-secret")
         self.assertEqual(requests[0][0].get_header("Oai-sites-authorization"), "Bearer sites-secret")
         self.assertEqual(result["received"], 2)
+
+    def test_salary_floor_and_hard_exclusions_control_china_retention(self):
+        self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("20-30K·13薪"), 20)
+        self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("30-50万/年"), 25)
+        self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("15000-30000元/月"), 15)
+        self.assertIsNone(BOSS_RADAR.monthly_salary_floor_k("面议"))
+        self.assertIsNone(BOSS_RADAR.required_experience("经验不限"))
+        self.assertEqual(BOSS_RADAR.required_experience("要求 5 年相关经验"), 5)
+
+        base = {
+            "boss_name": "示例公司",
+            "salary_source": "api",
+            "company_link": "https://www.zhipin.com/gongsi/example.html",
+            "job_link": "https://www.zhipin.com/job_detail/example.html",
+            "salary": "20-30K",
+        }
+        self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "ok", "title": "统计建模研究员"}))
+        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "intern", "title": "生物统计实习生"}))
+        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "senior", "title": "资深统计科学家"}))
+        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "eng", "title": "算法工程师"}))
+        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}))
+        self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "postdoc", "title": "生物统计博士后"}))
 
 
 if __name__ == "__main__":
