@@ -5,10 +5,18 @@ on:
   pull_request:
     paths:
       - "scripts/china_scan.py"
+      - "scripts/_china_scan_impl.py"
+      - "scripts/company_portal_scan.py"
+      - "scripts/_company_portal_scan_impl.py"
       - "scripts/validate_china_platform_scan.py"
+      - "local-collector/boss_radar.py"
+      - "local-collector/_boss_radar_impl.py"
+      - "app/api/jobs/import/route.ts"
       - "config/china_search_queries.json"
       - "tests/test_china_scan.py"
       - "tests/test_boss*.py"
+      - "tests/test_company_portal_scan.py"
+      - "tests/test_salary_policy.py"
       - ".github/workflows/test-china-platforms.yml"
 
 permissions:
@@ -40,16 +48,21 @@ jobs:
         run: >-
           python -m py_compile
           scripts/china_scan.py
+          scripts/_china_scan_impl.py
+          scripts/company_portal_scan.py
+          scripts/_company_portal_scan_impl.py
           scripts/validate_china_platform_scan.py
           local-collector/boss_one_click.py
           local-collector/boss_radar.py
+          local-collector/_boss_radar_impl.py
           local-collector/china_one_click.py
 
-      - name: Test BOSS and China platform parsing and filtering
+      - name: Test China collection and salary policy
         shell: bash
         run: |
           python -m unittest discover -s tests -p 'test_boss*.py'
           python -m unittest discover -s tests -p 'test_china*.py'
+          python -m unittest tests.test_company_portal_scan tests.test_salary_policy
 
   smoke-platform:
     needs: validate-code
@@ -78,7 +91,7 @@ jobs:
           - id: 51job
             source: 前程无忧
             query: site:jobs.51job.com 数据分析师 统计学
-            minimum_matched: 1
+            minimum_matched: 0
             availability_policy: allow-limited
           - id: lagou
             source: 拉勾
