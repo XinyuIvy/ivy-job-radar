@@ -89,6 +89,52 @@ def summarize_report(report: dict[str, Any]) -> tuple[str, str]:
     return state, message
 
 
+
+def refresh_repository(repo_dir: Path) -> bool:
+    """Fast-forward the local main branch and stage an updated agent for restart."""
+    git_dir = repo_dir / ".git"
+    if not git_dir.exists():
+        raise RuntimeError(f"Collector repository is not a Git checkout: {repo_dir}")
+
+    branch = subprocess.run(
+        ["git", "-C", str(repo_dir), "branch", "--show-current"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    current_branch = branch.stdout.strip()
+    if branch.returncode != 0 or current_branch != "main":
+        detail = branch.stderr.strip() or current_branch or "unknown"
+        raise RuntimeError(f"Collector auto-update requires the main branch; found {detail}.")
+
+    update = subprocess.run(
+        ["git", "-C", str(repo_dir), "pull", "--ff-only", "origin", "main"],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    if update.returncode != 0:
+        detail = update.stderr.strip() or update.stdout.strip() or f"exit code {update.returncode}"
+        raise RuntimeError(f"Collector auto-update failed: {detail}")
+
+    repository_agent = repo_dir / "local-collector" / "china_scan_agent.py"
+    installed_agent = Path(__file__).resolve()
+    if installed_agent == repository_agent.resolve():
+        return False
+    if not repository_agent.exists():
+        raise RuntimeError(f"Updated collector agent is missing: {repository_agent}")
+    if installed_agent.read_bytes() == repository_agent.read_bytes():
+        return False
+
+    shutil.copy2(repository_agent, installed_agent)
+    return True
+
+
+def restart_updated_agent() -> None:
+    """Replace this process with the newly installed collector agent."""
+    os.execv(sys.executable, [sys.executable, *sys.argv])
+
 def run_request(repo_dir: Path, request_id: str) -> None:
     script = repo_dir / "local-collector" / "china_one_click.py"
     if not script.exists():
@@ -132,6 +178,12 @@ def poll_once(repo_dir: Path) -> bool:
         return True
     if state != "queued" or not request_id:
         return False
+
+    # Update only when the website has queued work. This keeps the Mac collector
+    # current without polling GitHub continuously or accepting arbitrary commands.
+    if refresh_repository(repo_dir):
+        print(f"{datetime.now(timezone.utc).isoformat()} Collector updated; restarting.", flush=True)
+        restart_updated_agent()
 
     claim = request_json("/api/china-scan-control", {
         "action": "claim",
