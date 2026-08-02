@@ -862,6 +862,16 @@ export async function POST(request: NextRequest) {
       startedAt,
       completedAt: "",
       message: "美国公司 ATS 已完成，正在启动美国后台搜索。",
+      phase: "ATS 初筛",
+      currentSource: "美国公司 ATS",
+      stepsCompleted: 1,
+      stepsTotal: 10,
+      scanned: officialBoards.scanned,
+      uniqueJobs: officialBoards.scanned,
+      filtered: Math.max(0, officialBoards.scanned - officialBoards.matched),
+      verified: officialBoards.matched,
+      eligible: officialBoards.matched,
+      progressUpdatedAt: startedAt,
     }).onConflictDoUpdate({
       target: scanStatus.id,
       set: {
@@ -875,6 +885,16 @@ export async function POST(request: NextRequest) {
         startedAt,
         completedAt: "",
         message: "美国公司 ATS 已完成，正在启动美国后台搜索。",
+        phase: "ATS 初筛",
+        currentSource: "美国公司 ATS",
+        stepsCompleted: 1,
+        stepsTotal: 10,
+        scanned: officialBoards.scanned,
+        uniqueJobs: officialBoards.scanned,
+        filtered: Math.max(0, officialBoards.scanned - officialBoards.matched),
+        verified: officialBoards.matched,
+        eligible: officialBoards.matched,
+        progressUpdatedAt: startedAt,
       },
     });
     const backgroundScan = await dispatchGlobalScan();
@@ -884,6 +904,8 @@ export async function POST(request: NextRequest) {
       message: backgroundScan.triggered
         ? "美国 ATS 已完成；后台任务已排队，等待美国搜索、核验和回写。"
         : backgroundScan.message,
+      phase: backgroundScan.triggered ? "等待云端任务" : "启动失败",
+      currentSource: backgroundScan.triggered ? "GitHub Actions" : "美国公司 ATS",
     }).where(eq(scanStatus.id, 1));
     return NextResponse.json({ ...officialBoards, backgroundScan });
   }
