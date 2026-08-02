@@ -71,25 +71,29 @@ export async function POST(request: NextRequest) {
   const db = await getDb();
   const now = new Date().toISOString();
   const [current] = await db.select().from(scanStatus).where(eq(scanStatus.id, 1)).limit(1);
+  const progressCount = (camel: string, snake: string, previous: number | undefined) =>
+    body[camel] !== undefined || body[snake] !== undefined
+      ? count(body[camel] ?? body[snake])
+      : previous ?? 0;
   const progressValues = {
-    phase: cleanText(body.phase),
-    currentSource: cleanText(body.current_source ?? body.currentSource),
-    stepsCompleted: count(body.steps_completed ?? body.stepsCompleted),
-    stepsTotal: count(body.steps_total ?? body.stepsTotal),
-    scanned: count(body.scanned),
-    uniqueJobs: count(body.unique_jobs ?? body.uniqueJobs),
-    filtered: count(body.filtered),
-    verified: count(body.verified),
-    eligible: count(body.eligible),
+    phase: cleanText(body.phase) || current?.phase || "",
+    currentSource: cleanText(body.current_source ?? body.currentSource) || current?.currentSource || "",
+    stepsCompleted: progressCount("stepsCompleted", "steps_completed", current?.stepsCompleted),
+    stepsTotal: progressCount("stepsTotal", "steps_total", current?.stepsTotal),
+    scanned: progressCount("scanned", "scanned", current?.scanned),
+    uniqueJobs: progressCount("uniqueJobs", "unique_jobs", current?.uniqueJobs),
+    filtered: progressCount("filtered", "filtered", current?.filtered),
+    verified: progressCount("verified", "verified", current?.verified),
+    eligible: progressCount("eligible", "eligible", current?.eligible),
     progressUpdatedAt: now,
   };
   const values = state === "running" || state === "queued"
     ? {
       id: 1,
       state,
-      created: count(body.created),
-      updated: count(body.updated),
-      skipped: count(body.skipped),
+      created: body.created === undefined ? current?.created ?? 0 : count(body.created),
+      updated: body.updated === undefined ? current?.updated ?? 0 : count(body.updated),
+      skipped: body.skipped === undefined ? current?.skipped ?? 0 : count(body.skipped),
       startedAt: cleanText(body.started_at ?? body.startedAt) || current?.startedAt || now,
       completedAt: "",
       message: cleanText(body.message) || "美国岗位更新正在运行。",
