@@ -575,6 +575,19 @@ def next_batch(plan_path: Path) -> tuple[list[tuple[str, str]], int, int]:
     return batch, cursor, len(combinations)
 
 
+def classify_boss_interruption(output: str) -> tuple[str, str]:
+    """Return a stable interruption kind and a useful recovery message."""
+    detail = " ".join(output.split())[-900:]
+    lower = detail.lower()
+    if any(token in lower for token in ("captcha", "验证码", "安全验证", "访问频繁", "verify")):
+        return "verification_required", f"BOSS 触发验证码或安全验证。{detail}"
+    if any(token in lower for token in ("login", "登录", "未登录", "sign in", "session")):
+        return "login_required", f"BOSS 登录会话已失效。{detail}"
+    if any(token in lower for token in ("timeout", "timed out", "network", "connection", "网络")):
+        return "network_error", f"BOSS 网络连接中断。{detail}"
+    return "source_error", f"BOSS 页面或采集器返回异常。{detail}"
+
+
 def run_searches(
     scraper_dir: Path,
     plan_path: Path,
@@ -594,6 +607,7 @@ def run_searches(
     completed = 0
     failure = ""
     detail_failed = False
+    attention_kind = ""
 
     # Phase 1 only reads search-result pages. Detail pages are intentionally
     # deferred until every keyword in the batch has been deduplicated.
@@ -610,10 +624,16 @@ def run_searches(
             "--output", str(jobs_path),
             "--no-detail",
         ]
-        result = subprocess.run(command, check=False)
+        result = subprocess.run(command, check=False, text=True, capture_output=True)
         if result.returncode != 0:
-            failure = f"Search stopped at {keyword} / {city} with exit code {result.returncode}."
-            print(f"{failure} Check the dedicated Chrome window for login or verification.", file=sys.stderr)
+            attention_kind, detail = classify_boss_interruption(
+                "\n".join(part for part in (result.stderr, result.stdout) if part)
+            )
+            failure = (
+                f"BOSS 列表搜索停在“{keyword} / {city}”（退出码 {result.returncode}）。"
+                f"{detail}"
+            )
+            print(failure, file=sys.stderr)
             break
         if jobs_path.exists():
             list_paths.append(jobs_path)
@@ -677,11 +697,14 @@ def run_searches(
             "--format", "json",
             "--detail-output", str(details_path),
         ]
-        detail_result = subprocess.run(detail_command, check=False)
+        detail_result = subprocess.run(detail_command, check=False, text=True, capture_output=True)
         if detail_result.returncode != 0:
             detail_failed = True
-            failure = f"Detail collection stopped with exit code {detail_result.returncode}."
-            print(f"{failure} Check the dedicated Chrome window for login or verification.", file=sys.stderr)
+            attention_kind, detail = classify_boss_interruption(
+                "\n".join(part for part in (detail_result.stderr, detail_result.stdout) if part)
+            )
+            failure = f"BOSS 详情采集被中断（退出码 {detail_result.returncode}）。{detail}"
+            print(failure, file=sys.stderr)
         else:
             outputs.append((candidates_path, details_path if details_path.exists() else None))
 
@@ -695,6 +718,7 @@ def run_searches(
         "completed_searches": completed if batch_completed else 0,
         "status": "completed" if batch_completed else "attention_required",
         "failure": failure,
+        "attention_kind": attention_kind,
         **prefilter_stats,
     }
     write_state(state)
