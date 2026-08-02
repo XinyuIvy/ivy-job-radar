@@ -6,7 +6,6 @@ import html
 import json
 import re
 import time
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qsl, quote_plus, urlencode, urljoin, urlsplit, urlunsplit
@@ -248,38 +247,62 @@ def source_name(url: str, fallback: str) -> str:
     return fallback
 
 
-def fetch_bing_rss(query: str, timeout: int = 25) -> list[dict[str, str]]:
-    url = f"https://www.bing.com/search?format=rss&setlang=zh-CN&q={quote_plus(query)}"
+def parse_brave_results(body: str) -> list[dict[str, str]]:
+    """Extract ordinary web results from Brave's server-rendered HTML."""
+    starts = [match.start() for match in re.finditer(r'<div class="snippet[^>]+data-type="web"', body)]
+    records: list[dict[str, str]] = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(body)
+        block = body[start:end]
+        link_match = re.search(
+            r'<a href="(https?://[^"]+)"[^>]*class="[^"]*\bl1\b[^"]*"',
+            block,
+            flags=re.IGNORECASE,
+        )
+        title_match = re.search(
+            r'<div class="title search-snippet-title[^"]*"[^>]*title="([^"]*)"',
+            block,
+            flags=re.IGNORECASE,
+        )
+        if not link_match or not title_match:
+            continue
+        description_match = re.search(
+            r'<div class="content [^"]*line-clamp-dynamic[^"]*">([\s\S]*?)</div>',
+            block,
+            flags=re.IGNORECASE,
+        )
+        description = description_match.group(1) if description_match else ""
+        description = re.sub(r"<!--[\s\S]*?-->|<[^>]+>", " ", description)
+        records.append({
+            "title": clean_text(title_match.group(1)),
+            "url": clean_text(link_match.group(1)),
+            "description": clean_text(description),
+        })
+    return records
+
+
+def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
+    """Fetch public-index results; retain the legacy name for test compatibility."""
+    url = f"https://search.brave.com/search?source=web&q={quote_plus(query)}"
     request = Request(
         url,
         headers={
-            "Accept": "application/rss+xml,application/xml,text/xml",
+            "Accept": "text/html,application/xhtml+xml",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
-            "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0)",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150 Safari/537.36",
         },
     )
     try:
         with urlopen(request, timeout=timeout) as response:
             body = response.read(2_000_000)
     except Exception as exc:
-        print(f"Indexed search failed: {query}: {exc}")
+        print(f"Public-index search failed: {query}: {exc}")
         return []
-
-    try:
-        root = ET.fromstring(body)
-    except ET.ParseError:
+    text = body.decode("utf-8", "replace")
+    if "challenge-form" in text or '<div class="captcha"' in text.lower():
+        print(f"Public-index search requires verification: {query}")
         return []
-
-    records: list[dict[str, str]] = []
-    for item in root.findall(".//item"):
-        records.append(
-            {
-                "title": clean_text(item.findtext("title")),
-                "url": clean_text(item.findtext("link")),
-                "description": clean_text(item.findtext("description")),
-            }
-        )
-    return records
+    return parse_brave_results(text)
 
 
 def fetch_text(url: str, timeout: int = 25) -> tuple[str, str]:
