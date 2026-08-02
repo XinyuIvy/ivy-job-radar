@@ -42,6 +42,17 @@ def load_module(name: str, path: Path) -> ModuleType:
 
 
 def failed_source(source: str, error: BaseException) -> dict[str, Any]:
+    """Classify a source failure without treating it as a completed scan."""
+    message = str(error)
+    lower = message.lower()
+    if any(token in lower for token in ("captcha", "验证码", "安全验证", "访问频繁", "verify")):
+        attention_kind = "verification_required"
+    elif any(token in lower for token in ("login", "登录", "未登录", "sign in")):
+        attention_kind = "login_required"
+    elif any(token in lower for token in ("timeout", "timed out", "network", "connection", "网络")):
+        attention_kind = "network_error"
+    else:
+        attention_kind = "source_error"
     return {
         "source": source,
         "status": "failed",
@@ -49,7 +60,8 @@ def failed_source(source: str, error: BaseException) -> dict[str, Any]:
         "jobs_eligible": 0,
         "jobs_created": 0,
         "jobs_updated_or_duplicate": 0,
-        "attention": str(error),
+        "attention": message,
+        "attention_kind": attention_kind,
     }
 
 
