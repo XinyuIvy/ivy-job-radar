@@ -561,7 +561,8 @@ def monthly_salary_floor_k(text: str) -> float | None:
         clause_end = min((position for position in following_separators if position >= 0), default=len(content))
         suffix = content[end:clause_end]
         return re.match(
-            rf"\s*(?:的|作为|用于|用作)?\s*(?:{'|'.join(allowance_labels)})",
+            rf"\s*(?:的\s*)?(?:[（(【[]\s*)?(?:作为|用于|用作)?\s*"
+            rf"(?:{'|'.join(allowance_labels)})",
             suffix,
         ) is not None
     annual_patterns = (
