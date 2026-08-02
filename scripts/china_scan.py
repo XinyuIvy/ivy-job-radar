@@ -14,6 +14,10 @@ from urllib.request import Request, urlopen
 import pandas as pd
 
 
+LAST_SEARCH_STATUS = "ok"
+LAST_SEARCH_DETAIL = ""
+
+
 TRACKING_PARAMETERS = {
     "from",
     "ka",
@@ -314,6 +318,7 @@ def parse_yahoo_results(body: str) -> list[dict[str, str]]:
 
 
 def fetch_yahoo_results(query: str, timeout: int = 20) -> list[dict[str, str]]:
+    global LAST_SEARCH_DETAIL, LAST_SEARCH_STATUS
     url = f"https://search.yahoo.com/search?p={quote_plus(query)}"
     request = Request(
         url,
@@ -327,13 +332,26 @@ def fetch_yahoo_results(query: str, timeout: int = 20) -> list[dict[str, str]]:
         with urlopen(request, timeout=timeout) as response:
             text = response.read(2_000_000).decode("utf-8", "replace")
     except Exception as exc:
+        detail = str(exc)
+        LAST_SEARCH_STATUS = "rate_limited" if "429" in detail else "search_source_error"
+        LAST_SEARCH_DETAIL = f"Yahoo: {detail}"
         print(f"Yahoo fallback search failed: {query}: {exc}")
         return []
-    return parse_yahoo_results(text)
+    if "captcha" in text.lower() or "challenge-form" in text.lower():
+        LAST_SEARCH_STATUS = "verification_required"
+        LAST_SEARCH_DETAIL = "Yahoo returned a verification page."
+        return []
+    records = parse_yahoo_results(text)
+    LAST_SEARCH_STATUS = "ok" if records else "no_results"
+    LAST_SEARCH_DETAIL = ""
+    return records
 
 
 def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
     """Fetch public-index results; retain the legacy name for test compatibility."""
+    global LAST_SEARCH_DETAIL, LAST_SEARCH_STATUS
+    LAST_SEARCH_STATUS = "ok"
+    LAST_SEARCH_DETAIL = ""
     url = f"https://search.brave.com/search?source=web&q={quote_plus(query)}"
     request = Request(
         url,
@@ -348,13 +366,17 @@ def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
             body = response.read(2_000_000)
     except Exception as exc:
         print(f"Public-index search failed: {query}: {exc}")
-        return []
+        # A blocked primary provider must not prevent the independent fallback.
+        return fetch_yahoo_results(query, timeout)
     text = body.decode("utf-8", "replace")
     if "challenge-form" in text or '<div class="captcha"' in text.lower():
         print(f"Public-index search requires verification: {query}")
-        return []
+        return fetch_yahoo_results(query, timeout)
     records = parse_brave_results(text)
-    return records if records else fetch_yahoo_results(query, timeout)
+    if records:
+        LAST_SEARCH_STATUS = "ok"
+        return records
+    return fetch_yahoo_results(query, timeout)
 
 
 def fetch_text(url: str, timeout: int = 25) -> tuple[str, str]:
@@ -691,6 +713,9 @@ def run_scan(
     completed_steps = 0
 
     for item in queries:
+        global LAST_SEARCH_DETAIL, LAST_SEARCH_STATUS
+        LAST_SEARCH_STATUS = "ok"
+        LAST_SEARCH_DETAIL = ""
         results = fetch_bing_rss(item["query"])
         matched = 0
         rejection_stats = empty_filter_stats()
@@ -710,10 +735,12 @@ def run_scan(
             "rejected_total": hard_rejected,
             "accounted_for": matched + hard_rejected == len(results),
             "source_status": (
-                "no_results" if not results
+                LAST_SEARCH_STATUS if not results and LAST_SEARCH_STATUS != "ok"
+                else "no_results" if not results
                 else "search_source_anomaly" if valid_platform_urls == 0
                 else "ok"
             ),
+            "source_detail": LAST_SEARCH_DETAIL,
             "rejected": rejection_stats,
         })
         completed_steps += 1
