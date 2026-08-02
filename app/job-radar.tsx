@@ -168,6 +168,16 @@ type ScanStatus = {
   completedAt: string;
   message: string;
   timeoutMinutes: number;
+  phase: string;
+  currentSource: string;
+  stepsCompleted: number;
+  stepsTotal: number;
+  scanned: number;
+  uniqueJobs: number;
+  filtered: number;
+  verified: number;
+  eligible: number;
+  progressUpdatedAt: string;
 };
 
 type ChinaScanSource = {
@@ -181,6 +191,12 @@ type ChinaScanSource = {
   jobs_eligible?: number;
   jobs_created?: number;
   jobs_updated_or_duplicate?: number;
+  jobsUnique?: number;
+  jobs_unique?: number;
+  jobsDuplicateListings?: number;
+  jobs_duplicate_listings?: number;
+  jobsFilteredBeforeDetail?: number;
+  jobs_filtered_before_detail?: number;
   rejectionReasons?: Record<string, number>;
   rejection_reasons?: Record<string, number>;
   reviewCounts?: Record<string, number>;
@@ -188,6 +204,18 @@ type ChinaScanSource = {
   attention?: string;
   attentionKind?: string;
   attention_kind?: string;
+};
+
+const chinaRejectionLabels: Record<string, string> = {
+  missing_title_or_url: "缺少标题或链接",
+  missing_required_fields: "缺少必要字段",
+  title_not_targeted: "关键词或标题不匹配",
+  excluded_seniority_or_role: "高年资、工程类或无关岗位",
+  degree_experience_or_skill_gap: "经验超限或方向不符",
+  salary_below_20k: "工资下限不足 20K",
+  salary_below_20k_or_missing: "工资不足或缺失",
+  duplicate_listing: "重复结果",
+  detail_unavailable: "详情无法读取",
 };
 
 type ChinaScanStatus = {
@@ -566,7 +594,6 @@ export default function JobRadar() {
   const [chinaScanStatus, setChinaScanStatus] = useState<ChinaScanStatus | null>(null);
   const [chinaScanControl, setChinaScanControl] = useState<ChinaScanControl | null>(null);
   const [chinaScanStarting, setChinaScanStarting] = useState(false);
-  const [refreshConfirmationOpen, setRefreshConfirmationOpen] = useState(false);
   const [clock, setClock] = useState(0);
   const [profile, setProfile] = useState<UserProfile>(emptyProfile);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -1054,6 +1081,12 @@ export default function JobRadar() {
     : 0;
   const timeoutSeconds = (scanStatus?.timeoutMinutes ?? 60) * 60;
   const scanRemainingSeconds = Math.max(0, timeoutSeconds - scanElapsedSeconds);
+  const usProgressRatio = scanStatus?.stepsTotal
+    ? Math.min(1, scanStatus.stepsCompleted / scanStatus.stepsTotal)
+    : 0;
+  const usEtaSeconds = usProgressRatio > 0 && usProgressRatio < 1
+    ? Math.max(0, scanElapsedSeconds * (1 / usProgressRatio - 1))
+    : 0;
 
   useEffect(() => {
     let active = true;
@@ -1557,7 +1590,7 @@ export default function JobRadar() {
         </div>
         <div className="scan-status">
           <span className="pulse" />
-          <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "自动更新"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : "每日 06:00"}</span></div>
+          <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "手动更新"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : "按需运行"}</span></div>
         </div>
       </section>
 
@@ -1701,7 +1734,7 @@ export default function JobRadar() {
           <article className="scan-lane scan-lane-us">
             <div className="scan-lane-head">
               <div><span>美国岗位更新</span><p>{jobsMessage || "扫描美国公司 ATS、JobSpy 聚合平台和美国公司官网。"}</p></div>
-              <button className="refresh-jobs" onClick={() => setRefreshConfirmationOpen(true)} disabled={jobsRefreshing || scanRunning}>
+              <button className="refresh-jobs" onClick={() => void refreshJobs()} disabled={jobsRefreshing || scanRunning}>
                 更新美国岗位
               </button>
             </div>
@@ -1711,9 +1744,23 @@ export default function JobRadar() {
               {scanRunning ? (
                 <>
                   <strong>更新进行中</strong>
-                  <p>
-                    ATS 已筛出 {scanStatus?.atsMatched ?? 0} 个候选；GitHub 正在搜索、核验并回写。
-                    已运行 {formatDuration(scanElapsedSeconds)}，距离本次 60 分钟上限还剩 {formatDuration(scanRemainingSeconds)}。
+                  <p>{scanStatus?.message || "美国岗位来源正在扫描、核验并回写。"}</p>
+                  <div className="scan-progress-track" aria-label={`当前阶段完成 ${Math.round(usProgressRatio * 100)}%`}>
+                    <span style={{ width: `${Math.max(2, usProgressRatio * 100)}%` }} />
+                  </div>
+                  <div className="scan-live-metrics">
+                    <span>当前来源<b>{scanStatus?.currentSource || "美国公司 ATS"}</b></span>
+                    <span>进度<b>{scanStatus?.stepsCompleted ?? 0}/{scanStatus?.stepsTotal || "?"}</b></span>
+                    <span>已扫描<b>{scanStatus?.scanned ?? scanStatus?.atsScanned ?? 0}</b></span>
+                    <span>去重后<b>{scanStatus?.uniqueJobs ?? 0}</b></span>
+                    <span>筛选排除<b>{scanStatus?.filtered ?? 0}</b></span>
+                    <span>官网核验<b>{scanStatus?.verified ?? 0}</b></span>
+                    <span>筛选保留<b>{scanStatus?.eligible ?? scanStatus?.atsMatched ?? 0}</b></span>
+                    <span>新增<b>{scanStatus?.created ?? 0}</b></span>
+                  </div>
+                  <p className="scan-eta">
+                    已运行 {formatDuration(scanElapsedSeconds)}
+                    {usEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(usEtaSeconds)}` : `，本次运行上限还剩 ${formatDuration(scanRemainingSeconds)}`}。
                   </p>
                 </>
               ) : scanStatus?.state === "completed" ? (
@@ -1797,15 +1844,16 @@ export default function JobRadar() {
                     <div className="china-source-results">
                       {chinaScanStatus.results.map((item, index) => (
                         <span key={`${item.source ?? "source"}-${index}`} className={item.status === "completed" ? "source-ok" : "source-warning"}>
-                          {item.source || "未知来源"}：新增 {item.jobsCreated ?? item.jobs_created ?? 0}
-                          {(item.rejectionReasons ?? item.rejection_reasons)?.missing_title_or_url ? ` · 缺少字段 ${(item.rejectionReasons ?? item.rejection_reasons)?.missing_title_or_url}` : ""}
-                          {(item.rejectionReasons ?? item.rejection_reasons)?.title_not_targeted ? ` · 标题排除 ${(item.rejectionReasons ?? item.rejection_reasons)?.title_not_targeted}` : ""}
-                          {(item.rejectionReasons ?? item.rejection_reasons)?.excluded_seniority_or_role ? ` · 高年资/工程/无关 ${(item.rejectionReasons ?? item.rejection_reasons)?.excluded_seniority_or_role}` : ""}
-                          {(item.rejectionReasons ?? item.rejection_reasons)?.degree_experience_or_skill_gap ? ` · 经验/方向不符 ${(item.rejectionReasons ?? item.rejection_reasons)?.degree_experience_or_skill_gap}` : ""}
-                          {(item.rejectionReasons ?? item.rejection_reasons)?.salary_below_20k ? ` · 工资不足 20K ${(item.rejectionReasons ?? item.rejection_reasons)?.salary_below_20k}` : ""}
-                          {(item.rejectionReasons ?? item.rejection_reasons)?.salary_missing_or_negotiable ? ` · 工资待核验 ${(item.rejectionReasons ?? item.rejection_reasons)?.salary_missing_or_negotiable}` : ""}
-                          {(item.reviewCounts ?? item.review_counts)?.salary_missing_or_negotiable ? ` · 工资待核验 ${(item.reviewCounts ?? item.review_counts)?.salary_missing_or_negotiable}` : ""}
-                          {item.attention ? " · 需处理" : ""}
+                          <b>{item.source || "未知来源"}</b>
+                          {`：发现 ${item.jobsDiscovered ?? item.jobs_discovered ?? 0} · 保留 ${item.jobsEligible ?? item.jobs_eligible ?? 0} · 新增 ${item.jobsCreated ?? item.jobs_created ?? 0}`}
+                          {(item.jobsDuplicateListings ?? item.jobs_duplicate_listings) ? ` · 重复 ${item.jobsDuplicateListings ?? item.jobs_duplicate_listings}` : ""}
+                          {Object.entries(item.rejectionReasons ?? item.rejection_reasons ?? {})
+                            .filter(([, value]) => Number(value) > 0)
+                            .map(([reason, value]) => ` · ${chinaRejectionLabels[reason] || reason} ${value}`)}
+                          {Object.entries(item.reviewCounts ?? item.review_counts ?? {})
+                            .filter(([, value]) => Number(value) > 0)
+                            .map(([reason, value]) => ` · 待核验${reason === "salary_missing_or_negotiable" ? "工资" : chinaRejectionLabels[reason] || reason} ${value}`)}
+                          {item.attention ? ` · 中断原因：${item.attention}` : ""}
                         </span>
                       ))}
                     </div>
@@ -2420,43 +2468,6 @@ export default function JobRadar() {
               <button disabled={ignoreSaving} onClick={() => ignoreJob("不感兴趣，不想申请")}>不感兴趣，不想申请</button>
             </div>
             <button className="dialog-cancel" onClick={() => setIgnoreTarget(null)}>取消</button>
-          </section>
-        </div>
-      )}
-
-      {refreshConfirmationOpen && (
-        <div
-          className="modal-backdrop"
-          role="presentation"
-          onMouseDown={(event) => event.currentTarget === event.target && setRefreshConfirmationOpen(false)}
-        >
-          <section className="refresh-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="refresh-confirm-title">
-            <div className="form-head">
-              <div>
-                <p className="eyebrow">手动更新确认</p>
-                <h2 id="refresh-confirm-title">确定立即刷新全部来源？</h2>
-              </div>
-              <button type="button" onClick={() => setRefreshConfirmationOpen(false)} aria-label="关闭">×</button>
-            </div>
-            <p>
-              这会立即触发美国岗位完整扫描，包括公司 ATS、JobSpy、美国公司官网核验、过期检查、评分与去重，并消耗 GitHub Actions 运行时间。
-            </p>
-            <div className="refresh-confirm-note">
-              系统每天早上 06:00 会自动更新。除非需要立刻查看最新岗位，否则建议等待下一次自动更新。
-            </div>
-            <div className="refresh-confirm-actions">
-              <button type="button" onClick={() => setRefreshConfirmationOpen(false)}>取消，等待自动更新</button>
-              <button
-                type="button"
-                className="primary"
-                onClick={() => {
-                  setRefreshConfirmationOpen(false);
-                  void refreshJobs();
-                }}
-              >
-                确认立即刷新
-              </button>
-            </div>
           </section>
         </div>
       )}
