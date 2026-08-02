@@ -36,15 +36,35 @@ class ChinaScanAgentTest(unittest.TestCase):
             {"claimed": True},
         ]
         with patch.object(AGENT, "request_json", side_effect=responses) as request_json, \
+                patch.object(AGENT, "refresh_repository", return_value=False) as refresh_repository, \
                 patch.object(AGENT, "run_request") as run_request:
             handled = AGENT.poll_once(ROOT)
 
         self.assertTrue(handled)
+        refresh_repository.assert_called_once_with(ROOT)
         request_json.assert_any_call("/api/china-scan-control", {
             "action": "claim",
             "request_id": "request-1",
         })
         run_request.assert_called_once_with(ROOT, "request-1")
+
+    def test_poll_restarts_before_claim_when_agent_was_updated(self):
+        with patch.object(
+            AGENT,
+            "request_json",
+            return_value={"state": "queued", "requestId": "request-1"},
+        ) as request_json, patch.object(
+            AGENT,
+            "refresh_repository",
+            return_value=True,
+        ), patch.object(
+            AGENT,
+            "restart_updated_agent",
+        ) as restart_updated_agent:
+            AGENT.poll_once(ROOT)
+
+        restart_updated_agent.assert_called_once_with()
+        request_json.assert_called_once_with("/api/china-scan-control")
 
     def test_poll_ignores_idle_control(self):
         with patch.object(AGENT, "request_json", return_value={"state": "idle", "requestId": ""}), \
