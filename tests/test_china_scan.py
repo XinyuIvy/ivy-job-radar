@@ -19,7 +19,8 @@ class ChinaScanFilterTest(unittest.TestCase):
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "salary_below_20k_or_missing": 0,
+            "salary_below_20k": 0,
+            "salary_missing_or_negotiable": 0,
         }
         row = CHINA_SCAN.normalize_result(
             {
@@ -46,7 +47,8 @@ class ChinaScanFilterTest(unittest.TestCase):
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "salary_below_20k_or_missing": 0,
+            "salary_below_20k": 0,
+            "salary_missing_or_negotiable": 0,
         }
         row = CHINA_SCAN.normalize_result(
             {
@@ -71,6 +73,11 @@ class ChinaScanFilterTest(unittest.TestCase):
         scanned_at = "2026-08-01T00:00:00+00:00"
 
         kept = CHINA_SCAN.normalize_result({**base, "title": "统计建模研究员"}, query, scanned_at)
+        salary_missing = CHINA_SCAN.normalize_result(
+            {**base, "title": "统计建模研究员", "description": "统计建模，工资面议。"},
+            query,
+            scanned_at,
+        )
         low_salary = CHINA_SCAN.normalize_result(
             {**base, "title": "统计建模研究员", "description": "统计建模，月薪 15-30K。"},
             query,
@@ -85,6 +92,8 @@ class ChinaScanFilterTest(unittest.TestCase):
         postdoc = CHINA_SCAN.normalize_result({**base, "title": "生物统计博士后"}, query, scanned_at)
 
         self.assertIsNotNone(kept)
+        self.assertIsNotNone(salary_missing)
+        self.assertIn("已保留待核验", salary_missing["evidence"])
         self.assertIsNone(low_salary)
         self.assertIsNone(too_experienced)
         self.assertIsNone(senior)
