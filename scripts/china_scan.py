@@ -117,6 +117,7 @@ OBVIOUSLY_IRRELEVANT_SIGNALS = (
     "出纳",
     "客服",
     "行政专员",
+    "新闻编辑",
 )
 
 UNSUPPORTED_CORE_SIGNALS = (
@@ -626,10 +627,24 @@ def normalize_result(
         if rejection_stats is not None:
             rejection_stats[url_rejection] += 1
         return None
-    content_is_targeted = any(signal in combined.lower() for signal in WANTED_TITLE_SIGNALS)
+    title_is_targeted = any(signal in lower_title for signal in WANTED_TITLE_SIGNALS)
+    content_is_targeted = title_is_targeted or any(
+        signal in description.lower() for signal in WANTED_TITLE_SIGNALS
+    )
     # The query is the recall step, but it cannot prove that a returned page is
     # relevant because public search engines sometimes ignore query operators.
     if not content_is_targeted:
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
+        return None
+    # Search snippets can mention a relevant neighboring vacancy while the
+    # result itself is only a company or campus-recruiting index page.
+    if not title_is_targeted and re.search(r"招聘信息|校园招聘|最新招聘", lower_title):
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
+        return None
+    listing_years = [int(value) for value in re.findall(r"20\d{2}", title)]
+    if "招聘" in title and any(year < datetime.now(timezone.utc).year for year in listing_years):
         if rejection_stats is not None:
             rejection_stats["title_not_targeted"] += 1
         return None
