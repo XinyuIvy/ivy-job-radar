@@ -141,7 +141,10 @@ def run_scan(
             state["status"] = "attention_required"
             state["failure"] = str(exc)
         else:
-            radar.record_synced_jobs(jobs, result_files)
+            # A partial batch must be retried in full. Do not cache its rows or
+            # the completed retry would omit them from source reconciliation.
+            if not radar.incomplete_boss_sources(state):
+                radar.record_synced_jobs(jobs, result_files)
     plan = radar.load_json(radar.DEFAULT_PLAN)
     state["combination_count"] = len(plan.get("cities", [])) * len(plan.get("keywords", []))
     summary = build_summary(state, discovered, len(jobs), sync_result, dry_run)
