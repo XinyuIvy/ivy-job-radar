@@ -19,7 +19,18 @@ def load_json(path: Path, default: Any) -> Any:
         return default
 
 
+RUN_MARKER = Path("/tmp/ivy-us-scan-progress-started")
+
+
+def is_current(path: Path) -> bool:
+    if not path.exists():
+        return False
+    return not RUN_MARKER.exists() or path.stat().st_mtime_ns >= RUN_MARKER.stat().st_mtime_ns
+
+
 def rows(path: Path) -> list[dict[str, Any]]:
+    if not is_current(path):
+        return []
     payload = load_json(path, [])
     return [item for item in payload if isinstance(item, dict)] if isinstance(payload, list) else []
 
@@ -61,12 +72,16 @@ def metrics(scan_dir: Path) -> dict[str, int]:
     unique_candidates = {job_key(job): job for job in candidates if job_key(job)}
 
     us_jobs = rows(scan_dir / "us_jobs_latest.json")
-    us_verification = load_json(scan_dir / "us_verification_summary.json", {})
-    cloud_summary = load_json(scan_dir / "cloud_sources_summary.json", {})
-    aggregator_summary = load_json(scan_dir / "aggregator_scan_summary.json", {})
-    aggregator_verification = load_json(scan_dir / "aggregator_verification_summary.json", {})
-    portal_summary = load_json(scan_dir / "company_portal_summary.json", {})
-    receipt = load_json(scan_dir / "run_receipt_latest.json", {})
+    def current_json(filename: str) -> dict[str, Any]:
+        path = scan_dir / filename
+        return load_json(path, {}) if is_current(path) else {}
+
+    us_verification = current_json("us_verification_summary.json")
+    cloud_summary = current_json("cloud_sources_summary.json")
+    aggregator_summary = current_json("aggregator_scan_summary.json")
+    aggregator_verification = current_json("aggregator_verification_summary.json")
+    portal_summary = current_json("company_portal_summary.json")
+    receipt = current_json("run_receipt_latest.json")
 
     scanned = (
         len(us_jobs)
@@ -129,7 +144,11 @@ def main() -> None:
     parser.add_argument("--total", type=int, default=10)
     parser.add_argument("--message", required=True)
     parser.add_argument("--scan-dir", type=Path, default=Path("data/scans"))
+    parser.add_argument("--start-run", action="store_true")
     args = parser.parse_args()
+
+    if args.start_run:
+        RUN_MARKER.write_text("started", encoding="utf-8")
 
     payload: dict[str, Any] = {
         "state": args.state,
