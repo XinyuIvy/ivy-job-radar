@@ -77,6 +77,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git checkout -- .github/workflows .direct-salary-filter-removal-trigger
+          git checkout -- scripts/*.sh
+          find . -type d -name __pycache__ -prune -exec rm -rf {} +
+          git add -A -- local-collector scripts app tests vite.config.ts build
           git commit -m "Remove China salary filters from direct sources"
           git push origin HEAD:agent/remove-china-salary-hard-filter
