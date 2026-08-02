@@ -192,6 +192,7 @@ button { color: inherit; }
 .scan-live-metrics span { min-width: 0; border: 1px solid rgba(130,102,60,.14); border-radius: 8px; background: rgba(255,255,255,.7); padding: 7px; color: #765b31; font-size: 9px; }
 .scan-live-metrics b { display: block; margin-top: 3px; overflow: hidden; color: #3f3526; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .scan-eta { color: #765b31; }
+.scan-rejections { margin-top: 7px; color: #765b31; font-size: 10px; line-height: 1.55; }
 @keyframes status-pulse {
   50% { opacity: .42; transform: scale(.82); }
 }
