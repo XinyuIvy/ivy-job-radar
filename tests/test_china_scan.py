@@ -124,6 +124,39 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("广州 | 1-1.5万 | 13薪"), 10)
         self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("苏州 | 9千-1万"), 9)
         self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("西安 | 7千-1.3万·13薪"), 7)
+        self.assertAlmostEqual(CHINA_SCAN.monthly_salary_floor_k("兼职 | 300元/天"), 6.525)
+
+    def test_part_time_platform_role_is_not_saved(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "兼职远程数据分析师/统计师/数学建模",
+                "url": "https://nowcoder.com/jobs/detail/98916",
+                "description": "统计学相关专业，薪资面议。",
+            },
+            {"source": "牛客招聘", "query": "site:nowcoder.com/jobs/detail 数据分析师 统计学"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["excluded_seniority_or_role"], 1)
+
+    def test_mixed_unrelated_role_listing_is_not_saved(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "某商业公司招聘数据分析员|新媒体运营专员",
+                "url": "https://m.yingjiesheng.com/job-007-924-760.html",
+                "description": "统计学专业优先。",
+            },
+            {"source": "应届生求职网", "query": "site:yingjiesheng.com/job- 数据分析师 统计学"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["excluded_seniority_or_role"], 1)
 
     def test_low_chinese_platform_salary_is_rejected(self):
         stats = CHINA_SCAN.empty_filter_stats()
