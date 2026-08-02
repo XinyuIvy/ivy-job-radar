@@ -60,10 +60,15 @@ def validate(
         "verification_required",
         "search_source_error",
     }
+    statuses_by_source = defaultdict(list)
+    for row in summary.get("sources", []):
+        source = str(row.get("source", ""))
+        if source in platform_groups:
+            statuses_by_source[source].append(str(row.get("source_status", "")))
     limited_sources = {
-        str(row.get("source", ""))
-        for row in summary.get("sources", [])
-        if str(row.get("source_status", "")) in limited_statuses
+        source
+        for source, statuses in statuses_by_source.items()
+        if statuses and all(status in limited_statuses for status in statuses)
     }
     all_platform_sources_limited = bool(platform_groups) and set(platform_groups) <= limited_sources
     explicitly_unavailable = False
