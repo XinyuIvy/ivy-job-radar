@@ -21,7 +21,6 @@ class ChinaScanEligibilityTests(unittest.TestCase):
             "excluded_seniority_or_role": 0,
             "degree_experience_or_skill_gap": 0,
             "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
             "salary_missing_or_negotiable": 0,
         }
         result = CHINA_SCAN.normalize_result(

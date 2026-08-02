@@ -82,8 +82,7 @@ class ChinaScanFilterTest(unittest.TestCase):
                 CHINA_SCAN.fetch_bing_rss = original_fetch
 
         self.assertEqual(stats[0]["source_status"], "rate_limited")
-        self.assertEqual(stats[0]["matched"], 0)
-        self.assertEqual(stats[0]["rejected"]["salary_below_20k"], 1)
+        self.assertEqual(stats[0]["matched"], 1)
 
     def test_company_and_salary_fields_do_not_copy_javascript_shell_text(self):
         row = CHINA_SCAN.normalize_result(
@@ -186,7 +185,7 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNone(row)
         self.assertEqual(stats["excluded_seniority_or_role"], 1)
 
-    def test_low_chinese_platform_salary_is_rejected(self):
+    def test_low_chinese_platform_salary_is_kept(self):
         stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
             {
@@ -199,8 +198,24 @@ class ChinaScanFilterTest(unittest.TestCase):
             stats,
         )
 
-        self.assertIsNone(row)
-        self.assertEqual(stats["salary_below_20k"], 1)
+        self.assertIsNotNone(row)
+        self.assertEqual(row["salary_min_monthly_k"], 10)
+
+    def test_low_daily_rate_is_kept_when_role_is_otherwise_eligible(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "数据分析师",
+                "url": "https://jobs.51job.com/shanghai/172962370.html",
+                "description": "统计学专业，熟练使用 SQL，300元/天。",
+            },
+            {"source": "前程无忧", "query": "site:jobs.51job.com 数据分析师"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNotNone(row)
+        self.assertAlmostEqual(row["salary_min_monthly_k"], 6.525)
 
     def test_parses_brave_result_without_unrelated_navigation_links(self):
         body = '''
@@ -391,7 +406,7 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNone(row)
         self.assertEqual(stats["excluded_seniority_or_role"], 1)
 
-    def test_salary_experience_and_role_exclusions_are_hard_filters(self):
+    def test_salary_is_display_only_while_experience_and_role_exclusions_remain(self):
         base = {
             "url": "https://example.cn/jobs/role",
             "description": "统计建模，月薪 20-30K，要求 2 年经验。",
@@ -421,7 +436,8 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNotNone(kept)
         self.assertIsNotNone(salary_missing)
         self.assertIn("已保留待核验", salary_missing["evidence"])
-        self.assertIsNone(low_salary)
+        self.assertIsNotNone(low_salary)
+        self.assertEqual(low_salary["salary_min_monthly_k"], 15)
         self.assertIsNone(too_experienced)
         self.assertIsNone(senior)
         self.assertIsNotNone(postdoc)

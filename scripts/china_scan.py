@@ -203,7 +203,6 @@ HARD_REJECTION_KEYS = (
     "excluded_seniority_or_role",
     "degree_experience_or_skill_gap",
     "score_below_discovery_threshold",
-    "salary_below_20k",
 )
 
 
@@ -698,10 +697,6 @@ def normalize_result(
 
     years = required_experience(combined)
     salary_floor = monthly_salary_floor_k(combined)
-    if salary_floor is not None and salary_floor < 20:
-        if rejection_stats is not None:
-            rejection_stats["salary_below_20k"] += 1
-        return None
     if salary_floor is None and rejection_stats is not None:
         rejection_stats["salary_missing_or_negotiable"] += 1
     score, details, eligible = score_job(title, description, years)

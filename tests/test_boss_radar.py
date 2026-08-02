@@ -26,7 +26,7 @@ class BossRadarTransformTest(unittest.TestCase):
                     "boss_title": "招聘经理",
                     "boss_active_status": "刚刚活跃",
                     "salary_source": "api",
-                    "salary": "20-30K·13薪",
+                    "salary": "15-18K·13薪",
                     "company_link": "https://www.zhipin.com/gongsi/company-1.html",
                     "location": "上海·浦东新区",
                     "skills": "R | SAS | 临床试验",
@@ -339,7 +339,7 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertEqual(requests[0][0].get_header("Oai-sites-authorization"), "Bearer sites-secret")
         self.assertEqual(result["received"], 2)
 
-    def test_salary_floor_and_hard_exclusions_control_china_retention(self):
+    def test_salary_is_display_only_and_other_hard_exclusions_remain(self):
         self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("20-30K·13薪"), 20)
         self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("30-50万/年"), 25)
         self.assertEqual(BOSS_RADAR.monthly_salary_floor_k("15000-30000元/月"), 15)
@@ -358,11 +358,11 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "intern", "title": "生物统计实习生"}))
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "senior", "title": "资深统计科学家"}))
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "eng", "title": "算法工程师"}))
-        self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}))
+        self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}))
         self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "unknown", "title": "统计建模研究员", "salary": "面议"}))
         self.assertEqual(
             BOSS_RADAR.title_prefilter_reason({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}),
-            "salary_below_20k",
+            "",
         )
         self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "postdoc", "title": "生物统计博士后"}))
 

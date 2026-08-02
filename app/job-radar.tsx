@@ -212,8 +212,6 @@ const chinaRejectionLabels: Record<string, string> = {
   title_not_targeted: "关键词或标题不匹配",
   excluded_seniority_or_role: "高年资、工程类或无关岗位",
   degree_experience_or_skill_gap: "经验超限或方向不符",
-  salary_below_20k: "工资下限不足 20K",
-  salary_below_20k_or_missing: "工资不足或缺失",
   duplicate_listing: "重复结果",
   detail_unavailable: "详情无法读取",
 };
@@ -1820,7 +1818,7 @@ export default function JobRadar() {
                   <p className="scan-eta">已运行 {formatDuration(chinaElapsedSeconds)}{chinaEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(chinaEtaSeconds)}` : ""}。</p>
                   {Object.keys(chinaProgress.rejectionReasons || {}).length > 0 && (
                     <p className="scan-rejections">
-                      排除原因：缺少标题或链接 {chinaProgress.rejectionReasons.missing_title_or_url ?? chinaProgress.rejectionReasons.missing_required_fields ?? 0}；关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；明确工资下限不足 20K {chinaProgress.rejectionReasons.salary_below_20k ?? chinaProgress.rejectionReasons.salary_below_20k_or_missing ?? 0}。保留待核验：工资缺失或面议 {chinaProgress.reviewCounts?.salary_missing_or_negotiable ?? chinaProgress.rejectionReasons.salary_missing_or_negotiable ?? 0}。
+                      排除原因：缺少标题或链接 {chinaProgress.rejectionReasons.missing_title_or_url ?? chinaProgress.rejectionReasons.missing_required_fields ?? 0}；关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}。工资仅展示，不参与自动筛选。
                     </p>
                   )}
                 </>

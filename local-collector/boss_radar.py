@@ -246,9 +246,6 @@ def title_prefilter_reason(row: dict[str, Any]) -> str:
         return "excluded_core_domain"
     if EXCLUDED_CORE_CONTENT.search(listing_content):
         return "excluded_core_domain"
-    salary_floor = monthly_salary_floor_k(salary_text(row))
-    if salary_floor is not None and salary_floor < 20:
-        return "salary_below_20k"
     key = row_key(row)
     job_url = text(row.get("job_link") or row.get("url"))
     if not key or not job_url or not company_name(row, {}):
@@ -412,7 +409,7 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
             salary = salary_text(row, detail)
             salary_floor = monthly_salary_floor_k(salary, content)
             years = required_experience(content)
-            if (salary_floor is not None and salary_floor < 20) or (years is not None and years > 3):
+            if years is not None and years > 3:
                 continue
             if EXCLUDED_CORE_CONTENT.search(content):
                 continue
