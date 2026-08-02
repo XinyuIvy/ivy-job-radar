@@ -16,6 +16,12 @@ assert SPEC and SPEC.loader
 RADAR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(RADAR)
 
+ONE_CLICK_PATH = Path(__file__).resolve().parents[1] / "local-collector" / "boss_one_click.py"
+ONE_CLICK_SPEC = importlib.util.spec_from_file_location("boss_one_click", ONE_CLICK_PATH)
+assert ONE_CLICK_SPEC and ONE_CLICK_SPEC.loader
+ONE_CLICK = importlib.util.module_from_spec(ONE_CLICK_SPEC)
+ONE_CLICK_SPEC.loader.exec_module(ONE_CLICK)
+
 
 class FakeResponse:
     def __enter__(self):
@@ -29,6 +35,49 @@ class FakeResponse:
 
 
 class SyncJobsTest(unittest.TestCase):
+    def test_partial_boss_state_disables_source_reconciliation(self):
+        self.assertEqual(
+            RADAR.incomplete_boss_sources({"status": "attention_required"}),
+            {"BOSS直聘（本地采集）"},
+        )
+        self.assertEqual(RADAR.incomplete_boss_sources({"status": "completed"}), set())
+
+    def test_one_click_propagates_partial_state_to_sync(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            radar = mock.MagicMock()
+            radar.APP_DIR = root
+            radar.DEFAULT_ENV_FILE = root / "collector.env"
+            radar.DEFAULT_SCRAPER_DIR = root / "scraper"
+            radar.DEFAULT_PLAN = root / "plan.json"
+            radar.DEFAULT_RESULT_DIR = root / "results"
+            state = {
+                "status": "attention_required",
+                "failure": "code: 37",
+                "attention_kind": "verification_required",
+                "jobs_discovered": 1,
+                "jobs_unique": 1,
+                "jobs_filtered_before_detail": 0,
+                "jobs_detail_candidates": 1,
+                "completed_searches": 0,
+                "planned_searches": 2,
+            }
+            jobs = [{"source": "BOSS直聘（本地采集）", "job_url": "https://www.zhipin.com/job_detail/1.html"}]
+            radar.read_state.side_effect = [{"cursor": 0}, state]
+            radar.run_searches.return_value = []
+            radar.transform_result_files.return_value = jobs
+            radar.incomplete_boss_sources.return_value = {"BOSS直聘（本地采集）"}
+            radar.sync_jobs.return_value = {"received": 1, "created": 1, "updated": 0, "skipped": 0}
+            radar.load_json.return_value = {"cities": ["上海"], "keywords": ["统计"]}
+
+            with mock.patch.object(ONE_CLICK, "load_radar", return_value=radar):
+                ONE_CLICK.run_scan()
+
+        radar.sync_jobs.assert_called_once_with(
+            jobs,
+            incomplete_sources={"BOSS直聘（本地采集）"},
+        )
+
     def test_incomplete_source_imports_jobs_without_expiration_reconciliation(self):
         requests = []
 
