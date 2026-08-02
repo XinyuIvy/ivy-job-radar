@@ -104,6 +104,27 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNone(row)
         self.assertEqual(stats["title_not_targeted"], 1)
 
+    def test_common_chinese_platform_salary_ranges_are_monthly(self):
+        self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("广州 | 1-1.5万 | 13薪"), 10)
+        self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("苏州 | 9千-1万"), 9)
+        self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("西安 | 7千-1.3万·13薪"), 7)
+
+    def test_low_chinese_platform_salary_is_rejected(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "数据分析师招聘 | 广州 | 1-1.5万 | 某科技股份有限公司",
+                "url": "https://jobs.51job.com/guangzhou/172962369.html",
+                "description": "统计学专业，熟练使用 SQL。",
+            },
+            {"source": "前程无忧", "query": "site:jobs.51job.com 数据分析师"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["salary_below_20k"], 1)
+
     def test_parses_brave_result_without_unrelated_navigation_links(self):
         body = '''
         <a href="/images?q=test">Images</a>
