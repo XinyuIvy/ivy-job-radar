@@ -70,6 +70,7 @@ const wantedTitles = [
   "outcomes research", "algorithm validation", "imaging scientist", "clinical data scientist",
   "rwe scientist", "real world evidence", "healthcare consultant", "life sciences consultant",
   "数据科学家", "数据科学", "应用科学家", "研究科学家", "算法科学家", "决策科学家",
+  "算法研究员", "创新算法", "科学计算", "计算科学家", "计算生物", "ai for science",
   "生物统计", "统计科学家", "临床统计", "医学统计", "统计师", "流行病学",
   "真实世界研究", "真实世界证据", "卫生经济", "健康经济", "结局研究",
   "量化研究", "定量研究", "量化分析", "医学影像", "影像科学家",
