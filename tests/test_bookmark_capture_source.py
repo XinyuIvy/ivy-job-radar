@@ -19,15 +19,26 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
         self.assertNotIn('verifyJob(', route)
         self.assertNotIn('jobRequests', route)
 
-    def test_bookmarklet_extracts_jobposting_and_posts_to_private_endpoint(self):
+    def test_bookmarklet_extracts_jobposting_and_opens_same_origin_capture(self):
         installer = (ROOT / "app" / "bookmarklet" / "bookmarklet-installer.tsx").read_text(encoding="utf-8")
 
         self.assertIn('application/ld+json', installer)
         self.assertIn('type==="JobPosting"', installer)
-        self.assertIn('form.method="POST"', installer)
-        self.assertIn('/api/bookmark-capture', installer)
+        self.assertIn('encodeURIComponent(JSON.stringify(payload))', installer)
+        self.assertIn('/bookmarklet/capture', installer)
+        self.assertIn('window.open(destination', installer)
         self.assertIn('window.location.href', installer)
         self.assertIn('hiringOrganization', installer)
+        self.assertNotIn('form.method="POST"', installer)
+
+    def test_capture_window_posts_to_private_endpoint(self):
+        capture_page = (ROOT / "app" / "bookmarklet" / "capture" / "page.tsx").read_text(encoding="utf-8")
+
+        self.assertIn('window.location.hash.slice(1)', capture_page)
+        self.assertIn('decodeURIComponent(encoded)', capture_page)
+        self.assertIn('fetch("/api/bookmark-capture"', capture_page)
+        self.assertIn('"Content-Type": "application/json"', capture_page)
+        self.assertIn('window.history.replaceState', capture_page)
 
     def test_install_entry_and_scoped_key_are_present(self):
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
