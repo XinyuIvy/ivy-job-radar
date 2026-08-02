@@ -85,7 +85,14 @@ def run_request(repo_dir: Path, request_id: str) -> None:
     ACTIVE_REQUEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     ACTIVE_REQUEST_PATH.write_text(request_id, encoding="utf-8")
     started_at = time.time()
-    result = subprocess.run([sys.executable, str(script), "run"], cwd=repo_dir, check=False)
+    child_env = os.environ.copy()
+    child_env["IVY_CHINA_SCAN_REQUEST_ID"] = request_id
+    result = subprocess.run(
+        [sys.executable, str(script), "run"],
+        cwd=repo_dir,
+        check=False,
+        env=child_env,
+    )
 
     if REPORT_PATH.exists() and REPORT_PATH.stat().st_mtime >= started_at - 1:
         report = json.loads(REPORT_PATH.read_text(encoding="utf-8"))

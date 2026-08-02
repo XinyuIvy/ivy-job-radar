@@ -36,13 +36,27 @@ function idleControl() {
   };
 }
 
+function responseControl(control: typeof chinaScanControl.$inferSelect | ReturnType<typeof idleControl>) {
+  let progress: Record<string, unknown> | null = null;
+  let message = control.message;
+  if (message.startsWith("progress:")) {
+    try {
+      progress = JSON.parse(message.slice("progress:".length)) as Record<string, unknown>;
+      message = cleanText(progress.message) || "中国岗位扫描正在运行。";
+    } catch {
+      progress = null;
+    }
+  }
+  return { ...control, message, progress };
+}
+
 export async function GET(request: NextRequest) {
   if (!signedInUser(request) && !(await collectorAuthorized(request))) {
     return NextResponse.json({ error: "Authentication is required." }, { status: 401 });
   }
   const db = await getDb();
   const [control] = await db.select().from(chinaScanControl).where(eq(chinaScanControl.id, 1)).limit(1);
-  return NextResponse.json(control ?? idleControl(), { headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(responseControl(control ?? idleControl()), { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(request: NextRequest) {
@@ -101,6 +115,38 @@ export async function POST(request: NextRequest) {
       eq(chinaScanControl.state, "queued"),
     )).returning();
     return NextResponse.json({ claimed: updated.length === 1, control: updated[0] ?? null });
+  }
+
+  if (action === "progress") {
+    const rawProgress = body.progress && typeof body.progress === "object"
+      ? body.progress as Record<string, unknown>
+      : {};
+    const progress = {
+      source: cleanText(rawProgress.source).slice(0, 80),
+      phase: cleanText(rawProgress.phase).slice(0, 80),
+      message: cleanText(rawProgress.message).slice(0, 300),
+      completed: Math.max(0, Math.floor(Number(rawProgress.completed) || 0)),
+      total: Math.max(0, Math.floor(Number(rawProgress.total) || 0)),
+      scanned: Math.max(0, Math.floor(Number(rawProgress.scanned) || 0)),
+      unique: Math.max(0, Math.floor(Number(rawProgress.unique) || 0)),
+      filtered: Math.max(0, Math.floor(Number(rawProgress.filtered) || 0)),
+      detailCandidates: Math.max(0, Math.floor(Number(rawProgress.detail_candidates) || 0)),
+      eligible: Math.max(0, Math.floor(Number(rawProgress.eligible) || 0)),
+      created: Math.max(0, Math.floor(Number(rawProgress.created) || 0)),
+      duplicate: Math.max(0, Math.floor(Number(rawProgress.duplicate) || 0)),
+      rejectionReasons: rawProgress.rejection_reasons && typeof rawProgress.rejection_reasons === "object"
+        ? rawProgress.rejection_reasons
+        : {},
+      updatedAt: now,
+    };
+    const updated = await db.update(chinaScanControl).set({
+      state: "running",
+      message: `progress:${JSON.stringify(progress)}`.slice(0, 4000),
+    }).where(and(
+      eq(chinaScanControl.id, 1),
+      eq(chinaScanControl.requestId, requestId),
+    )).returning();
+    return NextResponse.json({ updated: updated.length === 1, control: updated[0] ? responseControl(updated[0]) : null });
   }
 
   if (action === "finish") {

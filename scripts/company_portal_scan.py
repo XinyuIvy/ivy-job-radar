@@ -266,6 +266,15 @@ def clean(value: object) -> str:
     return re.sub(r"\s+", " ", unescape(str(value or ""))).strip()
 
 
+def write_progress(path: Path | None, payload: dict[str, Any]) -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    temporary.replace(path)
+
+
 def fetch(
     url: str,
     timeout: int = 18,
@@ -1494,9 +1503,14 @@ def run(
     max_pages: int,
     company_limit: int,
     previous_registry_path: Path | None = None,
+    region_filter: str = "",
+    progress_path: Path | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
     scanned_at = datetime.now(timezone.utc).isoformat()
     companies = company_rows(pool_path)
+    if region_filter:
+        companies = [row for row in companies if clean(row.get("region")) == region_filter]
+    companies_in_scope = len(companies)
     discovered_portals = aggregator_portals(aggregator_registry_path)
     prior_portals = previous_portals(previous_registry_path) if previous_registry_path else {}
     for row in companies:
@@ -1530,7 +1544,7 @@ def run(
             executor.submit(scan_company, row, scanned_at, max_pages): clean(row.get("company"))
             for row in companies
         }
-        for future in as_completed(futures):
+        for completed_count, future in enumerate(as_completed(futures), start=1):
             company = futures[future]
             try:
                 receipt, matched = future.result()
@@ -1539,6 +1553,16 @@ def run(
                 matched = []
             receipts.append(receipt)
             jobs.extend(matched)
+            write_progress(progress_path, {
+                "source": "中国公司官网" if region_filter == "中国" else "美国公司官网",
+                "phase": "公司官网扫描",
+                "message": f"已检查 {completed_count}/{len(futures)} 家公司官网",
+                "completed": completed_count,
+                "total": len(futures),
+                "scanned": sum(item.jobs_scanned for item in receipts),
+                "eligible": len(jobs),
+                "filtered": max(0, sum(item.jobs_scanned for item in receipts) - len(jobs)),
+            })
 
     deduplicated = {
         clean(job.get("canonical_url")) or clean(job.get("job_key")): job
@@ -1552,7 +1576,7 @@ def run(
     }
     summary = {
         "generated_at": scanned_at,
-        "companies_in_pool": len(company_rows(pool_path)),
+        "companies_in_pool": companies_in_scope,
         "companies_attempted": len(receipts),
         "companies_succeeded": counts["success"],
         "companies_failed": counts["failed"],
@@ -1602,6 +1626,8 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=12)
     parser.add_argument("--max-pages", type=int, default=8)
     parser.add_argument("--company-limit", type=int, default=0)
+    parser.add_argument("--region", choices=("美国", "中国"), default="")
+    parser.add_argument("--progress-file", type=Path)
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     jobs, summary, registry = run(
@@ -1611,6 +1637,8 @@ def main() -> None:
         args.max_pages,
         args.company_limit,
         args.output_dir / "company_portal_registry.json",
+        args.region,
+        args.progress_file,
     )
     outputs = {
         "company_portal_jobs_latest.json": jobs,

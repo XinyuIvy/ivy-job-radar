@@ -35,6 +35,13 @@ WANTED_TITLE_SIGNALS = (
     "数据科学",
     "数据科学家",
     "机器学习科学家",
+    "算法研究员",
+    "算法科学家",
+    "创新算法",
+    "科学计算",
+    "计算科学家",
+    "计算生物",
+    "ai for science",
     "量化研究",
     "量化分析",
     "流行病",
@@ -296,7 +303,9 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
 
     phd_targeted = bool(re.search(r"博士|ph\.?d\.?|doctorate|doctoral", lower))
     quantitative_degree = bool(re.search(r"统计|生物统计|流行病|数学|经济|数据科学|quantitative", lower))
+    targeted_role = any(signal in title.lower() for signal in WANTED_TITLE_SIGNALS)
     score += 10 if phd_targeted else 6 if quantitative_degree else 0
+    score += 12 if targeted_role else 0
     score += 4 if years is None else 10 if years == 0 else 8 if years <= 3 else 0
     details.append("学历：明确接受博士" if phd_targeted else "学历：公开摘要未明确，需读取完整 JD 核验")
     details.append("经验：未写明最低年限" if years is None else f"经验：最低要求最高约 {years} 年")
@@ -339,7 +348,7 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
 
     experience_blocked = years is not None and years > 3
     # Discovery must tolerate incomplete search snippets; final degree eligibility is verified from the full JD.
-    eligible = quantitative_degree and not experience_blocked and gap_count < 2
+    eligible = (quantitative_degree or targeted_role) and not experience_blocked and gap_count < 2
     return max(0, min(100, round(score))), details, eligible
 
 
@@ -416,11 +425,25 @@ def normalize_result(
     }
 
 
-def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+def write_progress(path: Path | None, payload: dict[str, object]) -> None:
+    if path is None:
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    temporary.replace(path)
+
+
+def run_scan(
+    config_path: Path,
+    progress_path: Path | None = None,
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     config = json.loads(config_path.read_text(encoding="utf-8"))
     scanned_at = datetime.now(timezone.utc).isoformat()
     records: list[dict[str, object]] = []
     source_stats: list[dict[str, object]] = []
+    total_steps = len(config["queries"]) + len(config.get("direct_pages", []))
+    completed_steps = 0
 
     for item in config["queries"]:
         results = fetch_bing_rss(item["query"])
@@ -446,6 +469,20 @@ def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str,
                 "rejected": rejection_stats,
             }
         )
+        completed_steps += 1
+        write_progress(progress_path, {
+            "source": item["source"],
+            "phase": "公开索引搜索",
+            "message": f"正在搜索 {item['source']}：{completed_steps}/{total_steps}",
+            "completed": completed_steps,
+            "total": total_steps,
+            "scanned": sum(int(row["scanned"]) for row in source_stats),
+            "eligible": len(records),
+            "rejection_reasons": {
+                key: sum(int(row.get("rejected", {}).get(key, 0)) for row in source_stats)
+                for key in rejection_stats
+            },
+        })
         time.sleep(float(config.get("delay_seconds", 0.3)))
 
     for page in config.get("direct_pages", []):
@@ -473,6 +510,20 @@ def run_scan(config_path: Path) -> tuple[list[dict[str, object]], list[dict[str,
                 "rejected": rejection_stats,
             }
         )
+        completed_steps += 1
+        write_progress(progress_path, {
+            "source": page["source"],
+            "phase": "招聘页搜索",
+            "message": f"正在读取 {page['source']}：{completed_steps}/{total_steps}",
+            "completed": completed_steps,
+            "total": total_steps,
+            "scanned": sum(int(row["scanned"]) for row in source_stats),
+            "eligible": len(records),
+            "rejection_reasons": {
+                key: sum(int(row.get("rejected", {}).get(key, 0)) for row in source_stats)
+                for key in rejection_stats
+            },
+        })
 
     deduplicated: dict[str, dict[str, object]] = {}
     for record in records:
@@ -522,12 +573,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Collect indexed Chinese PhD-targeted jobs.")
     parser.add_argument("--config", type=Path, default=Path("config/china_search_queries.json"))
     parser.add_argument("--output-dir", type=Path, default=Path("data/scans"))
+    parser.add_argument("--progress-file", type=Path)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    records, source_stats = run_scan(args.config)
+    records, source_stats = run_scan(args.config, args.progress_file)
     write_outputs(records, source_stats, args.output_dir)
     print(f"Wrote {len(records)} eligible, deduplicated China jobs to {args.output_dir}")
 

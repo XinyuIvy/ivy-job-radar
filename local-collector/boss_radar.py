@@ -16,7 +16,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 APP_DIR = Path.home() / ".ivy-job-radar"
@@ -437,7 +437,12 @@ def next_batch(plan_path: Path) -> tuple[list[tuple[str, str]], int, int]:
     return batch, cursor, len(combinations)
 
 
-def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[tuple[Path, Path | None]]:
+def run_searches(
+    scraper_dir: Path,
+    plan_path: Path,
+    result_dir: Path,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> list[tuple[Path, Path | None]]:
     venv_python = ensure_scraper(scraper_dir)
     plan = load_json(plan_path)
     pages = max(1, min(int(plan.get("pages", 1)), 2))
@@ -475,6 +480,18 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
         if jobs_path.exists():
             list_paths.append(jobs_path)
         completed += 1
+        if progress_callback:
+            progress_callback({
+                "source": "BOSS直聘",
+                "phase": "列表搜索",
+                "message": f"已完成 {completed}/{len(batch)} 组 BOSS 关键词与城市",
+                "completed": completed,
+                "total": len(batch),
+                "scanned": sum(
+                    len(rows_from_payload(load_json(path)))
+                    for path in list_paths if path.exists()
+                ),
+            })
 
     candidates, prefilter_stats = collect_detail_candidates(list_paths)
     print(
@@ -485,6 +502,22 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
         f"({prefilter_stats['jobs_filtered_before_detail']} excluded, "
         f"{prefilter_stats['jobs_skipped_cached']} already synced)."
     )
+
+    if progress_callback:
+        progress_callback({
+            "source": "BOSS直聘",
+            "phase": "列表初筛",
+            "message": (
+                f"发现 {prefilter_stats['jobs_discovered']}，去重后 {prefilter_stats['jobs_unique']}，"
+                f"需要读取 {prefilter_stats['jobs_detail_candidates']} 个详情"
+            ),
+            "completed": completed,
+            "total": len(batch),
+            "scanned": prefilter_stats["jobs_discovered"],
+            "unique": prefilter_stats["jobs_unique"],
+            "filtered": prefilter_stats["jobs_filtered_before_detail"],
+            "detail_candidates": prefilter_stats["jobs_detail_candidates"],
+        })
 
     # Phase 2 opens details only for new, plausible jobs, once per job ID.
     if candidates and completed == len(batch):

@@ -40,6 +40,7 @@ class ChinaOneClickTest(unittest.TestCase):
                 patch.object(CHINA_ONE_CLICK, "REPORT_PATH", Path(temporary_dir) / "report.json"), \
                 patch.object(CHINA_ONE_CLICK, "run_boss", return_value={"status": "failed", "source": "BOSS直聘"}), \
                 patch.object(CHINA_ONE_CLICK, "run_public_sources", return_value={"status": "completed", "source": "中国公开索引", "jobs_created": 1}), \
+                patch.object(CHINA_ONE_CLICK, "run_company_sources", return_value={"status": "completed", "source": "中国公司官网", "jobs_created": 0}), \
                 patch.object(CHINA_ONE_CLICK, "sync_scan_report", return_value={"ok": True}):
             summary = CHINA_ONE_CLICK.run_all()
 
@@ -52,6 +53,7 @@ class ChinaOneClickTest(unittest.TestCase):
                 patch.object(CHINA_ONE_CLICK, "REPORT_PATH", Path(temporary_dir) / "report.json"), \
                 patch.object(CHINA_ONE_CLICK, "run_boss", return_value={"status": "completed", "source": "BOSS直聘"}), \
                 patch.object(CHINA_ONE_CLICK, "run_public_sources", return_value={"status": "completed", "source": "中国公开索引"}), \
+                patch.object(CHINA_ONE_CLICK, "run_company_sources", return_value={"status": "completed", "source": "中国公司官网"}), \
                 patch.object(CHINA_ONE_CLICK, "sync_scan_report", side_effect=RuntimeError("offline")):
             summary = CHINA_ONE_CLICK.run_all()
 
