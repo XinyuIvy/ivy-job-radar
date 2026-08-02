@@ -10,6 +10,6 @@
     "医疗咨询",
     "真实世界研究"
   ],
-  "batch_size": 8,
+  "batch_size": 4,
   "pages": 1
 }
