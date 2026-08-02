@@ -4,6 +4,7 @@ import os
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 
@@ -155,6 +156,148 @@ class BossRadarTransformTest(unittest.TestCase):
             transformed = BOSS_RADAR.transform_result_files([(jobs_path, details_path)])
 
             self.assertEqual(transformed, [])
+
+    def test_prefilters_deduplicates_and_skips_unchanged_cached_jobs(self):
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            root = Path(temporary_dir)
+            first = root / "first.json"
+            second = root / "second.json"
+            cache_path = root / "cache.json"
+
+            relevant = {
+                "title": "生物统计师",
+                "boss_name": "示例药企",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/company-1.html",
+                "job_id": "job-1",
+                "job_link": "https://www.zhipin.com/job_detail/job-1.html",
+            }
+            cached = {
+                "title": "数据科学家",
+                "boss_name": "示例科技公司",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/company-2.html",
+                "job_id": "job-2",
+                "job_link": "https://www.zhipin.com/job_detail/job-2.html",
+            }
+            irrelevant = {
+                "title": "资深数据科学家",
+                "boss_name": "示例科技公司",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/company-3.html",
+                "job_id": "job-3",
+                "job_link": "https://www.zhipin.com/job_detail/job-3.html",
+            }
+            first.write_text(
+                json.dumps({"jobs": [relevant, cached, irrelevant]}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            second.write_text(
+                json.dumps({"jobs": [relevant]}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+            cache_path.write_text(json.dumps({
+                "version": 1,
+                "jobs": {
+                    "job-2": {"fingerprint": BOSS_RADAR.listing_fingerprint(cached)}
+                },
+            }), encoding="utf-8")
+
+            candidates, stats = BOSS_RADAR.collect_detail_candidates(
+                [first, second],
+                cache_path=cache_path,
+            )
+
+        self.assertEqual([BOSS_RADAR.row_key(row) for row in candidates], ["job-1"])
+        self.assertEqual(stats["jobs_discovered"], 4)
+        self.assertEqual(stats["jobs_duplicate_listings"], 1)
+        self.assertEqual(stats["jobs_filtered_before_detail"], 1)
+        self.assertEqual(stats["jobs_skipped_cached"], 1)
+        self.assertEqual(stats["jobs_detail_candidates"], 1)
+
+    def test_run_searches_collects_lists_before_one_detail_pass(self):
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            root = Path(temporary_dir)
+            scraper_dir = root / "scraper"
+            result_dir = root / "results"
+            plan_path = root / "plan.json"
+            state_path = root / "state.json"
+            plan_path.write_text(json.dumps({"pages": 1}), encoding="utf-8")
+            candidate = {
+                "title": "生物统计师",
+                "boss_name": "示例药企",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/company-1.html",
+                "job_id": "job-1",
+                "job_link": "https://www.zhipin.com/job_detail/job-1.html",
+            }
+            commands = []
+
+            def fake_run(command, check=False):
+                commands.append(command)
+                if "--input" in command:
+                    detail_path = Path(command[command.index("--detail-output") + 1])
+                    detail_path.write_text(json.dumps([{
+                        "job_id": "job-1",
+                        "company": "示例药企",
+                        "jd": "负责临床试验统计分析。",
+                    }], ensure_ascii=False), encoding="utf-8")
+                return SimpleNamespace(returncode=0)
+
+            stats = {
+                "jobs_discovered": 60,
+                "jobs_unique": 30,
+                "jobs_duplicate_listings": 30,
+                "jobs_filtered_before_detail": 20,
+                "jobs_skipped_cached": 9,
+                "jobs_detail_candidates": 1,
+            }
+            with patch.object(BOSS_RADAR, "APP_DIR", root / "app"), \
+                    patch.object(BOSS_RADAR, "STATE_FILE", state_path), \
+                    patch.object(BOSS_RADAR, "ensure_scraper", return_value=Path("/python")), \
+                    patch.object(BOSS_RADAR, "next_batch", return_value=([
+                        ("生物统计", "上海"),
+                        ("数据科学家", "上海"),
+                    ], 0, 2)), \
+                    patch.object(BOSS_RADAR, "collect_detail_candidates", return_value=([candidate], stats)), \
+                    patch.object(BOSS_RADAR.subprocess, "run", side_effect=fake_run):
+                outputs = BOSS_RADAR.run_searches(scraper_dir, plan_path, result_dir)
+
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(len(outputs), 1)
+        self.assertEqual(len(commands), 3)
+        self.assertTrue(all("--no-detail" in command for command in commands[:2]))
+        self.assertIn("--input", commands[2])
+        self.assertEqual(state["status"], "completed")
+        self.assertEqual(state["jobs_detail_candidates"], 1)
+
+    def test_records_cache_only_for_synced_jobs(self):
+        with tempfile.TemporaryDirectory() as temporary_dir:
+            root = Path(temporary_dir)
+            jobs_path = root / "jobs.json"
+            cache_path = root / "cache.json"
+            row = {
+                "title": "生物统计师",
+                "boss_name": "示例药企",
+                "salary_source": "api",
+                "company_link": "https://www.zhipin.com/gongsi/company-1.html",
+                "job_id": "job-1",
+                "job_link": "https://www.zhipin.com/job_detail/job-1.html",
+            }
+            jobs_path.write_text(json.dumps({"jobs": [row]}, ensure_ascii=False), encoding="utf-8")
+
+            BOSS_RADAR.record_synced_jobs(
+                [{"application_id": "job-1"}],
+                [(jobs_path, None)],
+                cache_path=cache_path,
+            )
+            cache = json.loads(cache_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(
+            cache["jobs"]["job-1"]["fingerprint"],
+            BOSS_RADAR.listing_fingerprint(row),
+        )
 
     def test_sync_uses_private_site_header_and_chunks_payloads(self):
         class FakeResponse:
