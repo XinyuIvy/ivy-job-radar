@@ -688,7 +688,7 @@ button { color: inherit; }
 .empty-state p { margin: 0; font-size: 13px; }
 
 .bottom-nav {
-  position: fixed; z-index: 10; bottom: 16px; left: 50%; transform: translateX(-50%);
+  position: fixed; z-index: 100; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
   width: min(calc(100% - 28px), 920px); display: flex; overflow-x: auto; scrollbar-width: none;
   background: rgba(18, 38, 31, .95); color: #afbeb8; border-radius: 20px;
   padding: 7px; box-shadow: 0 14px 35px rgba(15,38,30,.24); backdrop-filter: blur(12px);
@@ -697,6 +697,10 @@ button { color: inherit; }
 .bottom-nav button { flex: 1 0 68px; border: 0; background: transparent; color: inherit; padding: 7px; font-size: 10px; cursor: pointer; }
 .bottom-nav span { display: block; font-size: 18px; margin-bottom: 2px; }
 .bottom-nav button.selected { background: #285d4b; color: white; border-radius: 14px; }
+.expired-job-label {
+  display: inline-block; margin-top: 7px; border-radius: 999px; padding: 5px 8px;
+  background: #f4e6e3; color: #8f403b; font-size: 10px; font-weight: 800;
+}
 
 .section-actions { display: flex; align-items: center; gap: 10px; }
 .quiet-list-button {
@@ -862,20 +866,20 @@ button { color: inherit; }
   .record-actions { justify-content: flex-start; flex-wrap: wrap; }
   .bottom-nav {
     width: calc(100% - 20px);
-    bottom: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
     display: grid;
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     overflow-x: hidden;
     padding: 5px;
     border-radius: 17px;
   }
   .bottom-nav button {
     min-width: 0;
-    min-height: 44px;
-    padding: 5px 1px;
-    font-size: 9px;
+    min-height: 52px;
+    padding: 6px 2px;
+    font-size: 10px;
   }
-  .bottom-nav span { font-size: 15px; margin-bottom: 1px; }
+  .bottom-nav span { font-size: 19px; margin-bottom: 2px; }
   .profile-card { padding: 18px 16px; }
   .profile-grid { grid-template-columns: 1fr; }
   .profile-grid label.full { grid-column: auto; }
