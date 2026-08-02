@@ -15,6 +15,13 @@ SPEC.loader.exec_module(CHINA_ONE_CLICK)
 
 
 class ChinaOneClickTest(unittest.TestCase):
+    def test_failed_source_classifies_login_and_verification(self):
+        login = CHINA_ONE_CLICK.failed_source("BOSS直聘", RuntimeError("请先登录 BOSS"))
+        verification = CHINA_ONE_CLICK.failed_source("BOSS直聘", RuntimeError("出现验证码"))
+
+        self.assertEqual(login["attention_kind"], "login_required")
+        self.assertEqual(verification["attention_kind"], "verification_required")
+
     def test_boss_plan_excludes_suzhou(self):
         plan = json.loads((ROOT / "local-collector" / "search-plan.json").read_text(encoding="utf-8"))
 
