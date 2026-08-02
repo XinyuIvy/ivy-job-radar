@@ -60,8 +60,10 @@ class ChinaScanAgentTest(unittest.TestCase):
         ), patch.object(
             AGENT,
             "restart_updated_agent",
+            side_effect=SystemExit,
         ) as restart_updated_agent:
-            AGENT.poll_once(ROOT)
+            with self.assertRaises(SystemExit):
+                AGENT.poll_once(ROOT)
 
         restart_updated_agent.assert_called_once_with()
         request_json.assert_called_once_with("/api/china-scan-control")
