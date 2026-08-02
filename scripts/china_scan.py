@@ -77,6 +77,7 @@ WANTED_TITLE_SIGNALS = (
 
 EXCLUDED_TITLE_SIGNALS = (
     "实习",
+    "兼职",
     "高级",
     "资深",
     "首席",
@@ -118,6 +119,22 @@ OBVIOUSLY_IRRELEVANT_SIGNALS = (
     "客服",
     "行政专员",
     "新闻编辑",
+    "新媒体运营",
+)
+
+# Search indexes sometimes surface career explainers under URLs that look like
+# individual job pages. These titles describe a profession instead of an open
+# vacancy and must not enter the live job pool.
+NON_VACANCY_TITLE_SIGNALS = (
+    "什么是",
+    "岗位职责",
+    "职位职责",
+    "工作职责",
+    "就业前景",
+    "职业前景",
+    "薪资待遇",
+    "工资待遇",
+    "面试经验",
 )
 
 UNSUPPORTED_CORE_SIGNALS = (
@@ -509,6 +526,10 @@ def monthly_salary_floor_k(text: str) -> float | None:
     for pattern, multiplier in annual_patterns:
         if match := re.search(pattern, content, re.IGNORECASE):
             return float(match.group(1)) * multiplier
+    # Convert advertised day rates using the standard 21.75 paid workdays per
+    # month so low-paid temporary roles cannot bypass the monthly salary rule.
+    if match := re.search(r"(\d+(?:\.\d+)?)\s*元\s*(?:/|每)\s*(?:天|日)", content):
+        return float(match.group(1)) * 21.75 / 1000
     monthly_patterns = (
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
@@ -638,6 +659,10 @@ def normalize_result(
     # The query is the recall step, but it cannot prove that a returned page is
     # relevant because public search engines sometimes ignore query operators.
     if not content_is_targeted:
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
+        return None
+    if any(signal in lower_title for signal in NON_VACANCY_TITLE_SIGNALS):
         if rejection_stats is not None:
             rejection_stats["title_not_targeted"] += 1
         return None
