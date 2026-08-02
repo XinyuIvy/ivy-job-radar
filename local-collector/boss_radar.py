@@ -883,7 +883,7 @@ def main() -> None:
         completed_source="BOSS直聘（本地采集）",
         incomplete_sources=incomplete_boss_sources(read_state()),
     )
-    if args.command == "run":
+    if args.command == "run" and not incomplete_boss_sources(read_state()):
         record_synced_jobs(jobs, result_files)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
