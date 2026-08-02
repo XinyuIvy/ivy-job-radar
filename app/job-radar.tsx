@@ -180,6 +180,8 @@ type ChinaScanSource = {
   jobs_eligible?: number;
   jobs_created?: number;
   jobs_updated_or_duplicate?: number;
+  rejectionReasons?: Record<string, number>;
+  rejection_reasons?: Record<string, number>;
   attention?: string;
 };
 
@@ -1749,6 +1751,11 @@ export default function JobRadar() {
                     <span>新增<b>{chinaProgress.created}</b></span>
                   </div>
                   <p className="scan-eta">已运行 {formatDuration(chinaElapsedSeconds)}{chinaEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(chinaEtaSeconds)}` : ""}。</p>
+                  {Object.keys(chinaProgress.rejectionReasons || {}).length > 0 && (
+                    <p className="scan-rejections">
+                      排除原因：标题不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资或排除岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；学历、经验或技能不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；分数不足 {chinaProgress.rejectionReasons.score_below_discovery_threshold ?? 0}。
+                    </p>
+                  )}
                 </>
               )}
             </div>
@@ -1770,6 +1777,7 @@ export default function JobRadar() {
                       {chinaScanStatus.results.map((item, index) => (
                         <span key={`${item.source ?? "source"}-${index}`} className={item.status === "completed" ? "source-ok" : "source-warning"}>
                           {item.source || "未知来源"}：新增 {item.jobsCreated ?? item.jobs_created ?? 0}
+                          {(item.rejectionReasons ?? item.rejection_reasons)?.title_not_targeted ? ` · 标题排除 ${(item.rejectionReasons ?? item.rejection_reasons)?.title_not_targeted}` : ""}
                           {item.attention ? " · 需处理" : ""}
                         </span>
                       ))}
