@@ -35,26 +35,50 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <a
-          href="/bookmarklet"
-          aria-label="安装 Chrome 保存岗位书签"
+        <div
           style={{
             position: "fixed",
             right: 18,
             bottom: 18,
             zIndex: 120,
-            borderRadius: 999,
-            padding: "11px 16px",
-            background: "#16794b",
-            color: "#fff",
-            textDecoration: "none",
-            fontSize: 13,
-            fontWeight: 800,
-            boxShadow: "0 10px 30px rgba(22,121,75,.28)",
+            display: "grid",
+            gap: 8,
+            justifyItems: "end",
           }}
         >
-          ＋ Chrome 保存岗位
-        </a>
+          <a
+            href="/manual-review"
+            aria-label="人工处理核验失败岗位"
+            style={{
+              borderRadius: 999,
+              padding: "11px 16px",
+              background: "#18221d",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 800,
+              boxShadow: "0 10px 30px rgba(24,34,29,.22)",
+            }}
+          >
+            ✓ 核验人工处理
+          </a>
+          <a
+            href="/bookmarklet"
+            aria-label="安装 Chrome 保存岗位书签"
+            style={{
+              borderRadius: 999,
+              padding: "11px 16px",
+              background: "#16794b",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 800,
+              boxShadow: "0 10px 30px rgba(22,121,75,.28)",
+            }}
+          >
+            ＋ Chrome 保存岗位
+          </a>
+        </div>
       </body>
     </html>
   );
