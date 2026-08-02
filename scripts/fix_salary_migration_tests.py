@@ -30,16 +30,19 @@ update(
     "    module = importlib.util.module_from_spec(spec)\n    sys.modules[name] = module\n    spec.loader.exec_module(module)\n",
 )
 
-# Remove literal retired rejection keys from tests as well as production code.
+# Remove literal retired rejection keys and wording from tests too.
 policy_path = ROOT / "tests" / "test_salary_policy.py"
 policy = policy_path.read_text(encoding="utf-8")
 policy = policy.replace(
     '        self.assertNotIn("salary_below_20k", combined)\n'
-    '        self.assertNotRegex(combined, r"salary_floor[^\\n]*(?:<\\s*20|>=\\s*20)")\n',
+    '        self.assertNotRegex(combined, r"salary_floor[^\\n]*(?:<\\s*20|>=\\s*20)")\n'
+    '        self.assertNotIn("工资下限不足 20K", combined)\n',
     '        retired_key = "salary_" + "below_20k"\n'
     '        retired_threshold = "salary_floor" + r"[^\\n]*(?:<\\s*20|>=\\s*20)"\n'
+    '        retired_copy = "工资下限" + "不足 20K"\n'
     '        self.assertNotIn(retired_key, combined)\n'
-    '        self.assertNotRegex(combined, retired_threshold)\n',
+    '        self.assertNotRegex(combined, retired_threshold)\n'
+    '        self.assertNotIn(retired_copy, combined)\n',
 )
 policy_path.write_text(policy, encoding="utf-8")
 
@@ -57,6 +60,11 @@ content = content.replace(
 content = content.replace('        self.assertNotIn("salary_below_20k", stats[0]["rejected"])\n', "")
 content = content.replace('        self.assertNotIn("salary_below_20k", stats)\n', "")
 china_test.write_text(content, encoding="utf-8")
+
+eligibility_test = ROOT / "tests" / "test_china_scan_eligibility.py"
+eligibility = eligibility_test.read_text(encoding="utf-8")
+eligibility = eligibility.replace('            "salary_below_20k": 0,\n', "")
+eligibility_test.write_text(eligibility, encoding="utf-8")
 
 # This script is temporary and must not enter the final branch.
 Path(__file__).unlink()
