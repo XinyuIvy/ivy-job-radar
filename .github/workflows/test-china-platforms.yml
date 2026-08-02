@@ -73,13 +73,13 @@ jobs:
             query: site:jobs.51job.com 数据科学 博士
           - id: lagou
             source: 拉勾
-            query: site:lagou.com/wn/jobs 数据科学家 博士
+            query: site:lagou.com 数据科学家 招聘
           - id: nowcoder
             source: 牛客招聘
-            query: site:nowcoder.com/jobs/detail 数据科学 博士
+            query: site:nowcoder.com/jobs/detail 算法 招聘
           - id: iguopin
             source: 国聘
-            query: site:iguopin.com 数据分析 博士
+            query: site:iguopin.com/job/detail 数据分析 博士
           - id: yingjiesheng
             source: 应届生求职网
             query: site:yingjiesheng.com 数据科学 博士
