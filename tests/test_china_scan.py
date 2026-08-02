@@ -169,6 +169,8 @@ class ChinaScanFilterTest(unittest.TestCase):
             21.75,
         )
         self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("餐补30元/天，月薪10-15K"), 10)
+        self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("餐补30元/天,月薪10-15K"), 10)
+        self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("月薪20,000-30,000元/月"), 20)
 
     def test_part_time_platform_role_is_not_saved(self):
         stats = CHINA_SCAN.empty_filter_stats()
