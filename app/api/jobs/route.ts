@@ -31,8 +31,20 @@ async function reconcileExpiration(sources: SourceStats[], now: string) {
     );
     for (const row of missing) {
       const misses = row.missedScanCount + 1;
+      const verification = await verifyPosting(row.jobUrl);
+      if (verification.state === "expired") {
+        await db.update(jobs).set({
+          status: "已过期",
+          missedScanCount: misses,
+          expirationReason: verification.reason,
+        }).where(eq(jobs.id, row.id));
+        continue;
+      }
       if (misses < 2) {
-        await db.update(jobs).set({ missedScanCount: misses }).where(eq(jobs.id, row.id));
+        await db.update(jobs).set({
+          missedScanCount: misses,
+          expirationReason: verification.state === "unknown" ? verification.reason : "",
+        }).where(eq(jobs.id, row.id));
         continue;
       }
 
@@ -41,10 +53,7 @@ async function reconcileExpiration(sources: SourceStats[], now: string) {
         missedScanCount: misses,
         expirationReason: "连续两次完整来源扫描未发现该岗位，正在直接核验",
       }).where(eq(jobs.id, row.id));
-      const verification = await verifyPosting(row.jobUrl);
-      if (verification.state === "expired") {
-        await db.update(jobs).set({ status: "已过期", expirationReason: verification.reason }).where(eq(jobs.id, row.id));
-      } else if (verification.state === "open") {
+      if (verification.state === "open") {
         await db.update(jobs).set({
           status: "开放",
           missedScanCount: 0,

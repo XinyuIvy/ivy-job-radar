@@ -292,10 +292,6 @@ export async function POST(request: NextRequest) {
       const rowUrls = [row.jobUrl, row.canonicalUrl].filter(Boolean).map(canonicalizeJobUrl);
       if (rowUrls.some((url) => seenUrls.has(url))) continue;
       const misses = row.missedScanCount + 1;
-      if (misses < 2) {
-        await db.update(jobs).set({ missedScanCount: misses }).where(eq(jobs.id, row.id));
-        continue;
-      }
       const verification = await verifyPosting(row.jobUrl);
       if (verification.state === "expired") {
         await db.update(jobs).set({
@@ -303,7 +299,16 @@ export async function POST(request: NextRequest) {
           missedScanCount: misses,
           expirationReason: verification.reason,
         }).where(eq(jobs.id, row.id));
-      } else if (verification.state === "open") {
+        continue;
+      }
+      if (misses < 2) {
+        await db.update(jobs).set({
+          missedScanCount: misses,
+          expirationReason: verification.state === "unknown" ? verification.reason : "",
+        }).where(eq(jobs.id, row.id));
+        continue;
+      }
+      if (verification.state === "open") {
         await db.update(jobs).set({
           status: "开放",
           missedScanCount: 0,
