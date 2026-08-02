@@ -125,7 +125,7 @@ def main() -> None:
     parser.add_argument("--state", choices=("queued", "running", "completed", "failed"), default="running")
     parser.add_argument("--phase", required=True)
     parser.add_argument("--source", required=True)
-    parser.add_argument("--completed", type=int, required=True)
+    parser.add_argument("--completed", type=int, default=-1)
     parser.add_argument("--total", type=int, default=10)
     parser.add_argument("--message", required=True)
     parser.add_argument("--scan-dir", type=Path, default=Path("data/scans"))
@@ -135,10 +135,11 @@ def main() -> None:
         "state": args.state,
         "phase": args.phase,
         "current_source": args.source,
-        "steps_completed": args.completed,
         "steps_total": args.total,
         "message": args.message,
     }
+    if args.completed >= 0:
+        payload["steps_completed"] = args.completed
     if args.completed > 1 or args.state in {"completed", "failed"}:
         payload.update(metrics(args.scan_dir))
     post_status(payload)
