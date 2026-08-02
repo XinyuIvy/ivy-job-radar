@@ -451,8 +451,8 @@ def transform_latest_jobs(result_dir: Path) -> list[dict[str, Any]]:
     return transform_result_files([(jobs_path, details_path)])
 
 
-def sync_jobs(jobs: list[dict[str, Any]]) -> dict[str, Any]:
-    if not jobs:
+def sync_jobs(jobs: list[dict[str, Any]], completed_source: str = "") -> dict[str, Any]:
+    if not jobs and not completed_source:
         return {"ok": True, "received": 0, "created": 0, "updated": 0, "skipped": 0}
     base_url = os.environ.get("IVY_JOB_RADAR_URL", "").rstrip("/")
     token = os.environ.get("IVY_JOB_RADAR_SYNC_TOKEN", "")
@@ -464,11 +464,47 @@ def sync_jobs(jobs: list[dict[str, Any]]) -> dict[str, Any]:
         )
 
     total = {"ok": True, "received": 0, "created": 0, "updated": 0, "skipped": 0}
-    for start in range(0, len(jobs), 50):
-        chunk = jobs[start:start + 50]
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    if completed_source:
+        grouped[completed_source] = jobs
+    else:
+        for job in jobs:
+            grouped.setdefault(text(job.get("source")), []).append(job)
+
+    for source, source_jobs in grouped.items():
+        chunks = [source_jobs[start:start + 50] for start in range(0, len(source_jobs), 50)]
+        for chunk in chunks:
+            request = urllib.request.Request(
+                f"{base_url}/api/jobs/import",
+                data=json.dumps(chunk, ensure_ascii=False).encode("utf-8"),
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "OAI-Sites-Authorization": f"Bearer {sites_token}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            try:
+                with urllib.request.urlopen(request, timeout=90) as response:
+                    result = json.loads(response.read().decode("utf-8"))
+            except urllib.error.HTTPError as error:
+                detail = error.read().decode("utf-8", errors="replace")
+                raise SystemExit(f"Job Radar import failed with HTTP {error.code}: {detail}") from error
+            except urllib.error.URLError as error:
+                raise SystemExit(f"Job Radar import could not connect: {error.reason}") from error
+            for key in ("received", "created", "updated", "skipped"):
+                total[key] += int(result.get(key, 0))
+
+        if not source:
+            continue
+        reconciliation = {
+            "jobs": [],
+            "complete_source": source,
+            "seen_urls": [text(job.get("canonical_url") or job.get("job_url")) for job in source_jobs],
+        }
         request = urllib.request.Request(
             f"{base_url}/api/jobs/import",
-            data=json.dumps(chunk, ensure_ascii=False).encode("utf-8"),
+            data=json.dumps(reconciliation, ensure_ascii=False).encode("utf-8"),
             headers={
                 "Authorization": f"Bearer {token}",
                 "OAI-Sites-Authorization": f"Bearer {sites_token}",
@@ -477,17 +513,14 @@ def sync_jobs(jobs: list[dict[str, Any]]) -> dict[str, Any]:
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=90) as response:
-                result = json.loads(response.read().decode("utf-8"))
+            with urllib.request.urlopen(request, timeout=90):
+                pass
         except urllib.error.HTTPError as error:
             detail = error.read().decode("utf-8", errors="replace")
-            raise SystemExit(f"Job Radar import failed with HTTP {error.code}: {detail}") from error
+            raise SystemExit(f"Job Radar expiration reconciliation failed with HTTP {error.code}: {detail}") from error
         except urllib.error.URLError as error:
-            raise SystemExit(f"Job Radar import could not connect: {error.reason}") from error
-        for key in ("received", "created", "updated", "skipped"):
-            total[key] += int(result.get(key, 0))
+            raise SystemExit(f"Job Radar expiration reconciliation could not connect: {error.reason}") from error
     return total
-
 
 def ensure_scraper(scraper_dir: Path) -> Path:
     script = scraper_dir / "scripts" / "boss_cdp_raw.py"
@@ -785,7 +818,7 @@ def main() -> None:
     if args.dry_run:
         print(json.dumps({"ok": True, "dry_run": True, "jobs": jobs}, ensure_ascii=False, indent=2))
         return
-    result = sync_jobs(jobs)
+    result = sync_jobs(jobs, completed_source="BOSS直聘（本地采集）")
     if args.command == "run":
         record_synced_jobs(jobs, result_files)
     print(json.dumps(result, ensure_ascii=False, indent=2))

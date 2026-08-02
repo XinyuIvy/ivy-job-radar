@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../../db";
 import { ignoredJobs, jobs, scanStatus } from "../../../../db/schema";
+import { extractDeadline } from "../../../lib/data-quality";
+import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../../lib/job-expiration";
 
 export const dynamic = "force-dynamic";
 
@@ -144,10 +146,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "The request body must be valid JSON." }, { status: 400 });
   }
 
-  if (!Array.isArray(payload)) {
-    return NextResponse.json({ error: "The request body must be a job array." }, { status: 400 });
+  const envelope = !Array.isArray(payload) && payload && typeof payload === "object"
+    ? payload as { jobs?: unknown; complete_source?: unknown; seen_urls?: unknown }
+    : null;
+  const importRows = Array.isArray(payload) ? payload : Array.isArray(envelope?.jobs) ? envelope.jobs : null;
+  if (!importRows) {
+    return NextResponse.json({ error: "The request body must contain a job array." }, { status: 400 });
   }
-  if (payload.length > 500) {
+  if (importRows.length > 500) {
     return NextResponse.json({ error: "A single import cannot exceed 500 jobs." }, { status: 413 });
   }
 
@@ -158,8 +164,10 @@ export async function POST(request: NextRequest) {
   let updated = 0;
   let skipped = 0;
   const importedSources = new Set<string>();
+  const completedSource = cleanText(envelope?.complete_source) || cleanText(request.headers.get("x-ivy-scan-source"));
+  const scanComplete = Boolean(completedSource) && (Boolean(envelope) || request.headers.get("x-ivy-scan-complete") === "true");
 
-  for (const raw of payload as ImportJob[]) {
+  for (const raw of importRows as ImportJob[]) {
     const company = cleanText(raw.company);
     const title = cleanText(raw.title);
     const originalJobUrl = cleanText(raw.original_job_url);
@@ -171,6 +179,7 @@ export async function POST(request: NextRequest) {
     const incomingStatus = displayStatus(cleanText(raw.status) || "待官网核验");
     const description = cleanText(raw.description) || cleanText(raw.full_description);
     const evidence = cleanText(raw.evidence);
+    const deadline = extractDeadline(`${description} ${evidence}`);
     const chinaEligible = region !== "中国" || isEligibleChinaImport(raw, title, description, evidence);
 
     // Recheck hard filters at the website boundary.
@@ -224,6 +233,11 @@ export async function POST(request: NextRequest) {
       status: region === "美国" && visa === "明确不支持" && incomingStatus === "开放"
         ? "不合格"
         : incomingStatus,
+      deadline: deadline.deadline || existing?.deadline || "",
+      deadlineType: deadline.deadlineType === "unknown" ? existing?.deadlineType || "unknown" : deadline.deadlineType,
+      lastSeenAt: cleanText(raw.checked_at) || now,
+      missedScanCount: 0,
+      expirationReason: "",
       discoveredAt: existing?.discoveredAt || cleanText(raw.discovered_at) || now,
       checkedAt: cleanText(raw.checked_at) || now,
     };
@@ -252,6 +266,62 @@ export async function POST(request: NextRequest) {
       await db.insert(jobs).values(values);
       created += 1;
     }
+  }
+
+  const activeRows = (await db.select().from(jobs)).filter((row) => activeJobStatuses.has(row.status));
+  for (const row of activeRows) {
+    if (!deadlineHasPassed(row.deadline, row.deadlineType, now)) continue;
+    await db.update(jobs).set({
+      status: "已过期",
+      expirationReason: `申请截止日期 ${row.deadline} 已过`,
+    }).where(eq(jobs.id, row.id));
+  }
+
+  if (scanComplete && completedSource) {
+    const envelopeSeenUrls = Array.isArray(envelope?.seen_urls) ? envelope.seen_urls.map(cleanText) : [];
+    const seenUrls = new Set([
+      ...envelopeSeenUrls,
+      ...(importRows as ImportJob[]).flatMap((raw) => [
+        cleanText(raw.job_url), cleanText(raw.original_job_url), cleanText(raw.official_url), cleanText(raw.canonical_url),
+      ]),
+    ].filter(Boolean).map(canonicalizeJobUrl));
+    const sourceRows = activeRows.filter((row) =>
+      row.source === completedSource && !deadlineHasPassed(row.deadline, row.deadlineType, now),
+    );
+    for (const row of sourceRows) {
+      const rowUrls = [row.jobUrl, row.canonicalUrl].filter(Boolean).map(canonicalizeJobUrl);
+      if (rowUrls.some((url) => seenUrls.has(url))) continue;
+      const misses = row.missedScanCount + 1;
+      if (misses < 2) {
+        await db.update(jobs).set({ missedScanCount: misses }).where(eq(jobs.id, row.id));
+        continue;
+      }
+      const verification = await verifyPosting(row.jobUrl);
+      if (verification.state === "expired") {
+        await db.update(jobs).set({
+          status: "已过期",
+          missedScanCount: misses,
+          expirationReason: verification.reason,
+        }).where(eq(jobs.id, row.id));
+      } else if (verification.state === "open") {
+        await db.update(jobs).set({
+          status: "开放",
+          missedScanCount: 0,
+          expirationReason: "",
+          checkedAt: now,
+        }).where(eq(jobs.id, row.id));
+      } else {
+        await db.update(jobs).set({
+          status: "疑似过期",
+          missedScanCount: misses,
+          expirationReason: verification.reason,
+        }).where(eq(jobs.id, row.id));
+      }
+    }
+  }
+
+  if (envelope && importRows.length === 0) {
+    return NextResponse.json({ ok: true, received: 0, created: 0, updated: 0, skipped: 0, reconciledAt: now });
   }
 
   const totalJobs = (await db.select({ id: jobs.id }).from(jobs)).length;
@@ -284,7 +354,7 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     ok: true,
-    received: payload.length,
+    received: importRows.length,
     created,
     updated,
     skipped,

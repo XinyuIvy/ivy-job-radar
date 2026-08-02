@@ -108,6 +108,9 @@ export async function getDb() {
   await ensureColumn("jobs", "application_id", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("jobs", "deadline", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("jobs", "deadline_type", "TEXT NOT NULL DEFAULT 'unknown'");
+  await ensureColumn("jobs", "last_seen_at", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("jobs", "missed_scan_count", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("jobs", "expiration_reason", "TEXT NOT NULL DEFAULT ''");
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS application_tasks (

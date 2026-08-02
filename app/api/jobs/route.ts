@@ -2,11 +2,61 @@ import { desc, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
-import { applications, ignoredJobs, jobs, scanStatus } from "../../../db/schema";
+import { applications, ignoredJobs, jobs, savedJobs, scanStatus } from "../../../db/schema";
 import { ashbyBoards, greenhouseBoards, iCimsBoards, leverBoards, paylocityBoards, workdayBoards } from "../../lib/company-sources";
 import { extractDeadline } from "../../lib/data-quality";
+import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/job-expiration";
 
 export const dynamic = "force-dynamic";
+
+async function reconcileExpiration(sources: SourceStats[], now: string) {
+  const db = await getDb();
+  const activeRows = (await db.select().from(jobs)).filter((row) => activeJobStatuses.has(row.status));
+
+  for (const row of activeRows) {
+    if (!deadlineHasPassed(row.deadline, row.deadlineType, now)) continue;
+    await db.update(jobs).set({
+      status: "已过期",
+      expirationReason: `申请截止日期 ${row.deadline} 已过`,
+    }).where(eq(jobs.id, row.id));
+  }
+
+  for (const source of sources) {
+    // A failed or partial source scan must never count as evidence that a job disappeared.
+    if (source.boards === 0 || source.succeeded !== source.boards) continue;
+    const missing = activeRows.filter((row) =>
+      !deadlineHasPassed(row.deadline, row.deadlineType, now)
+      && row.source.toLowerCase().startsWith(source.source.toLowerCase())
+      && row.checkedAt !== now,
+    );
+    for (const row of missing) {
+      const misses = row.missedScanCount + 1;
+      if (misses < 2) {
+        await db.update(jobs).set({ missedScanCount: misses }).where(eq(jobs.id, row.id));
+        continue;
+      }
+
+      await db.update(jobs).set({
+        status: "疑似过期",
+        missedScanCount: misses,
+        expirationReason: "连续两次完整来源扫描未发现该岗位，正在直接核验",
+      }).where(eq(jobs.id, row.id));
+      const verification = await verifyPosting(row.jobUrl);
+      if (verification.state === "expired") {
+        await db.update(jobs).set({ status: "已过期", expirationReason: verification.reason }).where(eq(jobs.id, row.id));
+      } else if (verification.state === "open") {
+        await db.update(jobs).set({
+          status: "开放",
+          missedScanCount: 0,
+          expirationReason: "",
+          checkedAt: now,
+        }).where(eq(jobs.id, row.id));
+      } else {
+        await db.update(jobs).set({ expirationReason: verification.reason }).where(eq(jobs.id, row.id));
+      }
+    }
+  }
+}
 
 const initialJobs = [
   {
@@ -346,6 +396,9 @@ async function saveCandidate(candidate: CandidateJob, ignored: Set<string>, now:
     status: "开放",
     deadline: deadline.deadline,
     deadlineType: deadline.deadlineType,
+    lastSeenAt: now,
+    missedScanCount: 0,
+    expirationReason: "",
     discoveredAt: existing?.discoveredAt ?? now,
     checkedAt: now,
   };
@@ -652,6 +705,7 @@ async function refreshOfficialBoards() {
     scanHtmlAts("Paylocity", paylocityBoards, /recruiting\.paylocity\.com\/recruiting\/jobs\/Details\/\d+\//i, ignored, now),
     scanWorkday(ignored, now),
   ]);
+  await reconcileExpiration(sources, now);
   return {
     scanned: sources.reduce((sum, item) => sum + item.scanned, 0),
     matched: sources.reduce((sum, item) => sum + item.matched, 0),
@@ -725,34 +779,32 @@ async function seedInitialJobs() {
 export async function GET() {
   const db = await seedInitialJobs();
   const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
+  const savedIds = new Set((await db.select().from(savedJobs)).map((row) => row.jobId));
   const activeApplicationStatuses = new Set(["已申请", "一面", "二面/技术面", "终面", "Offer", "拒绝"]);
   const activeApplications = (await db.select().from(applications))
     .filter((row) => activeApplicationStatuses.has(row.status));
   const appliedFingerprints = new Set(activeApplications.map((row) => fingerprint(row.company, row.title)));
   const appliedUrls = new Set(activeApplications.map((row) => canonicalizeJobUrl(row.jobUrl)).filter(Boolean));
   const appliedIds = new Set(activeApplications.map((row) => normalize(row.applicationId)).filter(Boolean));
-  const rows = await db
-    .select()
-    .from(jobs)
-    .where(or(
-      eq(jobs.status, "开放"),
-      eq(jobs.status, "待官网核验"),
-      // Keep captures imported before status normalization visible.
-      eq(jobs.status, "已捕获完整JD"),
-      eq(jobs.status, "待核验"),
-    ))
-    .orderBy(desc(jobs.discoveredAt));
+  const rows = await db.select().from(jobs).orderBy(desc(jobs.discoveredAt));
 
   const seen = new Set<string>();
   return NextResponse.json(
     rows
+      .filter((row) => {
+        const tracked = savedIds.has(row.id)
+          || appliedFingerprints.has(fingerprint(row.company, row.title))
+          || appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl))
+          || Boolean(row.applicationId && appliedIds.has(normalize(row.applicationId)));
+        return activeJobStatuses.has(row.status) || tracked;
+      })
       .filter((row) => !ignored.has(fingerprint(row.company, row.title)))
-      .filter((row) => !appliedFingerprints.has(fingerprint(row.company, row.title)))
-      .filter((row) => !appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl)))
-      .filter((row) => !row.applicationId || !appliedIds.has(normalize(row.applicationId)))
-      .filter((row) => !(row.region === "美国" && row.visa === "明确不支持"))
-      .filter((row) => !isExcludedTitle(row.title))
-      .filter((row) => row.score >= 55)
+      .filter((row) => !activeJobStatuses.has(row.status) || !appliedFingerprints.has(fingerprint(row.company, row.title)))
+      .filter((row) => !activeJobStatuses.has(row.status) || !appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl)))
+      .filter((row) => !activeJobStatuses.has(row.status) || !row.applicationId || !appliedIds.has(normalize(row.applicationId)))
+      .filter((row) => !activeJobStatuses.has(row.status) || !(row.region === "美国" && row.visa === "明确不支持"))
+      .filter((row) => !activeJobStatuses.has(row.status) || !isExcludedTitle(row.title))
+      .filter((row) => !activeJobStatuses.has(row.status) || row.score >= 55)
       .filter((row) => {
         const canonicalUrl = row.canonicalUrl || canonicalizeJobUrl(row.jobUrl);
         const key = row.status === "待官网核验"
@@ -865,6 +917,9 @@ export async function POST(request: NextRequest) {
     status: String(body.status ?? "开放").trim(),
     deadline: String(body.deadline ?? "").trim(),
     deadlineType: String(body.deadlineType ?? "unknown").trim(),
+    lastSeenAt: now,
+    missedScanCount: 0,
+    expirationReason: "",
     discoveredAt: String(body.discoveredAt ?? now),
     checkedAt: now,
   };

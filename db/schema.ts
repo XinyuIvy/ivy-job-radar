@@ -68,6 +68,9 @@ export const jobs = sqliteTable("jobs", {
   status: text("status").notNull().default("开放"),
   deadline: text("deadline").notNull().default(""),
   deadlineType: text("deadline_type").notNull().default("unknown"),
+  lastSeenAt: text("last_seen_at").notNull().default(""),
+  missedScanCount: integer("missed_scan_count").notNull().default(0),
+  expirationReason: text("expiration_reason").notNull().default(""),
   discoveredAt: text("discovered_at").notNull(),
   checkedAt: text("checked_at").notNull(),
 });

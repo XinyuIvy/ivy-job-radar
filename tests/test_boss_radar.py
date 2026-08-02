@@ -361,6 +361,41 @@ class BossRadarTransformTest(unittest.TestCase):
         self.assertFalse(BOSS_RADAR.title_prefilter({**base, "job_id": "low", "title": "统计建模研究员", "salary": "15-30K"}))
         self.assertTrue(BOSS_RADAR.title_prefilter({**base, "job_id": "postdoc", "title": "生物统计博士后"}))
 
+    def test_sync_reports_a_completed_source_for_expiration_reconciliation(self):
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self):
+                return json.dumps({"received": 1, "created": 0, "updated": 1, "skipped": 0}).encode()
+
+        requests = []
+
+        def fake_urlopen(request, timeout):
+            requests.append(request)
+            return FakeResponse()
+
+        env = {
+            "IVY_JOB_RADAR_URL": "https://example.test",
+            "IVY_JOB_RADAR_SYNC_TOKEN": "sync-secret",
+            "IVY_JOB_RADAR_SITES_BYPASS_TOKEN": "sites-secret",
+        }
+        job = {
+            "source": "BOSS直聘（本地采集）",
+            "job_url": "https://example.test/job/1",
+            "canonical_url": "https://example.test/job/1",
+        }
+        with patch.dict(os.environ, env, clear=False), patch.object(BOSS_RADAR.urllib.request, "urlopen", side_effect=fake_urlopen):
+            BOSS_RADAR.sync_jobs([job], completed_source="BOSS直聘（本地采集）")
+
+        self.assertEqual(len(requests), 2)
+        reconciliation = json.loads(requests[-1].data.decode("utf-8"))
+        self.assertEqual(reconciliation["complete_source"], "BOSS直聘（本地采集）")
+        self.assertEqual(reconciliation["seen_urls"], ["https://example.test/job/1"])
+
 
 if __name__ == "__main__":
     unittest.main()
