@@ -194,6 +194,20 @@ export const scanStatus = sqliteTable("scan_status", {
   message: text("message").notNull().default(""),
 });
 
+export const chinaScanStatus = sqliteTable("china_scan_status", {
+  id: integer("id").primaryKey(),
+  status: text("status").notNull().default("idle"),
+  sourcesCompleted: integer("sources_completed").notNull().default(0),
+  sourcesFailed: integer("sources_failed").notNull().default(0),
+  jobsDiscovered: integer("jobs_discovered").notNull().default(0),
+  jobsEligible: integer("jobs_eligible").notNull().default(0),
+  jobsCreated: integer("jobs_created").notNull().default(0),
+  jobsUpdatedOrDuplicate: integer("jobs_updated_or_duplicate").notNull().default(0),
+  results: text("results").notNull().default("[]"),
+  finishedAt: text("finished_at").notNull().default(""),
+  receivedAt: text("received_at").notNull().default(""),
+});
+
 export const userProfiles = sqliteTable("user_profiles", {
   userEmail: text("user_email").primaryKey(),
   fullName: text("full_name").notNull().default(""),

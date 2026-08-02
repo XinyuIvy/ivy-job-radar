@@ -20,6 +20,7 @@ class ChinaOneClickTest(unittest.TestCase):
 
         self.assertNotIn("苏州", plan["cities"])
         self.assertEqual(len(plan["cities"]) * len(plan["keywords"]), 56)
+        self.assertEqual(plan["batch_size"], 8)
 
     def test_summary_keeps_independent_source_failure(self):
         summary = CHINA_ONE_CLICK.build_summary(
@@ -38,11 +39,24 @@ class ChinaOneClickTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary_dir, \
                 patch.object(CHINA_ONE_CLICK, "REPORT_PATH", Path(temporary_dir) / "report.json"), \
                 patch.object(CHINA_ONE_CLICK, "run_boss", return_value={"status": "failed", "source": "BOSS直聘"}), \
-                patch.object(CHINA_ONE_CLICK, "run_public_sources", return_value={"status": "completed", "source": "中国公开索引", "jobs_created": 1}):
+                patch.object(CHINA_ONE_CLICK, "run_public_sources", return_value={"status": "completed", "source": "中国公开索引", "jobs_created": 1}), \
+                patch.object(CHINA_ONE_CLICK, "sync_scan_report", return_value={"ok": True}):
             summary = CHINA_ONE_CLICK.run_all()
 
         self.assertEqual(summary["status"], "partial")
         self.assertEqual(summary["jobs_created"], 1)
+        self.assertTrue(summary["report_synced"])
+
+    def test_run_all_keeps_local_report_when_website_sync_fails(self):
+        with tempfile.TemporaryDirectory() as temporary_dir, \
+                patch.object(CHINA_ONE_CLICK, "REPORT_PATH", Path(temporary_dir) / "report.json"), \
+                patch.object(CHINA_ONE_CLICK, "run_boss", return_value={"status": "completed", "source": "BOSS直聘"}), \
+                patch.object(CHINA_ONE_CLICK, "run_public_sources", return_value={"status": "completed", "source": "中国公开索引"}), \
+                patch.object(CHINA_ONE_CLICK, "sync_scan_report", side_effect=RuntimeError("offline")):
+            summary = CHINA_ONE_CLICK.run_all()
+
+        self.assertFalse(summary["report_synced"])
+        self.assertEqual(summary["report_sync_attention"], "offline")
 
 
 if __name__ == "__main__":

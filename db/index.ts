@@ -24,11 +24,15 @@ export async function getDb() {
       fit INTEGER NOT NULL DEFAULT 3,
       interest INTEGER NOT NULL DEFAULT 3,
       priority TEXT NOT NULL DEFAULT 'P2',
-      status TEXT NOT NULL DEFAULT '已收藏',
+      status TEXT NOT NULL DEFAULT '准备材料',
+      deadline TEXT NOT NULL DEFAULT '',
+      deadline_type TEXT NOT NULL DEFAULT 'unknown',
+      deadline_source TEXT NOT NULL DEFAULT 'unknown',
+      planned_application_date TEXT NOT NULL DEFAULT '',
       discovered_date TEXT NOT NULL DEFAULT '',
       applied_date TEXT NOT NULL DEFAULT '',
       follow_up_date TEXT NOT NULL DEFAULT '',
-      next_action TEXT NOT NULL DEFAULT '研究JD',
+      next_action TEXT NOT NULL DEFAULT '准备申请材料',
       resume_version TEXT NOT NULL DEFAULT '',
       work_authorization TEXT NOT NULL DEFAULT '',
       interview_notes TEXT NOT NULL DEFAULT '',
@@ -36,6 +40,20 @@ export async function getDb() {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS application_status_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      application_id INTEGER NOT NULL,
+      status TEXT NOT NULL,
+      occurred_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE INDEX IF NOT EXISTS application_status_events_application_id_idx
+    ON application_status_events (application_id)
   `).run();
 
   await env.DB.prepare(`
@@ -67,10 +85,79 @@ export async function getDb() {
       job_url TEXT NOT NULL UNIQUE,
       source TEXT NOT NULL DEFAULT '公司官网',
       status TEXT NOT NULL DEFAULT '开放',
+      deadline TEXT NOT NULL DEFAULT '',
+      deadline_type TEXT NOT NULL DEFAULT 'unknown',
       discovered_at TEXT NOT NULL,
       checked_at TEXT NOT NULL
     )
   `).run();
+
+  // Add columns introduced after the initial production database was created.
+  const ensureColumn = async (table: string, column: string, definition: string) => {
+    const result = await env.DB.prepare(`PRAGMA table_info(${table})`).all<{ name: string }>();
+    if (!(result.results ?? []).some((row) => row.name === column)) {
+      await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+    }
+  };
+  await ensureColumn("applications", "application_id", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("applications", "deadline", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("applications", "deadline_type", "TEXT NOT NULL DEFAULT 'unknown'");
+  await ensureColumn("applications", "deadline_source", "TEXT NOT NULL DEFAULT 'unknown'");
+  await ensureColumn("applications", "planned_application_date", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("jobs", "canonical_url", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("jobs", "application_id", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("jobs", "deadline", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("jobs", "deadline_type", "TEXT NOT NULL DEFAULT 'unknown'");
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS application_tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      application_id INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      due_date TEXT NOT NULL DEFAULT '',
+      reminder_date TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending',
+      source TEXT NOT NULL DEFAULT 'manual',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS interviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      application_id INTEGER NOT NULL,
+      round TEXT NOT NULL DEFAULT '一面',
+      scheduled_at TEXT NOT NULL DEFAULT '',
+      format TEXT NOT NULL DEFAULT 'Video',
+      contact_name TEXT NOT NULL DEFAULT '',
+      contact_email TEXT NOT NULL DEFAULT '',
+      notes TEXT NOT NULL DEFAULT '',
+      outcome TEXT NOT NULL DEFAULT '待进行',
+      thank_you_status TEXT NOT NULL DEFAULT '未发送',
+      thank_you_due_at TEXT NOT NULL DEFAULT '',
+      follow_up_at TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS company_research (
+      company TEXT PRIMARY KEY,
+      website TEXT NOT NULL DEFAULT '',
+      careers_url TEXT NOT NULL DEFAULT '',
+      business_summary TEXT NOT NULL DEFAULT '',
+      recent_notes TEXT NOT NULL DEFAULT '',
+      personal_notes TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.batch([
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS application_tasks_application_id_idx ON application_tasks (application_id)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS interviews_application_id_idx ON interviews (application_id)"),
+  ]);
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS ignored_jobs (
@@ -81,6 +168,167 @@ export async function getDb() {
       fingerprint TEXT NOT NULL UNIQUE,
       reason TEXT NOT NULL,
       created_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS saved_jobs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id INTEGER NOT NULL UNIQUE,
+      created_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS data_quality_checks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id INTEGER NOT NULL UNIQUE,
+      status TEXT NOT NULL DEFAULT 'queued',
+      issue_keys TEXT NOT NULL DEFAULT '[]',
+      attempts INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT NOT NULL DEFAULT '',
+      last_attempt_at TEXT NOT NULL DEFAULT '',
+      next_retry_at TEXT NOT NULL DEFAULT '',
+      resolved_at TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS data_quality_runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      started_at TEXT NOT NULL,
+      completed_at TEXT NOT NULL,
+      processed INTEGER NOT NULL DEFAULT 0,
+      merged INTEGER NOT NULL DEFAULT 0,
+      resolved INTEGER NOT NULL DEFAULT 0,
+      retrying INTEGER NOT NULL DEFAULT 0,
+      needs_review INTEGER NOT NULL DEFAULT 0,
+      failure_reasons TEXT NOT NULL DEFAULT '[]'
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS contacts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      company TEXT NOT NULL DEFAULT '',
+      role TEXT NOT NULL DEFAULT '',
+      contact_type TEXT NOT NULL DEFAULT 'Recruiter',
+      email TEXT NOT NULL DEFAULT '',
+      linkedin_url TEXT NOT NULL DEFAULT '',
+      application_id INTEGER,
+      status TEXT NOT NULL DEFAULT '未联系',
+      last_contact_at TEXT NOT NULL DEFAULT '',
+      next_follow_up_at TEXT NOT NULL DEFAULT '',
+      notes TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS interview_prep (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      interview_id INTEGER NOT NULL UNIQUE,
+      checklist TEXT NOT NULL DEFAULT '[]',
+      practice_notes TEXT NOT NULL DEFAULT '',
+      questions_to_ask TEXT NOT NULL DEFAULT '',
+      source_ids TEXT NOT NULL DEFAULT '[]',
+      readiness INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS scan_status (
+      id INTEGER PRIMARY KEY,
+      state TEXT NOT NULL DEFAULT 'idle',
+      ats_scanned INTEGER NOT NULL DEFAULT 0,
+      ats_matched INTEGER NOT NULL DEFAULT 0,
+      created INTEGER NOT NULL DEFAULT 0,
+      updated INTEGER NOT NULL DEFAULT 0,
+      skipped INTEGER NOT NULL DEFAULT 0,
+      total_jobs INTEGER NOT NULL DEFAULT 0,
+      started_at TEXT NOT NULL DEFAULT '',
+      completed_at TEXT NOT NULL DEFAULT '',
+      message TEXT NOT NULL DEFAULT ''
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS china_scan_status (
+      id INTEGER PRIMARY KEY,
+      status TEXT NOT NULL DEFAULT 'idle',
+      sources_completed INTEGER NOT NULL DEFAULT 0,
+      sources_failed INTEGER NOT NULL DEFAULT 0,
+      jobs_discovered INTEGER NOT NULL DEFAULT 0,
+      jobs_eligible INTEGER NOT NULL DEFAULT 0,
+      jobs_created INTEGER NOT NULL DEFAULT 0,
+      jobs_updated_or_duplicate INTEGER NOT NULL DEFAULT 0,
+      results TEXT NOT NULL DEFAULT '[]',
+      finished_at TEXT NOT NULL DEFAULT '',
+      received_at TEXT NOT NULL DEFAULT ''
+    )
+  `).run();
+
+  await env.DB.batch([
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS contacts_company_idx ON contacts (company)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS contacts_application_id_idx ON contacts (application_id)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS data_quality_runs_completed_at_idx ON data_quality_runs (completed_at)"),
+  ]);
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS user_profiles (
+      user_email TEXT PRIMARY KEY,
+      full_name TEXT NOT NULL DEFAULT '',
+      location TEXT NOT NULL DEFAULT '',
+      work_authorization TEXT NOT NULL DEFAULT '',
+      sponsorship_need TEXT NOT NULL DEFAULT '',
+      education TEXT NOT NULL DEFAULT '',
+      target_roles TEXT NOT NULL DEFAULT '',
+      target_industries TEXT NOT NULL DEFAULT '',
+      professional_summary TEXT NOT NULL DEFAULT '',
+      skills TEXT NOT NULL DEFAULT '[]',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS profile_resumes (
+      id TEXT PRIMARY KEY,
+      user_email TEXT NOT NULL,
+      label TEXT NOT NULL,
+      filename TEXT NOT NULL,
+      object_key TEXT NOT NULL UNIQUE,
+      content_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE INDEX IF NOT EXISTS profile_resumes_user_email_idx
+    ON profile_resumes (user_email)
+  `).run();
+
+  // Migrate legacy tracker states into the simplified workflow.
+  await env.DB.batch([
+    env.DB.prepare("UPDATE applications SET status = '准备材料' WHERE status IN ('待研究', '已收藏')"),
+    env.DB.prepare("UPDATE applications SET status = '已申请' WHERE status = 'HR筛选'"),
+  ]);
+
+  // Existing records start their auditable history at their current stage.
+  await env.DB.prepare(`
+    INSERT INTO application_status_events (application_id, status, occurred_at)
+    SELECT applications.id, applications.status, applications.updated_at
+    FROM applications
+    WHERE NOT EXISTS (
+      SELECT 1
+      FROM application_status_events
+      WHERE application_status_events.application_id = applications.id
     )
   `).run();
 

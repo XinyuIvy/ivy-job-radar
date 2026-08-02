@@ -155,6 +155,16 @@ button { color: inherit; }
 .scan-summary-failed .scan-summary-dot {
   background: #ad4b45; box-shadow: 0 0 0 4px rgba(173,75,69,.14);
 }
+.scan-summary-partial .scan-summary-dot {
+  background: #c68820; box-shadow: 0 0 0 4px rgba(198,136,32,.15);
+}
+.china-scan-summary { padding-top: 10px; }
+.china-source-results { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.china-source-results span {
+  border: 1px solid rgba(130,102,60,.2); border-radius: 999px; padding: 4px 8px;
+  background: rgba(255,255,255,.55); color: #66502f; font-size: 10px; font-weight: 700;
+}
+.china-source-results .source-warning { color: #8e3e38; border-color: rgba(173,75,69,.25); }
 @keyframes status-pulse {
   50% { opacity: .42; transform: scale(.82); }
 }

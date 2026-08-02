@@ -6,8 +6,11 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import subprocess
 import sys
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from types import ModuleType
@@ -122,6 +125,38 @@ def build_summary(results: list[dict[str, Any]], dry_run: bool) -> dict[str, Any
     }
 
 
+def sync_scan_report(summary: dict[str, Any]) -> dict[str, Any]:
+    radar = load_module("ivy_boss_radar_for_report", RADAR_SCRIPT)
+    radar.load_env(radar.DEFAULT_ENV_FILE)
+    base_url = os.environ.get("IVY_JOB_RADAR_URL", "").rstrip("/")
+    token = os.environ.get("IVY_JOB_RADAR_SYNC_TOKEN", "")
+    sites_token = os.environ.get("IVY_JOB_RADAR_SITES_BYPASS_TOKEN", "")
+    if not base_url or not token or not sites_token:
+        raise RuntimeError(
+            "collector.env must define IVY_JOB_RADAR_URL, IVY_JOB_RADAR_SYNC_TOKEN, "
+            "and IVY_JOB_RADAR_SITES_BYPASS_TOKEN"
+        )
+
+    request = urllib.request.Request(
+        f"{base_url}/api/china-scan-status",
+        data=json.dumps(summary, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "OAI-Sites-Authorization": f"Bearer {sites_token}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=45) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Scan report upload failed with HTTP {error.code}: {detail}") from error
+    except urllib.error.URLError as error:
+        raise RuntimeError(f"Scan report upload could not connect: {error.reason}") from error
+
+
 def run_all(dry_run: bool = False) -> dict[str, Any]:
     results = [run_boss(dry_run)]
     try:
@@ -133,6 +168,14 @@ def run_all(dry_run: bool = False) -> dict[str, Any]:
 
     summary = build_summary(results, dry_run)
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if not dry_run:
+        try:
+            sync_scan_report(summary)
+            summary["report_synced"] = True
+        except Exception as exc:
+            # Keep the local report when the website cannot receive the summary.
+            summary["report_synced"] = False
+            summary["report_sync_attention"] = str(exc)
     REPORT_PATH.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print("\nChina multi-source scan summary")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
