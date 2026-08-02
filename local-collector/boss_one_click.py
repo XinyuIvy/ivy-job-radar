@@ -12,7 +12,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from types import ModuleType
-from typing import Any
+from typing import Any, Callable
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -89,16 +89,40 @@ def save_summary(radar: ModuleType, state: dict[str, Any], summary: dict[str, An
     return latest
 
 
-def run_scan(dry_run: bool = False) -> dict[str, Any]:
+def run_scan(
+    dry_run: bool = False,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
+) -> dict[str, Any]:
     radar = load_radar()
     radar.APP_DIR.mkdir(parents=True, exist_ok=True)
     radar.load_env(radar.DEFAULT_ENV_FILE)
     state_before = radar.read_state()
     starting_cursor = int(state_before.get("cursor", 0))
-    result_files = radar.run_searches(radar.DEFAULT_SCRAPER_DIR, radar.DEFAULT_PLAN, radar.DEFAULT_RESULT_DIR)
+    if progress_callback:
+        result_files = radar.run_searches(
+            radar.DEFAULT_SCRAPER_DIR,
+            radar.DEFAULT_PLAN,
+            radar.DEFAULT_RESULT_DIR,
+            progress_callback=progress_callback,
+        )
+    else:
+        result_files = radar.run_searches(radar.DEFAULT_SCRAPER_DIR, radar.DEFAULT_PLAN, radar.DEFAULT_RESULT_DIR)
     state = radar.read_state()
     discovered = int(state.get("jobs_discovered", count_raw_rows(radar, result_files)))
     jobs = radar.transform_result_files(result_files)
+    if progress_callback:
+        progress_callback({
+            "source": "BOSS直聘",
+            "phase": "筛选完成",
+            "message": f"BOSS 发现 {discovered}，筛选保留 {len(jobs)}",
+            "completed": int(state.get("completed_searches", 0)),
+            "total": int(state.get("planned_searches", 0)),
+            "scanned": discovered,
+            "unique": int(state.get("jobs_unique", discovered)),
+            "filtered": int(state.get("jobs_filtered_before_detail", 0)),
+            "detail_candidates": int(state.get("jobs_detail_candidates", len(jobs))),
+            "eligible": len(jobs),
+        })
     sync_result = {"received": 0, "created": 0, "updated": 0, "skipped": 0}
     if not dry_run:
         try:
@@ -113,6 +137,21 @@ def run_scan(dry_run: bool = False) -> dict[str, Any]:
     plan = radar.load_json(radar.DEFAULT_PLAN)
     state["combination_count"] = len(plan.get("cities", [])) * len(plan.get("keywords", []))
     summary = build_summary(state, discovered, len(jobs), sync_result, dry_run)
+    if progress_callback:
+        progress_callback({
+            "source": "BOSS直聘",
+            "phase": "同步完成",
+            "message": f"BOSS 新增 {summary['jobs_created']}，重复或更新 {summary['jobs_updated_or_duplicate']}",
+            "completed": summary["searches_completed"],
+            "total": summary["searches_planned"],
+            "scanned": summary["jobs_discovered"],
+            "unique": summary["jobs_unique"],
+            "filtered": summary["jobs_filtered_before_detail"],
+            "detail_candidates": summary["jobs_detail_candidates"],
+            "eligible": summary["jobs_eligible"],
+            "created": summary["jobs_created"],
+            "duplicate": summary["jobs_updated_or_duplicate"],
+        })
     report_path = save_summary(radar, state, summary)
     print("\nBOSS scan summary")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
