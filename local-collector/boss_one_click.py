@@ -64,6 +64,11 @@ def build_summary(
         "searches_remaining_in_cycle": remaining,
         "cycle_completed": cycle_completed,
         "jobs_discovered": discovered,
+        "jobs_unique": int(state.get("jobs_unique", discovered)),
+        "jobs_duplicate_listings": int(state.get("jobs_duplicate_listings", 0)),
+        "jobs_filtered_before_detail": int(state.get("jobs_filtered_before_detail", 0)),
+        "jobs_skipped_cached": int(state.get("jobs_skipped_cached", 0)),
+        "jobs_detail_candidates": int(state.get("jobs_detail_candidates", eligible)),
         "jobs_eligible": eligible,
         "jobs_excluded_or_incomplete": max(0, discovered - eligible),
         "jobs_created": int(sync_result.get("created", 0)),
@@ -91,9 +96,9 @@ def run_scan(dry_run: bool = False) -> dict[str, Any]:
     state_before = radar.read_state()
     starting_cursor = int(state_before.get("cursor", 0))
     result_files = radar.run_searches(radar.DEFAULT_SCRAPER_DIR, radar.DEFAULT_PLAN, radar.DEFAULT_RESULT_DIR)
-    discovered = count_raw_rows(radar, result_files)
-    jobs = radar.transform_result_files(result_files)
     state = radar.read_state()
+    discovered = int(state.get("jobs_discovered", count_raw_rows(radar, result_files)))
+    jobs = radar.transform_result_files(result_files)
     sync_result = {"received": 0, "created": 0, "updated": 0, "skipped": 0}
     if not dry_run:
         try:
@@ -103,6 +108,8 @@ def run_scan(dry_run: bool = False) -> dict[str, Any]:
             state["cursor"] = starting_cursor
             state["status"] = "attention_required"
             state["failure"] = str(exc)
+        else:
+            radar.record_synced_jobs(jobs, result_files)
     plan = radar.load_json(radar.DEFAULT_PLAN)
     state["combination_count"] = len(plan.get("cities", [])) * len(plan.get("keywords", []))
     summary = build_summary(state, discovered, len(jobs), sync_result, dry_run)
