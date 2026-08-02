@@ -13,15 +13,7 @@ SPEC.loader.exec_module(CHINA_SCAN)
 
 class ChinaScanFilterTest(unittest.TestCase):
     def test_scientific_algorithm_role_is_kept(self):
-        stats = {
-            "missing_title_or_url": 0,
-            "title_not_targeted": 0,
-            "excluded_seniority_or_role": 0,
-            "degree_experience_or_skill_gap": 0,
-            "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
-            "salary_missing_or_negotiable": 0,
-        }
+        stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
             {
                 "title": "创新算法研究员",
@@ -40,20 +32,12 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(row["title"], "创新算法研究员")
         self.assertEqual(row["region"], "中国")
 
-    def test_targeted_query_keeps_incomplete_platform_snippet(self):
-        stats = {
-            "missing_title_or_url": 0,
-            "title_not_targeted": 0,
-            "excluded_seniority_or_role": 0,
-            "degree_experience_or_skill_gap": 0,
-            "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
-            "salary_missing_or_negotiable": 0,
-        }
+    def test_targeted_query_does_not_validate_unrelated_snippet(self):
+        stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
             {
                 "title": "研究员",
-                "url": "https://www.liepin.com/job/123456",
+                "url": "https://www.liepin.com/job/123456.shtml",
                 "description": "招聘平台仅返回截断摘要，完整职位信息待核验。",
             },
             {"source": "猎聘", "query": "site:liepin.com 生物统计"},
@@ -61,20 +45,72 @@ class ChinaScanFilterTest(unittest.TestCase):
             stats,
         )
 
+        self.assertIsNone(row)
+        self.assertEqual(stats["title_not_targeted"], 1)
+
+    def test_targeted_query_keeps_broad_ai_related_snippet(self):
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "研究员",
+                "url": "https://m.liepin.com/job/123456.shtml",
+                "description": "博士应届可申请，使用深度学习和统计分析解决医学影像问题。",
+            },
+            {"source": "猎聘", "query": "site:liepin.com 人工智能 博士"},
+            "2026-08-02T00:00:00+00:00",
+        )
+
         self.assertIsNotNone(row)
+        self.assertEqual(row["track"], "Healthcare AI")
+
+    def test_wrong_platform_domain_is_rejected_before_content_filter(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "生物统计师",
+                "url": "https://accountablehq.com/post/biostatistics",
+                "description": "博士，统计分析。",
+            },
+            {"source": "猎聘", "query": "site:liepin.com 生物统计 博士"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["source_domain_mismatch"], 1)
         self.assertEqual(stats["title_not_targeted"], 0)
-        self.assertIn("需打开具体 JD 核验", row["evidence"])
+
+    def test_platform_listing_page_is_not_treated_as_a_job(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "生物统计招聘列表",
+                "url": "https://www.liepin.com/zpshengwutongjishi/",
+                "description": "生物统计岗位列表。",
+            },
+            {"source": "猎聘", "query": "site:liepin.com 生物统计 博士"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["not_specific_job_page"], 1)
+
+    def test_supported_platform_job_url_shapes(self):
+        examples = {
+            "BOSS直聘公开索引": "https://m.zhipin.com/job_detail/9ca6b5f59d5514bb1XJ_2t66FFc~.html",
+            "猎聘": "https://m.liepin.com/job/1976592433.shtml",
+            "智联招聘": "https://www.zhaopin.com/jobdetail/CC302903980J40864591507.htm",
+            "拉勾": "https://www.lagou.com/wn/jobs/123456.html",
+            "牛客招聘": "https://www.nowcoder.com/jobs/detail/123456",
+            "国聘": "https://www.iguopin.com/job/detail?id=123456",
+            "应届生求职网": "https://www.yingjiesheng.com/job-123456.html",
+        }
+        for source, url in examples.items():
+            with self.subTest(source=source):
+                self.assertIsNone(CHINA_SCAN.platform_url_rejection(url, source))
 
     def test_untargeted_direct_page_still_rejects_unrelated_result(self):
-        stats = {
-            "missing_title_or_url": 0,
-            "title_not_targeted": 0,
-            "excluded_seniority_or_role": 0,
-            "degree_experience_or_skill_gap": 0,
-            "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
-            "salary_missing_or_negotiable": 0,
-        }
+        stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
             {
                 "title": "普通研究员",
@@ -90,15 +126,7 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(stats["title_not_targeted"], 1)
 
     def test_unrelated_result_records_rejection_reason(self):
-        stats = {
-            "missing_title_or_url": 0,
-            "title_not_targeted": 0,
-            "excluded_seniority_or_role": 0,
-            "degree_experience_or_skill_gap": 0,
-            "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
-            "salary_missing_or_negotiable": 0,
-        }
+        stats = CHINA_SCAN.empty_filter_stats()
         row = CHINA_SCAN.normalize_result(
             {
                 "title": "物流统计员",
