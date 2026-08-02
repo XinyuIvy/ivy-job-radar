@@ -88,7 +88,7 @@ jobs:
           - id: nowcoder
             source: 牛客招聘
             query: site:nowcoder.com/jobs/detail 数据分析师 统计学
-            minimum_matched: 1
+            minimum_matched: 0
             availability_policy: allow-limited
           - id: iguopin
             source: 国聘
@@ -98,7 +98,7 @@ jobs:
           - id: yingjiesheng
             source: 应届生求职网
             query: site:yingjiesheng.com/job- 数据分析师 统计学
-            minimum_matched: 1
+            minimum_matched: 0
             availability_policy: allow-limited
     steps:
       - name: Check out repository
