@@ -107,15 +107,15 @@
     },
     {
       "source": "应届生求职网",
-      "query": "site:yingjiesheng.com 生物统计 博士"
+      "query": "site:yingjiesheng.com/job- 生物统计 统计学"
     },
     {
       "source": "应届生求职网",
-      "query": "site:yingjiesheng.com 数据科学家 博士"
+      "query": "site:yingjiesheng.com/job- 数据分析师 统计学"
     },
     {
       "source": "应届生求职网",
-      "query": "site:yingjiesheng.com 量化研究 博士"
+      "query": "site:yingjiesheng.com/job- 量化研究 数学"
     }
   ],
   "direct_pages": [
