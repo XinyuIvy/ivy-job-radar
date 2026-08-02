@@ -26,6 +26,7 @@ type Job = {
   status: string;
   deadline: string;
   deadlineType: "date" | "rolling" | "unknown";
+  expirationReason?: string;
   discoveredAt: string;
   checkedAt: string;
 };
@@ -1087,6 +1088,7 @@ export default function JobRadar() {
       const normalizedQuery = jobQuery.trim().toLowerCase();
       const filtered = dailyJobs.filter(
         (job) =>
+          (view !== "today" || !["已过期", "疑似过期"].includes(job.status)) &&
           (track === "全部" || job.track === track) &&
           (region === "全部地区" || job.region === region) &&
           (view !== "saved" || savedBucket !== "saved" || saved.includes(job.id)) &&
@@ -1188,6 +1190,13 @@ export default function JobRadar() {
       : applicationBucket === "offer"
         ? offerApplications
         : rejectedApplications;
+  const expirationForApplication = (application: Application) => dailyJobs.find((job) =>
+    ["已过期", "疑似过期"].includes(job.status)
+      && ((application.applicationId && job.applicationId === application.applicationId)
+        || (application.jobUrl && job.jobUrl === application.jobUrl)
+        || (job.company.trim().toLowerCase() === application.company.trim().toLowerCase()
+          && job.title.trim().toLowerCase() === application.title.trim().toLowerCase())),
+  );
   const applicationById = new Map(applicationsList.filter((item) => item.id).map((item) => [item.id as number, item]));
   const pendingTasks = tasks
     .filter((task) => task.status === "pending")
@@ -1838,7 +1847,7 @@ export default function JobRadar() {
               ) : pendingApplications.map((item) => (
                 <article className="application-card" key={item.id}>
                   <div className="application-head">
-                    <div><span className={`status status-${item.status}`}>{item.status}</span><h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
+                    <div><span className={`status status-${item.status}`}>{item.status}</span>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
                     <span className="priority">{item.priority}</span>
                   </div>
                   <div className="application-details">
@@ -1871,6 +1880,7 @@ export default function JobRadar() {
                   <div className="job-title">
                     <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
                     <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
+                    {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
                   </div>
                   <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => toggleSaved(job.id)} aria-label={saved.includes(job.id) ? "取消收藏" : "收藏岗位"}>
                     {saved.includes(job.id) ? "★" : "☆"}
@@ -1955,7 +1965,7 @@ export default function JobRadar() {
               {visibleApplications.map((item) => (
                 <article className="application-card" key={item.id}>
                   <div className="application-head">
-                    <div><span className={`status status-${item.status}`}>{item.status}</span><h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
+                    <div><span className={`status status-${item.status}`}>{item.status}</span>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
                     <span className="priority">{item.priority}</span>
                   </div>
                   <div className="application-details">
@@ -2006,7 +2016,7 @@ export default function JobRadar() {
           <p className="result-count">显示 {companies.length} / {companyRecords.length} 条目标公司记录</p>
           <div className="company-list">
             {companies.map((company) => {
-              const companyJobs = dailyJobs.filter((job) => job.company.toLowerCase() === company.company.toLowerCase());
+              const companyJobs = dailyJobs.filter((job) => !["已过期", "疑似过期"].includes(job.status) && job.company.toLowerCase() === company.company.toLowerCase());
               const companyApplications = applicationsList.filter((item) => item.company.toLowerCase() === company.company.toLowerCase());
               const companyApplicationIds = new Set(companyApplications.map((item) => item.id).filter(Boolean));
               const companyInterviews = interviews.filter((item) => companyApplicationIds.has(item.applicationId));
@@ -2415,7 +2425,7 @@ export default function JobRadar() {
               <button type="button" onClick={() => setRefreshConfirmationOpen(false)} aria-label="关闭">×</button>
             </div>
             <p>
-              这会立即触发完整扫描，包括公司 ATS、JobSpy、Job Board Aggregator、中国公开来源、公司官网核验、评分与去重，并消耗 GitHub Actions 运行时间。
+              这会立即触发美国岗位完整扫描，包括公司 ATS、JobSpy、美国公司官网核验、过期检查、评分与去重，并消耗 GitHub Actions 运行时间。
             </p>
             <div className="refresh-confirm-note">
               系统每天早上 06:00 会自动更新。除非需要立刻查看最新岗位，否则建议等待下一次自动更新。
