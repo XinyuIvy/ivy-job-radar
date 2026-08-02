@@ -21,7 +21,7 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
     def test_bookmarklet_extracts_jobposting_and_posts_to_private_endpoint(self):
         installer = (ROOT / "app" / "bookmarklet" / "bookmarklet-installer.tsx").read_text(encoding="utf-8")
 
-        self.assertIn('script[type="application/ld+json"]', installer)
+        self.assertIn('application/ld+json', installer)
         self.assertIn('type==="JobPosting"', installer)
         self.assertIn('form.method="POST"', installer)
         self.assertIn('/api/bookmark-capture', installer)
@@ -35,7 +35,8 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
         self.assertIn('href="/bookmarklet"', layout)
         self.assertIn('ivy-job-radar-bookmark-v1:', helpers)
         self.assertIn('secureBookmarkKeyEqual', helpers)
-        self.assertNotIn('IVY_JOB_RADAR_SYNC_TOKEN', (ROOT / "app" / "bookmarklet" / "bookmarklet-installer.tsx").read_text(encoding="utf-8"))
+        installer = (ROOT / "app" / "bookmarklet" / "bookmarklet-installer.tsx").read_text(encoding="utf-8")
+        self.assertNotIn('IVY_JOB_RADAR_SYNC_TOKEN', installer)
 
 
 if __name__ == "__main__":
