@@ -7,7 +7,7 @@ type Props = {
   captureKey: string;
 };
 
-function buildBookmarklet(endpoint: string, key: string) {
+function buildBookmarklet(capturePageUrl: string, key: string) {
   const code = `(()=>{try{
 const clean=(value,max=50000)=>String(value||"").replace(/\\u0000/g,"").replace(/\\s+/g," ").trim().slice(0,max);
 const text=(node)=>clean(node&&(node.innerText||node.textContent));
@@ -28,11 +28,9 @@ const identifier=posting&&posting.identifier;
 const params=new URL(window.location.href).searchParams;
 const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("reqId")||params.get("requisitionId"),500);
 const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title};
-const target="ivy_job_radar_capture";
-window.open("about:blank",target,"popup,width=600,height=760");
-const form=document.createElement("form");form.method="POST";form.action=${JSON.stringify(endpoint)};form.target=target;
-for(const [name,value] of Object.entries(payload)){const input=document.createElement("input");input.type="hidden";input.name=name;input.value=String(value||"");form.appendChild(input);}
-document.body.appendChild(form);form.submit();form.remove();
+const destination=${JSON.stringify(capturePageUrl)}+"#"+encodeURIComponent(JSON.stringify(payload));
+const popup=window.open(destination,"ivy_job_radar_capture","popup,width=600,height=760");
+if(!popup)alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");
 }catch(error){alert("无法保存当前岗位："+(error&&error.message?error.message:error));}})()`;
   return `javascript:${code}`;
 }
@@ -44,14 +42,14 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
 
   useEffect(() => {
     if (!captureKey || !linkRef.current) return;
-    const bookmarklet = buildBookmarklet(`${window.location.origin}/api/bookmark-capture`, captureKey);
+    const bookmarklet = buildBookmarklet(`${window.location.origin}/bookmarklet/capture`, captureKey);
     bookmarkletRef.current = bookmarklet;
     linkRef.current.setAttribute("href", bookmarklet);
   }, [captureKey]);
 
   const copyCode = async () => {
     const bookmarklet = bookmarkletRef.current
-      || buildBookmarklet(`${window.location.origin}/api/bookmark-capture`, captureKey);
+      || buildBookmarklet(`${window.location.origin}/bookmarklet/capture`, captureKey);
     if (!bookmarklet) return;
     await navigator.clipboard.writeText(bookmarklet);
     setCopied(true);
@@ -123,7 +121,7 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
           ))}
         </div>
         <p style={{ marginTop: 24, color: "#758078", fontSize: 13 }}>
-          书签中只包含一个专用于“加入岗位”的派生密钥，不包含 Job Radar 的原始同步密钥。同步密钥变更后，需要重新安装书签。
+          书签中只包含一个专用于“加入岗位”的派生密钥，不包含 Job Radar 的原始同步密钥。岗位数据通过 Job Radar 同源窗口写入，不受招聘网站跨域表单限制。
         </p>
       </section>
     </main>
