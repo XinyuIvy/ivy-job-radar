@@ -104,6 +104,22 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertIsNone(row)
         self.assertEqual(stats["title_not_targeted"], 1)
 
+    def test_career_explainer_under_job_url_is_not_saved(self):
+        stats = CHINA_SCAN.empty_filter_stats()
+        row = CHINA_SCAN.normalize_result(
+            {
+                "title": "什么是生物统计师_2025年生物统计师岗位职责",
+                "url": "https://zhipin.com/job_detail/aea8c26d02d3e0fc1Hd42tm_GFdQ.html",
+                "description": "介绍生物统计师的日常工作、工资待遇和就业前景。",
+            },
+            {"source": "BOSS直聘公开索引", "query": "site:zhipin.com/job_detail 生物统计 博士"},
+            "2026-08-02T00:00:00+00:00",
+            stats,
+        )
+
+        self.assertIsNone(row)
+        self.assertEqual(stats["title_not_targeted"], 1)
+
     def test_common_chinese_platform_salary_ranges_are_monthly(self):
         self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("广州 | 1-1.5万 | 13薪"), 10)
         self.assertEqual(CHINA_SCAN.monthly_salary_floor_k("苏州 | 9千-1万"), 9)
