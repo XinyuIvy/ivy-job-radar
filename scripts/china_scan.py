@@ -328,15 +328,20 @@ def fetch_yahoo_results(query: str, timeout: int = 20) -> list[dict[str, str]]:
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150 Safari/537.36",
         },
     )
-    try:
-        with urlopen(request, timeout=timeout) as response:
-            text = response.read(2_000_000).decode("utf-8", "replace")
-    except Exception as exc:
-        detail = str(exc)
-        LAST_SEARCH_STATUS = "rate_limited" if "429" in detail else "search_source_error"
-        LAST_SEARCH_DETAIL = f"Yahoo: {detail}"
-        print(f"Yahoo fallback search failed: {query}: {exc}")
-        return []
+    for attempt in range(2):
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                text = response.read(2_000_000).decode("utf-8", "replace")
+            break
+        except Exception as exc:
+            detail = str(exc)
+            LAST_SEARCH_STATUS = "rate_limited" if "429" in detail else "search_source_error"
+            LAST_SEARCH_DETAIL = f"Yahoo: {detail}"
+            print(f"Yahoo fallback search failed: {query}: {exc}")
+            if attempt == 0 and "429" in detail:
+                time.sleep(2)
+                continue
+            return []
     if "captcha" in text.lower() or "challenge-form" in text.lower():
         LAST_SEARCH_STATUS = "verification_required"
         LAST_SEARCH_DETAIL = "Yahoo returned a verification page."
@@ -367,7 +372,13 @@ def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
     except Exception as exc:
         print(f"Public-index search failed: {query}: {exc}")
         # A blocked primary provider must not prevent the independent fallback.
-        return fetch_yahoo_results(query, timeout)
+        primary_status = "rate_limited" if "429" in str(exc) else "search_source_error"
+        primary_detail = f"Brave: {exc}"
+        records = fetch_yahoo_results(query, timeout)
+        if not records and LAST_SEARCH_STATUS == "no_results":
+            LAST_SEARCH_STATUS = primary_status
+            LAST_SEARCH_DETAIL = f"{primary_detail}; Yahoo returned no results."
+        return records
     text = body.decode("utf-8", "replace")
     if "challenge-form" in text or '<div class="captcha"' in text.lower():
         print(f"Public-index search requires verification: {query}")
@@ -855,6 +866,15 @@ def write_outputs(
                 "scanned_results": sum(int(row["scanned"]) for row in source_stats),
                 "valid_platform_urls": sum(int(row.get("valid_platform_urls", 0)) for row in source_stats),
                 "search_source_anomalies": sum(row.get("source_status") == "search_source_anomaly" for row in source_stats),
+                "unavailable_sources": sum(
+                    row.get("source_status") in {
+                        "job_pages_not_indexed",
+                        "rate_limited",
+                        "verification_required",
+                        "search_source_error",
+                    }
+                    for row in source_stats
+                ),
                 "all_counts_reconcile": all(bool(row.get("accounted_for")) for row in source_stats),
                 "sources": source_stats,
                 "note": (
