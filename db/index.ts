@@ -111,6 +111,16 @@ export async function getDb() {
   await ensureColumn("jobs", "last_seen_at", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("jobs", "missed_scan_count", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn("jobs", "expiration_reason", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("scan_status", "phase", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("scan_status", "current_source", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("scan_status", "steps_completed", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "steps_total", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "scanned", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "unique_jobs", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "filtered", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "verified", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "eligible", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("scan_status", "progress_updated_at", "TEXT NOT NULL DEFAULT ''");
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS application_tasks (
