@@ -697,7 +697,7 @@ async function dispatchGlobalScan() {
   return {
     triggered: false,
     status: `github_${response.status}`,
-      message: "美国公司 ATS 已完成，但美国后台搜索启动失败。",
+    message: "美国公司 ATS 已完成，但美国后台搜索启动失败。",
   };
 }
 
