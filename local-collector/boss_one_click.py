@@ -69,6 +69,8 @@ def build_summary(
         "jobs_filtered_before_detail": int(state.get("jobs_filtered_before_detail", 0)),
         "jobs_skipped_cached": int(state.get("jobs_skipped_cached", 0)),
         "jobs_detail_candidates": int(state.get("jobs_detail_candidates", eligible)),
+        "rejection_reasons": state.get("rejection_reasons", {}),
+        "review_counts": state.get("review_counts", {}),
         "jobs_eligible": eligible,
         "jobs_excluded_or_incomplete": max(0, discovered - eligible),
         "jobs_created": int(sync_result.get("created", 0)),
@@ -122,6 +124,8 @@ def run_scan(
             "filtered": int(state.get("jobs_filtered_before_detail", 0)),
             "detail_candidates": int(state.get("jobs_detail_candidates", len(jobs))),
             "eligible": len(jobs),
+            "rejection_reasons": state.get("rejection_reasons", {}),
+            "review_counts": state.get("review_counts", {}),
         })
     sync_result = {"received": 0, "created": 0, "updated": 0, "skipped": 0}
     if not dry_run:
@@ -151,6 +155,8 @@ def run_scan(
             "eligible": summary["jobs_eligible"],
             "created": summary["jobs_created"],
             "duplicate": summary["jobs_updated_or_duplicate"],
+            "rejection_reasons": summary["rejection_reasons"],
+            "review_counts": summary["review_counts"],
         })
     report_path = save_summary(radar, state, summary)
     print("\nBOSS scan summary")
