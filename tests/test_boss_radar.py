@@ -242,7 +242,7 @@ class BossRadarTransformTest(unittest.TestCase):
             }
             commands = []
 
-            def fake_run(command, check=False):
+            def fake_run(command, check=False, **_kwargs):
                 commands.append(command)
                 if "--input" in command:
                     detail_path = Path(command[command.index("--detail-output") + 1])
