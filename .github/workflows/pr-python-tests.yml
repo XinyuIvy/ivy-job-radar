@@ -69,6 +69,7 @@ jobs:
 
       - name: Validate website
         run: |
+          chmod +x scripts/*.sh
           npm run lint
           npm run build
 
