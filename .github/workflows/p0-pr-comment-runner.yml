@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: read
 
 jobs:
@@ -13,11 +14,22 @@ jobs:
     if: >-
       github.event.issue.pull_request &&
       github.event.issue.number == 26 &&
-      github.event.comment.body == '/run-p0-salary-policy' &&
+      github.event.comment.body == '/run-p0-salary-policy-v2' &&
       github.repository_owner == 'XinyuIvy'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - name: Report start
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: 'P0 salary-policy runner started.'
+            })
+
       - name: Check out source branch
         uses: actions/checkout@v4
         with:
@@ -38,6 +50,17 @@ jobs:
           PY
           bash /tmp/apply-p0.sh
           rm -f .github/workflows/p0-pr-trigger.yml
+
+      - name: Report edit completion
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: 'P0 edits applied; validation is running.'
+            })
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -74,8 +97,22 @@ jobs:
       - name: Commit validated changes
         shell: bash
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name "github-actions[bot]]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "Remove China salary hard filters"
           git push origin HEAD:agent/remove-china-salary-hard-filter
+
+      - name: Report final status
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `P0 salary-policy runner finished with status: ${process.env.JOB_STATUS}.`
+            })
