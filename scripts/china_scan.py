@@ -393,14 +393,24 @@ def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
         primary_status = "rate_limited" if "429" in str(exc) else "search_source_error"
         primary_detail = f"Brave: {exc}"
         records = fetch_yahoo_results(query, timeout)
-        if not records and LAST_SEARCH_STATUS == "no_results":
+        if records:
+            LAST_SEARCH_STATUS = primary_status
+            LAST_SEARCH_DETAIL = f"{primary_detail}; Yahoo returned {len(records)} partial results."
+        elif LAST_SEARCH_STATUS == "no_results":
             LAST_SEARCH_STATUS = primary_status
             LAST_SEARCH_DETAIL = f"{primary_detail}; Yahoo returned no results."
         return records
     text = body.decode("utf-8", "replace")
     if "challenge-form" in text or '<div class="captcha"' in text.lower():
         print(f"Public-index search requires verification: {query}")
-        return fetch_yahoo_results(query, timeout)
+        records = fetch_yahoo_results(query, timeout)
+        if records:
+            LAST_SEARCH_STATUS = "verification_required"
+            LAST_SEARCH_DETAIL = f"Brave required verification; Yahoo returned {len(records)} partial results."
+        elif LAST_SEARCH_STATUS == "no_results":
+            LAST_SEARCH_STATUS = "verification_required"
+            LAST_SEARCH_DETAIL = "Brave required verification; Yahoo returned no results."
+        return records
     records = parse_brave_results(text)
     if records:
         LAST_SEARCH_STATUS = "ok"
@@ -810,7 +820,9 @@ def run_scan(
             "rejected_total": hard_rejected,
             "accounted_for": matched + hard_rejected == len(results),
             "source_status": (
-                LAST_SEARCH_STATUS if not results and LAST_SEARCH_STATUS != "ok"
+                LAST_SEARCH_STATUS if LAST_SEARCH_STATUS in {
+                    "rate_limited", "verification_required", "search_source_error"
+                }
                 else "no_results" if not results
                 else "job_pages_not_indexed" if (
                     item["source"] == "拉勾"
