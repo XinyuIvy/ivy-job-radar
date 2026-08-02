@@ -1,4 +1,6 @@
 import importlib.util
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -12,6 +14,26 @@ SPEC.loader.exec_module(CHINA_SCAN)
 
 
 class ChinaScanFilterTest(unittest.TestCase):
+    def test_single_query_override_skips_other_queries_and_direct_pages(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = Path(directory) / "config.json"
+            config_path.write_text(json.dumps({
+                "queries": [{"source": "unused", "query": "unused"}],
+                "direct_pages": [{"source": "unused page", "url": "https://example.cn"}],
+            }), encoding="utf-8")
+            original_fetch = CHINA_SCAN.fetch_bing_rss
+            CHINA_SCAN.fetch_bing_rss = lambda query: []
+            try:
+                _, stats = CHINA_SCAN.run_scan(
+                    config_path,
+                    query_override={"source": "猎聘", "query": "site:liepin.com 生物统计"},
+                )
+            finally:
+                CHINA_SCAN.fetch_bing_rss = original_fetch
+
+        self.assertEqual(len(stats), 1)
+        self.assertEqual(stats[0]["source"], "猎聘")
+
     def test_parses_brave_result_without_unrelated_navigation_links(self):
         body = '''
         <a href="/images?q=test">Images</a>
