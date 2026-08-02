@@ -77,6 +77,7 @@ class SyncJobsTest(unittest.TestCase):
             jobs,
             incomplete_sources={"BOSS直聘（本地采集）"},
         )
+        radar.record_synced_jobs.assert_not_called()
 
     def test_incomplete_source_imports_jobs_without_expiration_reconciliation(self):
         requests = []
