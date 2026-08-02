@@ -97,7 +97,7 @@ jobs:
             availability_policy: allow-limited
           - id: yingjiesheng
             source: 应届生求职网
-            query: site:yingjiesheng.com 数据科学 博士
+            query: site:yingjiesheng.com/job- 数据分析师 统计学
             minimum_matched: 1
             availability_policy: allow-limited
     steps:
