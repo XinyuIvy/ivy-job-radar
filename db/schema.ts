@@ -208,6 +208,16 @@ export const chinaScanStatus = sqliteTable("china_scan_status", {
   receivedAt: text("received_at").notNull().default(""),
 });
 
+export const chinaScanControl = sqliteTable("china_scan_control", {
+  id: integer("id").primaryKey(),
+  requestId: text("request_id").notNull().default(""),
+  state: text("state").notNull().default("idle"),
+  requestedAt: text("requested_at").notNull().default(""),
+  claimedAt: text("claimed_at").notNull().default(""),
+  completedAt: text("completed_at").notNull().default(""),
+  message: text("message").notNull().default(""),
+});
+
 export const userProfiles = sqliteTable("user_profiles", {
   userEmail: text("user_email").primaryKey(),
   fullName: text("full_name").notNull().default(""),
