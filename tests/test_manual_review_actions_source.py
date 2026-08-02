@@ -18,15 +18,17 @@ class ManualReviewActionsSourceTests(unittest.TestCase):
         self.assertIn('db.delete(jobRequests)', route)
         self.assertIn('db.delete(jobs)', route)
 
-    def test_manual_review_page_exposes_all_user_actions(self):
-        client = (ROOT / "app" / "manual-review" / "manual-review-client.tsx").read_text(encoding="utf-8")
+    def test_verification_queue_exposes_all_user_actions(self):
+        client = (ROOT / "app" / "verification-queue-actions.tsx").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
 
+        self.assertIn('status !== "需复核"', client)
         self.assertIn('人工通过', client)
         self.assertIn('不再推荐', client)
         self.assertIn('重新核验', client)
         self.assertIn('仅删除记录', client)
-        self.assertIn('href="/manual-review"', layout)
+        self.assertIn('VerificationQueueActions', layout)
+        self.assertNotIn('href="/manual-review"', layout)
 
 
 if __name__ == "__main__":
