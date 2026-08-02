@@ -196,6 +196,15 @@ type ChinaScanStatus = {
   receivedAt: string;
 };
 
+type ChinaScanControl = {
+  requestId: string;
+  state: "idle" | "queued" | "running" | "completed" | "failed" | "attention_required";
+  requestedAt: string;
+  claimedAt: string;
+  completedAt: string;
+  message: string;
+};
+
 type UserProfile = {
   userEmail: string;
   fullName: string;
@@ -531,6 +540,8 @@ export default function JobRadar() {
   const [ignoreSaving, setIgnoreSaving] = useState(false);
   const [scanStatus, setScanStatus] = useState<ScanStatus | null>(null);
   const [chinaScanStatus, setChinaScanStatus] = useState<ChinaScanStatus | null>(null);
+  const [chinaScanControl, setChinaScanControl] = useState<ChinaScanControl | null>(null);
+  const [chinaScanStarting, setChinaScanStarting] = useState(false);
   const [refreshConfirmationOpen, setRefreshConfirmationOpen] = useState(false);
   const [clock, setClock] = useState(0);
   const [profile, setProfile] = useState<UserProfile>(emptyProfile);
@@ -623,6 +634,11 @@ export default function JobRadar() {
     });
   };
 
+  const loadChinaScanControl = async () => {
+    const response = await fetch("/api/china-scan-control", { cache: "no-store" });
+    if (response.ok) setChinaScanControl(await response.json() as ChinaScanControl);
+  };
+
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
@@ -708,11 +724,13 @@ export default function JobRadar() {
     const initialTimer = window.setTimeout(() => {
       void loadScanStatus();
       void loadChinaScanStatus();
+      void loadChinaScanControl();
       setClock(Date.now());
     }, 0);
     const statusTimer = window.setInterval(() => {
       void loadScanStatus();
       void loadChinaScanStatus();
+      void loadChinaScanControl();
     }, 15000);
     const clockTimer = window.setInterval(() => setClock(Date.now()), 1000);
     return () => {
@@ -971,8 +989,25 @@ export default function JobRadar() {
     setJobsRefreshing(false);
   };
 
+  const startChinaScan = async () => {
+    setChinaScanStarting(true);
+    const response = await fetch("/api/china-scan-control", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "start" }),
+    });
+    const result = await response.json().catch(() => ({})) as Partial<ChinaScanControl> & { error?: string };
+    if (response.ok || response.status === 409) {
+      setChinaScanControl(result as ChinaScanControl);
+    } else {
+      setChinaScanControl((current) => current ? { ...current, message: result.error || "中国岗位扫描启动失败。" } : null);
+    }
+    setChinaScanStarting(false);
+  };
+
   const scanStartedMs = scanStatus?.startedAt ? new Date(scanStatus.startedAt).getTime() : 0;
   const scanRunning = scanStatus?.state === "queued" || scanStatus?.state === "running" || scanStatus?.state === "ats_complete";
+  const chinaScanRunning = chinaScanControl?.state === "queued" || chinaScanControl?.state === "running";
   const scanElapsedSeconds = scanRunning && scanStartedMs
     ? Math.max(0, (clock - scanStartedMs) / 1000)
     : 0;
@@ -1618,13 +1653,22 @@ export default function JobRadar() {
             <strong>真实招聘数据</strong>
             <p>{jobsMessage || "一次更新会同时扫描公司 ATS、美国聚合平台、中国招聘网站和公司官网；结果统一去重后回写。"}</p>
           </div>
-          <button
-            className="refresh-jobs"
-            onClick={() => setRefreshConfirmationOpen(true)}
-            disabled={jobsRefreshing || scanRunning}
-          >
-            {jobsRefreshing ? "正在启动…" : scanRunning ? "更新进行中" : "立即更新全部来源"}
-          </button>
+          <div className="scan-action-buttons">
+            <button
+              className="refresh-jobs"
+              onClick={() => setRefreshConfirmationOpen(true)}
+              disabled={jobsRefreshing || scanRunning}
+            >
+              {jobsRefreshing ? "正在启动…" : scanRunning ? "云端更新中" : "更新云端来源"}
+            </button>
+            <button
+              className="refresh-jobs china-scan-button"
+              onClick={() => void startChinaScan()}
+              disabled={chinaScanStarting || chinaScanRunning}
+            >
+              {chinaScanStarting ? "正在提交…" : chinaScanControl?.state === "queued" ? "等待 Mac" : chinaScanControl?.state === "running" ? "中国扫描中" : "开始中国岗位扫描"}
+            </button>
+          </div>
           <button className="ignored-list-link" onClick={() => setView("ignored")}>忽略名单 {ignoredJobs.length}</button>
           <div className={`scan-summary scan-summary-${scanStatus?.state ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
@@ -1657,13 +1701,22 @@ export default function JobRadar() {
               )}
             </div>
           </div>
+          <div className={`scan-summary china-control-summary scan-summary-${chinaScanControl?.state ?? "idle"}`} aria-live="polite">
+            <span className="scan-summary-dot" />
+            <div>
+              <strong>
+                {chinaScanControl?.state === "queued" ? "中国岗位扫描已排队" : chinaScanControl?.state === "running" ? "Mac 正在扫描中国招聘平台" : chinaScanControl?.state === "completed" ? "最近一次网站发起的中国扫描已完成" : chinaScanControl?.state === "attention_required" ? "中国扫描完成，但有来源需要处理" : chinaScanControl?.state === "failed" ? "最近一次中国扫描失败" : "中国岗位扫描等待启动"}
+              </strong>
+              <p>{chinaScanControl?.message || "点击“开始中国岗位扫描”，Mac 后台服务会自动领取任务；Mac 关机时任务会保留到下次登录。"}</p>
+            </div>
+          </div>
           <div className={`scan-summary china-scan-summary scan-summary-${chinaScanStatus?.status ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
             <div>
               {chinaScanStatus ? (
                 <>
                   <strong>
-                    Mac 中国多来源扫描{chinaScanStatus.status === "completed" ? "完成" : chinaScanStatus.status === "partial" ? "部分完成" : "失败"}：{formatNewYorkTime(chinaScanStatus.finishedAt)}（美东时间）
+                    中国多来源扫描{chinaScanStatus.status === "completed" ? "完成" : chinaScanStatus.status === "partial" ? "部分完成" : "失败"}：{formatNewYorkTime(chinaScanStatus.finishedAt)}（美东时间）
                   </strong>
                   <p>
                     发现 {chinaScanStatus.jobsDiscovered} 个，筛选后 {chinaScanStatus.jobsEligible} 个；新增 {chinaScanStatus.jobsCreated} 个，更新或重复 {chinaScanStatus.jobsUpdatedOrDuplicate} 个。
@@ -1682,8 +1735,8 @@ export default function JobRadar() {
                 </>
               ) : (
                 <>
-                  <strong>尚无 Mac 中国多来源扫描报告</strong>
-                  <p>下一次运行一键扫描后，岗位会自动进入今日岗位，分来源汇总也会自动显示在这里。</p>
+                  <strong>尚无中国多来源扫描报告</strong>
+                  <p>点击上方按钮后，岗位会自动进入今日岗位，分来源汇总也会自动显示在这里。</p>
                 </>
               )}
             </div>
@@ -1978,12 +2031,13 @@ export default function JobRadar() {
             </article>
 
             <article className="collector-card collector-local">
-              <div className="collector-card-head"><span className="collector-dot" /><strong>BOSS 本地采集</strong><em>{latestBossCheck ? `最近同步 ${formatNewYorkTime(latestBossCheck)}` : "等待首次同步"}</em></div>
-              <h2>登录一次，之后轮换搜索</h2>
-              <p>独立 Chrome 在你的 Mac 上保留登录态。采集器按城市和岗位关键词低频轮换，只把岗位信息同步到这里，不上传 Cookie 或招聘者资料。</p>
-              <div className="collector-metrics"><span>已同步岗位 <b>{bossJobs.length}</b></span><span>默认频率 <b>每日 2 次</b></span></div>
+              <div className="collector-card-head"><span className="collector-dot" /><strong>中国平台本地采集</strong><em>{latestBossCheck ? `最近同步 ${formatNewYorkTime(latestBossCheck)}` : "等待首次同步"}</em></div>
+              <h2>网站发起，Mac 自动执行</h2>
+              <p>独立 Chrome 在你的 Mac 上保留 BOSS 登录态。点击网站按钮后，后台服务轮换搜索 BOSS 及其他中国来源，只同步岗位信息，不上传 Cookie 或招聘者资料。</p>
+              <div className="collector-metrics"><span>已同步岗位 <b>{bossJobs.length}</b></span><span>当前状态 <b>{chinaScanRunning ? "运行中" : "待命"}</b></span></div>
               <div className="collector-actions">
-                <a className="primary" href="/api/collector-config">下载私有配置</a>
+                <button className="primary" onClick={() => void startChinaScan()} disabled={chinaScanStarting || chinaScanRunning}>{chinaScanStarting ? "正在提交…" : chinaScanRunning ? "扫描进行中" : "开始中国岗位扫描"}</button>
+                <a href="/api/collector-config">下载私有配置</a>
                 <a href="https://github.com/XinyuIvy/ivy-job-radar/tree/main/local-collector" target="_blank" rel="noreferrer">查看安装说明 ↗</a>
               </div>
             </article>
@@ -1992,7 +2046,7 @@ export default function JobRadar() {
           <div className="collector-steps">
             <div><span>1</span><strong>下载私有配置</strong><p>配置只给当前登录的站点所有者下载，不会写入 GitHub。</p></div>
             <div><span>2</span><strong>首次登录 BOSS</strong><p>在专用 Chrome 中登录一次；登录状态保存在你的 Mac。</p></div>
-            <div><span>3</span><strong>开启自动计划</strong><p>每天两次轮换城市与关键词，遇到验证码或风控会停止并等待你处理。</p></div>
+            <div><span>3</span><strong>安装后台服务</strong><p>以后只需点击网站按钮；Mac 登录后自动领取任务，遇到验证码或风控会停止并提示。</p></div>
           </div>
 
           <aside className="collector-boundary">
