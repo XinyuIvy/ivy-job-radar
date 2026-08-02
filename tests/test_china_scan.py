@@ -34,6 +34,29 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(len(stats), 1)
         self.assertEqual(stats[0]["source"], "猎聘")
 
+    def test_rate_limit_is_reported_as_source_limit_not_zero_results(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = Path(directory) / "config.json"
+            config_path.write_text(json.dumps({"queries": []}), encoding="utf-8")
+            original_fetch = CHINA_SCAN.fetch_bing_rss
+
+            def limited_fetch(query):
+                CHINA_SCAN.LAST_SEARCH_STATUS = "rate_limited"
+                CHINA_SCAN.LAST_SEARCH_DETAIL = "Both public search providers returned HTTP 429."
+                return []
+
+            CHINA_SCAN.fetch_bing_rss = limited_fetch
+            try:
+                _, stats = CHINA_SCAN.run_scan(
+                    config_path,
+                    query_override={"source": "国聘", "query": "site:iguopin.com/job/detail 数据分析"},
+                )
+            finally:
+                CHINA_SCAN.fetch_bing_rss = original_fetch
+
+        self.assertEqual(stats[0]["source_status"], "rate_limited")
+        self.assertIn("HTTP 429", stats[0]["source_detail"])
+
     def test_parses_brave_result_without_unrelated_navigation_links(self):
         body = '''
         <a href="/images?q=test">Images</a>
