@@ -57,6 +57,34 @@ class ChinaScanFilterTest(unittest.TestCase):
         self.assertEqual(stats[0]["source_status"], "rate_limited")
         self.assertIn("HTTP 429", stats[0]["source_detail"])
 
+    def test_partial_fallback_results_keep_primary_rate_limit_status(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config_path = Path(directory) / "config.json"
+            config_path.write_text(json.dumps({"queries": []}), encoding="utf-8")
+            original_fetch = CHINA_SCAN.fetch_bing_rss
+
+            def partial_fetch(query):
+                CHINA_SCAN.LAST_SEARCH_STATUS = "rate_limited"
+                CHINA_SCAN.LAST_SEARCH_DETAIL = "Brave returned HTTP 429; Yahoo returned partial results."
+                return [{
+                    "title": "数据分析师",
+                    "url": "https://jobs.51job.com/shanghai/123456789.html",
+                    "description": "统计学专业，月薪10-15K。",
+                }]
+
+            CHINA_SCAN.fetch_bing_rss = partial_fetch
+            try:
+                _, stats = CHINA_SCAN.run_scan(
+                    config_path,
+                    query_override={"source": "前程无忧", "query": "site:jobs.51job.com 数据分析师"},
+                )
+            finally:
+                CHINA_SCAN.fetch_bing_rss = original_fetch
+
+        self.assertEqual(stats[0]["source_status"], "rate_limited")
+        self.assertEqual(stats[0]["matched"], 0)
+        self.assertEqual(stats[0]["rejected"]["salary_below_20k"], 1)
+
     def test_company_and_salary_fields_do_not_copy_javascript_shell_text(self):
         row = CHINA_SCAN.normalize_result(
             {
