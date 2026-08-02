@@ -57,6 +57,7 @@ jobs:
     timeout-minutes: 12
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
         include:
           - id: boss
