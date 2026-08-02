@@ -228,16 +228,13 @@ def write_detail_cache(cache: dict[str, Any], path: Path = DETAIL_CACHE_FILE) ->
     temporary.replace(path)
 
 
-def title_prefilter(row: dict[str, Any]) -> bool:
-    """Reject obvious mismatches before opening the slower detail page."""
+def title_prefilter_reason(row: dict[str, Any]) -> str:
+    """Return the exact hard-filter reason, or an empty string when retained."""
     title = text(row.get("title") or row.get("job_name"))
-    if (
-        not title
-        or not TARGET_TITLE.search(title)
-        or EXCLUDED_TITLE.search(title)
-        or OBVIOUSLY_IRRELEVANT.search(title)
-    ):
-        return False
+    if not title or not TARGET_TITLE.search(title):
+        return "title_not_targeted"
+    if EXCLUDED_TITLE.search(title) or OBVIOUSLY_IRRELEVANT.search(title):
+        return "excluded_seniority_or_role"
     listing_content = " ".join([
         title,
         text(row.get("skills")),
@@ -246,20 +243,28 @@ def title_prefilter(row: dict[str, Any]) -> bool:
         text(row.get("company_industry")),
     ])
     if ALGORITHM_TITLE.search(title) and EXCLUDED_ALGORITHM_DOMAIN.search(listing_content):
-        return False
+        return "excluded_core_domain"
     if EXCLUDED_CORE_CONTENT.search(listing_content):
-        return False
-    if (salary_floor := monthly_salary_floor_k(salary_text(row))) is None or salary_floor < 20:
-        return False
+        return "excluded_core_domain"
+    salary_floor = monthly_salary_floor_k(salary_text(row))
+    if salary_floor is not None and salary_floor < 20:
+        return "salary_below_20k"
     key = row_key(row)
     job_url = text(row.get("job_link") or row.get("url"))
-    return bool(key and job_url and company_name(row, {}))
+    if not key or not job_url or not company_name(row, {}):
+        return "missing_required_fields"
+    return ""
+
+
+def title_prefilter(row: dict[str, Any]) -> bool:
+    """Return whether a listing should advance to detail collection."""
+    return not title_prefilter_reason(row)
 
 
 def collect_detail_candidates(
     jobs_paths: list[Path],
     cache_path: Path = DETAIL_CACHE_FILE,
-) -> tuple[list[dict[str, Any]], dict[str, int]]:
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Deduplicate and prefilter every list result before detail collection."""
     cache_jobs = load_detail_cache(cache_path).get("jobs", {})
     unique_rows: dict[str, dict[str, Any]] = {}
@@ -281,10 +286,16 @@ def collect_detail_candidates(
     candidates: list[dict[str, Any]] = []
     filtered = 0
     cached = 0
+    rejection_reasons: dict[str, int] = {}
+    salary_missing_or_negotiable = 0
     for key, row in unique_rows.items():
-        if not title_prefilter(row):
+        reason = title_prefilter_reason(row)
+        if reason:
             filtered += 1
+            rejection_reasons[reason] = rejection_reasons.get(reason, 0) + 1
             continue
+        if monthly_salary_floor_k(salary_text(row)) is None:
+            salary_missing_or_negotiable += 1
         fingerprint = listing_fingerprint(row)
         entry = cache_jobs.get(key, {})
         if isinstance(entry, dict) and entry.get("fingerprint") == fingerprint:
@@ -299,6 +310,8 @@ def collect_detail_candidates(
         "jobs_filtered_before_detail": filtered,
         "jobs_skipped_cached": cached,
         "jobs_detail_candidates": len(candidates),
+        "rejection_reasons": rejection_reasons,
+        "review_counts": {"salary_missing_or_negotiable": salary_missing_or_negotiable},
     }
 
 
@@ -399,7 +412,7 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
             salary = salary_text(row, detail)
             salary_floor = monthly_salary_floor_k(salary, content)
             years = required_experience(content)
-            if salary_floor is None or salary_floor < 20 or (years is not None and years > 3):
+            if (salary_floor is not None and salary_floor < 20) or (years is not None and years > 3):
                 continue
             if EXCLUDED_CORE_CONTENT.search(content):
                 continue
@@ -420,8 +433,9 @@ def transform_result_files(result_files: list[tuple[Path, Path | None]]) -> list
                 "score": score,
                 "visa": "不适用",
                 "evidence": (
-                    f"薪资：{salary}（月薪下限约 {salary_floor:g}K）；"
-                    "BOSS 当前职位页由本地登录会话采集；职位开放性仍需以平台页面为准。"
+                    (f"薪资：{salary}（月薪下限约 {salary_floor:g}K）；" if salary_floor is not None
+                     else "工资未公布或面议，已保留待核验；")
+                    + "BOSS 当前职位页由本地登录会话采集；职位开放性仍需以平台页面为准。"
                 ),
                 "description": jd,
                 "salary": salary,
@@ -641,6 +655,8 @@ def run_searches(
             "unique": prefilter_stats["jobs_unique"],
             "filtered": prefilter_stats["jobs_filtered_before_detail"],
             "detail_candidates": prefilter_stats["jobs_detail_candidates"],
+            "rejection_reasons": prefilter_stats["rejection_reasons"],
+            "review_counts": prefilter_stats["review_counts"],
         })
 
     # Phase 2 opens details only for new, plausible jobs, once per job ID.
