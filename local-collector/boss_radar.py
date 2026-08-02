@@ -541,6 +541,14 @@ def sync_jobs(
             raise SystemExit(f"Job Radar expiration reconciliation could not connect: {error.reason}") from error
     return total
 
+
+def incomplete_boss_sources(state: dict[str, Any]) -> set[str]:
+    """Guard BOSS history when the latest search batch was not complete."""
+    if state.get("status") == "completed":
+        return set()
+    return {"BOSS直聘（本地采集）"}
+
+
 def ensure_scraper(scraper_dir: Path) -> Path:
     script = scraper_dir / "scripts" / "boss_cdp_raw.py"
     if not script.exists():
@@ -870,7 +878,11 @@ def main() -> None:
     if args.dry_run:
         print(json.dumps({"ok": True, "dry_run": True, "jobs": jobs}, ensure_ascii=False, indent=2))
         return
-    result = sync_jobs(jobs, completed_source="BOSS直聘（本地采集）")
+    result = sync_jobs(
+        jobs,
+        completed_source="BOSS直聘（本地采集）",
+        incomplete_sources=incomplete_boss_sources(read_state()),
+    )
     if args.command == "run":
         record_synced_jobs(jobs, result_files)
     print(json.dumps(result, ensure_ascii=False, indent=2))
