@@ -169,11 +169,23 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
     jobs = json.loads(jobs_path.read_text(encoding="utf-8"))
     source_summary = json.loads(summary_path.read_text(encoding="utf-8"))
     sync_result = {"created": 0, "updated": 0, "skipped": 0}
+    incomplete_statuses = {
+        "job_pages_not_indexed",
+        "rate_limited",
+        "verification_required",
+        "search_source_error",
+        "search_source_anomaly",
+    }
+    incomplete_sources = {
+        str(item.get("source", "")).strip()
+        for item in source_summary.get("sources", [])
+        if item.get("source_status") in incomplete_statuses
+    }
 
     if not dry_run:
         radar = load_module("ivy_boss_radar_for_public", RADAR_SCRIPT)
         radar.load_env(radar.DEFAULT_ENV_FILE)
-        sync_result = radar.sync_jobs(jobs)
+        sync_result = radar.sync_jobs(jobs, incomplete_sources=incomplete_sources)
 
     rejection_reasons: dict[str, int] = {}
     review_counts: dict[str, int] = {}
@@ -196,12 +208,20 @@ def run_public_sources(dry_run: bool) -> dict[str, Any]:
         "rejection_reasons": rejection_reasons,
         "review_counts": review_counts,
         "sources": source_summary.get("sources", []),
-        "attention": "",
+        "sources_limited": len(incomplete_sources),
+        "incomplete_sources": sorted(incomplete_sources),
+        "attention": (
+            "部分招聘平台本轮访问受限；已保留其历史岗位，未执行过期核对。"
+            if incomplete_sources else ""
+        ),
     }
     publish_progress({
         "source": "中国公开索引",
         "phase": "同步完成",
-        "message": f"公开索引发现 {summary['jobs_discovered']}，筛选保留 {summary['jobs_eligible']}",
+        "message": (
+            f"公开索引发现 {summary['jobs_discovered']}，筛选保留 {summary['jobs_eligible']}"
+            + (f"，{len(incomplete_sources)} 个来源受限并保留历史岗位" if incomplete_sources else "")
+        ),
         "completed": len(source_summary.get("sources", [])),
         "total": len(source_summary.get("sources", [])),
         "scanned": summary["jobs_discovered"],

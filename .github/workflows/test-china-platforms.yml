@@ -2,18 +2,26 @@ name: Test China recruitment platforms
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/china_scan.py"
+      - "scripts/validate_china_platform_scan.py"
+      - "config/china_search_queries.json"
+      - "tests/test_china_scan.py"
+      - "tests/test_boss*.py"
+      - ".github/workflows/test-china-platforms.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: test-china-recruitment-platforms
+  group: test-china-recruitment-platforms-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test-platforms:
+  validate-code:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -28,10 +36,11 @@ jobs:
       - name: Install scanner dependencies
         run: python -m pip install --requirement requirements-jobscan.txt
 
-      - name: Validate China platform scanner syntax
+      - name: Validate scanner syntax
         run: >-
           python -m py_compile
           scripts/china_scan.py
+          scripts/validate_china_platform_scan.py
           local-collector/boss_one_click.py
           local-collector/boss_radar.py
           local-collector/china_one_click.py
@@ -42,23 +51,96 @@ jobs:
           python -m unittest discover -s tests -p 'test_boss*.py'
           python -m unittest discover -s tests -p 'test_china*.py'
 
-      - name: Run public recruitment-platform smoke scan
+  smoke-platform:
+    needs: validate-code
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        include:
+          - id: boss
+            source: BOSS直聘公开索引
+            query: site:zhipin.com/job_detail 生物统计 博士
+            minimum_matched: 1
+            availability_policy: allow-limited
+          - id: liepin
+            source: 猎聘
+            query: site:liepin.com/job 生物统计 博士
+            minimum_matched: 1
+            availability_policy: allow-limited
+          - id: zhaopin
+            source: 智联招聘
+            query: site:zhaopin.com/jobdetail 数据科学家 博士
+            minimum_matched: 1
+            availability_policy: allow-limited
+          - id: 51job
+            source: 前程无忧
+            query: site:jobs.51job.com 数据分析师 统计学
+            minimum_matched: 1
+            availability_policy: allow-limited
+          - id: lagou
+            source: 拉勾
+            query: site:lagou.com 数据科学家 招聘
+            minimum_matched: 0
+            availability_policy: allow-limited
+          - id: nowcoder
+            source: 牛客招聘
+            query: site:nowcoder.com/jobs/detail 数据分析师 统计学
+            minimum_matched: 1
+            availability_policy: allow-limited
+          - id: iguopin
+            source: 国聘
+            query: site:iguopin.com/job/detail 数据分析 博士
+            minimum_matched: 1
+            availability_policy: allow-limited
+          - id: yingjiesheng
+            source: 应届生求职网
+            query: site:yingjiesheng.com/job- 数据分析师 统计学
+            minimum_matched: 1
+            availability_policy: allow-limited
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements-jobscan.txt
+
+      - name: Install scanner dependencies
+        run: python -m pip install --requirement requirements-jobscan.txt
+
+      - name: Run one-platform public-index smoke scan
         run: >-
           python scripts/china_scan.py
           --config config/china_search_queries.json
-          --output-dir /tmp/china-platform-test
-          --progress-file /tmp/china-platform-progress.json
+          --source "${{ matrix.source }}"
+          --query "${{ matrix.query }}"
+          --output-dir "/tmp/china-platform-${{ matrix.id }}"
+          --progress-file "/tmp/china-platform-${{ matrix.id }}-progress.json"
 
       - name: Print platform scan summary
-        run: python -m json.tool /tmp/china-platform-test/china_scan_summary.json
+        run: python -m json.tool "/tmp/china-platform-${{ matrix.id }}/china_scan_summary.json"
+
+      - name: Validate platform domain, job URLs, and count conservation
+        run: >-
+          python scripts/validate_china_platform_scan.py
+          --summary "/tmp/china-platform-${{ matrix.id }}/china_scan_summary.json"
+          --jobs "/tmp/china-platform-${{ matrix.id }}/china_jobs_latest.json"
+          --minimum-matched "${{ matrix.minimum_matched }}"
+          --availability-policy "${{ matrix.availability_policy }}"
 
       - name: Upload platform test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: china-platform-test-${{ github.run_id }}
+          name: china-platform-${{ matrix.id }}-${{ github.run_id }}
           path: |
-            /tmp/china-platform-test/
-            /tmp/china-platform-progress.json
+            /tmp/china-platform-${{ matrix.id }}/
+            /tmp/china-platform-${{ matrix.id }}-progress.json
           if-no-files-found: warn
           retention-days: 7

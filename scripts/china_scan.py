@@ -6,13 +6,16 @@ import html
 import json
 import re
 import time
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from pathlib import Path
-from urllib.parse import parse_qsl, quote_plus, urlencode, urljoin, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote_plus, unquote, urlencode, urljoin, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 import pandas as pd
+
+
+LAST_SEARCH_STATUS = "ok"
+LAST_SEARCH_DETAIL = ""
 
 
 TRACKING_PARAMETERS = {
@@ -35,6 +38,15 @@ WANTED_TITLE_SIGNALS = (
     "统计科学",
     "数据科学",
     "数据科学家",
+    "数据分析师",
+    "数据分析",
+    "人工智能",
+    "机器学习",
+    "深度学习",
+    "计算机视觉",
+    "医学影像",
+    "生物信息",
+    "生信分析",
     "机器学习科学家",
     "算法研究员",
     "算法科学家",
@@ -57,6 +69,10 @@ WANTED_TITLE_SIGNALS = (
     "data scientist",
     "quantitative researcher",
     "epidemiologist",
+    "machine learning",
+    "artificial intelligence",
+    "computer vision",
+    "bioinformatics",
 )
 
 EXCLUDED_TITLE_SIGNALS = (
@@ -101,6 +117,7 @@ OBVIOUSLY_IRRELEVANT_SIGNALS = (
     "出纳",
     "客服",
     "行政专员",
+    "新闻编辑",
 )
 
 UNSUPPORTED_CORE_SIGNALS = (
@@ -119,7 +136,87 @@ SOURCE_HOSTS = {
     "51job.com": "前程无忧",
     "zhaopin.com": "智联招聘",
     "lagou.com": "拉勾",
+    "iguopin.com": "国聘",
+    "yingjiesheng.com": "应届生求职网",
 }
+
+# Public search engines may ignore a site: operator when a query has few
+# results. A result can enter the candidate pool only when both its hostname
+# and URL path match the platform that was searched.
+PLATFORM_URL_RULES = {
+    "BOSS直聘公开索引": {
+        "hosts": ("zhipin.com",),
+        "paths": (r"^/job_detail/[^/]+\.html$",),
+    },
+    "猎聘": {
+        "hosts": ("liepin.com",),
+        "paths": (r"^/job/\d+\.shtml$",),
+    },
+    "智联招聘": {
+        "hosts": ("zhaopin.com",),
+        "paths": (r"^/jobdetail/[^/]+\.htm$", r"^/jobs/[^/]+\.htm$"),
+    },
+    "前程无忧": {
+        "hosts": ("51job.com",),
+        "paths": (r"^/job/[^/]+", r"^/[^/]+/[^/]+\.html$"),
+    },
+    "拉勾": {
+        "hosts": ("lagou.com",),
+        "paths": (r"^/(?:wn/)?jobs/\d+\.html$",),
+    },
+    "牛客招聘": {
+        "hosts": ("nowcoder.com",),
+        "paths": (r"^/jobs/detail/\d+", r"^/job/\d+"),
+    },
+    "国聘": {
+        "hosts": ("iguopin.com",),
+        "paths": (r"^/job/detail", r"^/jobs/\d+"),
+    },
+    "应届生求职网": {
+        "hosts": ("yingjiesheng.com",),
+        "paths": (r"^/job[-/]", r"^/jobview/", r"^/job/\d+"),
+    },
+}
+
+HARD_REJECTION_KEYS = (
+    "missing_title_or_url",
+    "source_domain_mismatch",
+    "not_specific_job_page",
+    "title_not_targeted",
+    "excluded_seniority_or_role",
+    "degree_experience_or_skill_gap",
+    "score_below_discovery_threshold",
+    "salary_below_20k",
+)
+
+
+def empty_filter_stats() -> dict[str, int]:
+    return {**{key: 0 for key in HARD_REJECTION_KEYS}, "salary_missing_or_negotiable": 0}
+
+
+def platform_rule(source: str) -> dict[str, tuple[str, ...]] | None:
+    for name, rule in PLATFORM_URL_RULES.items():
+        if source == name or source.startswith(name + "·"):
+            return rule
+    return None
+
+
+def hostname_matches(hostname: str, allowed_hosts: tuple[str, ...]) -> bool:
+    return any(hostname == host or hostname.endswith("." + host) for host in allowed_hosts)
+
+
+def platform_url_rejection(url: str, source: str) -> str | None:
+    """Return the rejection key when a platform URL is outside its source contract."""
+    rule = platform_rule(source)
+    if rule is None:
+        return None
+    parts = urlsplit(url)
+    hostname = (parts.hostname or "").lower().removeprefix("www.")
+    if not hostname_matches(hostname, rule["hosts"]):
+        return "source_domain_mismatch"
+    if not any(re.search(pattern, parts.path, flags=re.IGNORECASE) for pattern in rule["paths"]):
+        return "not_specific_job_page"
+    return None
 
 
 def clean_text(value: object) -> str:
@@ -155,38 +252,143 @@ def source_name(url: str, fallback: str) -> str:
     return fallback
 
 
-def fetch_bing_rss(query: str, timeout: int = 25) -> list[dict[str, str]]:
-    url = f"https://www.bing.com/search?format=rss&setlang=zh-CN&q={quote_plus(query)}"
+def parse_brave_results(body: str) -> list[dict[str, str]]:
+    """Extract ordinary web results from Brave's server-rendered HTML."""
+    starts = [match.start() for match in re.finditer(r'<div class="snippet[^>]+data-type="web"', body)]
+    records: list[dict[str, str]] = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(body)
+        block = body[start:end]
+        link_match = re.search(
+            r'<a href="(https?://[^"]+)"[^>]*class="[^"]*\bl1\b[^"]*"',
+            block,
+            flags=re.IGNORECASE,
+        )
+        title_match = re.search(
+            r'<div class="title search-snippet-title[^"]*"[^>]*title="([^"]*)"',
+            block,
+            flags=re.IGNORECASE,
+        )
+        if not link_match or not title_match:
+            continue
+        description_match = re.search(
+            r'<div class="content [^"]*line-clamp-dynamic[^"]*">([\s\S]*?)</div>',
+            block,
+            flags=re.IGNORECASE,
+        )
+        description = description_match.group(1) if description_match else ""
+        description = re.sub(r"<!--[\s\S]*?-->|<[^>]+>", " ", description)
+        records.append({
+            "title": clean_text(title_match.group(1)),
+            "url": clean_text(link_match.group(1)),
+            "description": clean_text(description),
+        })
+    return records
+
+
+def parse_yahoo_results(body: str) -> list[dict[str, str]]:
+    """Extract ordinary web results and decode Yahoo redirect URLs."""
+    starts = [match.start() for match in re.finditer(r'<div class="dd [^"]*\balgo\b', body)]
+    records: list[dict[str, str]] = []
+    for index, start in enumerate(starts):
+        end = starts[index + 1] if index + 1 < len(starts) else len(body)
+        block = body[start:end]
+        redirect_match = re.search(
+            r'href="https://r\.search\.yahoo\.com/[^"]*/RU=([^/]+)/RK=',
+            block,
+            flags=re.IGNORECASE,
+        )
+        direct_match = re.search(r'href="(https?://[^"]+)"', block, flags=re.IGNORECASE)
+        title_match = re.search(r'<h3[^>]*>([\s\S]*?)</h3>', block, flags=re.IGNORECASE)
+        if not title_match or not (redirect_match or direct_match):
+            continue
+        raw_url = unquote(redirect_match.group(1)) if redirect_match else html.unescape(direct_match.group(1))
+        description_match = re.search(
+            r'<div class="compText[^"]*"[^>]*>[\s\S]*?<p[^>]*>([\s\S]*?)</p>',
+            block,
+            flags=re.IGNORECASE,
+        )
+        title = re.sub(r"<[^>]+>", "", title_match.group(1))
+        description = re.sub(r"<[^>]+>", " ", description_match.group(1)) if description_match else ""
+        records.append({
+            "title": clean_text(title),
+            "url": clean_text(raw_url),
+            "description": clean_text(description),
+        })
+    return records
+
+
+def fetch_yahoo_results(query: str, timeout: int = 20) -> list[dict[str, str]]:
+    global LAST_SEARCH_DETAIL, LAST_SEARCH_STATUS
+    url = f"https://search.yahoo.com/search?p={quote_plus(query)}"
     request = Request(
         url,
         headers={
-            "Accept": "application/rss+xml,application/xml,text/xml",
+            "Accept": "text/html,application/xhtml+xml",
             "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
-            "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0)",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150 Safari/537.36",
+        },
+    )
+    for attempt in range(2):
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                text = response.read(2_000_000).decode("utf-8", "replace")
+            break
+        except Exception as exc:
+            detail = str(exc)
+            LAST_SEARCH_STATUS = "rate_limited" if "429" in detail else "search_source_error"
+            LAST_SEARCH_DETAIL = f"Yahoo: {detail}"
+            print(f"Yahoo fallback search failed: {query}: {exc}")
+            if attempt == 0 and "429" in detail:
+                time.sleep(2)
+                continue
+            return []
+    if "captcha" in text.lower() or "challenge-form" in text.lower():
+        LAST_SEARCH_STATUS = "verification_required"
+        LAST_SEARCH_DETAIL = "Yahoo returned a verification page."
+        return []
+    records = parse_yahoo_results(text)
+    LAST_SEARCH_STATUS = "ok" if records else "no_results"
+    LAST_SEARCH_DETAIL = ""
+    return records
+
+
+def fetch_bing_rss(query: str, timeout: int = 20) -> list[dict[str, str]]:
+    """Fetch public-index results; retain the legacy name for test compatibility."""
+    global LAST_SEARCH_DETAIL, LAST_SEARCH_STATUS
+    LAST_SEARCH_STATUS = "ok"
+    LAST_SEARCH_DETAIL = ""
+    url = f"https://search.brave.com/search?source=web&q={quote_plus(query)}"
+    request = Request(
+        url,
+        headers={
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150 Safari/537.36",
         },
     )
     try:
         with urlopen(request, timeout=timeout) as response:
             body = response.read(2_000_000)
     except Exception as exc:
-        print(f"Indexed search failed: {query}: {exc}")
-        return []
-
-    try:
-        root = ET.fromstring(body)
-    except ET.ParseError:
-        return []
-
-    records: list[dict[str, str]] = []
-    for item in root.findall(".//item"):
-        records.append(
-            {
-                "title": clean_text(item.findtext("title")),
-                "url": clean_text(item.findtext("link")),
-                "description": clean_text(item.findtext("description")),
-            }
-        )
-    return records
+        print(f"Public-index search failed: {query}: {exc}")
+        # A blocked primary provider must not prevent the independent fallback.
+        primary_status = "rate_limited" if "429" in str(exc) else "search_source_error"
+        primary_detail = f"Brave: {exc}"
+        records = fetch_yahoo_results(query, timeout)
+        if not records and LAST_SEARCH_STATUS == "no_results":
+            LAST_SEARCH_STATUS = primary_status
+            LAST_SEARCH_DETAIL = f"{primary_detail}; Yahoo returned no results."
+        return records
+    text = body.decode("utf-8", "replace")
+    if "challenge-form" in text or '<div class="captcha"' in text.lower():
+        print(f"Public-index search requires verification: {query}")
+        return fetch_yahoo_results(query, timeout)
+    records = parse_brave_results(text)
+    if records:
+        LAST_SEARCH_STATUS = "ok"
+        return records
+    return fetch_yahoo_results(query, timeout)
 
 
 def fetch_text(url: str, timeout: int = 25) -> tuple[str, str]:
@@ -269,9 +471,13 @@ def strip_site_suffix(title: str) -> str:
 
 
 def company_from_result(title: str, description: str) -> str:
+    if suffix_match := re.search(r"[-—]\s*([^|]{2,60}(?:公司|集团|研究院|中心))$", title):
+        return clean_text(suffix_match.group(1))
     patterns = (
         r"(?:招聘企业|公司)[:：]\s*([^，。；|]{2,40})",
-        r"([^，。；|]{2,40})(?:正在招聘|招聘)",
+        r"\|\s*([^|]{2,60}(?:公司|集团|医院|研究院|实验室))\s*(?:\||$)",
+        r"[-_]([^|]{2,40}?)(?:招聘信息|正在招聘)",
+        r"([^，。；|]{2,40}(?:公司|集团|医院|研究院|实验室))(?:正在招聘|招聘)",
     )
     for pattern in patterns:
         match = re.search(pattern, f"{title} {description}")
@@ -307,7 +513,10 @@ def monthly_salary_floor_k(text: str) -> float | None:
         (r"(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*[kK](?:\s*/?\s*月)?", 1),
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[kK](?:\s*(?:起|以上))", 1),
         (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?\s*(?:/|每)?月", 10),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*[-–—~至]\s*\d+(?:\.\d+)?\s*万(?:元)?(?:[·x×]\s*\d+\s*薪)?", 10),
+        (r"(?:月薪\s*)?(\d+(?:\.\d+)?)\s*千\s*[-–—~至]\s*\d+(?:\.\d+)?\s*(?:千|万)", 1),
         (r"(?:月薪\s*)?(\d{4,6})\s*[-–—~至]\s*\d{4,6}\s*元?\s*(?:/|每)?月", 0.001),
+        (r"(?:月薪|薪资)[:：]?\s*(\d{4,6})\s*元?(?:\s*/?\s*月)?", 0.001),
     )
     for pattern, multiplier in monthly_patterns:
         if match := re.search(pattern, content, re.IGNORECASE):
@@ -326,6 +535,17 @@ def infer_track(text: str) -> str:
     if re.search(r"医疗|医学影像|临床ai|medical|healthcare", lower):
         return "Healthcare AI"
     return "Technology"
+
+
+def unsupported_core_role(title: str, description: str) -> bool:
+    """Identify LLM/NLP roles only when the unsupported area is explicitly core."""
+    lower_title = title.lower()
+    if any(signal in lower_title for signal in UNSUPPORTED_CORE_SIGNALS):
+        return True
+    lower_description = description.lower()
+    core_phrase = r"(?:核心工作|核心职责|主要工作|主要职责|主要负责|岗位方向|专注于)"
+    unsupported_phrase = r"(?:大语言模型|大模型(?:训练|研发)?|自然语言处理|\bllm\b|\brag\b|\bnlp\b)"
+    return bool(re.search(core_phrase + r".{0,30}" + unsupported_phrase, lower_description))
 
 
 def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[str], bool]:
@@ -381,7 +601,13 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
 
     experience_blocked = years is not None and years > 3
     # Discovery must tolerate incomplete search snippets; final degree eligibility is verified from the full JD.
-    eligible = (quantitative_degree or targeted_role) and not experience_blocked and gap_count == 0
+    # LLM or NLP terminology in a description is a ranking penalty, not a hard
+    # filter. A role is rejected only when its title says that is the core job.
+    eligible = (
+        (quantitative_degree or targeted_role)
+        and not experience_blocked
+        and not unsupported_core_role(title, evidence)
+    )
     return max(0, min(100, round(score))), details, eligible
 
 
@@ -400,12 +626,29 @@ def normalize_result(
         if rejection_stats is not None:
             rejection_stats["missing_title_or_url"] += 1
         return None
-    content_is_targeted = any(signal in combined.lower() for signal in WANTED_TITLE_SIGNALS)
-    discovery_query = clean_text(query.get("query", "")).lower()
-    discovery_is_targeted = any(signal in discovery_query for signal in WANTED_TITLE_SIGNALS)
-    # A targeted platform query is already the recall step. Search snippets are
-    # often truncated, so they must not be required to repeat the query terms.
-    if not content_is_targeted and not discovery_is_targeted:
+    url_rejection = platform_url_rejection(url, str(query.get("source", "")))
+    if url_rejection:
+        if rejection_stats is not None:
+            rejection_stats[url_rejection] += 1
+        return None
+    title_is_targeted = any(signal in lower_title for signal in WANTED_TITLE_SIGNALS)
+    content_is_targeted = title_is_targeted or any(
+        signal in description.lower() for signal in WANTED_TITLE_SIGNALS
+    )
+    # The query is the recall step, but it cannot prove that a returned page is
+    # relevant because public search engines sometimes ignore query operators.
+    if not content_is_targeted:
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
+        return None
+    # Search snippets can mention a relevant neighboring vacancy while the
+    # result itself is only a company or campus-recruiting index page.
+    if not title_is_targeted and re.search(r"招聘信息|校园招聘|最新招聘", lower_title):
+        if rejection_stats is not None:
+            rejection_stats["title_not_targeted"] += 1
+        return None
+    listing_years = [int(value) for value in re.findall(r"20\d{2}", title)]
+    if "招聘" in title and any(year < datetime.now(timezone.utc).year for year in listing_years):
         if rejection_stats is not None:
             rejection_stats["title_not_targeted"] += 1
         return None
@@ -427,16 +670,16 @@ def normalize_result(
     if salary_floor is None and rejection_stats is not None:
         rejection_stats["salary_missing_or_negotiable"] += 1
     score, details, eligible = score_job(title, description, years)
-    # Keep incomplete results returned by an explicitly targeted platform
-    # query. Full-JD verification handles uncertain degree and skill evidence.
-    if not eligible and not (discovery_is_targeted and (years is None or years <= 3)):
+    if not eligible:
         if rejection_stats is not None:
             rejection_stats["degree_experience_or_skill_gap"] += 1
         return None
     company = clean_text(result.get("company")) or company_from_result(title, description)
     company_key = re.sub(r"\W+", "", company.lower())
     title_key = re.sub(r"\W+", "", title.lower())
-    identity = f"{company_key}::{title_key}"
+    # Search snippets often omit the employer. Use the canonical URL in that
+    # case so different jobs with the same generic title are not collapsed.
+    identity = url if company == "待核验公司" else f"{company_key}::{title_key}"
     return {
         "job_key": hashlib.sha256(identity.encode("utf-8")).hexdigest()[:24],
         "company": company,
@@ -452,7 +695,7 @@ def normalize_result(
             + f"{source_name(url, query['source'])}公开索引发现，需打开具体 JD 核验；"
             + "；".join(details)
         ),
-        "salary": combined,
+        "salary": f"月薪下限约 {salary_floor:g}K" if salary_floor is not None else "未公布或面议",
         "salary_min_monthly_k": salary_floor,
         "skills": [
             label
@@ -490,40 +733,57 @@ def write_progress(path: Path | None, payload: dict[str, object]) -> None:
 def run_scan(
     config_path: Path,
     progress_path: Path | None = None,
+    query_override: dict[str, str] | None = None,
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     config = json.loads(config_path.read_text(encoding="utf-8"))
     scanned_at = datetime.now(timezone.utc).isoformat()
     records: list[dict[str, object]] = []
     source_stats: list[dict[str, object]] = []
-    total_steps = len(config["queries"]) + len(config.get("direct_pages", []))
+    queries = [query_override] if query_override else config["queries"]
+    direct_pages = [] if query_override else config.get("direct_pages", [])
+    total_steps = len(queries) + len(direct_pages)
     completed_steps = 0
 
-    for item in config["queries"]:
+    for item in queries:
+        global LAST_SEARCH_DETAIL, LAST_SEARCH_STATUS
+        LAST_SEARCH_STATUS = "ok"
+        LAST_SEARCH_DETAIL = ""
         results = fetch_bing_rss(item["query"])
         matched = 0
-        rejection_stats = {
-            "missing_title_or_url": 0,
-            "title_not_targeted": 0,
-            "excluded_seniority_or_role": 0,
-            "degree_experience_or_skill_gap": 0,
-            "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
-            "salary_missing_or_negotiable": 0,
-        }
+        rejection_stats = empty_filter_stats()
         for result in results:
             normalized = normalize_result(result, item, scanned_at, rejection_stats)
             if normalized:
                 records.append(normalized)
                 matched += 1
-        source_stats.append(
-            {
-                "source": item["source"],
-                "query": item["query"],
-                "scanned": len(results),
-                "matched": matched,
-                "rejected": rejection_stats,
-            }
-        )
+        hard_rejected = sum(rejection_stats[key] for key in HARD_REJECTION_KEYS)
+        valid_platform_urls = len(results) - rejection_stats["source_domain_mismatch"] - rejection_stats["not_specific_job_page"]
+        source_stats.append({
+            "source": item["source"],
+            "query": item["query"],
+            "scanned": len(results),
+            "valid_platform_urls": valid_platform_urls,
+            "matched": matched,
+            "rejected_total": hard_rejected,
+            "accounted_for": matched + hard_rejected == len(results),
+            "source_status": (
+                LAST_SEARCH_STATUS if not results and LAST_SEARCH_STATUS != "ok"
+                else "no_results" if not results
+                else "job_pages_not_indexed" if (
+                    item["source"] == "拉勾"
+                    and valid_platform_urls == 0
+                    and rejection_stats["not_specific_job_page"] == len(results)
+                )
+                else "search_source_anomaly" if valid_platform_urls == 0
+                else "ok"
+            ),
+            "source_detail": (
+                "Public search returned only Lagou activity or listing pages; no specific job page is publicly indexed."
+                if item["source"] == "拉勾" and valid_platform_urls == 0 and results
+                else LAST_SEARCH_DETAIL
+            ),
+            "rejected": rejection_stats,
+        })
         completed_steps += 1
         write_progress(progress_path, {
             "source": item["source"],
@@ -547,33 +807,29 @@ def run_scan(
         })
         time.sleep(float(config.get("delay_seconds", 0.3)))
 
-    for page in config.get("direct_pages", []):
+    for page in direct_pages:
         results = collect_direct_page(page)
         matched = 0
-        rejection_stats = {
-            "missing_title_or_url": 0,
-            "title_not_targeted": 0,
-            "excluded_seniority_or_role": 0,
-            "degree_experience_or_skill_gap": 0,
-            "score_below_discovery_threshold": 0,
-            "salary_below_20k": 0,
-            "salary_missing_or_negotiable": 0,
-        }
+        rejection_stats = empty_filter_stats()
         query = {"source": str(page["source"]), "query": str(page["url"])}
         for result in results:
             normalized = normalize_result(result, query, scanned_at, rejection_stats)
             if normalized:
                 records.append(normalized)
                 matched += 1
-        source_stats.append(
-            {
-                "source": page["source"],
-                "query": page["url"],
-                "scanned": len(results),
-                "matched": matched,
-                "rejected": rejection_stats,
-            }
-        )
+        hard_rejected = sum(rejection_stats[key] for key in HARD_REJECTION_KEYS)
+        valid_platform_urls = len(results) - rejection_stats["source_domain_mismatch"] - rejection_stats["not_specific_job_page"]
+        source_stats.append({
+            "source": page["source"],
+            "query": page["url"],
+            "scanned": len(results),
+            "valid_platform_urls": valid_platform_urls,
+            "matched": matched,
+            "rejected_total": hard_rejected,
+            "accounted_for": matched + hard_rejected == len(results),
+            "source_status": "no_results" if not results else "ok",
+            "rejected": rejection_stats,
+        })
         completed_steps += 1
         write_progress(progress_path, {
             "source": page["source"],
@@ -626,6 +882,19 @@ def write_outputs(
             {
                 "generated_at": datetime.now(timezone.utc).isoformat(),
                 "matched_jobs": len(records),
+                "scanned_results": sum(int(row["scanned"]) for row in source_stats),
+                "valid_platform_urls": sum(int(row.get("valid_platform_urls", 0)) for row in source_stats),
+                "search_source_anomalies": sum(row.get("source_status") == "search_source_anomaly" for row in source_stats),
+                "unavailable_sources": sum(
+                    row.get("source_status") in {
+                        "job_pages_not_indexed",
+                        "rate_limited",
+                        "verification_required",
+                        "search_source_error",
+                    }
+                    for row in source_stats
+                ),
+                "all_counts_reconcile": all(bool(row.get("accounted_for")) for row in source_stats),
                 "sources": source_stats,
                 "note": (
                     "Chinese platform results are public-index discoveries. "
@@ -645,12 +914,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=Path("config/china_search_queries.json"))
     parser.add_argument("--output-dir", type=Path, default=Path("data/scans"))
     parser.add_argument("--progress-file", type=Path)
+    parser.add_argument("--source", help="Source label for a single-query smoke test.")
+    parser.add_argument("--query", help="Run one public-index query instead of the full config.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    records, source_stats = run_scan(args.config, args.progress_file)
+    if bool(args.source) != bool(args.query):
+        raise SystemExit("--source and --query must be provided together")
+    query_override = {"source": args.source, "query": args.query} if args.query else None
+    records, source_stats = run_scan(args.config, args.progress_file, query_override)
     write_outputs(records, source_stats, args.output_dir)
     print(f"Wrote {len(records)} eligible, deduplicated China jobs to {args.output_dir}")
 
