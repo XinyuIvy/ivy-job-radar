@@ -1026,6 +1026,12 @@ export default function JobRadar() {
   const scanStartedMs = scanStatus?.startedAt ? new Date(scanStatus.startedAt).getTime() : 0;
   const scanRunning = scanStatus?.state === "queued" || scanStatus?.state === "running" || scanStatus?.state === "ats_complete";
   const chinaScanRunning = chinaScanControl?.state === "queued" || chinaScanControl?.state === "running";
+  const chinaRequestMs = chinaScanControl?.requestedAt ? Date.parse(chinaScanControl.requestedAt) : 0;
+  const chinaReportMs = chinaScanStatus?.receivedAt ? Date.parse(chinaScanStatus.receivedAt) : 0;
+  const hasCurrentChinaReport = Boolean(
+    chinaScanStatus && (!chinaRequestMs || chinaReportMs >= chinaRequestMs),
+  );
+  const showChinaControlSummary = chinaScanRunning || !hasCurrentChinaReport;
   const chinaProgress = chinaScanControl?.progress;
   const chinaProgressRatio = chinaProgress?.total
     ? Math.min(1, chinaProgress.completed / chinaProgress.total)
@@ -1686,7 +1692,7 @@ export default function JobRadar() {
             <div className="scan-lane-head">
               <div><span>美国岗位更新</span><p>{jobsMessage || "扫描美国公司 ATS、JobSpy 聚合平台和美国公司官网。"}</p></div>
               <button className="refresh-jobs" onClick={() => setRefreshConfirmationOpen(true)} disabled={jobsRefreshing || scanRunning}>
-                {jobsRefreshing ? "正在启动…" : scanRunning ? "美国更新中" : "更新美国岗位"}
+                更新美国岗位
               </button>
             </div>
             <div className={`scan-summary scan-summary-${scanStatus?.state ?? "idle"}`} aria-live="polite">
@@ -1725,16 +1731,17 @@ export default function JobRadar() {
             <div className="scan-lane-head">
               <div><span>中国岗位更新</span><p>BOSS、猎聘、智联、51job、拉勾、牛客、国聘、应届生及中国公司官网。</p></div>
               <button className="refresh-jobs china-scan-button" onClick={() => void startChinaScan()} disabled={chinaScanStarting || chinaScanRunning}>
-                {chinaScanStarting ? "正在提交…" : chinaScanControl?.state === "queued" ? "等待 Mac" : chinaScanControl?.state === "running" ? "中国扫描中" : "开始中国岗位扫描"}
+                更新中国岗位
               </button>
             </div>
+            {showChinaControlSummary ? (
             <div className={`scan-summary china-control-summary scan-summary-${chinaScanControl?.state ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
             <div>
               <strong>
                 {chinaScanControl?.state === "queued" ? "中国岗位扫描已排队" : chinaScanControl?.state === "running" ? "Mac 正在扫描中国招聘平台" : chinaScanControl?.state === "completed" ? "最近一次网站发起的中国扫描已完成" : chinaScanControl?.state === "attention_required" ? "中国扫描完成，但有来源需要处理" : chinaScanControl?.state === "failed" ? "最近一次中国扫描失败" : "中国岗位扫描等待启动"}
               </strong>
-              <p>{chinaScanControl?.message || "点击“开始中国岗位扫描”，Mac 后台服务会自动领取任务；Mac 关机时任务会保留到下次登录。"}</p>
+              <p>{chinaScanControl?.message || "点击“更新中国岗位”，Mac 后台服务会自动领取任务；Mac 关机时任务会保留到下次登录。"}</p>
               {chinaProgress && chinaScanControl?.state === "running" && (
                 <>
                   <div className="scan-progress-track" aria-label={`当前阶段完成 ${Math.round(chinaProgressRatio * 100)}%`}>
@@ -1760,6 +1767,7 @@ export default function JobRadar() {
               )}
             </div>
             </div>
+            ) : (
             <div className={`scan-summary china-scan-summary scan-summary-${chinaScanStatus?.status ?? "idle"}`} aria-live="polite">
             <span className="scan-summary-dot" />
             <div>
@@ -1792,6 +1800,7 @@ export default function JobRadar() {
               )}
             </div>
             </div>
+            )}
           </article>
         </section>
       )}
@@ -2088,7 +2097,7 @@ export default function JobRadar() {
               <p>独立 Chrome 在你的 Mac 上保留 BOSS 登录态。点击网站按钮后，后台服务轮换搜索 BOSS 及其他中国来源，只同步岗位信息，不上传 Cookie 或招聘者资料。</p>
               <div className="collector-metrics"><span>已同步岗位 <b>{bossJobs.length}</b></span><span>当前状态 <b>{chinaScanRunning ? "运行中" : "待命"}</b></span></div>
               <div className="collector-actions">
-                <button className="primary" onClick={() => void startChinaScan()} disabled={chinaScanStarting || chinaScanRunning}>{chinaScanStarting ? "正在提交…" : chinaScanRunning ? "扫描进行中" : "开始中国岗位扫描"}</button>
+                <button className="primary" onClick={() => void startChinaScan()} disabled={chinaScanStarting || chinaScanRunning}>更新中国岗位</button>
                 <a href="/api/collector-config">下载私有配置</a>
                 <a href="https://github.com/XinyuIvy/ivy-job-radar/tree/main/local-collector" target="_blank" rel="noreferrer">查看安装说明 ↗</a>
               </div>
