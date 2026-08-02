@@ -51,19 +51,19 @@
     },
     {
       "source": "前程无忧",
-      "query": "site:51job.com 生物统计 博士"
+      "query": "site:jobs.51job.com 生物统计 统计学"
     },
     {
       "source": "前程无忧",
-      "query": "site:51job.com 数据科学家 博士"
+      "query": "site:jobs.51job.com 数据分析师 统计学"
     },
     {
       "source": "前程无忧",
-      "query": "site:51job.com 量化研究 博士"
+      "query": "site:jobs.51job.com 量化研究 数学"
     },
     {
       "source": "前程无忧",
-      "query": "site:51job.com 卫生经济 博士"
+      "query": "site:jobs.51job.com 卫生经济 统计"
     },
     {
       "source": "拉勾",
@@ -83,15 +83,15 @@
     },
     {
       "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail 生物统计 招聘"
+      "query": "site:nowcoder.com/jobs/detail 生物统计 统计学"
     },
     {
       "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail 数据科学 招聘"
+      "query": "site:nowcoder.com/jobs/detail 数据分析师 统计学"
     },
     {
       "source": "牛客招聘",
-      "query": "site:nowcoder.com/jobs/detail 量化研究 招聘"
+      "query": "site:nowcoder.com/jobs/detail 量化研究 数学"
     },
     {
       "source": "国聘",
