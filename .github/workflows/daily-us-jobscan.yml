@@ -1,4 +1,4 @@
-name: Daily global job scan
+name: Daily US job scan
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: daily-global-jobscan
+  group: daily-us-jobscan
   cancel-in-progress: false
 
 jobs:
@@ -95,25 +95,6 @@ jobs:
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/verify_company_jobs.py
 
-      - name: Collect China jobs
-        if: steps.schedule_guard.outputs.run == 'true'
-        run: python scripts/china_scan.py
-
-      - name: Import committed China browser snapshots
-        if: steps.schedule_guard.outputs.run == 'true'
-        run: python scripts/china_snapshot_import.py data/imports/china
-
-      - name: Collect optional paid Zhaopin source
-        if: steps.schedule_guard.outputs.run == 'true'
-        env:
-          APIFY_ZHAOPIN_ENABLED: ${{ secrets.APIFY_ZHAOPIN_ENABLED }}
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
-        run: python scripts/apify_zhaopin_scan.py --max-results 25
-
-      - name: Merge every China collection route
-        if: steps.schedule_guard.outputs.run == 'true'
-        run: python scripts/merge_china_sources.py
-
       - name: Collect credential-free cloud sources
         if: steps.schedule_guard.outputs.run == 'true'
         run: python scripts/cloud_sources_scan.py
@@ -128,11 +109,11 @@ jobs:
 
       - name: Scan every company-pool career portal
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python scripts/company_portal_scan.py
+        run: python scripts/company_portal_scan.py --region 美国
 
       - name: Canonicalize, prune, and write run receipt
         if: steps.schedule_guard.outputs.run == 'true'
-        run: python scripts/merge_scan_results.py
+        run: python scripts/merge_scan_results.py --region 美国
 
       - name: Record scan health and anomaly history
         if: steps.schedule_guard.outputs.run == 'true'
@@ -231,7 +212,7 @@ jobs:
         if: always() && steps.schedule_guard.outputs.run == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: global-jobscan-${{ github.run_id }}
+          name: us-jobscan-${{ github.run_id }}
           path: data/scans/
           if-no-files-found: error
           retention-days: 30
