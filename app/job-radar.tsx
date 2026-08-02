@@ -184,6 +184,8 @@ type ChinaScanSource = {
   rejectionReasons?: Record<string, number>;
   rejection_reasons?: Record<string, number>;
   attention?: string;
+  attentionKind?: string;
+  attention_kind?: string;
 };
 
 type ChinaScanStatus = {
@@ -1747,6 +1749,9 @@ export default function JobRadar() {
                 {chinaScanControl?.state === "queued" ? "中国岗位扫描已排队" : chinaScanControl?.state === "running" ? "Mac 正在扫描中国招聘平台" : chinaScanControl?.state === "completed" ? "最近一次网站发起的中国扫描已完成" : chinaScanControl?.state === "attention_required" ? "中国扫描完成，但有来源需要处理" : chinaScanControl?.state === "failed" ? "最近一次中国扫描失败" : "中国岗位扫描等待启动"}
               </strong>
               <p>{chinaScanControl?.message || "点击“更新中国岗位”，Mac 后台服务会自动领取任务；Mac 关机时任务会保留到下次登录。"}</p>
+              {chinaScanControl?.state === "attention_required" && (
+                <p className="scan-rejections">需要登录或验证码时不会绕过，也不会把该来源记作扫描完成。完成专用 Chrome 中的登录或验证后，再点一次“更新中国岗位”，扫描会从未完成批次继续。</p>
+              )}
               {chinaProgress && chinaScanControl?.state === "running" && (
                 <>
                   <div className="scan-progress-track" aria-label={`当前阶段完成 ${Math.round(chinaProgressRatio * 100)}%`}>
@@ -1765,7 +1770,7 @@ export default function JobRadar() {
                   <p className="scan-eta">已运行 {formatDuration(chinaElapsedSeconds)}{chinaEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(chinaEtaSeconds)}` : ""}。</p>
                   {Object.keys(chinaProgress.rejectionReasons || {}).length > 0 && (
                     <p className="scan-rejections">
-                      排除原因：关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；工资下限不足 20K 或未公布 {chinaProgress.rejectionReasons.salary_below_20k_or_missing ?? 0}。
+                      排除原因：缺少标题或链接 {chinaProgress.rejectionReasons.missing_title_or_url ?? 0}；关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；明确工资下限不足 20K {chinaProgress.rejectionReasons.salary_below_20k ?? chinaProgress.rejectionReasons.salary_below_20k_or_missing ?? 0}；工资缺失或面议、已保留待核验 {chinaProgress.rejectionReasons.salary_missing_or_negotiable ?? 0}。
                     </p>
                   )}
                 </>
@@ -1790,7 +1795,12 @@ export default function JobRadar() {
                       {chinaScanStatus.results.map((item, index) => (
                         <span key={`${item.source ?? "source"}-${index}`} className={item.status === "completed" ? "source-ok" : "source-warning"}>
                           {item.source || "未知来源"}：新增 {item.jobsCreated ?? item.jobs_created ?? 0}
+                          {(item.rejectionReasons ?? item.rejection_reasons)?.missing_title_or_url ? ` · 缺少字段 ${(item.rejectionReasons ?? item.rejection_reasons)?.missing_title_or_url}` : ""}
                           {(item.rejectionReasons ?? item.rejection_reasons)?.title_not_targeted ? ` · 标题排除 ${(item.rejectionReasons ?? item.rejection_reasons)?.title_not_targeted}` : ""}
+                          {(item.rejectionReasons ?? item.rejection_reasons)?.excluded_seniority_or_role ? ` · 高年资/工程/无关 ${(item.rejectionReasons ?? item.rejection_reasons)?.excluded_seniority_or_role}` : ""}
+                          {(item.rejectionReasons ?? item.rejection_reasons)?.degree_experience_or_skill_gap ? ` · 经验/方向不符 ${(item.rejectionReasons ?? item.rejection_reasons)?.degree_experience_or_skill_gap}` : ""}
+                          {(item.rejectionReasons ?? item.rejection_reasons)?.salary_below_20k ? ` · 工资不足 20K ${(item.rejectionReasons ?? item.rejection_reasons)?.salary_below_20k}` : ""}
+                          {(item.rejectionReasons ?? item.rejection_reasons)?.salary_missing_or_negotiable ? ` · 工资待核验 ${(item.rejectionReasons ?? item.rejection_reasons)?.salary_missing_or_negotiable}` : ""}
                           {item.attention ? " · 需处理" : ""}
                         </span>
                       ))}
