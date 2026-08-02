@@ -533,7 +533,10 @@ def monthly_salary_floor_k(text: str) -> float | None:
     content = re.sub(r"(?<=\d),(?=\d)", "", clean_text(structured))
 
     separators = "，,；;。|\n"
-    allowance_labels = ("餐补", "饭补", "房补", "住房补贴", "交通补贴", "补贴", "津贴", "补助")
+    allowance_labels = (
+        "餐补", "饭补", "房补", "住房补贴", "交通补贴", "补贴", "津贴", "补助",
+        "绩效奖金", "绩效奖", "年终奖", "项目奖", "奖金", "提成", "佣金",
+    )
 
     def is_allowance(start: int, end: int) -> bool:
         # Bind an allowance label to the amount in the same compensation
