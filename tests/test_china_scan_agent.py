@@ -16,6 +16,20 @@ SPEC.loader.exec_module(AGENT)
 
 
 class ChinaScanAgentTest(unittest.TestCase):
+    def test_summary_explains_how_to_resume_after_verification(self):
+        state, message = AGENT.summarize_report({
+            "status": "partial",
+            "jobs_discovered": 12,
+            "jobs_eligible": 3,
+            "jobs_created": 1,
+            "sources_failed": 1,
+            "results": [{"attention_kind": "verification_required"}],
+        })
+
+        self.assertEqual(state, "attention_required")
+        self.assertIn("专用 Chrome", message)
+        self.assertIn("再点一次更新中国岗位", message)
+
     def test_poll_claims_queued_request_and_runs_it(self):
         responses = [
             {"state": "queued", "requestId": "request-1"},
