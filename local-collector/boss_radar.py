@@ -465,7 +465,11 @@ def transform_latest_jobs(result_dir: Path) -> list[dict[str, Any]]:
     return transform_result_files([(jobs_path, details_path)])
 
 
-def sync_jobs(jobs: list[dict[str, Any]], completed_source: str = "") -> dict[str, Any]:
+def sync_jobs(
+    jobs: list[dict[str, Any]],
+    completed_source: str = "",
+    incomplete_sources: set[str] | None = None,
+) -> dict[str, Any]:
     if not jobs and not completed_source:
         return {"ok": True, "received": 0, "created": 0, "updated": 0, "skipped": 0}
     base_url = os.environ.get("IVY_JOB_RADAR_URL", "").rstrip("/")
@@ -478,6 +482,7 @@ def sync_jobs(jobs: list[dict[str, Any]], completed_source: str = "") -> dict[st
         )
 
     total = {"ok": True, "received": 0, "created": 0, "updated": 0, "skipped": 0}
+    incomplete = {text(source) for source in (incomplete_sources or set()) if text(source)}
     grouped: dict[str, list[dict[str, Any]]] = {}
     if completed_source:
         grouped[completed_source] = jobs
@@ -509,7 +514,7 @@ def sync_jobs(jobs: list[dict[str, Any]], completed_source: str = "") -> dict[st
             for key in ("received", "created", "updated", "skipped"):
                 total[key] += int(result.get(key, 0))
 
-        if not source:
+        if not source or source in incomplete:
             continue
         reconciliation = {
             "jobs": [],
