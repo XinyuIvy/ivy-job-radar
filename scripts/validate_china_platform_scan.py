@@ -15,7 +15,12 @@ CHINA_SCAN = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(CHINA_SCAN)
 
 
-def validate(summary_path: Path, jobs_path: Path) -> list[str]:
+def validate(
+    summary_path: Path,
+    jobs_path: Path,
+    minimum_matched: int = 0,
+    availability_policy: str = "require",
+) -> list[str]:
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
     jobs = json.loads(jobs_path.read_text(encoding="utf-8"))
     errors: list[str] = []
@@ -50,12 +55,28 @@ def validate(summary_path: Path, jobs_path: Path) -> list[str]:
     }
     usable_sources = sum(totals["valid"] > 0 for totals in platform_groups.values())
     if platform_groups and usable_sources == 0:
-        errors.append("Every public platform source returned zero valid platform URLs.")
+        statuses = {str(row.get("source_status", "")) for row in summary.get("sources", [])}
+        explicitly_unavailable = statuses and statuses <= {
+            "job_pages_not_indexed",
+            "rate_limited",
+            "verification_required",
+            "search_source_error",
+        }
+        if availability_policy != "allow-limited" or not explicitly_unavailable:
+            errors.append("Every public platform source returned zero valid platform URLs.")
+
+    total_matched = sum(totals["matched"] for totals in platform_groups.values())
+    if total_matched < minimum_matched:
+        errors.append(
+            f"Expected at least {minimum_matched} relevant job(s), but found {total_matched}."
+        )
 
     print(json.dumps({
         "jobs": len(jobs),
         "platforms": platform_groups,
         "usable_platform_sources": usable_sources,
+        "availability_policy": availability_policy,
+        "minimum_matched": minimum_matched,
         "errors": errors,
     }, ensure_ascii=False, indent=2))
     return errors
@@ -65,12 +86,23 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate China platform smoke-scan output.")
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--jobs", type=Path, required=True)
+    parser.add_argument("--minimum-matched", type=int, default=0)
+    parser.add_argument(
+        "--availability-policy",
+        choices=("require", "allow-limited"),
+        default="require",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    errors = validate(args.summary, args.jobs)
+    errors = validate(
+        args.summary,
+        args.jobs,
+        minimum_matched=args.minimum_matched,
+        availability_policy=args.availability_policy,
+    )
     if errors:
         raise SystemExit(1)
 
