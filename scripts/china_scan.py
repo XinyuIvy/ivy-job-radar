@@ -421,6 +421,17 @@ def infer_track(text: str) -> str:
     return "Technology"
 
 
+def unsupported_core_role(title: str, description: str) -> bool:
+    """Identify LLM/NLP roles only when the unsupported area is explicitly core."""
+    lower_title = title.lower()
+    if any(signal in lower_title for signal in UNSUPPORTED_CORE_SIGNALS):
+        return True
+    lower_description = description.lower()
+    core_phrase = r"(?:核心工作|核心职责|主要工作|主要职责|主要负责|岗位方向|专注于)"
+    unsupported_phrase = r"(?:大语言模型|大模型(?:训练|研发)?|自然语言处理|\bllm\b|\brag\b|\bnlp\b)"
+    return bool(re.search(core_phrase + r".{0,30}" + unsupported_phrase, lower_description))
+
+
 def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[str], bool]:
     text = f"{title} {evidence}"
     lower = text.lower()
@@ -476,7 +487,11 @@ def score_job(title: str, evidence: str, years: int | None) -> tuple[int, list[s
     # Discovery must tolerate incomplete search snippets; final degree eligibility is verified from the full JD.
     # LLM or NLP terminology in a description is a ranking penalty, not a hard
     # filter. A role is rejected only when its title says that is the core job.
-    eligible = (quantitative_degree or targeted_role) and not experience_blocked
+    eligible = (
+        (quantitative_degree or targeted_role)
+        and not experience_blocked
+        and not unsupported_core_role(title, evidence)
+    )
     return max(0, min(100, round(score))), details, eligible
 
 
