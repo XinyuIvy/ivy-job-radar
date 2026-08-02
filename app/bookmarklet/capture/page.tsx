@@ -11,6 +11,11 @@ type CaptureResult = {
   title: string;
 };
 
+type CaptureMessage = {
+  type?: unknown;
+  payload?: unknown;
+};
+
 type CaptureState =
   | { status: "saving" }
   | { status: "success"; result: CaptureResult }
@@ -21,12 +26,10 @@ export default function BookmarkCapturePage() {
 
   useEffect(() => {
     let active = true;
-    const save = async () => {
+    let received = false;
+
+    const save = async (payload: unknown) => {
       try {
-        const encoded = window.location.hash.slice(1);
-        if (!encoded) throw new Error("书签没有传入岗位信息。请重新点击招聘页面上的保存书签。");
-        const payload = JSON.parse(decodeURIComponent(encoded)) as Record<string, unknown>;
-        window.history.replaceState(null, "", window.location.pathname);
         const response = await fetch("/api/bookmark-capture", {
           method: "POST",
           headers: {
@@ -45,9 +48,28 @@ export default function BookmarkCapturePage() {
         });
       }
     };
-    void save();
+
+    const receive = (event: MessageEvent<CaptureMessage>) => {
+      if (received || event.source !== window.opener || event.data?.type !== "ivy-job-radar-capture") return;
+      received = true;
+      void save(event.data.payload);
+    };
+
+    window.addEventListener("message", receive);
+    const announce = () => window.opener?.postMessage("ivy-job-radar-ready", "*");
+    announce();
+    const secondAnnouncement = window.setTimeout(announce, 500);
+    const timeout = window.setTimeout(() => {
+      if (!received && active) {
+        setState({ status: "error", message: "没有收到招聘页面信息。请返回岗位页并重新点击保存书签。" });
+      }
+    }, 8_000);
+
     return () => {
       active = false;
+      window.removeEventListener("message", receive);
+      window.clearTimeout(secondAnnouncement);
+      window.clearTimeout(timeout);
     };
   }, []);
 
@@ -80,7 +102,7 @@ export default function BookmarkCapturePage() {
         )}
         <p style={{ lineHeight: 1.65, color: "#526058" }}>
           {state.status === "saving"
-            ? "正在解析当前招聘页面并执行去重。"
+            ? "正在接收当前招聘页面信息并执行去重。"
             : state.status === "success"
               ? "岗位已直接以“开放”状态写入，不会进入核验队列。此窗口会自动关闭。"
               : state.message}
