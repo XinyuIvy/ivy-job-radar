@@ -1,5 +1,5 @@
 {
-  "delay_seconds": 0.45,
+  "delay_seconds": 1.0,
   "queries": [
     {
       "source": "BOSS直聘公开索引",
