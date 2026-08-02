@@ -626,15 +626,18 @@ def write_progress(path: Path | None, payload: dict[str, object]) -> None:
 def run_scan(
     config_path: Path,
     progress_path: Path | None = None,
+    query_override: dict[str, str] | None = None,
 ) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
     config = json.loads(config_path.read_text(encoding="utf-8"))
     scanned_at = datetime.now(timezone.utc).isoformat()
     records: list[dict[str, object]] = []
     source_stats: list[dict[str, object]] = []
-    total_steps = len(config["queries"]) + len(config.get("direct_pages", []))
+    queries = [query_override] if query_override else config["queries"]
+    direct_pages = [] if query_override else config.get("direct_pages", [])
+    total_steps = len(queries) + len(direct_pages)
     completed_steps = 0
 
-    for item in config["queries"]:
+    for item in queries:
         results = fetch_bing_rss(item["query"])
         matched = 0
         rejection_stats = empty_filter_stats()
@@ -683,7 +686,7 @@ def run_scan(
         })
         time.sleep(float(config.get("delay_seconds", 0.3)))
 
-    for page in config.get("direct_pages", []):
+    for page in direct_pages:
         results = collect_direct_page(page)
         matched = 0
         rejection_stats = empty_filter_stats()
@@ -781,12 +784,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--config", type=Path, default=Path("config/china_search_queries.json"))
     parser.add_argument("--output-dir", type=Path, default=Path("data/scans"))
     parser.add_argument("--progress-file", type=Path)
+    parser.add_argument("--source", help="Source label for a single-query smoke test.")
+    parser.add_argument("--query", help="Run one public-index query instead of the full config.")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    records, source_stats = run_scan(args.config, args.progress_file)
+    if bool(args.source) != bool(args.query):
+        raise SystemExit("--source and --query must be provided together")
+    query_override = {"source": args.source, "query": args.query} if args.query else None
+    records, source_stats = run_scan(args.config, args.progress_file, query_override)
     write_outputs(records, source_stats, args.output_dir)
     print(f"Wrote {len(records)} eligible, deduplicated China jobs to {args.output_dir}")
 
