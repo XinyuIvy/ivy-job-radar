@@ -28,9 +28,14 @@ const identifier=posting&&posting.identifier;
 const params=new URL(window.location.href).searchParams;
 const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("reqId")||params.get("requisitionId"),500);
 const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title};
-const destination=${JSON.stringify(capturePageUrl)}+"#"+encodeURIComponent(JSON.stringify(payload));
-const popup=window.open(destination,"ivy_job_radar_capture","popup,width=600,height=760");
-if(!popup)alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");
+const captureUrl=new URL(${JSON.stringify(capturePageUrl)});
+let popup=null;
+let sent=false;
+const listener=(event)=>{if(sent||event.source!==popup||event.origin!==captureUrl.origin||event.data!=="ivy-job-radar-ready")return;sent=true;window.removeEventListener("message",listener);popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);};
+window.addEventListener("message",listener);
+popup=window.open(captureUrl.href,"ivy_job_radar_capture","popup,width=600,height=760");
+if(!popup){window.removeEventListener("message",listener);alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");return;}
+setTimeout(()=>{if(!sent){window.removeEventListener("message",listener);try{popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);}catch{}}},2500);
 }catch(error){alert("无法保存当前岗位："+(error&&error.message?error.message:error));}})()`;
   return `javascript:${code}`;
 }
@@ -121,7 +126,7 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
           ))}
         </div>
         <p style={{ marginTop: 24, color: "#758078", fontSize: 13 }}>
-          书签中只包含一个专用于“加入岗位”的派生密钥，不包含 Job Radar 的原始同步密钥。岗位数据通过 Job Radar 同源窗口写入，不受招聘网站跨域表单限制。
+          书签中只包含一个专用于“加入岗位”的派生密钥，不包含 Job Radar 的原始同步密钥。岗位内容通过浏览器消息传给 Job Radar，不写入地址栏或访问日志。
         </p>
       </section>
     </main>
