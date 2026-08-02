@@ -2,6 +2,14 @@ name: Test China recruitment platforms
 
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "scripts/china_scan.py"
+      - "scripts/validate_china_platform_scan.py"
+      - "config/china_search_queries.json"
+      - "tests/test_china_scan.py"
+      - "tests/test_boss*.py"
+      - ".github/workflows/test-china-platforms.yml"
 
 permissions:
   contents: read
@@ -32,6 +40,7 @@ jobs:
         run: >-
           python -m py_compile
           scripts/china_scan.py
+          scripts/validate_china_platform_scan.py
           local-collector/boss_one_click.py
           local-collector/boss_radar.py
           local-collector/china_one_click.py
@@ -51,6 +60,12 @@ jobs:
 
       - name: Print platform scan summary
         run: python -m json.tool /tmp/china-platform-test/china_scan_summary.json
+
+      - name: Validate platform domains, job URLs, and count conservation
+        run: >-
+          python scripts/validate_china_platform_scan.py
+          --summary /tmp/china-platform-test/china_scan_summary.json
+          --jobs /tmp/china-platform-test/china_jobs_latest.json
 
       - name: Upload platform test results
         if: always()
