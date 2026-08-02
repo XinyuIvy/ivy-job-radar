@@ -309,7 +309,7 @@ type ScanNotice = {
   read: boolean;
 };
 
-type View = "today" | "saved" | "applications" | "companies" | "collect" | "verify" | "profile" | "ignored";
+type View = "today" | "saved" | "applications" | "companies" | "verify" | "profile" | "ignored";
 
 const tracks = ["全部", "Technology", "Quant", "Pharma", "Medical Device", "Healthcare AI", "Consulting"];
 const sortOptions = [
@@ -1122,8 +1122,6 @@ export default function JobRadar() {
   }, [track, region, jobSort, view, savedBucket, jobQuery]);
 
   const visibleJobs = jobs.slice(0, visibleJobCount);
-  const bossJobs = dailyJobs.filter((job) => sourceLabel(job) === "BOSS直聘");
-  const latestBossCheck = bossJobs.reduce((latest, job) => job.checkedAt > latest ? job.checkedAt : latest, "");
   const manualRequestKeys = new Set(requests.map((item) => `${item.company.trim().toLowerCase()}::${item.title.trim().toLowerCase()}`));
   const qualityQueueIssues = (quality?.issues ?? [])
     .filter((issue) => issue.automationStatus !== "resolved")
@@ -1526,7 +1524,7 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "收藏与待提交" : view === "companies" ? "公司研究与面经" : view === "collect" ? "自动采集中心" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "收藏与待提交" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
           <p className="hero-copy">
             {view === "applications"
               ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
@@ -1534,8 +1532,6 @@ export default function JobRadar() {
                 ? "收藏岗位与已经建立记录但尚未提交的岗位分别管理。"
               : view === "companies"
                 ? `公司池共 ${companyRecords.length} 条；自动汇总官网、招聘入口、岗位记录与历年公开面经。`
-                : view === "collect"
-                  ? "官网与标准招聘系统在云端扫描；需要登录的平台由你的 Mac 本地采集后自动同步。"
                 : view === "verify"
                   ? "提交岗位、查看统一核验队列，并在同一页监控自动数据质检。"
                   : view === "profile"
@@ -1547,7 +1543,7 @@ export default function JobRadar() {
         </div>
         <div className="scan-status">
           <span className="pulse" />
-          <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "collect" ? "多来源采集" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "自动更新"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "collect" ? `BOSS 已同步 ${bossJobs.length} 个` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : "每日 06:00"}</span></div>
+          <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "自动更新"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : "每日 06:00"}</span></div>
         </div>
       </section>
 
@@ -1760,7 +1756,7 @@ export default function JobRadar() {
                   <p className="scan-eta">已运行 {formatDuration(chinaElapsedSeconds)}{chinaEtaSeconds > 0 ? `，按当前阶段速度估计还需约 ${formatDuration(chinaEtaSeconds)}` : ""}。</p>
                   {Object.keys(chinaProgress.rejectionReasons || {}).length > 0 && (
                     <p className="scan-rejections">
-                      排除原因：标题不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资或排除岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；学历、经验或技能不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；分数不足 {chinaProgress.rejectionReasons.score_below_discovery_threshold ?? 0}。
+                      排除原因：关键词不匹配 {chinaProgress.rejectionReasons.title_not_targeted ?? 0}；高年资、工程类或无关岗位 {chinaProgress.rejectionReasons.excluded_seniority_or_role ?? 0}；经验超过 3 年或核心方向不符 {chinaProgress.rejectionReasons.degree_experience_or_skill_gap ?? 0}；工资下限不足 20K 或未公布 {chinaProgress.rejectionReasons.salary_below_20k_or_missing ?? 0}。
                     </p>
                   )}
                 </>
@@ -2077,43 +2073,6 @@ export default function JobRadar() {
               </article>)}
             </div>
           </section>
-        </section>
-      )}
-
-      {view === "collect" && (
-        <section className="collector-section">
-          <div className="collector-grid">
-            <article className="collector-card collector-live">
-              <div className="collector-card-head"><span className="collector-dot" /><strong>云端自动扫描</strong><em>每天 06:00 美东时间</em></div>
-              <h2>公司官网与标准 ATS</h2>
-              <p>自动扫描已核实的 Workday、Greenhouse、Lever、Ashby、iCIMS 等入口，并对岗位去重、筛选和重新核验。</p>
-              <div className="collector-metrics"><span>公司池 <b>{companyRecords.length}</b></span><span>当前岗位 <b>{dailyJobs.length}</b></span></div>
-              <button onClick={() => void refreshJobs()} disabled={jobsRefreshing}>{jobsRefreshing ? "扫描已启动" : "立即运行一次"}</button>
-            </article>
-
-            <article className="collector-card collector-local">
-              <div className="collector-card-head"><span className="collector-dot" /><strong>中国平台本地采集</strong><em>{latestBossCheck ? `最近同步 ${formatNewYorkTime(latestBossCheck)}` : "等待首次同步"}</em></div>
-              <h2>网站发起，Mac 自动执行</h2>
-              <p>独立 Chrome 在你的 Mac 上保留 BOSS 登录态。点击网站按钮后，后台服务轮换搜索 BOSS 及其他中国来源，只同步岗位信息，不上传 Cookie 或招聘者资料。</p>
-              <div className="collector-metrics"><span>已同步岗位 <b>{bossJobs.length}</b></span><span>当前状态 <b>{chinaScanRunning ? "运行中" : "待命"}</b></span></div>
-              <div className="collector-actions">
-                <button className="primary" onClick={() => void startChinaScan()} disabled={chinaScanStarting || chinaScanRunning}>更新中国岗位</button>
-                <a href="/api/collector-config">下载私有配置</a>
-                <a href="https://github.com/XinyuIvy/ivy-job-radar/tree/main/local-collector" target="_blank" rel="noreferrer">查看安装说明 ↗</a>
-              </div>
-            </article>
-          </div>
-
-          <div className="collector-steps">
-            <div><span>1</span><strong>下载私有配置</strong><p>配置只给当前登录的站点所有者下载，不会写入 GitHub。</p></div>
-            <div><span>2</span><strong>首次登录 BOSS</strong><p>在专用 Chrome 中登录一次；登录状态保存在你的 Mac。</p></div>
-            <div><span>3</span><strong>安装后台服务</strong><p>以后只需点击网站按钮；Mac 登录后自动领取任务，遇到验证码或风控会停止并提示。</p></div>
-          </div>
-
-          <aside className="collector-boundary">
-            <strong>自动化边界</strong>
-            <p>采集器不会绕过验证码，不会抓取招聘者姓名、在线状态或联系方式，也不会自动打招呼、发消息或投递。BOSS 当前岗位会标记为平台来源，不能当作公司官网已核验岗位。</p>
-          </aside>
         </section>
       )}
 
@@ -2483,7 +2442,6 @@ export default function JobRadar() {
         <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>收藏</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
         <button className={view === "companies" ? "selected" : ""} onClick={() => setView("companies")}><span>⌕</span>公司</button>
-        <button className={view === "collect" ? "selected" : ""} onClick={() => setView("collect")}><span>↻</span>采集</button>
         <button className={view === "verify" ? "selected" : ""} onClick={() => setView("verify")}><span>✓</span>核验</button>
         <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>个人</button>
       </nav>
