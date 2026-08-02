@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import plistlib
@@ -20,6 +21,7 @@ from typing import Any
 
 APP_DIR = Path.home() / ".ivy-job-radar"
 STATE_FILE = APP_DIR / "boss-state.json"
+DETAIL_CACHE_FILE = APP_DIR / "boss-detail-cache.json"
 DEFAULT_ENV_FILE = APP_DIR / "collector.env"
 DEFAULT_SCRAPER_DIR = APP_DIR / "vendor" / "boss-zhipin-scraper"
 DEFAULT_RESULT_DIR = Path.home() / ".boss-zhipin-scraper" / "job-result"
@@ -52,8 +54,8 @@ EXCLUDED_ALGORITHM_DOMAIN = re.compile(
     re.IGNORECASE,
 )
 EXCLUDED_TITLE = re.compile(
-    r"实习|intern|博士后|postdoc|postdoctoral|总监|经理|负责人|"
-    r"director|principal|staff|senior|manager|lead|head of|vice president|"
+    r"实习|兼职|博士后|总监|经理|负责人|高级|资深|首席|专家|架构师|主管|统计员|"
+    r"intern|part.time|postdoc|postdoctoral|director|principal|staff|senior|manager|lead|head of|vice president|"
     r"软件工程|software engineer|数据工程|data engineer|生成式|generative|\bllm\b|\bnlp\b",
     re.IGNORECASE,
 )
@@ -125,6 +127,129 @@ def row_key(row: dict[str, Any]) -> str:
         or row.get("link")
         or row.get("url")
     )
+
+
+def listing_fingerprint(row: dict[str, Any]) -> str:
+    """Hash stable list-page fields that can indicate a changed posting."""
+    fields = {
+        key: row.get(key)
+        for key in (
+            "title", "job_name", "company", "company_name", "brand_name", "boss_name",
+            "salary", "location", "tags", "skills", "job_labels", "welfare",
+            "company_scale", "company_stage", "company_industry",
+        )
+    }
+    payload = json.dumps(fields, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def load_detail_cache(path: Path = DETAIL_CACHE_FILE) -> dict[str, Any]:
+    if not path.exists():
+        return {"version": 1, "jobs": {}}
+    try:
+        value = load_json(path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return {"version": 1, "jobs": {}}
+    if not isinstance(value, dict) or not isinstance(value.get("jobs"), dict):
+        return {"version": 1, "jobs": {}}
+    return value
+
+
+def write_detail_cache(cache: dict[str, Any], path: Path = DETAIL_CACHE_FILE) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary.replace(path)
+
+
+def title_prefilter(row: dict[str, Any]) -> bool:
+    """Reject obvious mismatches before opening the slower detail page."""
+    title = text(row.get("title") or row.get("job_name"))
+    if not title or not TARGET_TITLE.search(title) or EXCLUDED_TITLE.search(title):
+        return False
+    listing_content = " ".join([
+        title,
+        text(row.get("skills")),
+        text(row.get("tags")),
+        text(row.get("job_labels")),
+        text(row.get("company_industry")),
+    ])
+    if ALGORITHM_TITLE.search(title) and EXCLUDED_ALGORITHM_DOMAIN.search(listing_content):
+        return False
+    key = row_key(row)
+    job_url = text(row.get("job_link") or row.get("url"))
+    return bool(key and job_url and company_name(row, {}))
+
+
+def collect_detail_candidates(
+    jobs_paths: list[Path],
+    cache_path: Path = DETAIL_CACHE_FILE,
+) -> tuple[list[dict[str, Any]], dict[str, int]]:
+    """Deduplicate and prefilter every list result before detail collection."""
+    cache_jobs = load_detail_cache(cache_path).get("jobs", {})
+    unique_rows: dict[str, dict[str, Any]] = {}
+    raw_rows = 0
+    duplicates = 0
+
+    for jobs_path in jobs_paths:
+        if not jobs_path.exists():
+            continue
+        for row in rows_from_payload(load_json(jobs_path)):
+            raw_rows += 1
+            key = row_key(row)
+            if key and key in unique_rows:
+                duplicates += 1
+                continue
+            if key:
+                unique_rows[key] = row
+
+    candidates: list[dict[str, Any]] = []
+    filtered = 0
+    cached = 0
+    for key, row in unique_rows.items():
+        if not title_prefilter(row):
+            filtered += 1
+            continue
+        fingerprint = listing_fingerprint(row)
+        entry = cache_jobs.get(key, {})
+        if isinstance(entry, dict) and entry.get("fingerprint") == fingerprint:
+            cached += 1
+            continue
+        candidates.append(row)
+
+    return candidates, {
+        "jobs_discovered": raw_rows,
+        "jobs_unique": len(unique_rows),
+        "jobs_duplicate_listings": duplicates,
+        "jobs_filtered_before_detail": filtered,
+        "jobs_skipped_cached": cached,
+        "jobs_detail_candidates": len(candidates),
+    }
+
+
+def record_synced_jobs(
+    jobs: list[dict[str, Any]],
+    result_files: list[tuple[Path, Path | None]],
+    cache_path: Path = DETAIL_CACHE_FILE,
+) -> None:
+    """Cache only successfully synced jobs so failed uploads are retried."""
+    synced_ids = {text(job.get("application_id")) for job in jobs if text(job.get("application_id"))}
+    if not synced_ids:
+        return
+    cache = load_detail_cache(cache_path)
+    cache_jobs = cache.setdefault("jobs", {})
+    synced_at = datetime.now(timezone.utc).isoformat()
+    for jobs_path, _details_path in result_files:
+        if not jobs_path.exists():
+            continue
+        for row in rows_from_payload(load_json(jobs_path)):
+            key = row_key(row)
+            if key in synced_ids:
+                cache_jobs[key] = {
+                    "fingerprint": listing_fingerprint(row),
+                    "synced_at": synced_at,
+                }
+    write_detail_cache(cache, cache_path)
 
 
 def find_latest_file(result_dir: Path, prefix: str) -> Path | None:
@@ -321,15 +446,18 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
     run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
     run_dir = result_dir / "ivy-runs" / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    list_paths: list[Path] = []
     outputs: list[tuple[Path, Path | None]] = []
     completed = 0
     failure = ""
+    detail_failed = False
 
+    # Phase 1 only reads search-result pages. Detail pages are intentionally
+    # deferred until every keyword in the batch has been deduplicated.
     for index, (keyword, city) in enumerate(batch):
-        print(f"Searching BOSS: {keyword} / {city}")
+        print(f"Searching BOSS list: {keyword} / {city}")
         stem = f"{index + 1:02d}_{safe_filename(keyword)}_{safe_filename(city)}"
-        jobs_path = run_dir / f"boss_jobs_{stem}.json"
-        details_path = run_dir / f"boss_details_{stem}.json"
+        jobs_path = run_dir / f"boss_list_{stem}.json"
         command = [
             str(venv_python), str(script),
             "--keyword", keyword,
@@ -337,7 +465,7 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
             "--pages", str(pages),
             "--format", "json",
             "--output", str(jobs_path),
-            "--detail-output", str(details_path),
+            "--no-detail",
         ]
         result = subprocess.run(command, check=False)
         if result.returncode != 0:
@@ -345,19 +473,58 @@ def run_searches(scraper_dir: Path, plan_path: Path, result_dir: Path) -> list[t
             print(f"{failure} Check the dedicated Chrome window for login or verification.", file=sys.stderr)
             break
         if jobs_path.exists():
-            outputs.append((jobs_path, details_path if details_path.exists() else None))
+            list_paths.append(jobs_path)
         completed += 1
 
-    next_cursor = (cursor + completed) % combination_count
-    write_state({
+    candidates, prefilter_stats = collect_detail_candidates(list_paths)
+    print(
+        "BOSS list prefilter: "
+        f"{prefilter_stats['jobs_discovered']} rows -> "
+        f"{prefilter_stats['jobs_unique']} unique -> "
+        f"{prefilter_stats['jobs_detail_candidates']} detail pages "
+        f"({prefilter_stats['jobs_filtered_before_detail']} excluded, "
+        f"{prefilter_stats['jobs_skipped_cached']} already synced)."
+    )
+
+    # Phase 2 opens details only for new, plausible jobs, once per job ID.
+    if candidates:
+        candidates_path = run_dir / "boss_jobs_candidates.json"
+        details_path = run_dir / "boss_details_candidates.json"
+        candidates_path.write_text(
+            json.dumps({
+                "jobs": candidates,
+                "total": len(candidates),
+                "scraped_at": datetime.now(timezone.utc).isoformat(),
+            }, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        detail_command = [
+            str(venv_python), str(script),
+            "--input", str(candidates_path),
+            "--format", "json",
+            "--detail-output", str(details_path),
+        ]
+        detail_result = subprocess.run(detail_command, check=False)
+        if detail_result.returncode != 0:
+            detail_failed = True
+            failure = f"Detail collection stopped with exit code {detail_result.returncode}."
+            print(f"{failure} Check the dedicated Chrome window for login or verification.", file=sys.stderr)
+        else:
+            outputs.append((candidates_path, details_path if details_path.exists() else None))
+
+    batch_completed = completed == len(batch) and not detail_failed
+    next_cursor = (cursor + completed) % combination_count if batch_completed else cursor
+    state = {
         "cursor": next_cursor,
         "last_run_at": datetime.now(timezone.utc).isoformat(),
         "last_run_id": run_id,
         "planned_searches": len(batch),
-        "completed_searches": completed,
-        "status": "completed" if completed == len(batch) else "attention_required",
+        "completed_searches": completed if batch_completed else 0,
+        "status": "completed" if batch_completed else "attention_required",
         "failure": failure,
-    })
+        **prefilter_stats,
+    }
+    write_state(state)
     return outputs
 
 
@@ -495,6 +662,8 @@ def main() -> None:
         print(json.dumps({"ok": True, "dry_run": True, "jobs": jobs}, ensure_ascii=False, indent=2))
         return
     result = sync_jobs(jobs)
+    if args.command == "run":
+        record_synced_jobs(jobs, result_files)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
