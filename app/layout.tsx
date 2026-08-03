@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import ApplicationCvActions from "./application-cv-actions";
 import PendingJobVisibility from "./pending-job-visibility";
 import VerificationQueueActions from "./verification-queue-actions";
 import "./globals.css";
@@ -38,6 +39,7 @@ export default function RootLayout({
         {children}
         <VerificationQueueActions />
         <PendingJobVisibility />
+        <ApplicationCvActions />
         <div
           style={{
             position: "fixed",
@@ -49,22 +51,6 @@ export default function RootLayout({
             justifyItems: "end",
           }}
         >
-          <a
-            href="/cv-tailor"
-            aria-label="根据岗位定制 CV"
-            style={{
-              borderRadius: 999,
-              padding: "11px 16px",
-              background: "#704c2f",
-              color: "#fff",
-              textDecoration: "none",
-              fontSize: 13,
-              fontWeight: 800,
-              boxShadow: "0 10px 30px rgba(112,76,47,.22)",
-            }}
-          >
-            ✎ 定制 CV
-          </a>
           <a
             href="/screening-learning"
             aria-label="查看筛选学习建议"
