@@ -10,6 +10,13 @@ type RequestItem = {
   jobUrl: string;
 };
 
+type QualityIssue = {
+  jobId: number;
+  company: string;
+  title: string;
+  automationStatus: string;
+};
+
 type ApplicationRow = {
   company: string;
   title: string;
@@ -59,22 +66,27 @@ export default function VerificationQueueActions() {
       scheduled = false;
       if (disposed) return;
 
-      const [requestResponse, applicationResponse] = await Promise.all([
+      const [requestResponse, applicationResponse, qualityResponse] = await Promise.all([
         fetch("/api/job-requests", { cache: "no-store" }),
         fetch("/api/applications", { cache: "no-store" }),
+        fetch("/api/data-quality", { cache: "no-store" }),
       ]);
-      if (!requestResponse.ok || disposed) return;
+      if (disposed) return;
 
-      const items = await requestResponse.json() as RequestItem[];
-      const applications = applicationResponse.ok
-        ? await applicationResponse.json() as ApplicationRow[]
-        : [];
+      const requests = requestResponse.ok ? await requestResponse.json() as RequestItem[] : [];
+      const applications = applicationResponse.ok ? await applicationResponse.json() as ApplicationRow[] : [];
+      const qualityPayload = qualityResponse.ok
+        ? await qualityResponse.json() as { issues?: QualityIssue[] }
+        : { issues: [] };
+      const qualityIssues = (qualityPayload.issues ?? []).filter((item) => item.automationStatus === "needs_review");
+
       const pendingKeys = new Set(
         applications
           .filter((row) => row.status === "准备材料")
           .map((row) => key(row.company, row.title)),
       );
-      const itemByKey = new Map(items.map((item) => [key(item.company, item.title), item]));
+      const requestByKey = new Map(requests.map((item) => [key(item.company, item.title), item]));
+      const qualityByKey = new Map(qualityIssues.map((item) => [key(item.company, item.title), item]));
       const cards = Array.from(document.querySelectorAll<HTMLElement>(".request-list .request-card"));
 
       for (const card of cards) {
@@ -83,8 +95,6 @@ export default function VerificationQueueActions() {
           ?? card.querySelector("div > p")?.textContent?.trim()
           ?? "";
         const cardKey = key(company, title);
-        const item = itemByKey.get(cardKey);
-        if (!item) continue;
 
         if (pendingKeys.has(cardKey)) {
           card.style.setProperty("display", "none", "important");
@@ -94,40 +104,53 @@ export default function VerificationQueueActions() {
         card.style.removeProperty("display");
         card.removeAttribute("aria-hidden");
 
-        const status = card.querySelector(".verify-status")?.textContent?.trim() || item.status;
+        const status = card.querySelector(".verify-status")?.textContent?.trim() ?? "";
         if (status !== "需复核") continue;
         const actions = card.querySelector<HTMLElement>(".record-actions");
         if (!actions || actions.dataset.manualReviewEnhanced === "true") continue;
+
+        const requestItem = requestByKey.get(cardKey);
+        const qualityItem = qualityByKey.get(cardKey);
+        if (!requestItem && !qualityItem) continue;
 
         actions.dataset.manualReviewEnhanced = "true";
         actions.querySelectorAll("button").forEach((existing) => existing.remove());
 
         const run = async (action: "approve" | "ignore" | "delete" | "rerun", trigger: HTMLButtonElement) => {
           const prompts = {
-            approve: `确认人工通过 ${item.company} · ${item.title}，并直接加入今日岗位吗？`,
-            ignore: `确认将 ${item.company} · ${item.title} 加入不再推荐，并从核验队列删除吗？`,
+            approve: `确认人工通过 ${company} · ${title} 吗？`,
+            ignore: `确认将 ${company} · ${title} 加入不再推荐吗？`,
             delete: "确认仅删除这条核验记录吗？该岗位未来仍可能再次出现。",
-            rerun: `确认重新核验 ${item.company} · ${item.title} 吗？`,
+            rerun: `确认重新核验 ${company} · ${title} 吗？`,
           };
           if (!window.confirm(prompts[action])) return;
           const original = trigger.textContent;
           trigger.disabled = true;
           trigger.textContent = action === "rerun" ? "核验中…" : "处理中…";
-          const result = action === "rerun"
-            ? await fetch("/api/job-requests", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: item.id }),
-              })
-            : await fetch("/api/manual-review", {
+
+          const result = requestItem
+            ? action === "rerun"
+              ? await fetch("/api/job-requests", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ id: requestItem.id }),
+                })
+              : await fetch("/api/manual-review", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ id: requestItem.id, action }),
+                })
+            : await fetch("/api/quality-manual-review", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: item.id, action }),
+                body: JSON.stringify({ jobId: qualityItem?.jobId, action }),
               });
+
           if (!result.ok) {
+            const payload = await result.json().catch(() => ({})) as { error?: string };
             trigger.disabled = false;
             trigger.textContent = original;
-            window.alert("操作失败，请稍后重试。");
+            window.alert(payload.error || "操作失败，请稍后重试。");
             return;
           }
           window.location.reload();
