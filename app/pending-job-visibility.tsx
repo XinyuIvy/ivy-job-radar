@@ -20,7 +20,6 @@ export default function PendingJobVisibility() {
   useEffect(() => {
     let disposed = false;
     let observer: MutationObserver | null = null;
-    let intervalId: number | undefined;
     let pendingKeys = new Set<string>();
     let modalWasOpen = Boolean(document.querySelector(".modal-backdrop"));
 
@@ -84,14 +83,14 @@ export default function PendingJobVisibility() {
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisibilityChange);
-    intervalId = window.setInterval(() => void run(), 5000);
+    const intervalId = window.setInterval(() => void run(), 5000);
 
     return () => {
       disposed = true;
       observer?.disconnect();
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      if (intervalId !== undefined) window.clearInterval(intervalId);
+      window.clearInterval(intervalId);
     };
   }, []);
 
