@@ -8,6 +8,8 @@ type Match = {
   category: string;
   status: "covered" | "supported_gap" | "unsupported_gap";
   factEvidence: string;
+  jdEvidence?: string;
+  templateEvidence?: string;
 };
 
 type Analysis = {
@@ -38,18 +40,31 @@ const trackLabels: Record<string, string> = {
   consulting: "Healthcare Consulting",
 };
 
-function addKeyword(markdown: string, keyword: string, category: string) {
-  if (markdown.toLowerCase().includes(keyword.toLowerCase())) return markdown;
-  const lines = markdown.split(/\r?\n/);
-  const categoryIndex = lines.findIndex((line) => line.toLowerCase().includes(`**${category.toLowerCase()}`));
-  if (categoryIndex >= 0) {
-    lines[categoryIndex] = `${lines[categoryIndex].trimEnd().replace(/\s{2}$/, "")}; ${keyword}  `;
-    return lines.join("\n");
-  }
-  const skillHeader = lines.findIndex((line) => /^## .*skills/i.test(line));
-  const insertAt = skillHeader >= 0 ? skillHeader + 1 : lines.length;
-  lines.splice(insertAt, 0, `\n**${category}:** ${keyword}  `);
-  return lines.join("\n");
+const explanations: Record<string, string> = {
+  "Wearable and physiological data": "岗位希望候选人能够处理可穿戴设备、数字测量、日记或生理信号等高频健康数据。这里不是要求把这句话原样放进 Skills，而是要用最合适的项目证明你处理过相近的数据结构和科学问题。",
+  "Clinical and multimodal data": "岗位希望候选人能够联合解释临床、影像或其他多来源数据，并将复杂分析转化为健康研究结论。",
+  "Scientific study design": "岗位要求从研究问题出发设计观察性、前瞻性、回顾性或干预性研究，包括研究方案、终点和分析设计。",
+  "Human-subjects research": "岗位强调人体研究流程，包括 protocol、endpoint、ethics 或 IRB，以及从研究设计到科学传播的完整过程。",
+  "Time-series analysis": "岗位需要分析按时间连续或重复采集的数据，而不是只分析单次横断面观测。",
+  "Regression and mixed models": "岗位希望使用回归、混合模型或相关重复测量方法处理个体内相关性和多层数据。",
+  "Bayesian methods": "岗位把 Bayesian methods 列为可采用的方法之一。只有事实母版中有真实应用证据时才应写入项目或方法描述。",
+  "Machine learning": "岗位允许在适当场景采用机器学习，重点是能否将模型用于严谨、可解释的科学分析，而不是只罗列算法。",
+  "Reproducible computational workflows": "岗位要求分析过程可复现，例如使用 notebook、Git、RStudio、Jupyter、Docker 或 Conda 组织代码、结果和版本。",
+  "Manuscripts and scientific dissemination": "岗位重视论文、摘要、报告、图表和演示等科学传播成果。",
+  "Research leadership from hypothesis to publication": "岗位要求能够从假设、研究设计和分析一路推进到论文发表，并最好有第一作者或主导项目证据。",
+  "Cross-functional collaboration": "岗位要求与 Science、Product、Clinical、Regulatory、Research Operations 和数据团队协作。",
+  "Evidence-based decision support": "岗位希望把复杂分析转化为可用于研究、产品或合作决策的清晰结论。",
+};
+
+function suggestionLocation(item: Match) {
+  if (item.category === "Programming and Data") return "Technical Skills，前提是该技能尚未覆盖；若已覆盖则不应重复添加。";
+  if (["Research Design", "Data", "Methods", "Domain"].includes(item.category)) return "优先放入最相关项目的 bullet，并视需要调整项目选择和排序。";
+  if (["Communication", "Leadership", "Collaboration", "Decision Support", "Experience"].includes(item.category)) return "优先改写 Summary 或相关项目 bullet，用成果和职责证明，而不是作为孤立关键词。";
+  return "根据事实证据决定放入 Summary、项目 bullet 或 Skills，不直接机械加词。";
+}
+
+function cleanEvidence(value: string) {
+  return value.replace(/\*\*/g, "").replace(/\s+/g, " ").trim();
 }
 
 function safeSlug(value: string) {
@@ -92,8 +107,8 @@ export default function CvTailorClient() {
   const [title, setTitle] = useState("");
   const [jd, setJd] = useState("");
   const [template, setTemplate] = useState("");
-  const [facts, setFacts] = useState("");
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [acceptedSuggestions, setAcceptedSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingApplication, setLoadingApplication] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -111,8 +126,9 @@ export default function CvTailorClient() {
     }
     fetch(`/api/cv-tailor/application?applicationId=${id}`, { cache: "no-store" })
       .then(async (response) => {
-        if (!response.ok) throw new Error("无法读取这条待提交申请。");
-        return response.json() as Promise<ApplicationPrefill>;
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "无法读取这条待提交申请。");
+        return result as ApplicationPrefill;
       })
       .then((result) => {
         if (!active) return;
@@ -138,22 +154,24 @@ export default function CvTailorClient() {
       if (!active) return;
       setLoading(true);
       setAnalysis(null);
+      setAcceptedSuggestions([]);
       setTex("");
       setPullRequestUrl("");
     }, 0);
     fetch(`/api/cv-tailor/source?track=${encodeURIComponent(track)}`, { cache: "no-store" })
       .then(async (response) => {
-        if (!response.ok) throw new Error("CV 母版读取失败");
-        return response.json();
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || "CV 母版读取失败");
+        return result;
       })
       .then((result) => {
         if (!active) return;
         setTemplate(result.template || "");
-        setFacts(result.facts || "");
         setLoading(false);
       })
       .catch((error) => {
         if (!active) return;
+        setTemplate("");
         setMessage(error instanceof Error ? error.message : "CV 母版读取失败");
         setLoading(false);
       });
@@ -171,17 +189,27 @@ export default function CvTailorClient() {
       const response = await fetch("/api/cv-tailor/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ track, jd, template, facts }),
+        body: JSON.stringify({ track, jd }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || "关键词分析失败。");
       setAnalysis(result as Analysis);
-      setMessage("分析完成。请检查项目选择和修改建议。");
+      setAcceptedSuggestions([]);
+      setMessage("分析完成。可补充项需要先加入修改清单，再确认如何写入 CV。");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "关键词分析失败。");
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const toggleSuggestion = (keyword: string) => {
+    setAcceptedSuggestions((current) => {
+      const exists = current.includes(keyword);
+      const next = exists ? current.filter((item) => item !== keyword) : [...current, keyword];
+      setMessage(exists ? `已从修改清单移除：${keyword}` : `已加入修改清单：${keyword}。下一步需要确认项目和具体措辞。`);
+      return next;
+    });
   };
 
   const publish = async () => {
@@ -217,6 +245,7 @@ export default function CvTailorClient() {
   };
 
   const handleCopy = async (label: string, content: string) => {
+    if (!content.trim()) { setMessage(`${label} 内容为空，无法复制。`); return; }
     try {
       await copyText(content);
       setMessage(`${label} 已复制到剪贴板。`);
@@ -226,6 +255,7 @@ export default function CvTailorClient() {
   };
 
   const supported = useMemo(() => analysis?.matches.filter((item) => item.status === "supported_gap") ?? [], [analysis]);
+  const selectedMatches = useMemo(() => supported.filter((item) => acceptedSuggestions.includes(item.keyword)), [supported, acceptedSuggestions]);
   const filenameBase = `${safeSlug(company)}-${safeSlug(title)}`;
 
   return (
@@ -259,23 +289,34 @@ export default function CvTailorClient() {
                 <Metric label="事实不足" value={analysis.summary.unsupportedGaps} />
               </div>
               <div style={{ display: "grid", gap: 9 }}>
-                {analysis.matches.map((item) => <div key={item.keyword} style={{ border: "1px solid #ded9ca", borderRadius: 14, padding: 12, background: item.status === "covered" ? "#eef7f1" : item.status === "supported_gap" ? "#fff8df" : "#fff0ed" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><strong>{item.keyword}</strong><span style={{ fontSize: 12 }}>{item.status === "covered" ? "已覆盖" : item.status === "supported_gap" ? "可补充" : "不能自动添加"}</span></div>
-                  {item.factEvidence && <p style={{ fontSize: 12, lineHeight: 1.5, opacity: .78 }}>{item.factEvidence}</p>}
-                  {item.status === "supported_gap" && <button type="button" onClick={() => setTemplate((current) => addKeyword(current, item.keyword, item.category))} style={quietButton}>加入岗位专属草稿</button>}
-                </div>)}
+                {analysis.matches.map((item) => {
+                  const selected = acceptedSuggestions.includes(item.keyword);
+                  return <div key={item.keyword} style={{ border: "1px solid #ded9ca", borderRadius: 14, padding: 14, background: item.status === "covered" ? "#eef7f1" : item.status === "supported_gap" ? "#fff8df" : "#fff0ed" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}><strong>{item.keyword}</strong><span style={{ fontSize: 12, whiteSpace: "nowrap" }}>{item.status === "covered" ? "母版已覆盖" : item.status === "supported_gap" ? "事实支持，可考虑补充" : "事实不足，不能添加"}</span></div>
+                    <p style={{ lineHeight: 1.6, margin: "10px 0" }}>{explanations[item.keyword] || `这是 JD 中的 ${item.category} 要求。系统需要先找到事实证据和最合适的 CV 位置，再决定是否修改。`}</p>
+                    <p style={{ fontSize: 13, lineHeight: 1.55, margin: "8px 0" }}><strong>建议位置：</strong>{suggestionLocation(item)}</p>
+                    {item.jdEvidence && <details style={{ marginTop: 8 }}><summary style={{ cursor: "pointer", fontWeight: 700 }}>查看 JD 原文依据</summary><p style={{ fontSize: 12, lineHeight: 1.55 }}>{cleanEvidence(item.jdEvidence)}</p></details>}
+                    {item.factEvidence && <details style={{ marginTop: 8 }}><summary style={{ cursor: "pointer", fontWeight: 700 }}>查看事实母版依据</summary><p style={{ fontSize: 12, lineHeight: 1.55 }}>{cleanEvidence(item.factEvidence)}</p></details>}
+                    {item.status === "supported_gap" && <button type="button" onClick={() => toggleSuggestion(item.keyword)} style={{ ...quietButton, marginTop: 12, background: selected ? "#1f2c25" : "#fff", color: selected ? "#fff" : "#26342d" }}>{selected ? "✓ 已加入修改清单" : "加入修改清单"}</button>}
+                  </div>;
+                })}
               </div>
             </article>}
           </div>
 
           <div style={{ display: "grid", gap: 14, alignContent: "start" }}>
+            {analysis && <article style={cardStyle}>
+              <h2 style={headingStyle}>3. 待确认修改清单</h2>
+              {selectedMatches.length === 0 ? <p style={{ opacity: .72 }}>尚未选择需要补充的要求。加入修改清单不会立即改写 CV，避免把抽象关键词错误塞进 Skills。</p> : <div style={{ display: "grid", gap: 10 }}>{selectedMatches.map((item) => <div key={item.keyword} style={{ border: "1px solid #ded9ca", borderRadius: 12, padding: 12 }}><strong>{item.keyword}</strong><p style={{ margin: "6px 0 0", fontSize: 13 }}>{suggestionLocation(item)}</p></div>)}</div>}
+            </article>}
+
             <article style={cardStyle}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}><h2 style={headingStyle}>3. 确认与进一步修改</h2><span style={{ fontSize: 12, opacity: .65 }}>{supported.length} 个可补充关键词</span></div>
-              {loading ? <p>正在从 XinyuIvy/CV 读取母版…</p> : <textarea value={template} onChange={(event) => setTemplate(event.target.value)} style={{ ...inputStyle, minHeight: 760, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13, lineHeight: 1.55, resize: "vertical" }} />}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}><h2 style={headingStyle}>4. 确认与进一步修改</h2><span style={{ fontSize: 12, opacity: .65 }}>{selectedMatches.length} 项待确认修改</span></div>
+              {loading ? <p>正在从 XinyuIvy/CV 读取母版…</p> : template ? <textarea value={template} onChange={(event) => setTemplate(event.target.value)} style={{ ...inputStyle, minHeight: 760, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13, lineHeight: 1.55, resize: "vertical" }} /> : <p style={{ padding: 12, background: "#fff0ed", borderRadius: 12 }}>行业母版未成功加载。请检查 CV_GITHUB_TOKEN 配置后重新进入页面。</p>}
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
                 <button type="button" onClick={() => void publish()} disabled={publishing || !template.trim()} style={primaryButton}>{publishing ? "正在生成并创建 PR…" : "生成 LaTeX 并创建 GitHub PR"}</button>
-                <button type="button" onClick={() => void handleCopy("Markdown", template)} style={quietButton}>复制 Markdown</button>
-                <button type="button" onClick={() => downloadText(`${filenameBase}.md`, template, "text/markdown;charset=utf-8")} style={quietButton}>下载 Markdown</button>
+                <button type="button" onClick={() => void handleCopy("Markdown", template)} disabled={!template.trim()} style={quietButton}>复制 Markdown</button>
+                <button type="button" onClick={() => template.trim() ? downloadText(`${filenameBase}.md`, template, "text/markdown;charset=utf-8") : setMessage("Markdown 内容为空，无法下载。") } disabled={!template.trim()} style={quietButton}>下载 Markdown</button>
                 {tex && <button type="button" onClick={() => void handleCopy("LaTeX", tex)} style={quietButton}>复制 LaTeX</button>}
                 {tex && <button type="button" onClick={() => downloadText(`${filenameBase}.tex`, tex, "application/x-tex;charset=utf-8")} style={quietButton}>下载 LaTeX</button>}
               </div>
