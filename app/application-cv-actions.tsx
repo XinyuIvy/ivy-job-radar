@@ -21,6 +21,15 @@ function buttonText(element: Element) {
   return element.textContent?.replace(/\s+/g, " ").trim() ?? "";
 }
 
+function findApplicationCard(button: HTMLButtonElement) {
+  let current: HTMLElement | null = button.parentElement;
+  while (current && current !== document.body) {
+    if (current.querySelector("h3") && buttonText(current).includes("Application ID")) return current;
+    current = current.parentElement;
+  }
+  return button.closest<HTMLElement>("article, .application-card, .record-card, .job-card, li");
+}
+
 export default function ApplicationCvActions() {
   useEffect(() => {
     let disposed = false;
@@ -39,13 +48,18 @@ export default function ApplicationCvActions() {
     const enhance = () => {
       if (disposed) return;
       const editButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("button"))
-        .filter((button) => buttonText(button).includes("编辑申请状态"));
+        .filter((button) => {
+          const text = buttonText(button);
+          return text === "编辑记录" || text.includes("编辑申请状态");
+        });
 
       for (const editButton of editButtons) {
-        const card = editButton.closest<HTMLElement>("article, .application-card, .record-card, .job-card, li, section > div");
+        const card = findApplicationCard(editButton);
         if (!card) continue;
         const title = card.querySelector("h3")?.textContent?.trim() ?? "";
-        const companyLine = Array.from(card.querySelectorAll("p")).map((node) => node.textContent?.trim() ?? "").find(Boolean) ?? "";
+        const companyLine = Array.from(card.querySelectorAll("p"))
+          .map((node) => node.textContent?.trim() ?? "")
+          .find((text) => text.includes("·")) ?? "";
         const company = companyLine.split("·")[0]?.trim() ?? "";
         const application = applicationsByKey.get(key(company, title));
         if (!application) continue;
@@ -56,20 +70,21 @@ export default function ApplicationCvActions() {
           link.dataset.cvTailorAction = "true";
           link.href = `/cv-tailor?applicationId=${application.id}`;
           link.textContent = "定制 CV";
-          link.style.borderRadius = "999px";
+          link.style.borderRadius = "10px";
           link.style.padding = "9px 14px";
           link.style.background = "#704c2f";
           link.style.color = "#fff";
           link.style.fontWeight = "800";
           link.style.textDecoration = "none";
           link.style.fontSize = "13px";
-          actionContainer.append(link);
+          actionContainer.insertBefore(link, editButton);
         }
 
         const taskButton = Array.from(card.querySelectorAll<HTMLButtonElement>("button"))
-          .find((button) => buttonText(button).includes("新增任务"));
+          .find((button) => buttonText(button) === "新增任务");
         if (taskButton) {
-          taskButton.style.display = "none";
+          taskButton.style.setProperty("display", "none", "important");
+          taskButton.setAttribute("aria-hidden", "true");
           taskButton.dataset.mergedTaskButton = "true";
           if (editButton.dataset.taskMergeBound !== "true") {
             editButton.dataset.taskMergeBound = "true";
