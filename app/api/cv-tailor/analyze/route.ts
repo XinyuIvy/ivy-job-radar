@@ -2,87 +2,118 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-type KeywordRule = { label: string; patterns: RegExp[]; category: string };
-
-const rules: Record<string, KeywordRule[]> = {
-  pharma: [
-    { label: "R", patterns: [/\br\b/i, /r programming/i], category: "Programming" },
-    { label: "SAS", patterns: [/\bsas\b/i], category: "Programming" },
-    { label: "Python", patterns: [/\bpython\b/i], category: "Programming" },
-    { label: "Clinical trials", patterns: [/clinical trials?/i, /study design/i], category: "Methods" },
-    { label: "Experimental design", patterns: [/experimental design/i], category: "Methods" },
-    { label: "Longitudinal analysis", patterns: [/longitudinal/i, /repeated measures/i], category: "Methods" },
-    { label: "Survival analysis", patterns: [/survival analysis/i, /time-to-event/i], category: "Methods" },
-    { label: "Real-world evidence", patterns: [/real[- ]world evidence/i, /\brwe\b/i], category: "Methods" },
-    { label: "Regulatory knowledge", patterns: [/regulatory/i, /submission/i], category: "Research Practice" },
-    { label: "Statistical analysis plans", patterns: [/statistical analysis plan/i, /\bsap\b/i], category: "Research Practice" },
-  ],
-  tech: [
-    { label: "Python", patterns: [/\bpython\b/i], category: "Programming and Data" },
-    { label: "Machine learning", patterns: [/machine learning/i], category: "Machine Learning and Statistics" },
-    { label: "SQL", patterns: [/\bsql\b/i], category: "Programming and Data" },
-    { label: "Experimentation / A/B testing", patterns: [/a\/b test/i, /experimentation/i], category: "Machine Learning and Statistics" },
-    { label: "R", patterns: [/\br\b/i], category: "Programming and Data" },
-    { label: "Statistical modeling", patterns: [/statistical model/i, /statistical analysis/i], category: "Machine Learning and Statistics" },
-    { label: "Causal inference", patterns: [/causal inference/i], category: "Machine Learning and Statistics" },
-    { label: "Cloud", patterns: [/cloud/i, /aws/i, /azure/i, /gcp/i], category: "Engineering" },
-    { label: "C++", patterns: [/c\+\+/i], category: "Programming and Data" },
-    { label: "Product analytics", patterns: [/product analytics/i], category: "Machine Learning and Statistics" },
-  ],
-  quant: [
-    { label: "Python", patterns: [/\bpython\b/i], category: "Programming" },
-    { label: "Machine learning", patterns: [/machine learning/i], category: "Methods" },
-    { label: "C++", patterns: [/c\+\+/i], category: "Programming" },
-    { label: "Time-series analysis", patterns: [/time series/i], category: "Methods" },
-    { label: "Statistical modeling", patterns: [/statistical model/i, /statistical analysis/i], category: "Methods" },
-    { label: "Quantitative investment research", patterns: [/investment research/i, /quantitative research/i], category: "Methods" },
-    { label: "R", patterns: [/\br\b/i], category: "Programming" },
-    { label: "SQL", patterns: [/\bsql\b/i], category: "Programming" },
-    { label: "Factor / alpha research", patterns: [/factor research/i, /alpha research/i], category: "Methods" },
-    { label: "Optimization", patterns: [/optimization/i, /portfolio optimization/i], category: "Methods" },
-  ],
-  consulting: [
-    { label: "R", patterns: [/\br\b/i], category: "Analytics" },
-    { label: "Python", patterns: [/\bpython\b/i], category: "Analytics" },
-    { label: "SAS", patterns: [/\bsas\b/i], category: "Analytics" },
-    { label: "SQL", patterns: [/\bsql\b/i], category: "Analytics" },
-    { label: "Communication", patterns: [/communication/i, /present/i], category: "Collaboration" },
-    { label: "Cross-functional collaboration", patterns: [/cross[- ]functional/i, /stakeholder/i], category: "Collaboration" },
-    { label: "Regulatory knowledge", patterns: [/regulatory/i], category: "Decision Support" },
-    { label: "Evidence synthesis", patterns: [/evidence synthesis/i, /literature review/i], category: "Decision Support" },
-    { label: "Causal inference", patterns: [/causal inference/i], category: "Analytics" },
-    { label: "Real-world evidence", patterns: [/real[- ]world/i, /\brwe\b/i], category: "Analytics" },
-  ],
+type RequirementRule = {
+  label: string;
+  category: string;
+  aliases: string[];
+  projectTerms?: string[];
 };
 
-function context(text: string, label: string) {
-  const index = text.toLowerCase().indexOf(label.toLowerCase());
-  if (index < 0) return "";
-  return text.slice(Math.max(0, index - 120), Math.min(text.length, index + label.length + 220)).replace(/\s+/g, " ").trim();
+type ProjectRecommendation = {
+  name: string;
+  score: number;
+  matchedRequirements: string[];
+  alreadyInTemplate: boolean;
+  evidence: string;
+};
+
+const requirements: RequirementRule[] = [
+  { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional"], projectTerms: ["study design", "clinical trial", "observational", "simulation"] },
+  { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient"] },
+  { label: "Wearable and physiological data", category: "Data", aliases: ["wearable", "physiological", "digital health", "biobehavioral"], projectTerms: ["daily", "diary", "digital", "physiological", "patient-reported"] },
+  { label: "Clinical and multimodal data", category: "Data", aliases: ["clinical data", "multimodal", "multi-modal", "biomedical data"], projectTerms: ["multimodal", "multi-modal", "clinical", "ehr", "imaging"] },
+  { label: "Time-series analysis", category: "Methods", aliases: ["time-series", "time series", "temporal data"], projectTerms: ["time series", "longitudinal", "daily", "temporal"] },
+  { label: "Regression and mixed models", category: "Methods", aliases: ["regression", "mixed models", "mixed-effects", "mixed effects"], projectTerms: ["regression", "mixed-effects", "mixed effects", "gee"] },
+  { label: "Bayesian methods", category: "Methods", aliases: ["bayesian"], projectTerms: ["bayesian"] },
+  { label: "Machine learning", category: "Methods", aliases: ["machine learning", "machine-learning"], projectTerms: ["machine learning", "random forest", "xgboost", "lightgbm", "neural network"] },
+  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis"], projectTerms: ["statistical", "model", "inference"] },
+  { label: "Python", category: "Programming and Data", aliases: ["python"] },
+  { label: "R", category: "Programming and Data", aliases: ["r programming", "using r", " r,", " r and", " r;", " r "] },
+  { label: "SQL", category: "Programming and Data", aliases: ["sql"] },
+  { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow"] },
+  { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization"], projectTerms: ["visualization", "figures", "dashboard", "shiny"] },
+  { label: "Manuscripts and scientific dissemination", category: "Communication", aliases: ["manuscripts", "abstracts", "reports", "patents", "publication", "presentations", "scientific dissemination"], projectTerms: ["first author", "manuscript", "publication", "presentation"] },
+  { label: "Research leadership from hypothesis to publication", category: "Leadership", aliases: ["leading scientific research", "hypothesis through publication", "first-authored", "first authored"], projectTerms: ["first author", "led", "lead project", "project lead"] },
+  { label: "Cross-functional collaboration", category: "Collaboration", aliases: ["cross-functionally", "cross-functional", "collaborative", "stakeholders", "partnership"], projectTerms: ["cross-functional", "collaboration", "stakeholder", "multidisciplinary"] },
+  { label: "Evidence-based decision support", category: "Decision Support", aliases: ["evidence-based decisions", "decision-ready", "insight generation", "practical health applications"], projectTerms: ["decision support", "recommendation", "trial design", "operating trade-offs"] },
+  { label: "Clinical and regulatory collaboration", category: "Collaboration", aliases: ["clinical", "regulatory", "research operations"], projectTerms: ["clinical", "regulatory", "endpoint", "trial"] },
+  { label: "Industry-academia experience", category: "Experience", aliases: ["industry and academia", "intersection of industry and academia"], projectTerms: ["pfizer", "industry", "university"] },
+  { label: "UAE research experience", category: "Regional Preference", aliases: ["uae", "united arab emirates"], projectTerms: ["uae", "united arab emirates"] },
+  { label: "Sleep and circadian science", category: "Domain", aliases: ["sleep", "circadian"], projectTerms: ["sleep", "circadian"] },
+  { label: "Digital health", category: "Domain", aliases: ["digital health"], projectTerms: ["digital health", "digital endpoint", "wearable"] },
+];
+
+function normalized(value: string) {
+  return value.toLocaleLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ").trim();
+}
+
+function hasAlias(text: string, aliases: string[]) {
+  const source = normalized(text);
+  return aliases.some((alias) => source.includes(normalized(alias)));
+}
+
+function evidenceContext(text: string, aliases: string[]) {
+  const source = normalized(text);
+  const alias = aliases.find((item) => source.includes(normalized(item)));
+  if (!alias) return "";
+  const index = source.indexOf(normalized(alias));
+  return text.slice(Math.max(0, index - 150), Math.min(text.length, index + alias.length + 300)).replace(/\s+/g, " ").trim();
+}
+
+function projectSections(facts: string) {
+  const headings = [...facts.matchAll(/^####\s+(.+)$/gm)];
+  return headings.map((match, index) => {
+    const start = match.index ?? 0;
+    const end = headings[index + 1]?.index ?? facts.length;
+    return { name: match[1].trim(), text: facts.slice(start, end) };
+  }).filter((section) => /Project|Pfizer|Readmission|Treatment Effect|Confidence|NeuroStat|Distance Model|AI Usage|Ivy Job Radar/i.test(section.name));
+}
+
+function recommendProjects(facts: string, template: string, detected: RequirementRule[]) {
+  return projectSections(facts).map((project) => {
+    const matchedRequirements = detected.filter((requirement) => {
+      const terms = requirement.projectTerms ?? requirement.aliases;
+      return hasAlias(project.text, terms);
+    }).map((requirement) => requirement.label);
+    const score = matchedRequirements.length;
+    return {
+      name: project.name,
+      score,
+      matchedRequirements,
+      alreadyInTemplate: normalized(template).includes(normalized(project.name.replace(/^.*?—\s*/, ""))) || normalized(template).includes(normalized(project.name.split(":" ).pop() || project.name)),
+      evidence: project.text.slice(0, 420).replace(/\s+/g, " ").trim(),
+    } satisfies ProjectRecommendation;
+  }).filter((project) => project.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json() as { track?: string; jd?: string; template?: string; facts?: string };
-  const track = body.track || "pharma";
+  const body = await request.json() as { track?: string; jd?: string; template?: string; facts?: string; keywords?: string };
+  const track = body.track || "tech";
   const jd = body.jd || "";
   const template = body.template || "";
   const facts = body.facts || "";
-  const matches = (rules[track] || rules.pharma)
-    .filter((rule) => rule.patterns.some((pattern) => pattern.test(jd)))
-    .map((rule) => {
-      const covered = rule.patterns.some((pattern) => pattern.test(template));
-      const factSupported = rule.patterns.some((pattern) => pattern.test(facts));
-      return {
-        keyword: rule.label,
-        category: rule.category,
-        status: covered ? "covered" : factSupported ? "supported_gap" : "unsupported_gap",
-        factEvidence: factSupported ? context(facts, rule.label.split(" /")[0]) : "",
-      };
-    });
-  return NextResponse.json({ track, matches, summary: {
-    required: matches.length,
-    covered: matches.filter((item) => item.status === "covered").length,
-    supportedGaps: matches.filter((item) => item.status === "supported_gap").length,
-    unsupportedGaps: matches.filter((item) => item.status === "unsupported_gap").length,
-  } });
+  const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
+  const matches = detected.map((rule) => {
+    const covered = hasAlias(template, rule.aliases);
+    const factSupported = hasAlias(facts, [...rule.aliases, ...(rule.projectTerms ?? [])]);
+    return {
+      keyword: rule.label,
+      category: rule.category,
+      status: covered ? "covered" : factSupported ? "supported_gap" : "unsupported_gap",
+      factEvidence: factSupported ? evidenceContext(facts, [...rule.aliases, ...(rule.projectTerms ?? [])]) : "",
+      jdEvidence: evidenceContext(jd, rule.aliases),
+    };
+  });
+  const projects = recommendProjects(facts, template, detected);
+  return NextResponse.json({
+    track,
+    matches,
+    projects,
+    summary: {
+      required: matches.length,
+      covered: matches.filter((item) => item.status === "covered").length,
+      supportedGaps: matches.filter((item) => item.status === "supported_gap").length,
+      unsupportedGaps: matches.filter((item) => item.status === "unsupported_gap").length,
+    },
+  });
 }
