@@ -20,7 +20,9 @@ export default function PendingJobVisibility() {
   useEffect(() => {
     let disposed = false;
     let observer: MutationObserver | null = null;
+    let intervalId: number | undefined;
     let pendingKeys = new Set<string>();
+    let modalWasOpen = Boolean(document.querySelector(".modal-backdrop"));
 
     const refreshPendingKeys = async () => {
       const response = await fetch("/api/applications", { cache: "no-store" });
@@ -41,13 +43,21 @@ export default function PendingJobVisibility() {
 
       for (const card of cards) {
         if (!onTodayView) {
-          card.hidden = false;
+          card.style.removeProperty("display");
+          card.removeAttribute("aria-hidden");
           continue;
         }
         const title = card.querySelector(".job-title h3")?.textContent ?? "";
         const companyLine = card.querySelector(".job-title p")?.textContent ?? "";
         const company = companyLine.split("·")[0]?.trim() ?? "";
-        card.hidden = pendingKeys.has(`${normalize(company)}::${normalize(title)}`);
+        const shouldHide = pendingKeys.has(`${normalize(company)}::${normalize(title)}`);
+        if (shouldHide) {
+          card.style.setProperty("display", "none", "important");
+          card.setAttribute("aria-hidden", "true");
+        } else {
+          card.style.removeProperty("display");
+          card.removeAttribute("aria-hidden");
+        }
       }
     };
 
@@ -57,15 +67,31 @@ export default function PendingJobVisibility() {
     };
 
     void run();
-    observer = new MutationObserver(() => applyVisibility());
+    observer = new MutationObserver(() => {
+      const modalIsOpen = Boolean(document.querySelector(".modal-backdrop"));
+      if (modalWasOpen && !modalIsOpen) {
+        void run();
+      } else {
+        applyVisibility();
+      }
+      modalWasOpen = modalIsOpen;
+    });
     observer.observe(document.body, { childList: true, subtree: true, characterData: true });
 
     const onFocus = () => void run();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void run();
+    };
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    intervalId = window.setInterval(() => void run(), 5000);
+
     return () => {
       disposed = true;
       observer?.disconnect();
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (intervalId !== undefined) window.clearInterval(intervalId);
     };
   }, []);
 
