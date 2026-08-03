@@ -67,13 +67,26 @@ function evidenceContext(text: string, aliases: string[]) {
   return text.slice(Math.max(0, index - 150), Math.min(text.length, index + alias.length + 300)).replace(/\s+/g, " ").trim();
 }
 
-async function readRaw(path: string) {
-  const response = await fetch(`https://raw.githubusercontent.com/XinyuIvy/CV/main/${path}`, {
+function decodeBase64Utf8(value: string) {
+  const binary = atob(value.replace(/\n/g, ""));
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+async function readPrivateFile(path: string, token: string) {
+  const response = await fetch(`https://api.github.com/repos/XinyuIvy/CV/contents/${path}?ref=main`, {
     cache: "no-store",
-    headers: { "User-Agent": "Ivy-Job-Radar" },
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      "User-Agent": "Ivy-Job-Radar",
+    },
   });
-  if (!response.ok) throw new Error(`Unable to read ${path}`);
-  return response.text();
+  if (!response.ok) throw new Error(`无法从私有 CV 仓库读取 ${path}（GitHub ${response.status}）。`);
+  const payload = await response.json() as { content?: string; encoding?: string };
+  if (payload.encoding !== "base64" || !payload.content) throw new Error(`GitHub 未返回 ${path} 的文件内容。`);
+  return decodeBase64Utf8(payload.content);
 }
 
 function projectSections(facts: string) {
@@ -105,11 +118,20 @@ export async function POST(request: NextRequest) {
   const body = await request.json() as { track?: string; jd?: string };
   const track = body.track && templates[body.track] ? body.track : "tech";
   const jd = body.jd || "";
+  const { env } = await import("cloudflare:workers");
+  const token = String(env.CV_GITHUB_TOKEN || "").trim();
+
+  if (!token) {
+    return NextResponse.json({
+      error: "XinyuIvy/CV 是私有仓库。请先配置 CV_GITHUB_TOKEN，再运行 CV 分析。",
+      code: "CV_TOKEN_REQUIRED",
+    }, { status: 503 });
+  }
 
   try {
     const [template, facts] = await Promise.all([
-      readRaw(`master/template-cv/${templates[track]}`),
-      readRaw("master/FACT_MASTER.md"),
+      readPrivateFile(`master/template-cv/${templates[track]}`, token),
+      readPrivateFile("master/FACT_MASTER.md", token),
     ]);
     const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
     const matches = detected.map((rule) => {
