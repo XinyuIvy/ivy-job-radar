@@ -10,6 +10,24 @@ type RequestItem = {
   jobUrl: string;
 };
 
+type ApplicationRow = {
+  company: string;
+  title: string;
+  status: string;
+};
+
+function normalize(value: string) {
+  return value
+    .trim()
+    .toLocaleLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+}
+
+function key(company: string, title: string) {
+  return `${normalize(company)}::${normalize(title)}`;
+}
+
 function button(label: string, tone: "approve" | "neutral" | "danger" | "quiet") {
   const element = document.createElement("button");
   element.type = "button";
@@ -35,23 +53,53 @@ export default function VerificationQueueActions() {
   useEffect(() => {
     let disposed = false;
     let observer: MutationObserver | null = null;
+    let scheduled = false;
 
     const enhance = async () => {
+      scheduled = false;
       if (disposed) return;
-      const response = await fetch("/api/job-requests", { cache: "no-store" });
-      if (!response.ok || disposed) return;
-      const items = await response.json() as RequestItem[];
+
+      const [requestResponse, applicationResponse] = await Promise.all([
+        fetch("/api/job-requests", { cache: "no-store" }),
+        fetch("/api/applications", { cache: "no-store" }),
+      ]);
+      if (!requestResponse.ok || disposed) return;
+
+      const items = await requestResponse.json() as RequestItem[];
+      const applications = applicationResponse.ok
+        ? await applicationResponse.json() as ApplicationRow[]
+        : [];
+      const pendingKeys = new Set(
+        applications
+          .filter((row) => row.status === "准备材料")
+          .map((row) => key(row.company, row.title)),
+      );
+      const itemByKey = new Map(items.map((item) => [key(item.company, item.title), item]));
       const cards = Array.from(document.querySelectorAll<HTMLElement>(".request-list .request-card"));
 
-      items.forEach((item, index) => {
-        const card = cards[index];
-        if (!card || card.dataset.manualReviewEnhanced === "true") return;
-        const status = card.querySelector(".verify-status")?.textContent?.trim() || item.status;
-        if (status !== "需复核") return;
-        const actions = card.querySelector<HTMLElement>(".record-actions");
-        if (!actions) return;
+      for (const card of cards) {
+        const title = card.querySelector("h3")?.textContent?.trim() ?? "";
+        const company = card.querySelector("h3 + p")?.textContent?.trim()
+          ?? card.querySelector("div > p")?.textContent?.trim()
+          ?? "";
+        const cardKey = key(company, title);
+        const item = itemByKey.get(cardKey);
+        if (!item) continue;
 
-        card.dataset.manualReviewEnhanced = "true";
+        if (pendingKeys.has(cardKey)) {
+          card.style.setProperty("display", "none", "important");
+          card.setAttribute("aria-hidden", "true");
+          continue;
+        }
+        card.style.removeProperty("display");
+        card.removeAttribute("aria-hidden");
+
+        const status = card.querySelector(".verify-status")?.textContent?.trim() || item.status;
+        if (status !== "需复核") continue;
+        const actions = card.querySelector<HTMLElement>(".record-actions");
+        if (!actions || actions.dataset.manualReviewEnhanced === "true") continue;
+
+        actions.dataset.manualReviewEnhanced = "true";
         actions.querySelectorAll("button").forEach((existing) => existing.remove());
 
         const run = async (action: "approve" | "ignore" | "delete" | "rerun", trigger: HTMLButtonElement) => {
@@ -94,16 +142,23 @@ export default function VerificationQueueActions() {
         const remove = button("仅删除记录", "quiet");
         remove.addEventListener("click", () => void run("delete", remove));
         actions.append(approve, rerun, ignore, remove);
-      });
+      }
     };
 
-    const schedule = () => window.setTimeout(() => void enhance(), 0);
+    const schedule = () => {
+      if (scheduled || disposed) return;
+      scheduled = true;
+      window.setTimeout(() => void enhance(), 0);
+    };
+
     schedule();
     observer = new MutationObserver(schedule);
     observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("focus", schedule);
     return () => {
       disposed = true;
       observer?.disconnect();
+      window.removeEventListener("focus", schedule);
     };
   }, []);
 
