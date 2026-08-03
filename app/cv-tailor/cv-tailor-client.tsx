@@ -24,6 +24,13 @@ type ApplicationPrefill = {
   applicationStatus: string;
 };
 
+type PublishResult = {
+  tex?: string;
+  pullRequestUrl?: string;
+  message?: string;
+  error?: string;
+};
+
 const trackLabels: Record<string, string> = {
   pharma: "Pharma / Biostatistics",
   tech: "Tech / Data Science",
@@ -45,6 +52,39 @@ function addKeyword(markdown: string, keyword: string, category: string) {
   return lines.join("\n");
 }
 
+function safeSlug(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, "-").replace(/^-+|-+$/g, "") || "tailored-cv";
+}
+
+function downloadText(filename: string, content: string, type = "text/plain;charset=utf-8") {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+async function copyText(text: string) {
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.append(area);
+  area.focus();
+  area.select();
+  const copied = document.execCommand("copy");
+  area.remove();
+  if (!copied) throw new Error("浏览器拒绝访问剪贴板。");
+}
+
 export default function CvTailorClient() {
   const [applicationId, setApplicationId] = useState<number | null>(null);
   const [track, setTrack] = useState("pharma");
@@ -60,6 +100,7 @@ export default function CvTailorClient() {
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState("");
   const [tex, setTex] = useState("");
+  const [pullRequestUrl, setPullRequestUrl] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -97,6 +138,8 @@ export default function CvTailorClient() {
       if (!active) return;
       setLoading(true);
       setAnalysis(null);
+      setTex("");
+      setPullRequestUrl("");
     }, 0);
     fetch(`/api/cv-tailor/source?track=${encodeURIComponent(track)}`, { cache: "no-store" })
       .then(async (response) => {
@@ -123,35 +166,67 @@ export default function CvTailorClient() {
   const analyze = async () => {
     if (!jd.trim()) { setMessage("该申请没有完整 JD，暂时无法分析。"); return; }
     setAnalyzing(true);
-    setMessage("");
-    const response = await fetch("/api/cv-tailor/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ track, jd, template, facts }),
-    });
-    setAnalyzing(false);
-    if (!response.ok) { setMessage("关键词分析失败。"); return; }
-    setAnalysis(await response.json());
+    setMessage("正在分析完整 JD、母版覆盖和事实证据…");
+    try {
+      const response = await fetch("/api/cv-tailor/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ track, jd, template, facts }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "关键词分析失败。");
+      setAnalysis(result as Analysis);
+      setMessage("分析完成。请检查项目选择和修改建议。");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "关键词分析失败。");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   const publish = async () => {
+    if (!template.trim()) { setMessage("CV 内容为空，无法生成文件。"); return; }
     setPublishing(true);
-    setMessage("");
-    const response = await fetch("/api/cv-tailor/publish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ applicationId, company, title, track, markdown: template, jd }),
-    });
-    const result = await response.json().catch(() => ({}));
-    setPublishing(false);
-    if (!response.ok) { setMessage(result.error || "生成失败。"); return; }
-    setTex(result.tex || "");
-    setMessage(result.pullRequestUrl
-      ? `已创建 GitHub PR：${result.pullRequestUrl}`
-      : `已生成 Markdown 和 LaTeX，但尚未创建 PR：${result.message}`);
+    setPullRequestUrl("");
+    setMessage("正在生成 LaTeX，并尝试创建 GitHub 分支和 PR…");
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 45000);
+    try {
+      const response = await fetch("/api/cv-tailor/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ applicationId, company, title, track, markdown: template, jd }),
+        signal: controller.signal,
+      });
+      const result = await response.json().catch(() => ({})) as PublishResult;
+      if (!response.ok) throw new Error(result.error || `生成失败，服务器返回 ${response.status}。`);
+      setTex(result.tex || "");
+      setPullRequestUrl(result.pullRequestUrl || "");
+      setMessage(result.pullRequestUrl
+        ? "LaTeX 已生成，GitHub PR 已创建。请打开 PR 检查后再合并。"
+        : `LaTeX 已生成，但未创建 PR：${result.message || "Site 尚未配置 CV_GITHUB_TOKEN。"}`);
+    } catch (error) {
+      const detail = error instanceof DOMException && error.name === "AbortError"
+        ? "生成请求超过 45 秒，已停止。请检查 Site 的 GitHub token 配置或稍后重试。"
+        : error instanceof Error ? error.message : "生成失败。";
+      setMessage(detail);
+    } finally {
+      window.clearTimeout(timeoutId);
+      setPublishing(false);
+    }
+  };
+
+  const handleCopy = async (label: string, content: string) => {
+    try {
+      await copyText(content);
+      setMessage(`${label} 已复制到剪贴板。`);
+    } catch (error) {
+      setMessage(`${label} 复制失败：${error instanceof Error ? error.message : "未知错误"} 请使用下载按钮。`);
+    }
   };
 
   const supported = useMemo(() => analysis?.matches.filter((item) => item.status === "supported_gap") ?? [], [analysis]);
+  const filenameBase = `${safeSlug(company)}-${safeSlug(title)}`;
 
   return (
     <main style={{ minHeight: "100vh", background: "#f5f2e9", color: "#1f2c25", padding: "28px 20px 100px" }}>
@@ -172,7 +247,7 @@ export default function CvTailorClient() {
               <p><strong>{company || "未识别公司"}</strong> · {title || "未识别岗位"}</p>
               <label style={labelStyle}>行业母版<select value={track} onChange={(event) => setTrack(event.target.value)} style={inputStyle}>{Object.entries(trackLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <label style={labelStyle}>完整 JD<textarea value={jd} onChange={(event) => setJd(event.target.value)} style={{ ...inputStyle, minHeight: 300, resize: "vertical" }} placeholder="岗位记录中尚无完整 JD，可在此补充" /></label>
-              <button onClick={() => void analyze()} disabled={analyzing || loading} style={primaryButton}>{analyzing ? "分析中…" : "开始项目与关键词分析"}</button>
+              <button type="button" onClick={() => void analyze()} disabled={analyzing || loading} style={primaryButton}>{analyzing ? "分析中…" : "开始项目与关键词分析"}</button>
             </article>
 
             {analysis && <article style={cardStyle}>
@@ -187,7 +262,7 @@ export default function CvTailorClient() {
                 {analysis.matches.map((item) => <div key={item.keyword} style={{ border: "1px solid #ded9ca", borderRadius: 14, padding: 12, background: item.status === "covered" ? "#eef7f1" : item.status === "supported_gap" ? "#fff8df" : "#fff0ed" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}><strong>{item.keyword}</strong><span style={{ fontSize: 12 }}>{item.status === "covered" ? "已覆盖" : item.status === "supported_gap" ? "可补充" : "不能自动添加"}</span></div>
                   {item.factEvidence && <p style={{ fontSize: 12, lineHeight: 1.5, opacity: .78 }}>{item.factEvidence}</p>}
-                  {item.status === "supported_gap" && <button onClick={() => setTemplate((current) => addKeyword(current, item.keyword, item.category))} style={quietButton}>加入岗位专属草稿</button>}
+                  {item.status === "supported_gap" && <button type="button" onClick={() => setTemplate((current) => addKeyword(current, item.keyword, item.category))} style={quietButton}>加入岗位专属草稿</button>}
                 </div>)}
               </div>
             </article>}
@@ -197,8 +272,17 @@ export default function CvTailorClient() {
             <article style={cardStyle}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}><h2 style={headingStyle}>3. 确认与进一步修改</h2><span style={{ fontSize: 12, opacity: .65 }}>{supported.length} 个可补充关键词</span></div>
               {loading ? <p>正在从 XinyuIvy/CV 读取母版…</p> : <textarea value={template} onChange={(event) => setTemplate(event.target.value)} style={{ ...inputStyle, minHeight: 760, fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace", fontSize: 13, lineHeight: 1.55, resize: "vertical" }} />}
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}><button onClick={() => void publish()} disabled={publishing || !template.trim()} style={primaryButton}>{publishing ? "创建中…" : "生成 LaTeX 并创建 GitHub PR"}</button><button onClick={() => navigator.clipboard.writeText(template)} style={quietButton}>复制 Markdown</button>{tex && <button onClick={() => navigator.clipboard.writeText(tex)} style={quietButton}>复制 LaTeX</button>}</div>
-              {message && <p style={{ marginTop: 12, padding: 12, background: "#eef3ed", borderRadius: 12, lineHeight: 1.5 }}>{message}</p>}
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 12 }}>
+                <button type="button" onClick={() => void publish()} disabled={publishing || !template.trim()} style={primaryButton}>{publishing ? "正在生成并创建 PR…" : "生成 LaTeX 并创建 GitHub PR"}</button>
+                <button type="button" onClick={() => void handleCopy("Markdown", template)} style={quietButton}>复制 Markdown</button>
+                <button type="button" onClick={() => downloadText(`${filenameBase}.md`, template, "text/markdown;charset=utf-8")} style={quietButton}>下载 Markdown</button>
+                {tex && <button type="button" onClick={() => void handleCopy("LaTeX", tex)} style={quietButton}>复制 LaTeX</button>}
+                {tex && <button type="button" onClick={() => downloadText(`${filenameBase}.tex`, tex, "application/x-tex;charset=utf-8")} style={quietButton}>下载 LaTeX</button>}
+              </div>
+              {message && <div aria-live="polite" style={{ marginTop: 12, padding: 12, background: "#eef3ed", borderRadius: 12, lineHeight: 1.5 }}>
+                <p style={{ margin: 0 }}>{message}</p>
+                {pullRequestUrl && <p style={{ margin: "8px 0 0" }}><a href={pullRequestUrl} target="_blank" rel="noreferrer" style={{ color: "#16794b", fontWeight: 800 }}>打开 GitHub PR ↗</a></p>}
+              </div>}
             </article>
           </div>
         </section>}
