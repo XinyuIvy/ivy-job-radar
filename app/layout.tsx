@@ -50,6 +50,22 @@ export default function RootLayout({
           }}
         >
           <a
+            href="/cv-tailor"
+            aria-label="根据岗位定制 CV"
+            style={{
+              borderRadius: 999,
+              padding: "11px 16px",
+              background: "#704c2f",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 800,
+              boxShadow: "0 10px 30px rgba(112,76,47,.22)",
+            }}
+          >
+            ✎ 定制 CV
+          </a>
+          <a
             href="/screening-learning"
             aria-label="查看筛选学习建议"
             style={{
