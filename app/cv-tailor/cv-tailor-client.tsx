@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type Match = {
@@ -51,8 +52,11 @@ export default function CvTailorClient() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setAnalysis(null);
+    const resetTimer = window.setTimeout(() => {
+      if (!active) return;
+      setLoading(true);
+      setAnalysis(null);
+    }, 0);
     fetch(`/api/cv-tailor/source?track=${encodeURIComponent(track)}`, { cache: "no-store" })
       .then(async (response) => {
         if (!response.ok) throw new Error("CV 母版读取失败");
@@ -69,7 +73,10 @@ export default function CvTailorClient() {
         setMessage(error instanceof Error ? error.message : "CV 母版读取失败");
         setLoading(false);
       });
-    return () => { active = false; };
+    return () => {
+      active = false;
+      window.clearTimeout(resetTimer);
+    };
   }, [track]);
 
   const analyze = async () => {
@@ -114,7 +121,7 @@ export default function CvTailorClient() {
             <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(30px,5vw,54px)", margin: "4px 0" }}>岗位定制 CV</h1>
             <p style={{ maxWidth: 760, lineHeight: 1.65 }}>以 CV 仓库中的行业母版、FACT_MASTER 和历史 JD 关键词为唯一依据。未被事实母版支持的关键词不会自动加入。</p>
           </div>
-          <a href="/" style={{ color: "#16794b", fontWeight: 800 }}>返回 Job Radar</a>
+          <Link href="/" style={{ color: "#16794b", fontWeight: 800 }}>返回 Job Radar</Link>
         </header>
 
         <section style={{ display: "grid", gridTemplateColumns: "minmax(300px,.8fr) minmax(420px,1.2fr)", gap: 18 }} className="cv-tailor-grid">
