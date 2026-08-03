@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const apiRoot = "https://api.github.com/repos/XinyuIvy/CV";
+
 function cleanSlug(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9\u4e00-\u9fff]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "job";
 }
@@ -14,24 +16,12 @@ function encodeBase64(text: string) {
 }
 
 function escapeLatex(value: string) {
-  return value
-    .replace(/\\/g, "\\textbackslash{}")
-    .replace(/([#$%&_{}])/g, "\\$1")
-    .replace(/~/g, "\\textasciitilde{}")
-    .replace(/\^/g, "\\textasciicircum{}");
+  return value.replace(/\\/g, "\\textbackslash{}").replace(/([#$%&_{}])/g, "\\$1").replace(/~/g, "\\textasciitilde{}").replace(/\^/g, "\\textasciicircum{}");
 }
 
 function markdownToLatex(markdown: string) {
   const lines = markdown.split(/\r?\n/);
-  const output = [
-    "\\documentclass[10pt]{article}",
-    "\\usepackage[margin=0.62in]{geometry}",
-    "\\usepackage[hidelinks]{hyperref}",
-    "\\usepackage{enumitem}",
-    "\\setlist[itemize]{leftmargin=1.25em,itemsep=1pt,topsep=2pt}",
-    "\\pagestyle{empty}",
-    "\\begin{document}",
-  ];
+  const output = ["\\documentclass[10pt]{article}", "\\usepackage[margin=0.62in]{geometry}", "\\usepackage[hidelinks]{hyperref}", "\\usepackage{enumitem}", "\\setlist[itemize]{leftmargin=1.25em,itemsep=1pt,topsep=2pt}", "\\pagestyle{empty}", "\\begin{document}"];
   let inList = false;
   for (const raw of lines) {
     const line = raw.trim();
@@ -51,27 +41,30 @@ function markdownToLatex(markdown: string) {
   return output.join("\n");
 }
 
-async function putFile(token: string, path: string, content: string, message: string) {
-  const api = `https://api.github.com/repos/XinyuIvy/CV/contents/${path}`;
-  const existing = await fetch(`${api}?ref=main`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "User-Agent": "Ivy-Job-Radar" },
-  });
-  const current = existing.ok ? await existing.json() as { sha?: string } : null;
-  const response = await fetch(api, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "Ivy-Job-Radar" },
-    body: JSON.stringify({ message, content: encodeBase64(content), branch: "main", ...(current?.sha ? { sha: current.sha } : {}) }),
-  });
+function headers(token: string) {
+  return { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "Ivy-Job-Radar" };
+}
+
+async function github(token: string, path: string, init?: RequestInit) {
+  const response = await fetch(`${apiRoot}${path}`, { ...init, headers: { ...headers(token), ...(init?.headers || {}) } });
   if (!response.ok) throw new Error(await response.text());
   return response.json();
 }
 
+async function putFile(token: string, branch: string, path: string, content: string, message: string) {
+  await github(token, `/contents/${path}`, {
+    method: "PUT",
+    body: JSON.stringify({ message, content: encodeBase64(content), branch }),
+  });
+}
+
 export async function POST(request: NextRequest) {
-  const body = await request.json() as { company?: string; title?: string; track?: string; markdown?: string };
+  const body = await request.json() as { applicationId?: number | null; company?: string; title?: string; track?: string; markdown?: string; jd?: string };
   const company = String(body.company || "Unknown company").trim();
   const title = String(body.title || "Target role").trim();
   const track = cleanSlug(String(body.track || "general"));
   const markdown = String(body.markdown || "").trim();
+  const jd = String(body.jd || "").trim();
   if (!markdown) return NextResponse.json({ error: "CV content is required." }, { status: 400 });
 
   const { env } = await import("cloudflare:workers");
@@ -79,12 +72,28 @@ export async function POST(request: NextRequest) {
   const folder = `generated/${cleanSlug(company)}/${cleanSlug(title)}`;
   const tex = markdownToLatex(markdown);
   if (!token) {
-    return NextResponse.json({ ok: true, published: false, folder, markdown, tex, message: "CV_GITHUB_TOKEN is not configured; files were generated but not written to GitHub." });
+    return NextResponse.json({ ok: true, published: false, folder, markdown, tex, message: "CV_GITHUB_TOKEN 未配置，因此只生成文件，不创建 GitHub PR。" });
   }
 
+  const main = await github(token, "/git/ref/heads/main") as { object: { sha: string } };
+  const branch = `cv/${cleanSlug(company)}-${cleanSlug(title)}-${Date.now()}`.slice(0, 180);
+  await github(token, "/git/refs", { method: "POST", body: JSON.stringify({ ref: `refs/heads/${branch}`, sha: main.object.sha }) });
+
   const commitMessage = `Generate tailored ${track} CV for ${company} ${title}`;
-  await putFile(token, `${folder}/cv.md`, markdown + "\n", commitMessage);
-  await putFile(token, `${folder}/main.tex`, tex + "\n", commitMessage);
-  await putFile(token, `${folder}/README.md`, `# ${company} - ${title}\n\nTrack: ${track}\n\nGenerated by Ivy Job Radar CV Tailor. Review every claim against master/FACT_MASTER.md before submission.\n`, commitMessage);
-  return NextResponse.json({ ok: true, published: true, folder, githubUrl: `https://github.com/XinyuIvy/CV/tree/main/${folder}`, tex });
+  await putFile(token, branch, `${folder}/cv.md`, markdown + "\n", commitMessage);
+  await putFile(token, branch, `${folder}/main.tex`, tex + "\n", commitMessage);
+  await putFile(token, branch, `${folder}/jd.txt`, jd + "\n", commitMessage);
+  await putFile(token, branch, `${folder}/README.md`, `# ${company} - ${title}\n\nTrack: ${track}\n\nApplication ID: ${body.applicationId ?? ""}\n\nGenerated by Ivy Job Radar CV Tailor. Review every claim against master/FACT_MASTER.md before merging.\n`, commitMessage);
+
+  const pullRequest = await github(token, "/pulls", {
+    method: "POST",
+    body: JSON.stringify({
+      title: `Tailored CV: ${company} - ${title}`,
+      head: branch,
+      base: "main",
+      body: `Generated from pending application ${body.applicationId ?? ""}. Review project selection, wording, keyword coverage, and LaTeX output before merging.`,
+    }),
+  }) as { html_url: string; number: number };
+
+  return NextResponse.json({ ok: true, published: true, folder, branch, pullRequestUrl: pullRequest.html_url, pullRequestNumber: pullRequest.number, tex });
 }
