@@ -17,6 +17,13 @@ type ProjectRecommendation = {
   evidence: string;
 };
 
+const templates: Record<string, string> = {
+  pharma: "cv_pharma.md",
+  tech: "cv_tech.md",
+  quant: "cv_quant.md",
+  consulting: "cv_healthcare_consulting.md",
+};
+
 const requirements: RequirementRule[] = [
   { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional"], projectTerms: ["study design", "clinical trial", "observational", "simulation"] },
   { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient"] },
@@ -26,9 +33,9 @@ const requirements: RequirementRule[] = [
   { label: "Regression and mixed models", category: "Methods", aliases: ["regression", "mixed models", "mixed-effects", "mixed effects"], projectTerms: ["regression", "mixed-effects", "mixed effects", "gee"] },
   { label: "Bayesian methods", category: "Methods", aliases: ["bayesian"], projectTerms: ["bayesian"] },
   { label: "Machine learning", category: "Methods", aliases: ["machine learning", "machine-learning"], projectTerms: ["machine learning", "random forest", "xgboost", "lightgbm", "neural network"] },
-  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis"], projectTerms: ["statistical", "model", "inference"] },
+  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis", "logistic regression", "regression"], projectTerms: ["statistical", "model", "inference"] },
   { label: "Python", category: "Programming and Data", aliases: ["python"] },
-  { label: "R", category: "Programming and Data", aliases: ["r programming", "using r", " r,", " r and", " r;", " r "] },
+  { label: "R", category: "Programming and Data", aliases: ["r programming", "using r", " r,", " r and", " r;", " r ", "r;"] },
   { label: "SQL", category: "Programming and Data", aliases: ["sql"] },
   { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow"] },
   { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization"], projectTerms: ["visualization", "figures", "dashboard", "shiny"] },
@@ -60,6 +67,15 @@ function evidenceContext(text: string, aliases: string[]) {
   return text.slice(Math.max(0, index - 150), Math.min(text.length, index + alias.length + 300)).replace(/\s+/g, " ").trim();
 }
 
+async function readRaw(path: string) {
+  const response = await fetch(`https://raw.githubusercontent.com/XinyuIvy/CV/main/${path}`, {
+    cache: "no-store",
+    headers: { "User-Agent": "Ivy-Job-Radar" },
+  });
+  if (!response.ok) throw new Error(`Unable to read ${path}`);
+  return response.text();
+}
+
 function projectSections(facts: string) {
   const headings = [...facts.matchAll(/^####\s+(.+)$/gm)];
   return headings.map((match, index) => {
@@ -75,10 +91,9 @@ function recommendProjects(facts: string, template: string, detected: Requiremen
       const terms = requirement.projectTerms ?? requirement.aliases;
       return hasAlias(project.text, terms);
     }).map((requirement) => requirement.label);
-    const score = matchedRequirements.length;
     return {
       name: project.name,
-      score,
+      score: matchedRequirements.length,
       matchedRequirements,
       alreadyInTemplate: normalized(template).includes(normalized(project.name.replace(/^.*?—\s*/, ""))) || normalized(template).includes(normalized(project.name.split(":" ).pop() || project.name)),
       evidence: project.text.slice(0, 420).replace(/\s+/g, " ").trim(),
@@ -87,33 +102,42 @@ function recommendProjects(facts: string, template: string, detected: Requiremen
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json() as { track?: string; jd?: string; template?: string; facts?: string; keywords?: string };
-  const track = body.track || "tech";
+  const body = await request.json() as { track?: string; jd?: string };
+  const track = body.track && templates[body.track] ? body.track : "tech";
   const jd = body.jd || "";
-  const template = body.template || "";
-  const facts = body.facts || "";
-  const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
-  const matches = detected.map((rule) => {
-    const covered = hasAlias(template, rule.aliases);
-    const factSupported = hasAlias(facts, [...rule.aliases, ...(rule.projectTerms ?? [])]);
-    return {
-      keyword: rule.label,
-      category: rule.category,
-      status: covered ? "covered" : factSupported ? "supported_gap" : "unsupported_gap",
-      factEvidence: factSupported ? evidenceContext(facts, [...rule.aliases, ...(rule.projectTerms ?? [])]) : "",
-      jdEvidence: evidenceContext(jd, rule.aliases),
-    };
-  });
-  const projects = recommendProjects(facts, template, detected);
-  return NextResponse.json({
-    track,
-    matches,
-    projects,
-    summary: {
-      required: matches.length,
-      covered: matches.filter((item) => item.status === "covered").length,
-      supportedGaps: matches.filter((item) => item.status === "supported_gap").length,
-      unsupportedGaps: matches.filter((item) => item.status === "unsupported_gap").length,
-    },
-  });
+
+  try {
+    const [template, facts] = await Promise.all([
+      readRaw(`master/template-cv/${templates[track]}`),
+      readRaw("master/FACT_MASTER.md"),
+    ]);
+    const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
+    const matches = detected.map((rule) => {
+      const covered = hasAlias(template, rule.aliases);
+      const factSupported = hasAlias(facts, [...rule.aliases, ...(rule.projectTerms ?? [])]);
+      return {
+        keyword: rule.label,
+        category: rule.category,
+        status: covered ? "covered" : factSupported ? "supported_gap" : "unsupported_gap",
+        factEvidence: factSupported ? evidenceContext(facts, [...rule.aliases, ...(rule.projectTerms ?? [])]) : "",
+        templateEvidence: covered ? evidenceContext(template, rule.aliases) : "",
+        jdEvidence: evidenceContext(jd, rule.aliases),
+      };
+    });
+    const projects = recommendProjects(facts, template, detected);
+    return NextResponse.json({
+      track,
+      matches,
+      projects,
+      sourceDiagnostics: { templateFile: templates[track], templateLength: template.length, factsLength: facts.length },
+      summary: {
+        required: matches.length,
+        covered: matches.filter((item) => item.status === "covered").length,
+        supportedGaps: matches.filter((item) => item.status === "supported_gap").length,
+        unsupportedGaps: matches.filter((item) => item.status === "unsupported_gap").length,
+      },
+    });
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof Error ? error.message : "CV source loading failed." }, { status: 502 });
+  }
 }
