@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+type SupportEvidence = {
+  project: string;
+  fact: string;
+  relevance: string;
+};
+
 type Match = {
   keyword: string;
   category: string;
   status: "covered" | "supported_gap" | "unsupported_gap";
-  factEvidence?: string;
+  supportEvidence?: SupportEvidence[];
   jdEvidence?: string;
 };
 
@@ -157,6 +163,7 @@ export default function CvTailorClient() {
                   <strong>{index + 1}. {project.name}</strong>
                   <p>匹配要求：{project.matchedRequirements.join("、")}</p>
                   <p>{project.alreadyInTemplate ? "当前母版已包含，重点调整排序或 bullet。" : "当前母版未包含，需要判断是否替换较弱项目。"}</p>
+                  {project.evidence && <p><strong>代表性事实：</strong>{project.evidence}</p>}
                 </div>)}
               </section>
               <section>
@@ -164,7 +171,11 @@ export default function CvTailorClient() {
                 {supported.length === 0 ? <p>无。</p> : supported.map((item) => <div key={item.keyword} style={summaryBlock}>
                   <strong>{item.keyword}</strong>
                   <p>建议位置：{placement(item)}</p>
-                  {item.factEvidence && <details><summary>查看事实母版证据</summary><p>{item.factEvidence}</p></details>}
+                  {(item.supportEvidence ?? []).length === 0 ? <p>暂未提取到可读的项目证据，建议人工核对事实母版。</p> : (item.supportEvidence ?? []).map((evidence, index) => <div key={`${item.keyword}-${index}`} style={evidenceBlock}>
+                    <p><strong>支持项目：</strong>{evidence.project}</p>
+                    <p><strong>支持事实：</strong>{evidence.fact}</p>
+                    <p><strong>为什么相关：</strong>{evidence.relevance}</p>
+                  </div>)}
                 </div>)}
               </section>
               <section>
@@ -194,3 +205,4 @@ const labelStyle = { display: "grid", gap: 6, fontSize: 13, fontWeight: 800, mar
 const inputStyle = { width: "100%", boxSizing: "border-box", border: "1px solid #cbc6b8", borderRadius: 12, padding: "11px 12px", background: "#fff", color: "#1f2c25" } as const;
 const primaryButton = { border: 0, borderRadius: 999, padding: "11px 17px", background: "#16794b", color: "#fff", fontWeight: 800, cursor: "pointer" } as const;
 const summaryBlock = { border: "1px solid #ded9ca", borderRadius: 14, padding: 14, marginBottom: 10, background: "#faf7ee", lineHeight: 1.6 } as const;
+const evidenceBlock = { marginTop: 10, padding: 12, borderRadius: 12, background: "#fff", border: "1px solid #e5dfd0", lineHeight: 1.55 } as const;
