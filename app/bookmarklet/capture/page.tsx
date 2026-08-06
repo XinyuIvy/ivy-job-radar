@@ -12,6 +12,18 @@ type CaptureResult = {
   jobUrl: string;
 };
 
+type PendingApplication = {
+  id?: number;
+  company?: string;
+  title?: string;
+  location?: string;
+  region?: string;
+  jobUrl?: string;
+  priority?: string;
+  status?: string;
+  source?: string;
+};
+
 type CapturePayload = {
   company?: string;
   title?: string;
@@ -22,19 +34,29 @@ type CapturePayload = {
   addressCountry?: string;
 };
 
-type CaptureMessage = {
-  type?: unknown;
-  payload?: unknown;
-};
-
+type CaptureMessage = { type?: unknown; payload?: unknown };
 type CaptureState =
   | { status: "saving" }
   | { status: "success"; result: CaptureResult }
   | { status: "error"; message: string };
 
+const CHANNEL_NAME = "ivy-job-radar-updates";
+
 function inferRegion(payload: CapturePayload) {
   const source = `${payload.addressCountry || ""} ${payload.location || ""}`.toLowerCase();
   return /china|cn|中国|北京|上海|深圳|广州|杭州|南京|成都|武汉|西安|苏州/.test(source) ? "中国" : "美国";
+}
+
+function announcePending(application: PendingApplication) {
+  const message = { type: "ivy-job-radar-pending-created", application };
+  if (typeof BroadcastChannel !== "undefined") {
+    const channel = new BroadcastChannel(CHANNEL_NAME);
+    channel.postMessage(message);
+    channel.close();
+  }
+  try {
+    localStorage.setItem("ivy-job-radar:last-pending-created", JSON.stringify({ ...message, sentAt: Date.now() }));
+  } catch {}
 }
 
 export default function BookmarkCapturePage() {
@@ -49,10 +71,7 @@ export default function BookmarkCapturePage() {
       try {
         const response = await fetch("/api/bookmark-capture", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify(payload),
         });
         const result = await response.json() as CaptureResult & { error?: string };
@@ -79,16 +98,13 @@ export default function BookmarkCapturePage() {
             notes: payload.description || "通过 Chrome 书签从原招聘页面手动保存。",
           }),
         });
-        const applicationResult = await applicationResponse.json().catch(() => ({})) as { error?: string };
+        const applicationResult = await applicationResponse.json().catch(() => ({})) as PendingApplication & { error?: string };
         if (!applicationResponse.ok) throw new Error(applicationResult.error || "岗位已保存，但加入待提交申请失败。");
 
-        window.opener?.postMessage({ type: "ivy-job-radar-pending-created", company: result.company, title: result.title }, window.location.origin);
+        announcePending(applicationResult);
         if (active) setState({ status: "success", result });
       } catch (error) {
-        if (active) setState({
-          status: "error",
-          message: error instanceof Error ? error.message : "岗位保存失败。",
-        });
+        if (active) setState({ status: "error", message: error instanceof Error ? error.message : "岗位保存失败。" });
       }
     };
 
@@ -103,9 +119,7 @@ export default function BookmarkCapturePage() {
     announce();
     const secondAnnouncement = window.setTimeout(announce, 500);
     const timeout = window.setTimeout(() => {
-      if (!received && active) {
-        setState({ status: "error", message: "没有收到招聘页面信息。请返回岗位页并重新点击保存书签。" });
-      }
+      if (!received && active) setState({ status: "error", message: "没有收到招聘页面信息。请返回岗位页并重新点击保存书签。" });
     }, 8_000);
 
     return () => {
@@ -118,9 +132,7 @@ export default function BookmarkCapturePage() {
 
   useEffect(() => {
     if (state.status !== "success") return;
-    const timer = window.setTimeout(() => {
-      if (window.opener) window.close();
-    }, 1200);
+    const timer = window.setTimeout(() => window.close(), 1200);
     return () => window.clearTimeout(timer);
   }, [state.status]);
 
@@ -134,28 +146,18 @@ export default function BookmarkCapturePage() {
           {successful ? "✓" : failed ? "!" : "…"}
         </div>
         <h1 style={{ margin: "20px 0 10px", fontSize: 28 }}>
-          {state.status === "saving"
-            ? "正在加入待提交申请"
-            : state.status === "success"
-              ? "已加入待提交申请"
-              : "保存失败"}
+          {state.status === "saving" ? "正在加入待提交申请" : successful ? "已加入待提交申请" : "保存失败"}
         </h1>
-        {state.status === "success" && (
-          <strong style={{ display: "block", marginTop: 16, fontSize: 18 }}>{state.result.company} · {state.result.title}</strong>
-        )}
+        {successful && <strong style={{ display: "block", marginTop: 16, fontSize: 18 }}>{state.result.company} · {state.result.title}</strong>}
         <p style={{ lineHeight: 1.65, color: "#526058" }}>
           {state.status === "saving"
             ? "正在保存完整岗位信息并建立待提交申请记录。"
-            : state.status === "success"
-              ? "该岗位已直接进入待提交申请，不需要核验或人工通过。此窗口会自动关闭。"
+            : successful
+              ? "该岗位已直接进入待提交申请。若 Job Radar 正停留在待提交页面，新岗位会立即显示在第一条。"
               : state.message}
         </p>
-        <Link href="/" style={{ display: "inline-block", marginTop: 18, borderRadius: 999, padding: "12px 18px", background: "#18221d", color: "#fff", textDecoration: "none", fontWeight: 750 }}>
-          返回 Ivy Job Radar
-        </Link>
-        <button type="button" onClick={() => window.close()} style={{ marginLeft: 8, border: 0, borderRadius: 999, padding: "12px 18px", background: "#e9e5dc", color: "#18221d", fontWeight: 750, cursor: "pointer" }}>
-          关闭窗口
-        </button>
+        <Link href="/" style={{ display: "inline-block", marginTop: 18, borderRadius: 999, padding: "12px 18px", background: "#18221d", color: "#fff", textDecoration: "none", fontWeight: 750 }}>返回 Ivy Job Radar</Link>
+        <button type="button" onClick={() => window.close()} style={{ marginLeft: 8, border: 0, borderRadius: 999, padding: "12px 18px", background: "#e9e5dc", color: "#18221d", fontWeight: 750, cursor: "pointer" }}>关闭窗口</button>
       </article>
     </main>
   );
