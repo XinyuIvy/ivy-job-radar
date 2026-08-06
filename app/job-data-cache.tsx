@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 const CACHE_KEY = "ivy-job-radar:jobs-cache:v1";
 const CACHE_TIME_KEY = "ivy-job-radar:jobs-cache-time:v1";
@@ -49,7 +49,7 @@ export function removeCachedJob(company: string, title: string) {
 }
 
 export default function JobDataCache() {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const nativeFetch = window.fetch.bind(window);
 
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
