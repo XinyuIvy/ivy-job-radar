@@ -4,6 +4,7 @@ import ApplicationCvActions from "./application-cv-actions";
 import HardRequirementIgnoreActions from "./hard-requirement-ignore-actions";
 import JobDataCache from "./job-data-cache";
 import NavigationStatePersistence from "./navigation-state-persistence";
+import PendingApplicationLiveSync from "./pending-application-live-sync";
 import PendingJobVisibility from "./pending-job-visibility";
 import VerificationQueueActions from "./verification-queue-actions";
 import "./globals.css";
@@ -43,6 +44,7 @@ export default function RootLayout({
         {children}
         <VerificationQueueActions />
         <PendingJobVisibility />
+        <PendingApplicationLiveSync />
         <ApplicationCvActions />
         <HardRequirementIgnoreActions />
         <NavigationStatePersistence />
