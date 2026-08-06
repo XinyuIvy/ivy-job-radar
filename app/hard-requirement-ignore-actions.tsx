@@ -96,7 +96,7 @@ function enhanceDialog(dialog: HTMLElement) {
 
       void submitHardRequirement(company, title, reason)
         .then(() => {
-          window.location.reload();
+          void fetch("/api/jobs", { cache: "no-store" }).catch(() => undefined);
         })
         .catch((error) => {
           window.alert(error instanceof Error ? `${error.message} 岗位将重新显示。` : "保存失败，岗位将重新显示。");
