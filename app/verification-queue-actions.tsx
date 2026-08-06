@@ -2,33 +2,16 @@
 
 import { useEffect } from "react";
 
-type RequestItem = {
-  id: number;
-  company: string;
-  title: string;
-  status: string;
-  jobUrl: string;
-};
+type RequestItem = { id: number; company: string; title: string; status: string; jobUrl: string };
+type QualityIssue = { jobId: number; company: string; title: string; automationStatus: string };
+type ApplicationRow = { company: string; title: string; status: string };
 
-type QualityIssue = {
-  jobId: number;
-  company: string;
-  title: string;
-  automationStatus: string;
-};
-
-type ApplicationRow = {
-  company: string;
-  title: string;
-  status: string;
-};
+const JOB_CACHE_KEY = "ivy-job-radar:jobs-cache:v1";
+const JOB_CACHE_TIME_KEY = "ivy-job-radar:jobs-cache-time:v1";
+const NAV_KEY = "ivy-job-radar:navigation-state:v1";
 
 function normalize(value: string) {
-  return value
-    .trim()
-    .toLocaleLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+  return value.trim().toLocaleLowerCase().replace(/&/g, "and").replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
 }
 
 function key(company: string, title: string) {
@@ -45,15 +28,27 @@ function button(label: string, tone: "approve" | "neutral" | "danger" | "quiet")
   element.style.fontWeight = "800";
   element.style.cursor = "pointer";
   element.style.border = tone === "quiet" ? "1px solid #d9bbb6" : "0";
-  element.style.background = tone === "approve"
-    ? "#16794b"
-    : tone === "danger"
-      ? "#a33f35"
-      : tone === "neutral"
-        ? "#e8e4d9"
-        : "transparent";
+  element.style.background = tone === "approve" ? "#16794b" : tone === "danger" ? "#a33f35" : tone === "neutral" ? "#e8e4d9" : "transparent";
   element.style.color = tone === "approve" || tone === "danger" ? "#fff" : tone === "quiet" ? "#7c4c47" : "#26342d";
   return element;
+}
+
+function rememberTodayView() {
+  try {
+    const current = JSON.parse(sessionStorage.getItem(NAV_KEY) || "{}");
+    sessionStorage.setItem(NAV_KEY, JSON.stringify({ ...current, selectedNav: "今日", scrollY: 0 }));
+  } catch {}
+}
+
+async function refreshJobsCache() {
+  const response = await fetch("/api/jobs", { cache: "no-store" });
+  if (!response.ok) return;
+  const rows = await response.json().catch(() => null);
+  if (!Array.isArray(rows)) return;
+  try {
+    sessionStorage.setItem(JOB_CACHE_KEY, JSON.stringify(rows));
+    sessionStorage.setItem(JOB_CACHE_TIME_KEY, String(Date.now()));
+  } catch {}
 }
 
 export default function VerificationQueueActions() {
@@ -65,58 +60,40 @@ export default function VerificationQueueActions() {
     const enhance = async () => {
       scheduled = false;
       if (disposed) return;
-
       const [requestResponse, applicationResponse, qualityResponse] = await Promise.all([
         fetch("/api/job-requests", { cache: "no-store" }),
         fetch("/api/applications", { cache: "no-store" }),
         fetch("/api/data-quality", { cache: "no-store" }),
       ]);
       if (disposed) return;
-
       const requests = requestResponse.ok ? await requestResponse.json() as RequestItem[] : [];
       const applications = applicationResponse.ok ? await applicationResponse.json() as ApplicationRow[] : [];
-      const qualityPayload = qualityResponse.ok
-        ? await qualityResponse.json() as { issues?: QualityIssue[] }
-        : { issues: [] };
+      const qualityPayload = qualityResponse.ok ? await qualityResponse.json() as { issues?: QualityIssue[] } : { issues: [] };
       const qualityIssues = (qualityPayload.issues ?? []).filter((item) => item.automationStatus === "needs_review");
-
-      const pendingKeys = new Set(
-        applications
-          .filter((row) => row.status === "准备材料")
-          .map((row) => key(row.company, row.title)),
-      );
+      const pendingKeys = new Set(applications.filter((row) => row.status === "准备材料").map((row) => key(row.company, row.title)));
       const requestByKey = new Map(requests.map((item) => [key(item.company, item.title), item]));
       const qualityByKey = new Map(qualityIssues.map((item) => [key(item.company, item.title), item]));
       const cards = Array.from(document.querySelectorAll<HTMLElement>(".request-list .request-card"));
 
       for (const card of cards) {
         const title = card.querySelector("h3")?.textContent?.trim() ?? "";
-        const company = card.querySelector("h3 + p")?.textContent?.trim()
-          ?? card.querySelector("div > p")?.textContent?.trim()
-          ?? "";
+        const company = card.querySelector("h3 + p")?.textContent?.trim() ?? card.querySelector("div > p")?.textContent?.trim() ?? "";
         const cardKey = key(company, title);
-
         if (pendingKeys.has(cardKey)) {
           card.style.setProperty("display", "none", "important");
-          card.setAttribute("aria-hidden", "true");
           continue;
         }
-        card.style.removeProperty("display");
-        card.removeAttribute("aria-hidden");
-
         const status = card.querySelector(".verify-status")?.textContent?.trim() ?? "";
         if (status !== "需复核") continue;
         const actions = card.querySelector<HTMLElement>(".record-actions");
         if (!actions || actions.dataset.manualReviewEnhanced === "true") continue;
-
         const requestItem = requestByKey.get(cardKey);
         const qualityItem = qualityByKey.get(cardKey);
         if (!requestItem && !qualityItem) continue;
-
         actions.dataset.manualReviewEnhanced = "true";
         actions.querySelectorAll("button").forEach((existing) => existing.remove());
 
-        const run = async (action: "approve" | "ignore" | "delete" | "rerun", trigger: HTMLButtonElement) => {
+        const run = async (action: "approve" | "ignore" | "delete" | "rerun") => {
           const prompts = {
             approve: `确认人工通过 ${company} · ${title} 吗？`,
             ignore: `确认将 ${company} · ${title} 加入不再推荐吗？`,
@@ -124,46 +101,38 @@ export default function VerificationQueueActions() {
             rerun: `确认重新核验 ${company} · ${title} 吗？`,
           };
           if (!window.confirm(prompts[action])) return;
-          const original = trigger.textContent;
-          trigger.disabled = true;
-          trigger.textContent = action === "rerun" ? "核验中…" : "处理中…";
+
+          const previousDisplay = card.style.display;
+          if (action !== "rerun") card.style.setProperty("display", "none", "important");
+          else actions.querySelectorAll<HTMLButtonElement>("button").forEach((item) => { item.disabled = true; });
 
           const result = requestItem
             ? action === "rerun"
-              ? await fetch("/api/job-requests", {
-                  method: "PUT",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ id: requestItem.id }),
-                })
-              : await fetch("/api/manual-review", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ id: requestItem.id, action }),
-                })
-            : await fetch("/api/quality-manual-review", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ jobId: qualityItem?.jobId, action }),
-              });
+              ? await fetch("/api/job-requests", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: requestItem.id }) })
+              : await fetch("/api/manual-review", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: requestItem.id, action }) })
+            : await fetch("/api/quality-manual-review", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jobId: qualityItem?.jobId, action }) });
 
           if (!result.ok) {
+            card.style.display = previousDisplay;
+            actions.querySelectorAll<HTMLButtonElement>("button").forEach((item) => { item.disabled = false; });
             const payload = await result.json().catch(() => ({})) as { error?: string };
-            trigger.disabled = false;
-            trigger.textContent = original;
             window.alert(payload.error || "操作失败，请稍后重试。");
             return;
           }
-          window.location.reload();
+
+          if (action === "approve") {
+            rememberTodayView();
+            void refreshJobsCache().finally(() => window.location.reload());
+          } else if (action === "rerun") {
+            actions.querySelectorAll<HTMLButtonElement>("button").forEach((item) => { item.disabled = false; });
+            window.setTimeout(() => window.location.reload(), 250);
+          }
         };
 
-        const approve = button("人工通过", "approve");
-        approve.addEventListener("click", () => void run("approve", approve));
-        const rerun = button("重新核验", "neutral");
-        rerun.addEventListener("click", () => void run("rerun", rerun));
-        const ignore = button("不再推荐", "danger");
-        ignore.addEventListener("click", () => void run("ignore", ignore));
-        const remove = button("仅删除记录", "quiet");
-        remove.addEventListener("click", () => void run("delete", remove));
+        const approve = button("人工通过", "approve"); approve.addEventListener("click", () => void run("approve"));
+        const rerun = button("重新核验", "neutral"); rerun.addEventListener("click", () => void run("rerun"));
+        const ignore = button("不再推荐", "danger"); ignore.addEventListener("click", () => void run("ignore"));
+        const remove = button("仅删除记录", "quiet"); remove.addEventListener("click", () => void run("delete"));
         actions.append(approve, rerun, ignore, remove);
       }
     };
@@ -173,7 +142,6 @@ export default function VerificationQueueActions() {
       scheduled = true;
       window.setTimeout(() => void enhance(), 0);
     };
-
     schedule();
     observer = new MutationObserver(schedule);
     observer.observe(document.body, { childList: true, subtree: true });
@@ -184,6 +152,5 @@ export default function VerificationQueueActions() {
       window.removeEventListener("focus", schedule);
     };
   }, []);
-
   return null;
 }
