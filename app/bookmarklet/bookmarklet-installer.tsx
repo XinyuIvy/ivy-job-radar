@@ -33,7 +33,8 @@ let popup=null;
 let sent=false;
 const listener=(event)=>{if(sent||event.source!==popup||event.origin!==captureUrl.origin||event.data!=="ivy-job-radar-ready")return;sent=true;window.removeEventListener("message",listener);popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);};
 window.addEventListener("message",listener);
-popup=window.open(captureUrl.href,"ivy_job_radar_capture","popup,width=600,height=760");
+const popupName="ivy_job_radar_capture_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+popup=window.open(captureUrl.href,popupName,"popup,width=600,height=760");
 if(!popup){window.removeEventListener("message",listener);alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");return;}
 setTimeout(()=>{if(!sent){window.removeEventListener("message",listener);try{popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);}catch{}}},2500);
 }catch(error){alert("无法保存当前岗位："+(error&&error.message?error.message:error));}})()`;
@@ -66,9 +67,9 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
       <section style={{ maxWidth: 820, margin: "0 auto" }}>
         <Link href="/" style={{ color: "#536159", textDecoration: "none", fontWeight: 700 }}>← 返回 Ivy Job Radar</Link>
         <p style={{ marginTop: 48, letterSpacing: ".16em", fontSize: 12, fontWeight: 800, color: "#718078" }}>CHROME BOOKMARK CAPTURE</p>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(38px, 7vw, 70px)", lineHeight: 1.02, margin: "12px 0 20px" }}>浏览岗位时，一键加入岗位池</h1>
+        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(38px, 7vw, 70px)", lineHeight: 1.02, margin: "12px 0 20px" }}>浏览岗位时，一键加入待提交申请</h1>
         <p style={{ maxWidth: 680, fontSize: 18, lineHeight: 1.75, color: "#536159" }}>
-          把下面的按钮拖到 Chrome 书签栏。以后在 LinkedIn、BOSS、猎聘、公司官网或其他招聘页面看到合适岗位，点击书签即可直接去重加入 Ivy Job Radar，不进入核验队列。
+          把下面的按钮拖到 Chrome 书签栏。以后在 LinkedIn、BOSS、猎聘、公司官网或其他招聘页面看到想申请的岗位，点击书签即可直接进入“待提交申请”，不进入核验队列。
         </p>
 
         <article style={{ marginTop: 34, background: "#fff", border: "1px solid #d8d4c9", borderRadius: 24, padding: "30px", boxShadow: "0 22px 60px rgba(32,40,35,.10)" }}>
@@ -86,28 +87,11 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
                   event.preventDefault();
                   window.alert("请把这个按钮拖到 Chrome 书签栏。安装后，在招聘页面点击书签即可保存。");
                 }}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  marginTop: 14,
-                  borderRadius: 999,
-                  padding: "15px 22px",
-                  background: "#16794b",
-                  color: "white",
-                  textDecoration: "none",
-                  fontWeight: 850,
-                  boxShadow: "0 10px 28px rgba(22,121,75,.25)",
-                  cursor: "grab",
-                }}
+                style={{ display: "inline-flex", alignItems: "center", gap: 10, marginTop: 14, borderRadius: 999, padding: "15px 22px", background: "#16794b", color: "white", textDecoration: "none", fontWeight: 850, boxShadow: "0 10px 28px rgba(22,121,75,.25)", cursor: "grab" }}
               >
-                ＋ 保存到 Ivy Job Radar
+                ＋ 保存到待提交申请
               </a>
-              <button
-                type="button"
-                onClick={() => void copyCode()}
-                style={{ marginLeft: 10, border: "1px solid #cfcabe", borderRadius: 999, padding: "14px 18px", background: "#f7f5ef", fontWeight: 750, cursor: "pointer" }}
-              >
+              <button type="button" onClick={() => void copyCode()} style={{ marginLeft: 10, border: "1px solid #cfcabe", borderRadius: 999, padding: "14px 18px", background: "#f7f5ef", fontWeight: 750, cursor: "pointer" }}>
                 {copied ? "已复制" : "无法拖动时复制代码"}
               </button>
             </>
@@ -116,9 +100,9 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16, marginTop: 20 }}>
           {[
-            ["直接加入", "手动点击代表你已经确认岗位合适，因此状态直接设为“开放”。"],
-            ["自动去重", "优先按规范化链接和 Requisition ID 去重；重复岗位只更新页面信息。"],
-            ["自动提取", "优先读取 JobPosting JSON-LD，并回退到标题、公司、地点和可见 JD 文本。"],
+            ["直接待申请", "手动点击代表你已经决定考虑申请，因此自动建立“准备材料”记录。"],
+            ["独立保存", "每次点击使用独立保存窗口，连续保存多个岗位不会互相覆盖。"],
+            ["自动去重", "优先按规范化链接和 Requisition ID 去重，重复岗位不会重复建立申请。"],
           ].map(([title, body]) => (
             <article key={title} style={{ background: "rgba(255,255,255,.68)", border: "1px solid #ded9ce", borderRadius: 18, padding: 20 }}>
               <strong>{title}</strong><p style={{ marginBottom: 0, lineHeight: 1.6, color: "#647169" }}>{body}</p>
@@ -126,7 +110,7 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
           ))}
         </div>
         <p style={{ marginTop: 24, color: "#758078", fontSize: 13 }}>
-          书签中只包含一个专用于“加入岗位”的派生密钥，不包含 Job Radar 的原始同步密钥。岗位内容通过浏览器消息传给 Job Radar，不写入地址栏或访问日志。
+          书签中只包含一个专用于保存岗位的派生密钥，不包含 Job Radar 的原始同步密钥。
         </p>
       </section>
     </main>
