@@ -2,6 +2,8 @@
 
 import { useEffect } from "react";
 
+import { removeCachedJob } from "./job-data-cache";
+
 const hardRequirementReasons = [
   "经验年限或职级不符合",
   "学历或专业要求不符合",
@@ -18,10 +20,23 @@ function extractTarget(dialog: HTMLElement) {
   return { company, title };
 }
 
-async function submitHardRequirement(dialog: HTMLElement, reason: string) {
-  const { company, title } = extractTarget(dialog);
-  if (!company || !title) throw new Error("无法识别当前岗位。");
+function closeDialogImmediately(dialog: HTMLElement) {
+  const close = dialog.querySelector<HTMLButtonElement>('button[aria-label="关闭"]');
+  close?.click();
+}
 
+function hideMatchingJob(company: string, title: string) {
+  const normalizedCompany = company.trim().toLowerCase();
+  const normalizedTitle = title.trim().toLowerCase();
+  document.querySelectorAll<HTMLElement>("article").forEach((article) => {
+    const text = (article.textContent || "").toLowerCase();
+    if (text.includes(normalizedCompany) && text.includes(normalizedTitle)) {
+      article.style.display = "none";
+    }
+  });
+}
+
+async function submitHardRequirement(company: string, title: string, reason: string) {
   const response = await fetch("/api/ignored-jobs", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -35,7 +50,6 @@ async function submitHardRequirement(dialog: HTMLElement, reason: string) {
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error || "保存失败。");
-  window.location.reload();
 }
 
 function enhanceDialog(dialog: HTMLElement) {
@@ -69,16 +83,25 @@ function enhanceDialog(dialog: HTMLElement) {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = reason;
-    button.addEventListener("click", async () => {
-      const buttons = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button"));
-      buttons.forEach((item) => { item.disabled = true; });
-      help.textContent = "正在保存…";
-      try {
-        await submitHardRequirement(dialog, reason);
-      } catch (error) {
-        buttons.forEach((item) => { item.disabled = false; });
-        help.textContent = error instanceof Error ? error.message : "保存失败，请重试。";
+    button.addEventListener("click", () => {
+      const { company, title } = extractTarget(dialog);
+      if (!company || !title) {
+        help.textContent = "无法识别当前岗位，请刷新页面后重试。";
+        return;
       }
+
+      removeCachedJob(company, title);
+      hideMatchingJob(company, title);
+      closeDialogImmediately(dialog);
+
+      void submitHardRequirement(company, title, reason)
+        .then(() => {
+          void fetch("/api/jobs", { cache: "no-store" }).catch(() => undefined);
+        })
+        .catch((error) => {
+          window.alert(error instanceof Error ? `${error.message} 岗位将重新显示。` : "保存失败，岗位将重新显示。");
+          window.location.reload();
+        });
     });
     panel.append(button);
   }

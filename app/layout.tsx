@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import ApplicationCvActions from "./application-cv-actions";
 import HardRequirementIgnoreActions from "./hard-requirement-ignore-actions";
+import JobDataCache from "./job-data-cache";
 import NavigationStatePersistence from "./navigation-state-persistence";
 import PendingJobVisibility from "./pending-job-visibility";
 import VerificationQueueActions from "./verification-queue-actions";
@@ -38,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <JobDataCache />
         {children}
         <VerificationQueueActions />
         <PendingJobVisibility />
