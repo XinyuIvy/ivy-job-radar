@@ -8,7 +8,7 @@ type ApplicationRow = { company: string; title: string; status: string };
 
 const JOB_CACHE_KEY = "ivy-job-radar:jobs-cache:v1";
 const JOB_CACHE_TIME_KEY = "ivy-job-radar:jobs-cache-time:v1";
-const NAV_KEY = "ivy-job-radar:navigation-state:v1";
+const APPROVAL_KEY = "ivy-job-radar:last-approved-job";
 
 function normalize(value: string) {
   return value.trim().toLocaleLowerCase().replace(/&/g, "and").replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
@@ -33,22 +33,16 @@ function button(label: string, tone: "approve" | "neutral" | "danger" | "quiet")
   return element;
 }
 
-function rememberTodayView() {
-  try {
-    const current = JSON.parse(sessionStorage.getItem(NAV_KEY) || "{}");
-    sessionStorage.setItem(NAV_KEY, JSON.stringify({ ...current, selectedNav: "今日", scrollY: 0 }));
-  } catch {}
-}
-
 async function refreshJobsCache() {
   const response = await fetch("/api/jobs", { cache: "no-store" });
-  if (!response.ok) return;
+  if (!response.ok) return [];
   const rows = await response.json().catch(() => null);
-  if (!Array.isArray(rows)) return;
+  if (!Array.isArray(rows)) return [];
   try {
     sessionStorage.setItem(JOB_CACHE_KEY, JSON.stringify(rows));
     sessionStorage.setItem(JOB_CACHE_TIME_KEY, String(Date.now()));
   } catch {}
+  return rows as Array<{ company?: string; title?: string; jobUrl?: string }>;
 }
 
 export default function VerificationQueueActions() {
@@ -121,11 +115,15 @@ export default function VerificationQueueActions() {
           }
 
           if (action === "approve") {
-            rememberTodayView();
-            void refreshJobsCache().finally(() => window.location.reload());
+            void refreshJobsCache().then((rows) => {
+              const approved = rows.find((row) => key(row.company || "", row.title || "") === cardKey) || { company, title, jobUrl: requestItem?.jobUrl || "" };
+              try { localStorage.setItem(APPROVAL_KEY, JSON.stringify({ ...approved, sentAt: Date.now() })); } catch {}
+              window.dispatchEvent(new CustomEvent("ivy-job-radar-approved", { detail: approved }));
+            });
           } else if (action === "rerun") {
+            actions.dataset.manualReviewEnhanced = "false";
             actions.querySelectorAll<HTMLButtonElement>("button").forEach((item) => { item.disabled = false; });
-            window.setTimeout(() => window.location.reload(), 250);
+            window.setTimeout(schedule, 120);
           }
         };
 
