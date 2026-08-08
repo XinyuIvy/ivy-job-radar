@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 
 type Status = {
@@ -39,7 +40,10 @@ export default function CvKnowledgeClient() {
     setLoading(false);
   };
 
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => void refresh(), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const search = async (event: FormEvent) => {
     event.preventDefault();
@@ -61,7 +65,7 @@ export default function CvKnowledgeClient() {
   return (
     <main style={{ minHeight: "100vh", background: "#f5f2ea", color: "#18221d", padding: "32px 18px 80px" }}>
       <div style={{ width: "min(1080px,100%)", margin: "0 auto" }}>
-        <a href="/" style={{ color: "#526058", textDecoration: "none", fontWeight: 700 }}>← 返回 Job Radar</a>
+        <Link href="/" style={{ color: "#526058", textDecoration: "none", fontWeight: 700 }}>← 返回 Job Radar</Link>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "flex-end", marginTop: 28, flexWrap: "wrap" }}>
           <div><p style={{ margin: 0, letterSpacing: ".12em", fontSize: 12, fontWeight: 800, color: "#7b807b" }}>CV KNOWLEDGE BASE</p><h1 style={{ margin: "8px 0 8px", fontSize: 38 }}>个人能力知识库</h1><p style={{ margin: 0, color: "#66736c", maxWidth: 720 }}>一级证据负责证明“做过什么”，结构化知识库负责把 verified facts、统计概念、问题与行业翻译连接起来。JD 检索只召回候选事实，不允许绕过事实校验。</p></div>
           <button onClick={() => void refresh()} disabled={loading} style={{ border: 0, borderRadius: 999, padding: "11px 16px", background: "#18221d", color: "white", fontWeight: 800, cursor: "pointer" }}>{loading ? "同步中…" : "↻ 重新同步"}</button>
