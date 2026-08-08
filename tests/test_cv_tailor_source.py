@@ -19,7 +19,7 @@ class CvTailorSourceTests(unittest.TestCase):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
         self.assertIn('"supported_gap"', route)
         self.assertIn('"unsupported_gap"', route)
-        self.assertIn("factEvidence", route)
+        self.assertIn("supportEvidence", route)
 
     def test_cv_publish_writes_markdown_and_latex_to_cv_repo(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "publish" / "route.ts").read_text(encoding="utf-8")
