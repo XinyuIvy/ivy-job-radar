@@ -12,17 +12,24 @@ type PendingApplication = {
   priority?: string;
   status?: string;
   source?: string;
+  updatedAt?: string;
 };
 
 type PendingMessage = {
   type?: string;
   application?: PendingApplication;
+  sentAt?: number;
 };
 
 const CHANNEL_NAME = "ivy-job-radar-updates";
+const STORAGE_KEY = "ivy-job-radar:last-pending-created";
 
 function normalized(value: string) {
   return value.replace(/\s+/g, " ").trim();
+}
+
+function itemKey(application: PendingApplication) {
+  return `${normalized(application.company || "").toLowerCase()}::${normalized(application.title || "").toLowerCase()}`;
 }
 
 function isPendingViewVisible() {
@@ -47,7 +54,8 @@ function findPendingList() {
 
 function makeCard(application: PendingApplication) {
   const article = document.createElement("article");
-  article.dataset.livePendingApplication = String(application.id || `${application.company}-${application.title}`);
+  article.dataset.livePendingApplication = String(application.id || itemKey(application));
+  article.dataset.livePendingKey = itemKey(application);
   article.style.cssText = "background:#fffdf8;border:1px solid #d9d5ca;border-radius:18px;padding:18px;margin-bottom:12px;box-shadow:0 10px 28px rgba(55,63,57,.06);animation:ivyPendingAppear .25s ease-out";
 
   const header = document.createElement("div");
@@ -93,30 +101,59 @@ function makeCard(application: PendingApplication) {
   return article;
 }
 
+function cardAlreadyPresent(list: HTMLElement, application: PendingApplication) {
+  const key = itemKey(application);
+  if (list.querySelector(`[data-live-pending-key="${CSS.escape(key)}"]`)) return true;
+  const company = normalized(application.company || "").toLowerCase();
+  const title = normalized(application.title || "").toLowerCase();
+  return Array.from(list.querySelectorAll<HTMLElement>("article")).some((article) => {
+    const text = normalized(article.textContent || "").toLowerCase();
+    return Boolean(company && title && text.includes(company) && text.includes(title));
+  });
+}
+
 function insertPending(application: PendingApplication) {
-  if (!isPendingViewVisible()) return;
+  if (!isPendingViewVisible()) return false;
   const list = findPendingList();
-  if (!list) return;
-
-  const identifier = String(application.id || `${application.company}-${application.title}`);
-  list.querySelector(`[data-live-pending-application="${CSS.escape(identifier)}"]`)?.remove();
-  const card = makeCard(application);
-  list.prepend(card);
-
+  if (!list || cardAlreadyPresent(list, application)) return false;
+  list.prepend(makeCard(application));
   if (!document.getElementById("ivy-pending-live-style")) {
     const style = document.createElement("style");
     style.id = "ivy-pending-live-style";
     style.textContent = "@keyframes ivyPendingAppear{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}";
     document.head.append(style);
   }
-  window.requestAnimationFrame(() => card.scrollIntoView({ behavior: "smooth", block: "start" }));
+  return true;
+}
+
+async function reconcilePendingFromServer() {
+  if (!isPendingViewVisible()) return;
+  const list = findPendingList();
+  if (!list) return;
+  const response = await fetch("/api/applications", { cache: "no-store" });
+  if (!response.ok) return;
+  const rows = await response.json().catch(() => []) as PendingApplication[];
+  const pending = rows.filter((row) => row.status === "准备材料");
+  for (const application of [...pending].reverse()) insertPending(application);
 }
 
 export default function PendingApplicationLiveSync() {
   useEffect(() => {
+    let disposed = false;
+    let syncTimer = 0;
+    let lastPendingVisible = false;
+
+    const scheduleReconcile = (delay = 80) => {
+      window.clearTimeout(syncTimer);
+      syncTimer = window.setTimeout(() => {
+        if (!disposed) void reconcilePendingFromServer();
+      }, delay);
+    };
+
     const handle = (message: PendingMessage) => {
       if (message.type !== "ivy-job-radar-pending-created" || !message.application) return;
       insertPending(message.application);
+      scheduleReconcile(120);
     };
 
     const windowHandler = (event: MessageEvent<PendingMessage>) => {
@@ -125,11 +162,43 @@ export default function PendingApplicationLiveSync() {
     };
     window.addEventListener("message", windowHandler);
 
+    const storageHandler = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY || !event.newValue) return;
+      try { handle(JSON.parse(event.newValue) as PendingMessage); } catch {}
+    };
+    window.addEventListener("storage", storageHandler);
+
     const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(CHANNEL_NAME) : null;
     if (channel) channel.onmessage = (event: MessageEvent<PendingMessage>) => handle(event.data);
 
+    const observer = new MutationObserver(() => {
+      const visible = isPendingViewVisible();
+      if (visible && !lastPendingVisible) scheduleReconcile(50);
+      lastPendingVisible = visible;
+    });
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+    const focusHandler = () => scheduleReconcile(50);
+    const visibilityHandler = () => {
+      if (document.visibilityState === "visible") scheduleReconcile(50);
+    };
+    window.addEventListener("focus", focusHandler);
+    document.addEventListener("visibilitychange", visibilityHandler);
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) handle(JSON.parse(saved) as PendingMessage);
+    } catch {}
+    scheduleReconcile(150);
+
     return () => {
+      disposed = true;
+      window.clearTimeout(syncTimer);
       window.removeEventListener("message", windowHandler);
+      window.removeEventListener("storage", storageHandler);
+      window.removeEventListener("focus", focusHandler);
+      document.removeEventListener("visibilitychange", visibilityHandler);
+      observer.disconnect();
       channel?.close();
     };
   }, []);
