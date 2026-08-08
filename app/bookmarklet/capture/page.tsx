@@ -41,6 +41,7 @@ type CaptureState =
   | { status: "error"; message: string };
 
 const CHANNEL_NAME = "ivy-job-radar-updates";
+const STORAGE_KEY = "ivy-job-radar:last-pending-created";
 
 function inferRegion(payload: CapturePayload) {
   const source = `${payload.addressCountry || ""} ${payload.location || ""}`.toLowerCase();
@@ -48,15 +49,15 @@ function inferRegion(payload: CapturePayload) {
 }
 
 function announcePending(application: PendingApplication) {
-  const message = { type: "ivy-job-radar-pending-created", application };
+  const message = { type: "ivy-job-radar-pending-created", application, sentAt: Date.now() };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(message));
+  } catch {}
   if (typeof BroadcastChannel !== "undefined") {
     const channel = new BroadcastChannel(CHANNEL_NAME);
     channel.postMessage(message);
-    channel.close();
+    window.setTimeout(() => channel.close(), 300);
   }
-  try {
-    localStorage.setItem("ivy-job-radar:last-pending-created", JSON.stringify({ ...message, sentAt: Date.now() }));
-  } catch {}
 }
 
 export default function BookmarkCapturePage() {
@@ -153,7 +154,7 @@ export default function BookmarkCapturePage() {
           {state.status === "saving"
             ? "正在保存完整岗位信息并建立待提交申请记录。"
             : successful
-              ? "该岗位已直接进入待提交申请。若 Job Radar 正停留在待提交页面，新岗位会立即显示在第一条。"
+              ? "该岗位已直接进入待提交申请。打开的 Job Radar 会自动同步，不需要刷新。"
               : state.message}
         </p>
         <Link href="/" style={{ display: "inline-block", marginTop: 18, borderRadius: 999, padding: "12px 18px", background: "#18221d", color: "#fff", textDecoration: "none", fontWeight: 750 }}>返回 Ivy Job Radar</Link>
