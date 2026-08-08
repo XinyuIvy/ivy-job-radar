@@ -2,6 +2,15 @@
 
 import { useEffect } from "react";
 
+const APPROVAL_KEY = "ivy-job-radar:last-approved-job";
+
+type ApprovedJob = {
+  company?: string;
+  title?: string;
+  jobUrl?: string;
+  sentAt?: number;
+};
+
 function text(value: string | null | undefined) {
   return String(value || "").replace(/\s+/g, " ").trim();
 }
@@ -83,6 +92,87 @@ function optimisticIgnoreClick(event: MouseEvent) {
   }, 1200);
 }
 
+function approvedKey(job: ApprovedJob) {
+  return `${text(job.company).toLowerCase()}::${text(job.title).toLowerCase()}`;
+}
+
+function makeApprovedPlaceholder(job: ApprovedJob) {
+  const card = document.createElement("article");
+  card.className = "job-card";
+  card.dataset.approvedPlaceholder = approvedKey(job);
+
+  const top = document.createElement("div");
+  top.className = "job-card-top";
+  const logo = document.createElement("div");
+  logo.className = "company-logo";
+  logo.textContent = text(job.company).slice(0, 2) || "✓";
+  const titleBlock = document.createElement("div");
+  titleBlock.className = "job-title";
+  const meta = document.createElement("div");
+  meta.className = "job-meta";
+  const now = document.createElement("span");
+  now.textContent = "刚刚人工通过";
+  meta.append(now);
+  const heading = document.createElement("h3");
+  heading.textContent = text(job.title) || "已通过岗位";
+  const company = document.createElement("p");
+  company.textContent = text(job.company);
+  titleBlock.append(meta, heading, company);
+  top.append(logo, titleBlock);
+
+  const row = document.createElement("div");
+  row.className = "match-row";
+  const score = document.createElement("div");
+  score.className = "score";
+  score.innerHTML = "<strong>✓</strong><span>人工通过</span>";
+  const evidence = document.createElement("div");
+  evidence.className = "evidence";
+  const strong = document.createElement("strong");
+  strong.textContent = "岗位已通过核验，详细信息正在后台同步。";
+  const note = document.createElement("p");
+  note.textContent = "公司和岗位名称已先显示，不需要等待整页刷新。";
+  evidence.append(strong, note);
+  row.append(score, evidence);
+
+  const actions = document.createElement("div");
+  actions.className = "card-actions";
+  if (job.jobUrl) {
+    const link = document.createElement("a");
+    link.className = "secondary job-link";
+    link.href = job.jobUrl;
+    link.target = "_blank";
+    link.rel = "noreferrer noopener";
+    link.textContent = "打开 JD ↗";
+    actions.append(link);
+  }
+  card.append(top, row, actions);
+  return card;
+}
+
+function showApprovedPlaceholder(job: ApprovedJob) {
+  if (!isTodayView() || !job.company || !job.title) return;
+  const list = document.querySelector<HTMLElement>(".job-list:not(.saved-job-list)");
+  if (!list) return;
+  if (findJobCard(job.company, job.title)) return;
+  const key = approvedKey(job);
+  if (list.querySelector(`[data-approved-placeholder="${CSS.escape(key)}"]`)) return;
+  const empty = list.querySelector<HTMLElement>(":scope > .empty-state");
+  empty?.remove();
+  list.prepend(makeApprovedPlaceholder(job));
+}
+
+function readLastApproval() {
+  try {
+    const raw = localStorage.getItem(APPROVAL_KEY);
+    if (!raw) return null;
+    const job = JSON.parse(raw) as ApprovedJob;
+    if (!job.sentAt || Date.now() - job.sentAt > 10 * 60 * 1000) return null;
+    return job;
+  } catch {
+    return null;
+  }
+}
+
 export default function OptimisticDashboardActions() {
   useEffect(() => {
     let scheduled = false;
@@ -92,11 +182,24 @@ export default function OptimisticDashboardActions() {
       window.requestAnimationFrame(() => {
         scheduled = false;
         applySavedVisibility();
+        const approval = readLastApproval();
+        if (approval) showApprovedPlaceholder(approval);
       });
+    };
+
+    const approvedHandler = (event: Event) => {
+      const job = (event as CustomEvent<ApprovedJob>).detail;
+      showApprovedPlaceholder(job);
+    };
+    const storageHandler = (event: StorageEvent) => {
+      if (event.key !== APPROVAL_KEY || !event.newValue) return;
+      try { showApprovedPlaceholder(JSON.parse(event.newValue) as ApprovedJob); } catch {}
     };
 
     document.addEventListener("click", optimisticSaveClick, true);
     document.addEventListener("click", optimisticIgnoreClick, true);
+    window.addEventListener("ivy-job-radar-approved", approvedHandler);
+    window.addEventListener("storage", storageHandler);
     const observer = new MutationObserver(schedule);
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
     schedule();
@@ -104,6 +207,8 @@ export default function OptimisticDashboardActions() {
     return () => {
       document.removeEventListener("click", optimisticSaveClick, true);
       document.removeEventListener("click", optimisticIgnoreClick, true);
+      window.removeEventListener("ivy-job-radar-approved", approvedHandler);
+      window.removeEventListener("storage", storageHandler);
       observer.disconnect();
     };
   }, []);
