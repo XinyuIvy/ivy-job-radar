@@ -62,6 +62,22 @@ export default function RootLayout({
           }}
         >
           <a
+            href="/cv-knowledge"
+            aria-label="打开 CV 个人能力知识库"
+            style={{
+              borderRadius: 999,
+              padding: "11px 16px",
+              background: "#65533f",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 800,
+              boxShadow: "0 10px 30px rgba(70,57,42,.20)",
+            }}
+          >
+            ◈ CV 知识库
+          </a>
+          <a
             href="/screening-learning"
             aria-label="查看筛选学习建议"
             style={{
