@@ -24,7 +24,8 @@ class CvFullJdAnalysisSourceTests(unittest.TestCase):
 
     def test_analysis_uses_aliases_and_structured_fact_evidence(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("hasAlias(template, rule.aliases)", route)
+        self.assertIn("hasAlias(templateText, rule.aliases)", route)
+        self.assertIn("latexToPlainText(template)", route)
         self.assertIn("collectSupportEvidence(facts, rule)", route)
         self.assertIn("supportEvidence", route)
         self.assertIn("jdEvidence", route)
