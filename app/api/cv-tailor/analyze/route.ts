@@ -31,23 +31,28 @@ const templates: Record<string, string> = {
 };
 
 const requirements: RequirementRule[] = [
-  { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional"], projectTerms: ["study design", "clinical trial", "observational", "simulation", "endpoint"] },
-  { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient", "participants"] },
-  { label: "Wearable and physiological data", category: "Data", aliases: ["wearable", "physiological", "digital health", "biobehavioral"], projectTerms: ["daily", "diary", "digital", "physiological", "patient-reported", "high-frequency"] },
-  { label: "Clinical and multimodal data", category: "Data", aliases: ["clinical data", "multimodal", "multi-modal", "biomedical data"], projectTerms: ["multimodal", "multi-modal", "clinical", "ehr", "imaging"] },
-  { label: "Time-series analysis", category: "Methods", aliases: ["time-series", "time series", "temporal data"], projectTerms: ["time series", "longitudinal", "daily", "temporal", "repeated"] },
-  { label: "Regression and mixed models", category: "Methods", aliases: ["regression", "mixed models", "mixed-effects", "mixed effects"], projectTerms: ["regression", "mixed-effects", "mixed effects", "gee"] },
-  { label: "Bayesian methods", category: "Methods", aliases: ["bayesian"], projectTerms: ["bayesian"] },
-  { label: "Machine learning", category: "Methods", aliases: ["machine learning", "machine-learning"], projectTerms: ["machine learning", "random forest", "xgboost", "lightgbm", "neural network"] },
-  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis", "logistic regression", "regression"], projectTerms: ["statistical", "model", "inference"] },
+  { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional", "研究设计", "实验设计", "试验设计", "课题设计"], projectTerms: ["study design", "clinical trial", "observational", "simulation", "endpoint"] },
+  { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb", "人体研究", "受试者", "临床研究", "伦理审查"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient", "participants"] },
+  { label: "Wearable and physiological data", category: "Data", aliases: ["wearable", "physiological", "digital health", "biobehavioral", "可穿戴", "生理数据", "数字健康", "生物行为"], projectTerms: ["daily", "diary", "digital", "physiological", "patient-reported", "high-frequency"] },
+  { label: "Clinical and multimodal data", category: "Data", aliases: ["clinical data", "multimodal", "multi-modal", "biomedical data", "临床数据", "多模态", "生物医学数据"], projectTerms: ["multimodal", "multi-modal", "clinical", "ehr", "imaging"] },
+  { label: "Time-series analysis", category: "Methods", aliases: ["time-series", "time series", "temporal data", "时间序列", "时序数据", "纵向数据", "重复测量"], projectTerms: ["time series", "longitudinal", "daily", "temporal", "repeated"] },
+  { label: "Regression and mixed models", category: "Methods", aliases: ["regression", "mixed models", "mixed-effects", "mixed effects", "回归", "混合模型", "混合效应"], projectTerms: ["regression", "mixed-effects", "mixed effects", "gee"] },
+  { label: "Bayesian methods", category: "Methods", aliases: ["bayesian", "贝叶斯"], projectTerms: ["bayesian"] },
+  { label: "Machine learning", category: "Methods", aliases: ["machine learning", "machine-learning", "机器学习", "深度学习"], projectTerms: ["machine learning", "random forest", "xgboost", "lightgbm", "neural network"] },
+  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis", "logistic regression", "regression", "统计建模", "统计模型", "统计分析", "统计学"], projectTerms: ["statistical", "model", "inference"] },
+  { label: "Agent workflow and tool use", category: "AI Systems", aliases: ["agent workflow", "agentic workflow", "agent system", "智能体", "自主决策", "工具调用", "代码执行", "实验验证"], projectTerms: ["multi-agent", "agent orchestration", "tool integration", "code execution", "evaluation harness", "human-in-the-loop"] },
+  { label: "Reinforcement learning and post-training", category: "Methods", aliases: ["reinforcement learning", "post-training", "ppo", "dpo", "grpo", "强化学习", "后训练", "奖励设计", "训练稳定性"], projectTerms: ["reinforcement learning", "post-training", "ppo", "dpo", "grpo"] },
+  { label: "Agentic data synthesis", category: "Data Engineering", aliases: ["agentic data synthesis", "trajectory data", "data synthesis", "数据合成", "轨迹数据", "数据清洗", "数据筛选", "数据增强", "数据配比", "数据管线"], projectTerms: ["agentic data synthesis", "trajectory data", "data synthesis"] },
+  { label: "Foundation and multimodal model development", category: "AI Models", aliases: ["foundation model", "large language model", "multimodal foundation model", "大语言模型", "大模型", "多模态大模型"], projectTerms: ["foundation model", "large language model", "llm training", "multimodal foundation model"] },
+  { label: "Scientific problem solving and paper reproduction", category: "Research", aliases: ["problem definition", "paper reproduction", "literature review", "科研能力", "问题定义", "论文阅读", "论文复现", "创新性解决方案"], projectTerms: ["research question", "first author", "manuscript", "reproducibility", "replication"] },
   { label: "Python", category: "Programming and Data", aliases: ["python"] },
-  { label: "R", category: "Programming and Data", aliases: ["r programming", "using r", " r,", " r and", " r;", " r ", "r;"] },
+  { label: "R", category: "Programming and Data", aliases: ["r", "r programming", "using r", " r,", " r and", " r;", " r ", "r;"] },
   { label: "SQL", category: "Programming and Data", aliases: ["sql"] },
-  { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow"] },
-  { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization"], projectTerms: ["visualization", "figures", "dashboard", "shiny"] },
-  { label: "Manuscripts and scientific dissemination", category: "Communication", aliases: ["manuscripts", "abstracts", "reports", "patents", "publication", "presentations", "scientific dissemination"], projectTerms: ["first author", "manuscript", "publication", "presentation", "report"] },
-  { label: "Research leadership from hypothesis to publication", category: "Leadership", aliases: ["leading scientific research", "hypothesis through publication", "first-authored", "first authored"], projectTerms: ["first author", "led", "lead project", "project lead", "corresponding author"] },
-  { label: "Cross-functional collaboration", category: "Collaboration", aliases: ["cross-functionally", "cross-functional", "collaborative", "stakeholders", "partnership"], projectTerms: ["cross-functional", "collaboration", "stakeholder", "multidisciplinary", "team"] },
+  { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda", "可复现", "计算工作流", "分析流程"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow"] },
+  { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization", "可视化", "图表"], projectTerms: ["visualization", "figures", "dashboard", "shiny"] },
+  { label: "Manuscripts and scientific dissemination", category: "Communication", aliases: ["manuscripts", "abstracts", "reports", "patents", "publication", "presentations", "scientific dissemination", "论文", "专利", "学术会议", "同行评议", "报告"], projectTerms: ["first author", "manuscript", "publication", "presentation", "report"] },
+  { label: "Research leadership from hypothesis to publication", category: "Leadership", aliases: ["leading scientific research", "hypothesis through publication", "first-authored", "first authored", "主导科研", "研究能力", "课题设计"], projectTerms: ["first author", "led", "lead project", "project lead", "corresponding author"] },
+  { label: "Cross-functional collaboration", category: "Collaboration", aliases: ["cross-functionally", "cross-functional", "collaborative", "stakeholders", "partnership", "跨职能", "跨学科", "团队合作", "协作"], projectTerms: ["cross-functional", "collaboration", "stakeholder", "multidisciplinary", "team"] },
   { label: "Evidence-based decision support", category: "Decision Support", aliases: ["evidence-based decisions", "decision-ready", "insight generation", "practical health applications"], projectTerms: ["decision support", "recommendation", "trial design", "operating trade-offs", "recommendation"] },
   { label: "Clinical and regulatory collaboration", category: "Collaboration", aliases: ["clinical", "regulatory", "research operations"], projectTerms: ["clinical", "regulatory", "endpoint", "trial"] },
   { label: "Industry-academia experience", category: "Experience", aliases: ["industry and academia", "intersection of industry and academia"], projectTerms: ["pfizer", "industry", "university"] },
@@ -83,7 +88,25 @@ function normalized(value: string) {
 
 function hasAlias(text: string, aliases: string[]) {
   const source = normalized(text);
-  return aliases.some((alias) => source.includes(normalized(alias)));
+  return aliases.some((alias) => {
+    const target = normalized(alias);
+    if (target.length === 1 && /[a-z0-9]/i.test(target)) {
+      return new RegExp(`(^|[^a-z0-9])${target}([^a-z0-9]|$)`, "i").test(source);
+    }
+    return source.includes(target);
+  });
+}
+
+function latexToPlainText(value: string) {
+  return value
+    .replace(/%.*$/gm, " ")
+    .replace(/\\(?:href|url)\{[^{}]*\}\{([^{}]*)\}/g, "$1")
+    .replace(/\\(?:section|subsection|subsubsection|textbf|textit|emph|small|footnotesize)\*?\{([^{}]*)\}/g, "$1")
+    .replace(/\\&/g, "&")
+    .replace(/\\[a-zA-Z@]+\*?(?:\[[^\]]*\])?/g, " ")
+    .replace(/[{}~]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function evidenceContext(text: string, aliases: string[]) {
@@ -117,12 +140,12 @@ async function readPrivateFile(path: string, token: string) {
 }
 
 function projectSections(facts: string) {
-  const headings = [...facts.matchAll(/^####\s+(.+)$/gm)];
+  const headings = [...facts.matchAll(/^###\s+(.+)$/gm)];
   return headings.map((match, index) => {
     const start = match.index ?? 0;
     const end = headings[index + 1]?.index ?? facts.length;
     return { name: match[1].trim(), text: facts.slice(start, end) };
-  }).filter((section) => /Project|Pfizer|Readmission|Treatment Effect|Confidence|NeuroStat|Distance Model|AI Usage|Ivy Job Radar|Multimodal|Clinical Trial/i.test(section.name));
+  }).filter((section) => /^(?:Pfizer|Dissertation Project|Lead Project)|Readmission|Treatment Effect|Confidence|NeuroStat|Distance Model|AI Usage|Ivy Job Radar|Multimodal|Clinical Trial|spinal-cord|Anxiety trajectories|correlation accuracy|mFFE|resting-state/i.test(section.name));
 }
 
 function cleanFactLine(line: string) {
@@ -141,6 +164,7 @@ function isRestrictionLine(line: string) {
 function candidateFactLines(projectText: string, terms: string[]) {
   return projectText
     .split(/\r?\n/)
+    .filter((line) => !/^#{1,6}\s/.test(line.trim()))
     .map(cleanFactLine)
     .filter((line) => line.length >= 28 && line.length <= 360)
     .filter((line) => !isRestrictionLine(line))
@@ -181,6 +205,7 @@ function collectSupportEvidence(facts: string, rule: RequirementRule): SupportEv
 }
 
 function recommendProjects(facts: string, template: string, detected: RequirementRule[]) {
+  const templateText = latexToPlainText(template);
   return projectSections(facts).map((project) => {
     const matchedRequirements = detected.filter((requirement) => {
       const terms = requirement.projectTerms ?? requirement.aliases;
@@ -191,7 +216,7 @@ function recommendProjects(facts: string, template: string, detected: Requiremen
       name: project.name,
       score,
       matchedRequirements,
-      alreadyInTemplate: normalized(template).includes(normalized(project.name.replace(/^.*?—\s*/, ""))) || normalized(template).includes(normalized(project.name.split(":" ).pop() || project.name)),
+      alreadyInTemplate: normalized(templateText).includes(normalized(project.name.replace(/^.*?—\s*/, ""))) || normalized(templateText).includes(normalized(project.name.split(":" ).pop() || project.name)),
       evidence: candidateFactLines(project.text, detected.flatMap((item) => item.projectTerms ?? item.aliases))[0] || "",
     } satisfies ProjectRecommendation;
   }).filter((project) => project.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
@@ -216,16 +241,17 @@ export async function POST(request: NextRequest) {
       readPrivateFile(`master/template-cv/${templates[track]}`, token),
       readPrivateFile("master/FACT_MASTER.md", token),
     ]);
+    const templateText = latexToPlainText(template);
     const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
     const matches = detected.map((rule) => {
-      const covered = hasAlias(template, rule.aliases);
+      const covered = hasAlias(templateText, rule.aliases);
       const supportEvidence = covered ? [] : collectSupportEvidence(facts, rule);
       return {
         keyword: rule.label,
         category: rule.category,
         status: covered ? "covered" : supportEvidence.length > 0 ? "supported_gap" : "unsupported_gap",
         supportEvidence,
-        templateEvidence: covered ? evidenceContext(template, rule.aliases) : "",
+        templateEvidence: covered ? evidenceContext(templateText, rule.aliases) : "",
         jdEvidence: evidenceContext(jd, rule.aliases),
       };
     });
