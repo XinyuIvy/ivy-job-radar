@@ -10,15 +10,15 @@ class DirectPendingAndOptimisticReviewTests(unittest.TestCase):
         installer = (ROOT / "app" / "bookmarklet" / "bookmarklet-installer.tsx").read_text(encoding="utf-8")
         self.assertIn('fetch("/api/applications"', capture)
         self.assertIn('status: "准备材料"', capture)
-        self.assertIn("不需要核验或人工通过", capture)
+        self.assertIn("已直接进入待提交申请", capture)
         self.assertIn('const popupName="ivy_job_radar_capture_"', installer)
 
-    def test_manual_approval_is_optimistic_and_refreshes_job_cache(self):
+    def test_manual_approval_is_optimistic_and_does_not_reload_page(self):
         source = (ROOT / "app" / "verification-queue-actions.tsx").read_text(encoding="utf-8")
         self.assertIn('card.style.setProperty("display", "none", "important")', source)
         self.assertIn("refreshJobsCache", source)
-        self.assertIn('selectedNav: "今日"', source)
-        self.assertIn("window.location.reload()", source)
+        self.assertIn("ivy-job-radar-approved", source)
+        self.assertNotIn("window.location.reload()", source)
 
 
 if __name__ == "__main__":
