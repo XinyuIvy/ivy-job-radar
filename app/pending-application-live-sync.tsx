@@ -32,13 +32,36 @@ function itemKey(application: PendingApplication) {
   return `${normalized(application.company || "").toLowerCase()}::${normalized(application.title || "").toLowerCase()}`;
 }
 
-function pendingTabIsActive() {
+function savedViewIsVisible() {
   const heroTitle = Array.from(document.querySelectorAll<HTMLElement>(".hero h1"))
     .find((element) => element.offsetParent !== null);
-  if (normalized(heroTitle?.textContent || "") !== "收藏与待提交") return false;
+  return normalized(heroTitle?.textContent || "") === "收藏与待提交";
+}
 
+function pendingTabIsActive() {
+  if (!savedViewIsVisible()) return false;
   return Array.from(document.querySelectorAll<HTMLButtonElement>(".stats-two button.active"))
     .some((button) => normalized(button.textContent || "").startsWith("待提交申请"));
+}
+
+function findPendingSummaryButton() {
+  if (!savedViewIsVisible()) return null;
+  return Array.from(document.querySelectorAll<HTMLButtonElement>(".stats-two button"))
+    .find((button) => normalized(button.textContent || "").startsWith("待提交申请")) ?? null;
+}
+
+function setPendingSummaryCount(count: number) {
+  const button = findPendingSummaryButton();
+  const strong = button?.querySelector<HTMLElement>("strong");
+  if (strong) strong.textContent = String(Math.max(0, count));
+}
+
+function incrementPendingSummary() {
+  const button = findPendingSummaryButton();
+  const strong = button?.querySelector<HTMLElement>("strong");
+  if (!strong) return;
+  const current = Number(strong.textContent || 0);
+  strong.textContent = String((Number.isFinite(current) ? current : 0) + 1);
 }
 
 function findPendingList() {
@@ -143,12 +166,15 @@ function insertPending(application: PendingApplication) {
 }
 
 async function reconcilePendingFromServer() {
-  const list = findPendingList();
-  if (!list) return;
+  if (!savedViewIsVisible()) return;
   const response = await fetch("/api/applications", { cache: "no-store" });
   if (!response.ok) return;
   const rows = await response.json().catch(() => []) as PendingApplication[];
   const pending = rows.filter((row) => row.status === "准备材料");
+  setPendingSummaryCount(pending.length);
+
+  const list = findPendingList();
+  if (!list) return;
   for (const application of [...pending].reverse()) insertPending(application);
 }
 
@@ -156,7 +182,8 @@ export default function PendingApplicationLiveSync() {
   useEffect(() => {
     let disposed = false;
     let syncTimer = 0;
-    let wasPendingActive = false;
+    let wasSavedVisible = false;
+    const handledMessages = new Set<string>();
 
     const scheduleReconcile = (delay = 80) => {
       window.clearTimeout(syncTimer);
@@ -167,8 +194,14 @@ export default function PendingApplicationLiveSync() {
 
     const handle = (message: PendingMessage) => {
       if (message.type !== "ivy-job-radar-pending-created" || !message.application) return;
+      const messageKey = `${message.application.id || itemKey(message.application)}:${message.sentAt || 0}`;
+      if (handledMessages.has(messageKey)) return;
+      handledMessages.add(messageKey);
+
+      const freshMessage = Boolean(message.sentAt && Date.now() - message.sentAt < 10_000);
+      if (freshMessage && savedViewIsVisible()) incrementPendingSummary();
       insertPending(message.application);
-      scheduleReconcile(120);
+      scheduleReconcile(80);
     };
 
     const windowHandler = (event: MessageEvent<PendingMessage>) => {
@@ -187,9 +220,10 @@ export default function PendingApplicationLiveSync() {
     if (channel) channel.onmessage = (event: MessageEvent<PendingMessage>) => handle(event.data);
 
     const observer = new MutationObserver(() => {
-      const active = pendingTabIsActive();
-      if (active && !wasPendingActive) scheduleReconcile(40);
-      wasPendingActive = active;
+      const visible = savedViewIsVisible();
+      if (visible && !wasSavedVisible) scheduleReconcile(40);
+      if (visible && pendingTabIsActive()) scheduleReconcile(70);
+      wasSavedVisible = visible;
     });
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 

@@ -14,13 +14,20 @@ class PendingLiveSyncSourceTests(unittest.TestCase):
 
     def test_live_insert_targets_formal_pending_application_list(self):
         source = (ROOT / "app" / "pending-application-live-sync.tsx").read_text(encoding="utf-8")
-        self.assertIn('normalized(heroTitle?.textContent || "") !== "收藏与待提交"', source)
+        self.assertIn('normalized(heroTitle?.textContent || "") === "收藏与待提交"', source)
         self.assertIn('document.querySelectorAll<HTMLButtonElement>(".stats-two button.active")', source)
         self.assertIn('document.querySelectorAll<HTMLElement>("section.application-list")', source)
         self.assertIn('article.className = "application-card"', source)
         self.assertIn("list.prepend(makeCard(application))", source)
         self.assertNotIn("scrollIntoView", source)
         self.assertNotIn("window.location.reload", source)
+
+    def test_pending_summary_count_updates_immediately_and_reconciles(self):
+        source = (ROOT / "app" / "pending-application-live-sync.tsx").read_text(encoding="utf-8")
+        self.assertIn("findPendingSummaryButton", source)
+        self.assertIn("incrementPendingSummary", source)
+        self.assertIn("setPendingSummaryCount(pending.length)", source)
+        self.assertIn("freshMessage", source)
 
     def test_live_sync_has_storage_and_server_reconciliation_fallbacks(self):
         source = (ROOT / "app" / "pending-application-live-sync.tsx").read_text(encoding="utf-8")
