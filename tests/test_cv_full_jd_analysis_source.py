@@ -10,12 +10,17 @@ class CvFullJdAnalysisSourceTests(unittest.TestCase):
         for phrase in [
             "Scientific study design",
             "Human-subjects research",
-            "Wearable and physiological data",
+            "Wearable data",
+            "Physiological data",
+            "Clinical data",
+            "Multimodal data",
             "Time-series analysis",
-            "Regression and mixed models",
+            "Regression",
+            "Mixed-effects models",
             "Bayesian methods",
             "Reproducible computational workflows",
-            "Manuscripts and scientific dissemination",
+            "Manuscript development",
+            "Scientific dissemination",
             "Cross-functional collaboration",
             "Industry-academia experience",
             "UAE research experience",
@@ -26,7 +31,8 @@ class CvFullJdAnalysisSourceTests(unittest.TestCase):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("hasAlias(templateText, rule.aliases)", route)
         self.assertIn("latexToPlainText(template)", route)
-        self.assertIn("collectSupportEvidence(facts, rule)", route)
+        self.assertIn("collectAtomicEvidence(atomicFacts, rule)", route)
+        self.assertIn("parseAtomicFacts", route)
         self.assertIn("supportEvidence", route)
         self.assertIn("jdEvidence", route)
 
