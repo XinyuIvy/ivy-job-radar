@@ -79,7 +79,6 @@ function overlapScore(query: Set<string>, values: string[] | undefined, weight: 
   let score = 0;
   const matches: string[] = [];
   for (const value of values) {
-    const normalizedValue = normalize(value);
     const valueTerms = terms(value);
     const overlap = [...valueTerms].filter((item) => query.has(item)).length;
     if (overlap > 0) {
