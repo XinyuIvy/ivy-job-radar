@@ -3,10 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 const templates: Record<string, string> = {
-  pharma: "cv_pharma.md",
-  tech: "cv_tech.md",
-  quant: "cv_quant.md",
-  consulting: "cv_healthcare_consulting.md",
+  pharma: "cv_pharma.tex",
+  tech: "cv_tech.tex",
+  quant: "cv_quant.tex",
+  consulting: "cv_healthcare_consulting.tex",
 };
 
 function decodeBase64Utf8(value: string) {
