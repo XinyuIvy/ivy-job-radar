@@ -37,8 +37,29 @@ class CvChineseTexAnalysisTests(unittest.TestCase):
         self.assertIn("hasAlias(templateText, rule.aliases)", self.source)
 
     def test_short_r_alias_uses_token_boundaries(self):
-        self.assertRegex(self.source, re.compile(r"target\.length === 1"))
+        self.assertRegex(self.source, re.compile(r"startBoundary.*a-z0-9"))
+        self.assertRegex(self.source, re.compile(r"endBoundary.*a-z0-9"))
         self.assertIn('["r", "r programming"', self.source)
+
+    def test_all_latin_aliases_use_complete_token_matching(self):
+        matcher = self.source.split("function hasAlias", 1)[1].split("function latexToPlainText", 1)[0]
+        self.assertIn("escapeRegex(target)", matcher)
+        self.assertIn("startBoundary", matcher)
+        self.assertIn("endBoundary", matcher)
+
+    def test_chinese_and_english_templates_are_available(self):
+        for filename in [
+            "cv_tech.tex",
+            "cv_tech_cn.tex",
+            "cv_quant.tex",
+            "cv_quant_cn.tex",
+            "cv_pharma.tex",
+            "cv_pharma_cn.tex",
+            "cv_healthcare_consulting.tex",
+            "cv_healthcare_consulting_cn.tex",
+            "cv_clinical_data_neuro_cn.tex",
+        ]:
+            self.assertIn(filename, self.source)
 
 
 if __name__ == "__main__":

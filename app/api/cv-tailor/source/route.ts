@@ -2,11 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const templates: Record<string, string> = {
-  pharma: "cv_pharma.tex",
-  tech: "cv_tech.tex",
-  quant: "cv_quant.tex",
-  consulting: "cv_healthcare_consulting.tex",
+type TemplateLanguage = "en" | "zh";
+
+const templates: Record<TemplateLanguage, Record<string, string | null>> = {
+  en: {
+    pharma: "cv_pharma.tex",
+    tech: "cv_tech.tex",
+    quant: "cv_quant.tex",
+    consulting: "cv_healthcare_consulting.tex",
+    clinical_neuro: null,
+  },
+  zh: {
+    pharma: "cv_pharma_cn.tex",
+    tech: "cv_tech_cn.tex",
+    quant: "cv_quant_cn.tex",
+    consulting: "cv_healthcare_consulting_cn.tex",
+    clinical_neuro: "cv_clinical_data_neuro_cn.tex",
+  },
 };
 
 function decodeBase64Utf8(value: string) {
@@ -32,8 +44,11 @@ async function readPrivateFile(path: string, token: string) {
 }
 
 export async function GET(request: NextRequest) {
-  const track = new URL(request.url).searchParams.get("track") || "pharma";
-  const filename = templates[track] || templates.pharma;
+  const search = new URL(request.url).searchParams;
+  const language: TemplateLanguage = search.get("language") === "zh" ? "zh" : "en";
+  const requestedTrack = search.get("track") || "pharma";
+  const track = requestedTrack in templates[language] ? requestedTrack : "pharma";
+  const filename = templates[language][track];
   const { env } = await import("cloudflare:workers");
   const token = String(env.CV_GITHUB_TOKEN || "").trim();
 
@@ -44,13 +59,21 @@ export async function GET(request: NextRequest) {
     }, { status: 503 });
   }
 
+  if (!filename) {
+    return NextResponse.json({
+      error: "脑科学 / 临床数据 / 医疗器械方向目前只有中文 LaTeX 母版，请选择中文母版。",
+      code: "CV_TEMPLATE_LANGUAGE_UNAVAILABLE",
+    }, { status: 400 });
+  }
+
   try {
-    const [template, facts, keywords] = await Promise.all([
+    const [template, facts, keywords, atomicFacts] = await Promise.all([
       readPrivateFile(`master/template-cv/${filename}`, token),
       readPrivateFile("master/FACT_MASTER.md", token),
       readPrivateFile("master/template-cv/KEYWORD_ANALYSIS.md", token),
+      readPrivateFile("master/project-evidence/STAGE3_ATOMIC_FACTS.yaml", token),
     ]);
-    return NextResponse.json({ track, filename, template, facts, keywords });
+    return NextResponse.json({ track, language, filename, template, facts, keywords, atomicFacts });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "CV source loading failed." }, { status: 502 });
   }

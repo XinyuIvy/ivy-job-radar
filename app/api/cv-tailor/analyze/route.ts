@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+type TemplateLanguage = "en" | "zh";
+type EvidenceClassification = "Direct" | "Strong Transferable" | "Adjacent";
+
 type RequirementRule = {
   label: string;
   category: string;
@@ -9,91 +12,174 @@ type RequirementRule = {
   projectTerms?: string[];
 };
 
+type AtomicFact = {
+  projectId: string;
+  projectName: string;
+  role: string;
+  factId: string;
+  verifiedFact: string;
+  factStatus: string;
+  personalAttribution: string;
+  evidenceStrength: string;
+  source: string;
+  evidenceLocation: string;
+  claimBoundary: string;
+};
+
 type SupportEvidence = {
+  projectId: string;
   project: string;
+  factId: string;
   fact: string;
+  factStatus: string;
+  evidenceStrength: string;
+  classification: EvidenceClassification;
   relevance: string;
+  source: string;
+  evidenceLocation: string;
+  claimBoundary: string;
 };
 
 type ProjectRecommendation = {
+  projectId: string;
   name: string;
   score: number;
   matchedRequirements: string[];
+  classifications: EvidenceClassification[];
   alreadyInTemplate: boolean;
-  evidence: string;
+  evidence: SupportEvidence | null;
 };
 
-const templates: Record<string, string> = {
-  pharma: "cv_pharma.tex",
-  tech: "cv_tech.tex",
-  quant: "cv_quant.tex",
-  consulting: "cv_healthcare_consulting.tex",
+type MatchStatus = "covered" | "supported_gap" | "adjacent_gap" | "unsupported_gap";
+
+type RequirementMatch = {
+  keyword: string;
+  category: string;
+  status: MatchStatus;
+  supportEvidence: SupportEvidence[];
+  templateEvidence: string;
+  jdEvidence: string;
 };
 
+type ModificationDraft = {
+  id: string;
+  action: "revise_existing" | "consider_addition";
+  projectId: string;
+  project: string;
+  requirement: string;
+  classification: EvidenceClassification;
+  factId: string;
+  verifiedFact: string;
+  proposedBullet: string;
+  source: string;
+  evidenceLocation: string;
+  claimBoundary: string;
+  rationale: string;
+  latexDiff: { before: string; after: string };
+};
+
+const templateFiles: Record<TemplateLanguage, Record<string, string | null>> = {
+  en: {
+    pharma: "cv_pharma.tex",
+    tech: "cv_tech.tex",
+    quant: "cv_quant.tex",
+    consulting: "cv_healthcare_consulting.tex",
+    clinical_neuro: null,
+  },
+  zh: {
+    pharma: "cv_pharma_cn.tex",
+    tech: "cv_tech_cn.tex",
+    quant: "cv_quant_cn.tex",
+    consulting: "cv_healthcare_consulting_cn.tex",
+    clinical_neuro: "cv_clinical_data_neuro_cn.tex",
+  },
+};
+
+// Compound requirements stay split so one matched concept cannot imply another.
 const requirements: RequirementRule[] = [
-  { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional", "研究设计", "实验设计", "试验设计", "课题设计"], projectTerms: ["study design", "clinical trial", "observational", "simulation", "endpoint"] },
-  { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb", "人体研究", "受试者", "临床研究", "伦理审查"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient", "participants"] },
-  { label: "Wearable and physiological data", category: "Data", aliases: ["wearable", "physiological", "digital health", "biobehavioral", "可穿戴", "生理数据", "数字健康", "生物行为"], projectTerms: ["daily", "diary", "digital", "physiological", "patient-reported", "high-frequency"] },
-  { label: "Clinical and multimodal data", category: "Data", aliases: ["clinical data", "multimodal", "multi-modal", "biomedical data", "临床数据", "多模态", "生物医学数据"], projectTerms: ["multimodal", "multi-modal", "clinical", "ehr", "imaging"] },
-  { label: "Time-series analysis", category: "Methods", aliases: ["time-series", "time series", "temporal data", "时间序列", "时序数据", "纵向数据", "重复测量"], projectTerms: ["time series", "longitudinal", "daily", "temporal", "repeated"] },
-  { label: "Regression and mixed models", category: "Methods", aliases: ["regression", "mixed models", "mixed-effects", "mixed effects", "回归", "混合模型", "混合效应"], projectTerms: ["regression", "mixed-effects", "mixed effects", "gee"] },
-  { label: "Bayesian methods", category: "Methods", aliases: ["bayesian", "贝叶斯"], projectTerms: ["bayesian"] },
-  { label: "Machine learning", category: "Methods", aliases: ["machine learning", "machine-learning", "机器学习", "深度学习"], projectTerms: ["machine learning", "random forest", "xgboost", "lightgbm", "neural network"] },
-  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis", "logistic regression", "regression", "统计建模", "统计模型", "统计分析", "统计学"], projectTerms: ["statistical", "model", "inference"] },
-  { label: "Agent workflow and tool use", category: "AI Systems", aliases: ["agent workflow", "agentic workflow", "agent system", "智能体", "自主决策", "工具调用", "代码执行", "实验验证"], projectTerms: ["multi-agent", "agent orchestration", "tool integration", "code execution", "evaluation harness", "human-in-the-loop"] },
-  { label: "Reinforcement learning and post-training", category: "Methods", aliases: ["reinforcement learning", "post-training", "ppo", "dpo", "grpo", "强化学习", "后训练", "奖励设计", "训练稳定性"], projectTerms: ["reinforcement learning", "post-training", "ppo", "dpo", "grpo"] },
-  { label: "Agentic data synthesis", category: "Data Engineering", aliases: ["agentic data synthesis", "trajectory data", "data synthesis", "数据合成", "轨迹数据", "数据清洗", "数据筛选", "数据增强", "数据配比", "数据管线"], projectTerms: ["agentic data synthesis", "trajectory data", "data synthesis"] },
-  { label: "Foundation and multimodal model development", category: "AI Models", aliases: ["foundation model", "large language model", "multimodal foundation model", "大语言模型", "大模型", "多模态大模型"], projectTerms: ["foundation model", "large language model", "llm training", "multimodal foundation model"] },
-  { label: "Scientific problem solving and paper reproduction", category: "Research", aliases: ["problem definition", "paper reproduction", "literature review", "科研能力", "问题定义", "论文阅读", "论文复现", "创新性解决方案"], projectTerms: ["research question", "first author", "manuscript", "reproducibility", "replication"] },
+  { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional", "研究设计", "实验设计", "试验设计", "课题设计"], projectTerms: ["study design", "clinical trial", "simulation", "endpoint", "研究设计", "试验设计", "模拟", "终点"] },
+  { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb", "人体研究", "受试者", "临床研究", "伦理审查"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient", "participants", "临床试验", "终点", "患者", "受试者"] },
+  { label: "Wearable data", category: "Data", aliases: ["wearable", "wearables", "可穿戴"], projectTerms: ["wearable", "digital measurement", "daily diary", "可穿戴", "数字测量", "每日记录"] },
+  { label: "Physiological data", category: "Data", aliases: ["physiological", "physiology", "生理数据", "生理信号"], projectTerms: ["physiological", "heart rate", "fev1", "pef", "生理", "心率", "肺功能"] },
+  { label: "Clinical data", category: "Data", aliases: ["clinical data", "clinical dataset", "临床数据"], projectTerms: ["clinical", "ehr", "patient", "trial", "临床", "电子病历", "患者", "试验"] },
+  { label: "Multimodal data", category: "Data", aliases: ["multimodal data", "multi-modal data", "multimodal", "multi-modal", "多模态"], projectTerms: ["multimodal", "multi-modal", "multiple data sources", "多模态", "多来源"] },
+  { label: "Biomedical data", category: "Data", aliases: ["biomedical data", "health data", "生物医学数据", "医疗健康数据"], projectTerms: ["biomedical", "neuroimaging", "clinical", "ehr", "生物医学", "神经影像", "临床"] },
+  { label: "Time-series analysis", category: "Methods", aliases: ["time-series", "time series", "temporal data", "时间序列", "时序数据"], projectTerms: ["time series", "temporal", "daily", "longitudinal", "时间序列", "时间外", "每日", "纵向"] },
+  { label: "Longitudinal analysis", category: "Methods", aliases: ["longitudinal", "repeated measures", "纵向数据", "纵向分析", "重复测量"], projectTerms: ["longitudinal", "repeated measurements", "gee", "mixed-effects", "纵向", "重复测量", "广义估计方程", "混合效应"] },
+  { label: "Regression", category: "Methods", aliases: ["regression", "logistic regression", "linear regression", "回归", "逻辑回归", "线性回归"], projectTerms: ["regression", "回归"] },
+  { label: "Mixed-effects models", category: "Methods", aliases: ["mixed models", "mixed-effects", "mixed effects", "混合模型", "混合效应"], projectTerms: ["mixed-effects", "mixed effects", "linear mixed", "混合效应", "混合模型"] },
+  { label: "Bayesian methods", category: "Methods", aliases: ["bayesian", "贝叶斯"], projectTerms: ["bayesian", "贝叶斯"] },
+  { label: "Machine learning", category: "Methods", aliases: ["machine learning", "machine-learning", "机器学习", "深度学习"], projectTerms: ["machine learning", "random forest", "xgboost", "lightgbm", "neural network", "机器学习", "随机森林", "神经网络"] },
+  { label: "Statistical modeling", category: "Methods", aliases: ["statistical modeling", "statistical methods", "statistical analysis", "统计建模", "统计模型", "统计分析", "统计学"], projectTerms: ["statistical", "model", "inference", "统计", "模型", "推断"] },
+  { label: "Agent workflow", category: "AI Systems", aliases: ["agent workflow", "agentic workflow", "agent system", "multi-agent", "智能体", "多智能体"], projectTerms: ["multi-agent", "agent orchestration", "orchestrator", "human-in-the-loop", "多智能体", "编排器", "人工监督"] },
+  { label: "Tool use and code execution", category: "AI Systems", aliases: ["tool use", "tool calling", "code execution", "工具调用", "代码执行", "实验验证"], projectTerms: ["tool integration", "code execution", "evaluation harness", "工具", "代码实现", "实验验证"] },
+  { label: "Reinforcement learning", category: "Methods", aliases: ["reinforcement learning", "ppo", "dpo", "grpo", "强化学习", "奖励设计"], projectTerms: ["reinforcement learning", "ppo", "dpo", "grpo", "强化学习", "奖励"] },
+  { label: "Post-training", category: "Methods", aliases: ["post-training", "post training", "后训练", "训练稳定性"], projectTerms: ["post-training", "post training", "后训练"] },
+  { label: "Agentic data synthesis", category: "Data Engineering", aliases: ["agentic data synthesis", "trajectory data", "data synthesis", "数据合成", "轨迹数据"], projectTerms: ["agentic data synthesis", "trajectory data", "data synthesis", "数据合成", "轨迹数据"] },
+  { label: "Data curation pipeline", category: "Data Engineering", aliases: ["data cleaning", "data filtering", "data augmentation", "data mixture", "data pipeline", "数据清洗", "数据筛选", "数据增强", "数据配比", "数据管线"], projectTerms: ["data cleaning", "pipeline", "quality checks", "数据清洗", "数据核验", "流程"] },
+  { label: "Foundation-model development", category: "AI Models", aliases: ["foundation model", "large language model", "llm development", "大语言模型", "大模型"], projectTerms: ["foundation model", "large language model", "llm training", "基础模型", "大模型"] },
+  { label: "Multimodal-model development", category: "AI Models", aliases: ["multimodal model", "multi-modal model", "multimodal foundation model", "多模态模型", "多模态大模型"], projectTerms: ["multimodal model", "multi-modal model", "多模态模型"] },
+  { label: "Scientific problem solving", category: "Research", aliases: ["problem definition", "scientific problem solving", "科研能力", "问题定义", "创新性解决方案"], projectTerms: ["research question", "methodology", "research design", "研究问题", "方法", "研究设计"] },
+  { label: "Paper reproduction", category: "Research", aliases: ["paper reproduction", "research reproduction", "论文复现", "研究复现"], projectTerms: ["reproducibility", "replication", "reproduction", "可复现", "复现"] },
+  { label: "Literature review", category: "Research", aliases: ["literature review", "paper reading", "论文阅读", "文献综述", "文献检索"], projectTerms: ["literature", "published studies", "manuscript", "文献", "公开研究", "论文"] },
   { label: "Python", category: "Programming and Data", aliases: ["python"] },
-  { label: "R", category: "Programming and Data", aliases: ["r", "r programming", "using r", " r,", " r and", " r;", " r ", "r;"] },
+  { label: "R", category: "Programming and Data", aliases: ["r", "r programming", "using r"] },
   { label: "SQL", category: "Programming and Data", aliases: ["sql"] },
-  { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda", "可复现", "计算工作流", "分析流程"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow"] },
-  { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization", "可视化", "图表"], projectTerms: ["visualization", "figures", "dashboard", "shiny"] },
-  { label: "Manuscripts and scientific dissemination", category: "Communication", aliases: ["manuscripts", "abstracts", "reports", "patents", "publication", "presentations", "scientific dissemination", "论文", "专利", "学术会议", "同行评议", "报告"], projectTerms: ["first author", "manuscript", "publication", "presentation", "report"] },
-  { label: "Research leadership from hypothesis to publication", category: "Leadership", aliases: ["leading scientific research", "hypothesis through publication", "first-authored", "first authored", "主导科研", "研究能力", "课题设计"], projectTerms: ["first author", "led", "lead project", "project lead", "corresponding author"] },
-  { label: "Cross-functional collaboration", category: "Collaboration", aliases: ["cross-functionally", "cross-functional", "collaborative", "stakeholders", "partnership", "跨职能", "跨学科", "团队合作", "协作"], projectTerms: ["cross-functional", "collaboration", "stakeholder", "multidisciplinary", "team"] },
-  { label: "Evidence-based decision support", category: "Decision Support", aliases: ["evidence-based decisions", "decision-ready", "insight generation", "practical health applications"], projectTerms: ["decision support", "recommendation", "trial design", "operating trade-offs", "recommendation"] },
-  { label: "Clinical and regulatory collaboration", category: "Collaboration", aliases: ["clinical", "regulatory", "research operations"], projectTerms: ["clinical", "regulatory", "endpoint", "trial"] },
-  { label: "Industry-academia experience", category: "Experience", aliases: ["industry and academia", "intersection of industry and academia"], projectTerms: ["pfizer", "industry", "university"] },
-  { label: "UAE research experience", category: "Regional Preference", aliases: ["uae", "united arab emirates"], projectTerms: ["uae", "united arab emirates"] },
-  { label: "Sleep and circadian science", category: "Domain", aliases: ["sleep", "circadian"], projectTerms: ["sleep", "circadian"] },
-  { label: "Digital health", category: "Domain", aliases: ["digital health"], projectTerms: ["digital health", "digital endpoint", "wearable"] },
+  { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda", "可复现", "计算工作流", "分析流程"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow", "可复现", "流水线", "工作流"] },
+  { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization", "可视化", "图表"], projectTerms: ["visualization", "figures", "dashboard", "shiny", "可视化", "图表", "仪表板"] },
+  { label: "Manuscript development", category: "Communication", aliases: ["manuscripts", "manuscript development", "publication", "论文", "手稿"], projectTerms: ["first author", "manuscript", "publication", "第一作者", "论文", "手稿"] },
+  { label: "Scientific dissemination", category: "Communication", aliases: ["abstracts", "reports", "patents", "presentations", "scientific dissemination", "专利", "学术会议", "同行评议", "报告"], projectTerms: ["presentation", "report", "reviewer", "报告", "会议", "审稿"] },
+  { label: "Research leadership", category: "Leadership", aliases: ["leading scientific research", "hypothesis through publication", "first-authored", "first authored", "主导科研", "研究能力", "课题设计"], projectTerms: ["first author", "led", "lead project", "project lead", "corresponding author", "第一作者", "主导", "通讯作者"] },
+  { label: "Cross-functional collaboration", category: "Collaboration", aliases: ["cross-functionally", "cross-functional", "collaborative", "stakeholders", "partnership", "跨职能", "跨学科", "团队合作", "协作"], projectTerms: ["cross-functional", "collaboration", "stakeholder", "multidisciplinary", "team", "跨职能", "合作", "团队"] },
+  { label: "Evidence-based decision support", category: "Decision Support", aliases: ["evidence-based decisions", "decision-ready", "insight generation", "practical health applications", "决策支持", "支持决策"], projectTerms: ["decision support", "recommendation", "trial design", "operating trade-offs", "决策", "建议", "试验设计", "权衡"] },
+  { label: "Clinical collaboration", category: "Collaboration", aliases: ["clinical collaboration", "clinical partners", "临床协作", "临床团队"], projectTerms: ["clinical", "endpoint", "trial", "临床", "终点", "试验"] },
+  { label: "Regulatory collaboration", category: "Collaboration", aliases: ["regulatory collaboration", "regulatory affairs", "regulatory", "监管协作", "监管事务"], projectTerms: ["regulatory", "监管"] },
+  { label: "Industry-academia experience", category: "Experience", aliases: ["industry and academia", "intersection of industry and academia", "产学", "行业与学术"], projectTerms: ["pfizer", "industry", "university", "辉瑞", "行业", "大学"] },
+  { label: "UAE research experience", category: "Regional Preference", aliases: ["uae", "united arab emirates", "阿联酋"], projectTerms: ["uae", "united arab emirates", "阿联酋"] },
+  { label: "Sleep science", category: "Domain", aliases: ["sleep science", "sleep", "睡眠"], projectTerms: ["sleep", "睡眠"] },
+  { label: "Circadian science", category: "Domain", aliases: ["circadian", "昼夜节律"], projectTerms: ["circadian", "昼夜节律"] },
+  { label: "Digital health", category: "Domain", aliases: ["digital health", "数字健康"], projectTerms: ["digital health", "digital endpoint", "wearable", "数字健康", "数字终点", "可穿戴"] },
 ];
 
-const supportReasons: Record<string, string> = {
-  "Scientific study design": "该项目包含研究问题、试验或模拟设计、终点比较或分析方案，可证明研究设计能力。",
-  "Human-subjects research": "该项目使用患者、受试者或临床数据，并涉及终点、研究流程或人体研究语境。",
-  "Wearable and physiological data": "该项目处理日记、重复测量、数字测量或高频健康信号，与 wearable 数据结构相近，但不能等同于真实 wearable 研究。",
-  "Clinical and multimodal data": "该项目联合分析临床、EHR、影像或多来源数据，可支持复杂生物医学数据分析能力。",
-  "Time-series analysis": "该项目包含纵向、重复测量、每日记录或时间顺序验证，可支持时间相关数据分析。",
-  "Regression and mixed models": "该项目使用回归、GEE、混合效应或相关结构建模，可支持这一方法要求。",
-  "Bayesian methods": "该项目明确使用 Bayesian 方法时才可支持。",
-  "Machine learning": "该项目实际训练和比较机器学习模型，而不是只在课程中接触。",
-  "Statistical modeling": "该项目包含明确的统计模型、推断或模型评估工作。",
-  "Reproducible computational workflows": "该项目包含可复现代码、版本控制、流水线、报告或结构化工作流。",
-  "Scientific visualization": "该项目生成图表、可视化工具或分析展示，用于解释复杂结果。",
-  "Manuscripts and scientific dissemination": "该项目形成论文、报告、摘要、演示或其他科学传播成果。",
-  "Research leadership from hypothesis to publication": "该项目有第一作者、项目主导或从方法设计推进到论文产出的证据。",
-  "Cross-functional collaboration": "该项目需要与不同专业、研究或业务合作方共同推进。",
-  "Evidence-based decision support": "该项目把分析结果转化为方法选择、试验设计或可执行建议。",
-  "Clinical and regulatory collaboration": "该项目处于临床试验或临床研究语境，并与临床或监管相关工作相邻。",
-  "Industry-academia experience": "该经历连接药企或行业项目与学术研究训练。",
-  "Digital health": "该项目处理数字化健康测量、患者报告结果或健康数据系统。",
+const projectIdentityAliases: Record<string, string[]> = {
+  semiparametric_confidence_sets: ["Semiparametric Confidence Sets", "Semiparametric Confidence Sets for Correlated Outcomes", "相关结局的半参数置信集", "半参数置信集"],
+  resi_asymptotic_inference: ["Robust Effect Size Index", "Closed-Form Asymptotic Inference for Effect Sizes", "效应量的闭式渐近推断", "稳健效应量"],
+  model_reliance_confidence_sets: ["Confidence Sets for Model Reliance", "FDR- and FWER-Controlled Confidence Sets for Model Reliance", "控制错误发现率的模型依赖度置信集", "模型依赖度置信集"],
+  multimodal_multiregion_distance: ["Multimodal and Multi-Region Distance Model", "Multi-modal and Multi-region Distance Model", "多模态多区域距离模型"],
+  pfizer_asthma_clinical_trial_simulation: ["Pfizer", "Asthma Clinical-Trial Simulation", "辉瑞", "哮喘临床试验模拟"],
+  hospital_readmission_risk: ["Hospital Readmission Risk", "Real-Time Hospital Readmission", "30-Day Hospital Readmission", "住院再入院风险", "再入院风险机器学习模型"],
+  nph_treatment_effects: ["Non-Proportional Hazards", "Non-proportional Hazard", "非比例风险"],
+  markov_switching_matrix_autoregressive: ["Markov Switching Matrix Autoregressive", "Markov-Switching Matrix Autoregressive", "马尔可夫切换矩阵"],
+  lumbosacral_resting_state_fc: ["Lumbosacral Spinal-Cord Resting-State Functional Connectivity", "spinal-cord functional connectivity", "脊髓功能连接", "多发性硬化脊髓神经影像标志物"],
+  lumbosacral_mffe: ["Multi-echo Gradient-echo MRI", "mFFE", "多回波梯度回波", "腰骶部多发性硬化影像"],
+  neurostat_virtual_lab: ["NeuroStat"],
+  ivy_job_radar: ["Ivy Job Radar"],
+  ai_usage_dashboard: ["AI Usage Dashboard", "AI Usage", "AI 用量", "AI 配额"],
+};
+
+const supportReasons: Record<EvidenceClassification, string> = {
+  Direct: "原子事实直接记录了这项方法、数据、工具或职责。",
+  "Strong Transferable": "原子事实记录了可迁移的方法或工作过程，但不能写成该岗位要求的同名行业经历。",
+  Adjacent: "项目语境与要求相邻，但证据不足以写成已实际完成该项工作。",
 };
 
 function normalized(value: string) {
   return value.toLocaleLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ").trim();
 }
 
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function hasAlias(text: string, aliases: string[]) {
   const source = normalized(text);
   return aliases.some((alias) => {
     const target = normalized(alias);
-    if (target.length === 1 && /[a-z0-9]/i.test(target)) {
-      return new RegExp(`(^|[^a-z0-9])${target}([^a-z0-9]|$)`, "i").test(source);
-    }
-    return source.includes(target);
+    if (!target) return false;
+    if (/[\u3400-\u9fff]/u.test(target)) return source.includes(target);
+    const startBoundary = /^[a-z0-9]/i.test(target) ? "(^|[^a-z0-9])" : "";
+    const endBoundary = /[a-z0-9]$/i.test(target) ? "(?=$|[^a-z0-9])" : "";
+    return new RegExp(`${startBoundary}${escapeRegex(target)}${endBoundary}`, "i").test(source);
   });
 }
 
@@ -111,9 +197,10 @@ function latexToPlainText(value: string) {
 
 function evidenceContext(text: string, aliases: string[]) {
   const source = normalized(text);
-  const alias = aliases.find((item) => source.includes(normalized(item)));
+  const alias = aliases.find((item) => hasAlias(source, [item]));
   if (!alias) return "";
   const index = source.indexOf(normalized(alias));
+  if (index < 0) return "";
   return text.slice(Math.max(0, index - 120), Math.min(text.length, index + alias.length + 220)).replace(/\s+/g, " ").trim();
 }
 
@@ -139,93 +226,241 @@ async function readPrivateFile(path: string, token: string) {
   return decodeBase64Utf8(payload.content);
 }
 
+function yamlValue(value: string) {
+  const trimmed = value.trim();
+  if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    try { return JSON.parse(trimmed) as string; } catch { return trimmed.slice(1, -1); }
+  }
+  return trimmed.replace(/^['"]|['"]$/g, "");
+}
+
+function parseAtomicFacts(yaml: string) {
+  const facts: AtomicFact[] = [];
+  let inProjectRecords = false;
+  let projectId = "";
+  let projectName = "";
+  let role = "";
+  let current: Partial<AtomicFact> | null = null;
+
+  const finishFact = () => {
+    if (current?.factId && current.verifiedFact) {
+      facts.push({
+        projectId,
+        projectName,
+        role,
+        factId: current.factId,
+        verifiedFact: current.verifiedFact,
+        factStatus: current.factStatus || "",
+        personalAttribution: current.personalAttribution || "",
+        evidenceStrength: current.evidenceStrength || "",
+        source: current.source || "",
+        evidenceLocation: current.evidenceLocation || "",
+        claimBoundary: current.claimBoundary || "",
+      });
+    }
+    current = null;
+  };
+
+  for (const line of yaml.split(/\r?\n/)) {
+    if (line === "project_records:") { inProjectRecords = true; continue; }
+    if (!inProjectRecords) continue;
+    const projectMatch = line.match(/^  ([a-z0-9_]+):\s*$/);
+    if (projectMatch) {
+      finishFact();
+      projectId = projectMatch[1];
+      projectName = "";
+      role = "";
+      continue;
+    }
+    const projectNameMatch = line.match(/^    project_name:\s*(.+)$/);
+    if (projectNameMatch) { projectName = yamlValue(projectNameMatch[1]); continue; }
+    const roleMatch = line.match(/^    role:\s*(.+)$/);
+    if (roleMatch) { role = yamlValue(roleMatch[1]); continue; }
+    const factMatch = line.match(/^      - fact_id:\s*(.+)$/);
+    if (factMatch) {
+      finishFact();
+      current = { factId: yamlValue(factMatch[1]) };
+      continue;
+    }
+    if (!current) continue;
+    const fieldMatch = line.match(/^        ([a-z_]+):\s*(.+)$/);
+    if (!fieldMatch) continue;
+    const key = fieldMatch[1];
+    const value = yamlValue(fieldMatch[2]);
+    if (key === "verified_fact") current.verifiedFact = value;
+    else if (key === "fact_status") current.factStatus = value;
+    else if (key === "personal_attribution") current.personalAttribution = value;
+    else if (key === "evidence_strength") current.evidenceStrength = value;
+    else if (key === "source") current.source = value;
+    else if (key === "evidence_location") current.evidenceLocation = value;
+    else if (key === "claim_boundary") current.claimBoundary = value;
+  }
+  finishFact();
+  return facts;
+}
+
+function evidenceClassification(fact: AtomicFact, rule: RequirementRule): EvidenceClassification | null {
+  const factText = `${fact.verifiedFact} ${fact.role}`;
+  const direct = hasAlias(factText, rule.aliases);
+  const transferable = hasAlias(factText, rule.projectTerms ?? []);
+  const adjacent = hasAlias(`${fact.projectName} ${factText}`, [...rule.aliases, ...(rule.projectTerms ?? [])]);
+  const incomplete = ["planned", "project_context"].includes(fact.factStatus);
+  if (direct && !incomplete) return "Direct";
+  if (transferable && !incomplete) return "Strong Transferable";
+  if (adjacent) return "Adjacent";
+  return null;
+}
+
+function collectAtomicEvidence(atomicFacts: AtomicFact[], rule: RequirementRule) {
+  const rank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+  return atomicFacts
+    .map((fact) => ({ fact, classification: evidenceClassification(fact, rule) }))
+    .filter((item): item is { fact: AtomicFact; classification: EvidenceClassification } => Boolean(item.classification))
+    .map(({ fact, classification }) => ({
+      projectId: fact.projectId,
+      project: fact.projectName,
+      factId: fact.factId,
+      fact: fact.verifiedFact,
+      factStatus: fact.factStatus,
+      evidenceStrength: fact.evidenceStrength,
+      classification,
+      relevance: supportReasons[classification],
+      source: fact.source,
+      evidenceLocation: fact.evidenceLocation,
+      claimBoundary: fact.claimBoundary,
+    } satisfies SupportEvidence))
+    .sort((a, b) => rank[b.classification] - rank[a.classification] || Number(b.evidenceStrength === "high") - Number(a.evidenceStrength === "high"))
+    .filter((item, index, all) => all.findIndex((candidate) => candidate.projectId === item.projectId && candidate.factId === item.factId) === index)
+    .slice(0, 4);
+}
+
 function projectSections(facts: string) {
   const headings = [...facts.matchAll(/^###\s+(.+)$/gm)];
   return headings.map((match, index) => {
     const start = match.index ?? 0;
     const end = headings[index + 1]?.index ?? facts.length;
     return { name: match[1].trim(), text: facts.slice(start, end) };
-  }).filter((section) => /^(?:Pfizer|Dissertation Project|Lead Project)|Readmission|Treatment Effect|Confidence|NeuroStat|Distance Model|AI Usage|Ivy Job Radar|Multimodal|Clinical Trial|spinal-cord|Anxiety trajectories|correlation accuracy|mFFE|resting-state/i.test(section.name));
+  });
 }
 
 function cleanFactLine(line: string) {
-  return line
-    .replace(/^[-*]\s+/, "")
-    .replace(/\*\*/g, "")
-    .replace(/`/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return line.replace(/^[-*]\s+/, "").replace(/\*\*/g, "").replace(/`/g, "").replace(/\s+/g, " ").trim();
 }
 
 function isRestrictionLine(line: string) {
-  return /\b(must not|do not|cannot|can't|should not|after august|after the internship|wording must|audited|not default|recommended standardized|deliverables?)\b|不能|不得|不可|不要|仅可|禁用|限制|结束后|措辞|审计/i.test(line);
+  return /\b(must not|do not|cannot|can't|should not|after august|wording must|audited|not default|claim boundary|restriction)\b|不能|不得|不可|不要|仅可|禁用|限制|措辞|审计/i.test(line);
 }
 
-function candidateFactLines(projectText: string, terms: string[]) {
-  return projectText
+function localizedFactLine(factMaster: string, evidence: SupportEvidence, rule: RequirementRule, language: TemplateLanguage) {
+  if (language === "en") return evidence.fact;
+  const aliases = projectIdentityAliases[evidence.projectId] ?? [evidence.project];
+  const section = projectSections(factMaster).find((candidate) => hasAlias(candidate.name, aliases));
+  if (!section) return evidence.fact;
+  const terms = [...rule.aliases, ...(rule.projectTerms ?? [])];
+  const localized = section.text
     .split(/\r?\n/)
     .filter((line) => !/^#{1,6}\s/.test(line.trim()))
     .map(cleanFactLine)
-    .filter((line) => line.length >= 28 && line.length <= 360)
-    .filter((line) => !isRestrictionLine(line))
-    .filter((line) => hasAlias(line, terms))
-    .sort((a, b) => {
-      const score = (line: string) => terms.filter((term) => hasAlias(line, [term])).length;
-      return score(b) - score(a);
-    });
+    .filter((line) => /[\u3400-\u9fff]/u.test(line))
+    .filter((line) => line.length >= 24 && line.length <= 420)
+    .filter((line) => !isRestrictionLine(line) && hasAlias(line, terms))
+    .sort((a, b) => terms.filter((term) => hasAlias(b, [term])).length - terms.filter((term) => hasAlias(a, [term])).length)[0];
+  return localized || evidence.fact;
 }
 
-function supportReason(rule: RequirementRule) {
-  return supportReasons[rule.label] || "该事实与 JD 中的这项要求有直接方法、数据或职责关联。";
+function meaningfulTokens(value: string) {
+  const stop = new Set(["with", "from", "using", "under", "model", "models", "analysis", "statistical", "project", "development", "application", "study"]);
+  return normalized(value).split(/[^a-z0-9]+/).filter((token) => token.length >= 4 && !stop.has(token));
 }
 
-function collectSupportEvidence(facts: string, rule: RequirementRule): SupportEvidence[] {
-  const terms = rule.projectTerms ?? rule.aliases;
-  const evidence: SupportEvidence[] = [];
-  for (const project of projectSections(facts)) {
-    if (!hasAlias(project.text, terms)) continue;
-    const lines = candidateFactLines(project.text, terms);
-    for (const fact of lines.slice(0, 2)) {
-      evidence.push({ project: project.name, fact, relevance: supportReason(rule) });
-      if (evidence.length >= 3) return evidence;
+function templateContainsProject(templateText: string, projectId: string, projectName: string) {
+  const aliases = [projectName, ...(projectIdentityAliases[projectId] ?? [])];
+  if (aliases.some((alias) => hasAlias(templateText, [alias]))) return true;
+  const tokens = meaningfulTokens(projectName);
+  if (tokens.length < 3) return false;
+  return tokens.filter((token) => hasAlias(templateText, [token])).length / tokens.length >= 0.6;
+}
+
+function latexProjectBlocks(template: string) {
+  const markers = [...template.matchAll(/\\noindent\s*\\textbf\{([^{}\n]+)\}/g)];
+  return markers.map((match, index) => ({
+    title: latexToPlainText(match[1]),
+    source: template.slice(match.index ?? 0, markers[index + 1]?.index ?? template.length).trim(),
+  }));
+}
+
+function findProjectBlock(template: string, projectId: string, projectName: string) {
+  const aliases = [projectName, ...(projectIdentityAliases[projectId] ?? [])];
+  return latexProjectBlocks(template).find((block) => aliases.some((alias) => hasAlias(block.title, [alias]))) ?? null;
+}
+
+function latexEscape(value: string) {
+  return value.replace(/\\/g, "\\textbackslash{}").replace(/([#$%&_{}])/g, "\\$1").replace(/~/g, "\\textasciitilde{}").replace(/\^/g, "\\textasciicircum{}");
+}
+
+function recommendProjects(atomicFacts: AtomicFact[], templateText: string, detected: RequirementRule[]) {
+  const byProject = new Map<string, { name: string; requirements: Map<string, SupportEvidence> }>();
+  for (const rule of detected) {
+    for (const evidence of collectAtomicEvidence(atomicFacts, rule)) {
+      const current = byProject.get(evidence.projectId) ?? { name: evidence.project, requirements: new Map<string, SupportEvidence>() };
+      if (!current.requirements.has(rule.label)) current.requirements.set(rule.label, evidence);
+      byProject.set(evidence.projectId, current);
     }
   }
-
-  if (evidence.length === 0 && rule.category === "Programming and Data") {
-    const lines = facts
-      .split(/\r?\n/)
-      .map(cleanFactLine)
-      .filter((line) => !isRestrictionLine(line) && hasAlias(line, rule.aliases))
-      .slice(0, 2);
-    for (const fact of lines) {
-      evidence.push({ project: "Technical skills evidence", fact, relevance: "事实母版明确记录了该编程或数据技能。" });
-    }
-  }
-  return evidence;
-}
-
-function recommendProjects(facts: string, template: string, detected: RequirementRule[]) {
-  const templateText = latexToPlainText(template);
-  return projectSections(facts).map((project) => {
-    const matchedRequirements = detected.filter((requirement) => {
-      const terms = requirement.projectTerms ?? requirement.aliases;
-      return hasAlias(project.text, terms) && candidateFactLines(project.text, terms).length > 0;
-    }).map((requirement) => requirement.label);
-    const score = matchedRequirements.length;
+  const weights: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+  return [...byProject.entries()].map(([projectId, value]) => {
+    const evidence = [...value.requirements.values()];
     return {
-      name: project.name,
-      score,
-      matchedRequirements,
-      alreadyInTemplate: normalized(templateText).includes(normalized(project.name.replace(/^.*?—\s*/, ""))) || normalized(templateText).includes(normalized(project.name.split(":" ).pop() || project.name)),
-      evidence: candidateFactLines(project.text, detected.flatMap((item) => item.projectTerms ?? item.aliases))[0] || "",
+      projectId,
+      name: value.name,
+      score: evidence.reduce((sum, item) => sum + weights[item.classification], 0),
+      matchedRequirements: [...value.requirements.keys()],
+      classifications: [...new Set(evidence.map((item) => item.classification))],
+      alreadyInTemplate: templateContainsProject(templateText, projectId, value.name),
+      evidence: evidence[0] ?? null,
     } satisfies ProjectRecommendation;
-  }).filter((project) => project.score > 0).sort((a, b) => b.score - a.score).slice(0, 8);
+  }).sort((a, b) => b.score - a.score).slice(0, 8);
+}
+
+function buildModificationDrafts(matches: RequirementMatch[], template: string, factMaster: string, language: TemplateLanguage) {
+  const drafts: ModificationDraft[] = [];
+  for (const match of matches.filter((item) => item.status === "supported_gap")) {
+    const evidence = match.supportEvidence.find((item) => item.classification !== "Adjacent");
+    if (!evidence) continue;
+    const block = findProjectBlock(template, evidence.projectId, evidence.project);
+    const proposedBullet = localizedFactLine(factMaster, evidence, requirements.find((item) => item.label === match.keyword)!, language);
+    const escapedBullet = latexEscape(proposedBullet);
+    const existingBullet = block?.source.match(/\\item\s+([\s\S]*?)(?=\\item|\\end\{itemize\})/)?.[0]?.trim() || "% No matching bullet in the selected template";
+    const after = block
+      ? `\\item ${escapedBullet}`
+      : `\\noindent\\textbf{${latexEscape(evidence.project)}}\n\\begin{itemize}\n\\item ${escapedBullet}\n\\end{itemize}`;
+    drafts.push({
+      id: `${match.keyword}-${evidence.factId}`,
+      action: block ? "revise_existing" : "consider_addition",
+      projectId: evidence.projectId,
+      project: evidence.project,
+      requirement: match.keyword,
+      classification: evidence.classification,
+      factId: evidence.factId,
+      verifiedFact: evidence.fact,
+      proposedBullet,
+      source: evidence.source,
+      evidenceLocation: evidence.evidenceLocation,
+      claimBoundary: evidence.claimBoundary,
+      rationale: block ? "该项目已在母版中；建议只改写现有 bullet，使这项要求更明确。" : "该项目不在所选母版中；仅在它比现有项目更匹配时考虑替换加入。",
+      latexDiff: { before: existingBullet, after },
+    });
+    if (drafts.length >= 10) break;
+  }
+  return drafts.filter((draft, index, all) => all.findIndex((item) => item.projectId === draft.projectId && item.requirement === draft.requirement) === index);
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json() as { track?: string; jd?: string };
-  const track = body.track && templates[body.track] ? body.track : "tech";
+  const body = await request.json() as { track?: string; language?: TemplateLanguage; jd?: string };
+  const language: TemplateLanguage = body.language === "zh" ? "zh" : "en";
+  const track = body.track && body.track in templateFiles[language] ? body.track : "tech";
   const jd = body.jd || "";
+  const templateFile = templateFiles[language][track];
   const { env } = await import("cloudflare:workers");
   const token = String(env.CV_GITHUB_TOKEN || "").trim();
 
@@ -236,35 +471,56 @@ export async function POST(request: NextRequest) {
     }, { status: 503 });
   }
 
+  if (!templateFile) {
+    return NextResponse.json({
+      error: "脑科学 / 临床数据 / 医疗器械方向目前只有中文 LaTeX 母版，请选择中文母版。",
+      code: "CV_TEMPLATE_LANGUAGE_UNAVAILABLE",
+    }, { status: 400 });
+  }
+
   try {
-    const [template, facts] = await Promise.all([
-      readPrivateFile(`master/template-cv/${templates[track]}`, token),
+    const [template, factMaster, atomicYaml] = await Promise.all([
+      readPrivateFile(`master/template-cv/${templateFile}`, token),
       readPrivateFile("master/FACT_MASTER.md", token),
+      readPrivateFile("master/project-evidence/STAGE3_ATOMIC_FACTS.yaml", token),
     ]);
     const templateText = latexToPlainText(template);
+    const atomicFacts = parseAtomicFacts(atomicYaml);
     const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
-    const matches = detected.map((rule) => {
+    const matches: RequirementMatch[] = detected.map((rule) => {
       const covered = hasAlias(templateText, rule.aliases);
-      const supportEvidence = covered ? [] : collectSupportEvidence(facts, rule);
+      const supportEvidence = covered ? [] : collectAtomicEvidence(atomicFacts, rule);
+      const hasSupported = supportEvidence.some((item) => item.classification === "Direct" || item.classification === "Strong Transferable");
+      const hasAdjacent = supportEvidence.some((item) => item.classification === "Adjacent");
       return {
         keyword: rule.label,
         category: rule.category,
-        status: covered ? "covered" : supportEvidence.length > 0 ? "supported_gap" : "unsupported_gap",
+        status: covered ? "covered" : hasSupported ? "supported_gap" : hasAdjacent ? "adjacent_gap" : "unsupported_gap",
         supportEvidence,
         templateEvidence: covered ? evidenceContext(templateText, rule.aliases) : "",
         jdEvidence: evidenceContext(jd, rule.aliases),
       };
     });
-    const projects = recommendProjects(facts, template, detected);
+    const projects = recommendProjects(atomicFacts, templateText, detected);
+    const modificationDrafts = buildModificationDrafts(matches, template, factMaster, language);
     return NextResponse.json({
       track,
+      language,
       matches,
       projects,
-      sourceDiagnostics: { templateFile: templates[track], templateLength: template.length, factsLength: facts.length },
+      modificationDrafts,
+      sourceDiagnostics: {
+        templateFile,
+        templateLength: template.length,
+        factMasterLength: factMaster.length,
+        atomicFactsFile: "master/project-evidence/STAGE3_ATOMIC_FACTS.yaml",
+        atomicFactCount: atomicFacts.length,
+      },
       summary: {
         required: matches.length,
         covered: matches.filter((item) => item.status === "covered").length,
         supportedGaps: matches.filter((item) => item.status === "supported_gap").length,
+        adjacentGaps: matches.filter((item) => item.status === "adjacent_gap").length,
         unsupportedGaps: matches.filter((item) => item.status === "unsupported_gap").length,
       },
     });
