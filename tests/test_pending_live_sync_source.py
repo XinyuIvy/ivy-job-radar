@@ -12,9 +12,12 @@ class PendingLiveSyncSourceTests(unittest.TestCase):
         self.assertIn("localStorage.setItem(STORAGE_KEY", capture)
         self.assertIn("announcePending(applicationResult)", capture)
 
-    def test_pending_view_prepends_new_card_without_switching_views(self):
+    def test_live_insert_targets_formal_pending_application_list(self):
         source = (ROOT / "app" / "pending-application-live-sync.tsx").read_text(encoding="utf-8")
-        self.assertIn("isPendingViewVisible", source)
+        self.assertIn('normalized(heroTitle?.textContent || "") !== "收藏与待提交"', source)
+        self.assertIn('document.querySelectorAll<HTMLButtonElement>(".stats-two button.active")', source)
+        self.assertIn('document.querySelectorAll<HTMLElement>("section.application-list")', source)
+        self.assertIn('article.className = "application-card"', source)
         self.assertIn("list.prepend(makeCard(application))", source)
         self.assertNotIn("scrollIntoView", source)
         self.assertNotIn("window.location.reload", source)

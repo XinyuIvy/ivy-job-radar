@@ -32,72 +32,85 @@ function itemKey(application: PendingApplication) {
   return `${normalized(application.company || "").toLowerCase()}::${normalized(application.title || "").toLowerCase()}`;
 }
 
-function isPendingViewVisible() {
-  const selectedNav = document.querySelector<HTMLButtonElement>(".bottom-nav button.selected");
-  if (!selectedNav || !normalized(selectedNav.textContent || "").includes("收藏")) return false;
-  return Array.from(document.querySelectorAll<HTMLElement>("h1,h2,h3,button,span"))
-    .some((element) => normalized(element.textContent || "") === "待提交申请" && element.offsetParent !== null);
+function pendingTabIsActive() {
+  const heroTitle = Array.from(document.querySelectorAll<HTMLElement>(".hero h1"))
+    .find((element) => element.offsetParent !== null);
+  if (normalized(heroTitle?.textContent || "") !== "收藏与待提交") return false;
+
+  return Array.from(document.querySelectorAll<HTMLButtonElement>(".stats-two button.active"))
+    .some((button) => normalized(button.textContent || "").startsWith("待提交申请"));
 }
 
 function findPendingList() {
-  const label = Array.from(document.querySelectorAll<HTMLElement>("h1,h2,h3,button,span"))
-    .find((element) => normalized(element.textContent || "") === "待提交申请" && element.offsetParent !== null);
-  if (!label) return null;
-
-  const section = label.closest<HTMLElement>("section") || label.closest<HTMLElement>("div");
-  if (!section) return null;
-  return section.querySelector<HTMLElement>(".application-list, .record-list, .saved-list, [data-application-list]")
-    || Array.from(section.querySelectorAll<HTMLElement>("div"))
-      .find((candidate) => candidate.querySelector("article"))
-    || section;
+  if (!pendingTabIsActive()) return null;
+  return Array.from(document.querySelectorAll<HTMLElement>("section.application-list"))
+    .find((section) => section.offsetParent !== null) ?? null;
 }
 
 function makeCard(application: PendingApplication) {
   const article = document.createElement("article");
+  article.className = "application-card";
   article.dataset.livePendingApplication = String(application.id || itemKey(application));
   article.dataset.livePendingKey = itemKey(application);
-  article.style.cssText = "background:#fffdf8;border:1px solid #d9d5ca;border-radius:18px;padding:18px;margin-bottom:12px;box-shadow:0 10px 28px rgba(55,63,57,.06);animation:ivyPendingAppear .25s ease-out";
+  article.style.animation = "ivyPendingAppear .25s ease-out";
 
-  const header = document.createElement("div");
-  header.style.cssText = "display:flex;justify-content:space-between;gap:16px;align-items:flex-start";
-  const text = document.createElement("div");
+  const head = document.createElement("div");
+  head.className = "application-head";
+  const identity = document.createElement("div");
+  const status = document.createElement("span");
+  status.className = "status status-准备材料";
+  status.textContent = "准备材料";
   const title = document.createElement("h3");
   title.textContent = application.title || "待补充职位名称";
-  title.style.cssText = "margin:0 0 6px;font-size:18px";
   const company = document.createElement("p");
   company.textContent = [application.company, application.location || application.region].filter(Boolean).join(" · ");
-  company.style.cssText = "margin:0;color:#5f6c64";
-  text.append(title, company);
+  identity.append(status, title, company);
+  const priority = document.createElement("span");
+  priority.className = "priority";
+  priority.textContent = application.priority || "P1";
+  head.append(identity, priority);
 
-  const badge = document.createElement("span");
-  badge.textContent = "刚刚保存";
-  badge.style.cssText = "white-space:nowrap;border-radius:999px;padding:6px 10px;background:#e6f3eb;color:#16794b;font-size:12px;font-weight:800";
-  header.append(text, badge);
+  const details = document.createElement("div");
+  details.className = "application-details";
+  const detailRows = [
+    ["匹配度", "5/5"],
+    ["状态", "待提交申请"],
+    ["Application ID", "未填写"],
+    ["下一步", "准备申请材料"],
+    ["计划申请", "未设置"],
+    ["申请截止", "JD 未公布"],
+  ];
+  for (const [label, value] of detailRows) {
+    const span = document.createElement("span");
+    const bold = document.createElement("b");
+    bold.textContent = label;
+    span.append(bold, document.createTextNode(value));
+    details.append(span);
+  }
 
-  const details = document.createElement("p");
-  details.textContent = `${application.priority || "P1"} · 准备材料 · ${application.source || "Chrome 手动保存"}`;
-  details.style.cssText = "margin:14px 0 0;color:#66736c;font-size:13px";
+  const note = document.createElement("p");
+  note.className = "record-note";
+  note.textContent = "刚刚通过 Chrome 手动保存，已直接加入待提交申请。";
 
   const actions = document.createElement("div");
-  actions.style.cssText = "display:flex;flex-wrap:wrap;gap:8px;margin-top:14px";
+  actions.className = "record-actions";
   if (application.jobUrl) {
     const jd = document.createElement("a");
     jd.href = application.jobUrl;
     jd.target = "_blank";
     jd.rel = "noreferrer noopener";
     jd.textContent = "打开 JD ↗";
-    jd.style.cssText = "border-radius:999px;padding:9px 13px;background:#18221d;color:#fff;text-decoration:none;font-weight:750;font-size:13px";
     actions.append(jd);
   }
   if (application.id) {
     const cv = document.createElement("a");
     cv.href = `/cv-tailor?applicationId=${application.id}`;
+    cv.dataset.cvTailorAction = "true";
     cv.textContent = "定制 CV";
-    cv.style.cssText = "border-radius:999px;padding:9px 13px;background:#16794b;color:#fff;text-decoration:none;font-weight:750;font-size:13px";
     actions.append(cv);
   }
 
-  article.append(header, details, actions);
+  article.append(head, details, note, actions);
   return article;
 }
 
@@ -106,17 +119,20 @@ function cardAlreadyPresent(list: HTMLElement, application: PendingApplication) 
   if (list.querySelector(`[data-live-pending-key="${CSS.escape(key)}"]`)) return true;
   const company = normalized(application.company || "").toLowerCase();
   const title = normalized(application.title || "").toLowerCase();
-  return Array.from(list.querySelectorAll<HTMLElement>("article")).some((article) => {
+  return Array.from(list.querySelectorAll<HTMLElement>("article.application-card")).some((article) => {
     const text = normalized(article.textContent || "").toLowerCase();
     return Boolean(company && title && text.includes(company) && text.includes(title));
   });
 }
 
 function insertPending(application: PendingApplication) {
-  if (!isPendingViewVisible()) return false;
   const list = findPendingList();
   if (!list || cardAlreadyPresent(list, application)) return false;
+
+  const emptyState = list.querySelector<HTMLElement>(":scope > .empty-state");
+  emptyState?.remove();
   list.prepend(makeCard(application));
+
   if (!document.getElementById("ivy-pending-live-style")) {
     const style = document.createElement("style");
     style.id = "ivy-pending-live-style";
@@ -127,7 +143,6 @@ function insertPending(application: PendingApplication) {
 }
 
 async function reconcilePendingFromServer() {
-  if (!isPendingViewVisible()) return;
   const list = findPendingList();
   if (!list) return;
   const response = await fetch("/api/applications", { cache: "no-store" });
@@ -141,7 +156,7 @@ export default function PendingApplicationLiveSync() {
   useEffect(() => {
     let disposed = false;
     let syncTimer = 0;
-    let lastPendingVisible = false;
+    let wasPendingActive = false;
 
     const scheduleReconcile = (delay = 80) => {
       window.clearTimeout(syncTimer);
@@ -172,15 +187,15 @@ export default function PendingApplicationLiveSync() {
     if (channel) channel.onmessage = (event: MessageEvent<PendingMessage>) => handle(event.data);
 
     const observer = new MutationObserver(() => {
-      const visible = isPendingViewVisible();
-      if (visible && !lastPendingVisible) scheduleReconcile(50);
-      lastPendingVisible = visible;
+      const active = pendingTabIsActive();
+      if (active && !wasPendingActive) scheduleReconcile(40);
+      wasPendingActive = active;
     });
     observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 
-    const focusHandler = () => scheduleReconcile(50);
+    const focusHandler = () => scheduleReconcile(40);
     const visibilityHandler = () => {
-      if (document.visibilityState === "visible") scheduleReconcile(50);
+      if (document.visibilityState === "visible") scheduleReconcile(40);
     };
     window.addEventListener("focus", focusHandler);
     document.addEventListener("visibilitychange", visibilityHandler);
@@ -189,7 +204,7 @@ export default function PendingApplicationLiveSync() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) handle(JSON.parse(saved) as PendingMessage);
     } catch {}
-    scheduleReconcile(150);
+    scheduleReconcile(120);
 
     return () => {
       disposed = true;
