@@ -52,7 +52,19 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
         self.assertIn('role="tablist"', client)
         self.assertIn('onClick={() => setResultPanel(panel.id)}', client)
         self.assertIn('label: "推荐项目"', client)
-        self.assertIn('label: "逐条修改"', client)
+        self.assertIn('label: "逐条处理"', client)
+
+    def test_every_supported_or_adjacent_gap_gets_a_handling_result(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
+        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
+        self.assertIn('["supported_gap", "adjacent_gap"].includes(item.status)', route)
+        self.assertIn('"Credential Direct", "Coursework Match"', route)
+        self.assertIn('action: "no_direct_edit"', route)
+        self.assertNotIn('!item.projectId.startsWith("profile:")', route)
+        self.assertNotIn("if (drafts.length >= 10) break", route)
+        self.assertIn("可生成修改", client)
+        self.assertIn("仅相邻不可直写", client)
+        self.assertIn("不可直接写入", client)
 
     def test_jd_evidence_is_compact_and_highlighted(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
