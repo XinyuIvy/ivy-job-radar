@@ -1,0 +1,42 @@
+name: Temporary production CV Tailor check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/production-cv-tailor-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  production-check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: POST Alibaba JD to existing production Site
+        shell: bash
+        run: |
+          cat > payload.json <<'JSON'
+          {
+            "track": "tech",
+            "language": "zh",
+            "jd": "面向 Auto Research 的强化学习算法与数据合成体系研究。\n理工类科研领域中的自动化科研智能体，自主决策、规划、工具调用、代码执行、实验验证。\nAgentic 数据生成、数据清洗、数据筛选、数据增强、数据配比和后训练数据管线。\n研究 PPO、DPO、GRPO 等强化学习后训练方法，关注奖励设计、训练稳定性、探索效率和泛化能力。\n代码生成、实验执行、错误修复、结果分析、论文写作，形成训练与评测闭环并关注模型鲁棒性。\n要求在高水平期刊或会议发表经过同行评议的论文。\n计算机、AI、信息、数学、统计、自动化及相关 STEM 或交叉学科博士。\n熟练 Python、PyTorch，具备算法实现、实验设计和结果分析能力。\n具有 LLM、多模态大模型、RL、Agent、工具调用、自动化科研或自动化推理相关背景。\n能够独立推进科研项目，具备扎实理论背景、问题定义、论文阅读与复现能力，以及创新、沟通协作和跨学科合作能力。"
+          }
+          JSON
+          status=$(curl -sS -o response.json -w '%{http_code}' --retry 2 --max-time 60 \
+            -H 'Content-Type: application/json' \
+            --data @payload.json \
+            'https://ivy-job-radar.rourou1199.chatgpt.site/api/cv-tailor/analyze')
+          echo "HTTP_STATUS=$status"
+          if [ "$status" != "200" ]; then
+            echo "PRODUCTION_RESPONSE_ERROR"
+            head -c 1000 response.json || true
+            exit 1
+          fi
+          echo 'PRODUCTION_SUMMARY'
+          jq -c '.summary' response.json
+          echo 'PRODUCTION_DIAGNOSTICS'
+          jq -c '.sourceDiagnostics | {templateFile,templateSnippetCount,atomicFactCount,structuredFactCount,templateMatching,factMatching,ontology}' response.json
+          echo 'KEY_CASES'
+          jq -c '[.matches[] | select(.keyword == "Statistics background" or .keyword == "STEM research domain" or .keyword == "Interdisciplinary background" or .keyword == "Peer-reviewed publications" or .keyword == "Python" or .keyword == "PyTorch" or .keyword == "Reinforcement learning" or .keyword == "PPO" or .keyword == "DPO" or .keyword == "GRPO" or .keyword == "Agent system" or .keyword == "Tool calling") | {keyword,status,evidenceClassification,templateCovered,templateEvidence,relation:(.templateMatches[0].relationType // ""),factStatus:(.supportEvidence[0].factStatus // "")}]' response.json
