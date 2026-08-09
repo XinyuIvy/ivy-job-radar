@@ -152,6 +152,7 @@ function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrac
   const fact = candidate.fact;
   const translationTrack = track === "clinical_neuro" ? "pharma" : track;
   const translation = fact.industry_translation[translationTrack];
+  const classification: EvidenceClassification = fact.fact_status === "planned" ? "Adjacent" : candidate.classification;
   return {
     projectId: fact.project_id,
     project: fact.project_name,
@@ -159,8 +160,10 @@ function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrac
     fact: fact.verified_fact,
     factStatus: fact.fact_status,
     evidenceStrength: fact.evidence_strength,
-    classification: candidate.classification,
-    relevance: candidate.why,
+    classification,
+    relevance: fact.fact_status === "planned"
+      ? `${candidate.why} The underlying fact is still planned, so it cannot support completed-experience coverage.`
+      : candidate.why,
     source: fact.source,
     evidenceLocation: fact.evidence_location,
     claimBoundary: fact.claim_boundary,
@@ -371,9 +374,10 @@ export async function POST(request: NextRequest) {
   if (!templateFile) return NextResponse.json({ error: "该方向当前没有所选语言的 LaTeX 母版。", code: "CV_TEMPLATE_LANGUAGE_UNAVAILABLE" }, { status: 400 });
 
   try {
-    const [template, factIndexJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl] = await Promise.all([
+    const [template, factIndexJsonl, statusAddendumJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl] = await Promise.all([
       readPrivateFile(`master/template-cv/${templateFile}`, token),
       readPrivateFile("master/project-evidence/FACT_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/FACT_INDEX_STATUS_ADDENDUM.jsonl", token),
       readPrivateFile("master/project-evidence/CONCEPT_EDGES.jsonl", token),
       readPrivateFile("master/project-evidence/CREDENTIAL_INDEX.jsonl", token),
       readPrivateFile("master/project-evidence/COURSEWORK_INDEX.jsonl", token),
@@ -381,7 +385,10 @@ export async function POST(request: NextRequest) {
       readPrivateFile("master/project-evidence/LITERATURE_INDEX.jsonl", token),
     ]);
 
-    const unifiedFactIndex = parseJsonl<FactIndexRecord>(factIndexJsonl);
+    const unifiedFactIndex = [
+      ...parseJsonl<FactIndexRecord>(factIndexJsonl),
+      ...parseJsonl<FactIndexRecord>(statusAddendumJsonl),
+    ];
     const factIndex = unifiedFactIndex.filter((fact) => !fact.record_type || fact.record_type === "project_fact");
     const structuredIndex = [
       ...parseJsonl<StructuredFactRecord>(credentialIndexJsonl),
@@ -452,7 +459,7 @@ export async function POST(request: NextRequest) {
       sourceDiagnostics: {
         templateFile,
         templateSnippetCount: templateIndex.length,
-        factIndexFile: "master/project-evidence/FACT_INDEX.jsonl",
+        factIndexFile: "master/project-evidence/FACT_INDEX.jsonl + FACT_INDEX_STATUS_ADDENDUM.jsonl",
         atomicFactCount: factIndex.length,
         structuredFactCount: structuredIndex.length,
         conceptEdgeCount: conceptEdges.length,
