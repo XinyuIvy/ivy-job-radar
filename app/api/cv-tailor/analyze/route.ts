@@ -44,6 +44,7 @@ type SupportEvidence = {
   industryGuardrail?: string;
   score?: number;
   retrievalChannels?: string[];
+  evidenceType: "project_fact" | StructuredFactRecord["record_type"];
 };
 
 type ProjectRecommendation = {
@@ -70,7 +71,10 @@ type RequirementMatch = {
 
 type ModificationDraft = {
   id: string;
-  action: "revise_existing" | "consider_addition";
+  action: "revise_existing" | "consider_addition" | "add_to_section" | "no_direct_edit";
+  status: "supported_gap" | "adjacent_gap";
+  targetSection: string;
+  canGenerateEdit: boolean;
   projectId: string;
   project: string;
   requirement: string;
@@ -82,7 +86,7 @@ type ModificationDraft = {
   evidenceLocation: string;
   claimBoundary: string;
   rationale: string;
-  latexDiff: { before: string; after: string };
+  latexDiff: { before: string; after: string } | null;
 };
 
 const templateFiles: Record<TemplateLanguage, Record<string, string | null>> = {
@@ -442,6 +446,7 @@ function collectAtomicEvidence(
       capabilityContext: capability?.problemSolved || capability?.transferableCapabilities[0] || "",
       industryTranslation: translation?.validInterpretations.find((value) => hasAlias(value, [...rule.aliases, ...(rule.projectTerms ?? [])])) || "",
       industryGuardrail: translation?.invalidOverclaims[0] || "",
+      evidenceType: "project_fact",
     } satisfies SupportEvidence))
     .sort((a, b) => rank[b.classification] - rank[a.classification] || Number(b.evidenceStrength === "high") - Number(a.evidenceStrength === "high"))
     .filter((item, index, all) => all.findIndex((candidate) => candidate.projectId === item.projectId && candidate.factId === item.factId) === index)
@@ -504,6 +509,7 @@ function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrac
     industryGuardrail: candidate.limitation,
     score: Math.round(candidate.preverificationScore * 10) / 10,
     retrievalChannels: candidate.retrievalChannels,
+    evidenceType: "project_fact",
   };
 }
 
@@ -537,6 +543,7 @@ function structuredSupportEvidence(candidate: StructuredCandidate): SupportEvide
     industryGuardrail: candidate.limitation,
     score: candidate.score,
     retrievalChannels: [record.record_type === "coursework" ? "coursework_index" : record.record_type === "education_credential" ? "credential_index" : "profile_index"],
+    evidenceType: record.record_type,
   };
 }
 
@@ -630,22 +637,82 @@ function recommendProjects(
   }).sort((a, b) => b.score - a.score).slice(0, 8);
 }
 
+function structuredTargetSection(evidenceType: SupportEvidence["evidenceType"], language: TemplateLanguage) {
+  const sections: Record<Exclude<SupportEvidence["evidenceType"], "project_fact">, [string, string]> = {
+    education_credential: ["Education", "教育背景"],
+    coursework: ["Relevant Coursework", "相关课程"],
+    skill: ["Technical Skills", "专业技能"],
+    publication: ["Selected Publications", "代表性论文"],
+    research_literature: ["Relevant Research", "相关研究项目"],
+    professional_service: ["Professional Service", "学术服务"],
+    teaching: ["Teaching", "教学经历"],
+    award: ["Honors & Awards", "荣誉与奖励"],
+  };
+  return evidenceType === "project_fact" ? (language === "zh" ? "研究／项目经历" : "Research / Projects") : sections[evidenceType][language === "zh" ? 1 : 0];
+}
+
+function sectionContext(template: string, targetSection: string) {
+  const lines = template.split(/\r?\n/);
+  const index = lines.findIndex((line) => hasAlias(latexToPlainText(line), [targetSection]));
+  return index >= 0 ? lines.slice(index, index + 5).join("\n").trim() : `% ${targetSection} section is not present in the selected template`;
+}
+
 function buildModificationDrafts(matches: RequirementMatch[], template: string, factMaster: string, language: TemplateLanguage) {
   const drafts: ModificationDraft[] = [];
-  for (const match of matches.filter((item) => item.status === "supported_gap")) {
-    const evidence = match.supportEvidence.find((item) => ["Direct", "Strong Transferable"].includes(item.classification) && !item.projectId.startsWith("profile:"));
-    if (!evidence) continue;
+  for (const match of matches.filter((item) => ["supported_gap", "adjacent_gap"].includes(item.status))) {
+    const supported = match.status === "supported_gap";
+    const evidence = supported
+      ? match.supportEvidence.find((item) => ["Direct", "Credential Direct", "Coursework Match", "Strong Transferable"].includes(item.classification))
+      : match.supportEvidence.find((item) => ["Adjacent", "Credential Status Gap"].includes(item.classification));
+    if (!evidence) {
+      throw new Error(`Requirement ${match.keyword} has status ${match.status} but no matching evidence.`);
+    }
+    const targetSection = structuredTargetSection(evidence.evidenceType, language);
+
+    if (!supported) {
+      drafts.push({
+        id: `${match.keyword}-${evidence.factId}`,
+        action: "no_direct_edit",
+        status: "adjacent_gap",
+        targetSection: language === "zh" ? "不直接写入 CV" : "Do not add as a direct claim",
+        canGenerateEdit: false,
+        projectId: evidence.projectId,
+        project: evidence.project,
+        requirement: match.keyword,
+        classification: evidence.classification,
+        factId: evidence.factId,
+        verifiedFact: evidence.fact,
+        proposedBullet: "",
+        source: evidence.source,
+        evidenceLocation: evidence.evidenceLocation,
+        claimBoundary: evidence.claimBoundary || evidence.industryGuardrail || "Only the verified adjacent fact may be stated; do not claim the named JD requirement.",
+        rationale: evidence.classification === "Credential Status Gap"
+          ? "学历方向直接相关，但完成状态不满足 JD 的明确要求；保留真实在读／预计毕业状态，不生成满足该条件的表述。"
+          : "只有相邻能力证据。不得把底层方法或相关研究改写成已经完成该 JD 要求；本项明确标记为不直接写入。",
+        latexDiff: null,
+      });
+      continue;
+    }
+
     const block = findProjectBlock(template, evidence.projectId, evidence.project);
     const rule = requirements.find((item) => item.label === match.keyword) ?? { label: match.keyword, category: match.category, aliases: [match.keyword] };
-    const proposedBullet = localizedFactLine(factMaster, evidence, rule, language);
+    const isProjectFact = evidence.evidenceType === "project_fact";
+    const proposedBullet = isProjectFact ? localizedFactLine(factMaster, evidence, rule, language) : evidence.fact;
     const escapedBullet = latexEscape(proposedBullet);
-    const existingBullet = block?.source.match(/\\item\s+([\s\S]*?)(?=\\item|\\end\{itemize\})/)?.[0]?.trim() || "% No matching bullet in the selected template";
-    const after = block
-      ? `\\item ${escapedBullet}`
-      : `\\noindent\\textbf{${latexEscape(evidence.project)}}\n\\begin{itemize}\n\\item ${escapedBullet}\n\\end{itemize}`;
+    const existingBullet = isProjectFact
+      ? block?.source.match(/\\item\s+([\s\S]*?)(?=\\item|\\end\{itemize\})/)?.[0]?.trim() || "% No matching bullet in the selected template"
+      : sectionContext(template, targetSection);
+    const after = isProjectFact
+      ? block
+        ? `\\item ${escapedBullet}`
+        : `\\noindent\\textbf{${latexEscape(evidence.project)}}\n\\begin{itemize}\n\\item ${escapedBullet}\n\\end{itemize}`
+      : `% Merge into ${targetSection}; preserve the selected template's existing format\n${escapedBullet}`;
     drafts.push({
       id: `${match.keyword}-${evidence.factId}`,
-      action: block ? "revise_existing" : "consider_addition",
+      action: isProjectFact ? (block ? "revise_existing" : "consider_addition") : "add_to_section",
+      status: "supported_gap",
+      targetSection,
+      canGenerateEdit: true,
       projectId: evidence.projectId,
       project: evidence.project,
       requirement: match.keyword,
@@ -656,12 +723,13 @@ function buildModificationDrafts(matches: RequirementMatch[], template: string, 
       source: evidence.source,
       evidenceLocation: evidence.evidenceLocation,
       claimBoundary: evidence.claimBoundary,
-      rationale: block ? "该项目已在母版中；建议只改写现有 bullet，使这项要求更明确。" : "该项目不在所选母版中；仅在它比现有项目更匹配时考虑替换加入。",
+      rationale: isProjectFact
+        ? block ? "该项目已在母版中；建议只改写现有 bullet，使这项要求更明确。" : "该项目不在所选母版中；仅在它比现有项目更匹配时考虑替换加入。"
+        : `这是可核验的非项目事实；建议放入 ${targetSection}，不应被丢弃，也不应改写成项目经历。`,
       latexDiff: { before: existingBullet, after },
     });
-    if (drafts.length >= 10) break;
   }
-  return drafts.filter((draft, index, all) => all.findIndex((item) => item.projectId === draft.projectId && item.requirement === draft.requirement) === index);
+  return drafts.filter((draft, index, all) => all.findIndex((item) => item.requirement === draft.requirement) === index);
 }
 
 export async function POST(request: NextRequest) {
