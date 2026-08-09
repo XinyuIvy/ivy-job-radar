@@ -72,6 +72,19 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
             self.assertIn(filename, route)
         self.assertIn('ragPreparationStages: "1–7"', route)
 
+    def test_non_project_indexes_use_structured_matching(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
+        for filename in ["CREDENTIAL_INDEX.jsonl", "COURSEWORK_INDEX.jsonl", "PROFILE_INDEX.jsonl", "LITERATURE_INDEX.jsonl", "STAGE7_NON_PROJECT_MATCHING_ADDENDUM.yaml", "STAGE7_LITERATURE_MATCHING_ADDENDUM.yaml"]:
+            self.assertIn(filename, route)
+        self.assertIn("matchStructuredEvidence", route)
+        self.assertIn('"Credential Direct"', route)
+        self.assertIn('"Coursework Match"', route)
+
+    def test_incomplete_status_is_not_forced_to_adjacent(self):
+        rag = (ROOT / "app" / "lib" / "hybrid-rag.ts").read_text(encoding="utf-8")
+        self.assertNotIn('["planned", "project_context"].includes(fact.fact_status)', rag)
+        self.assertIn('["planned", "in_progress"].includes(fact.fact_status)', rag)
+
 
 if __name__ == "__main__":
     unittest.main()
