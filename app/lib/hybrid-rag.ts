@@ -453,7 +453,7 @@ function verifyCandidate(candidate: Omit<HybridCandidate, "classification" | "wh
   if (fact.fact_status === "project_context") classification = "No Evidence";
   if (candidate.graphPath?.adjacentPath && candidate.exactMethodOverlap < 0.78) classification = "Adjacent";
   if (embeddingOnly && (classification === "Direct" || classification === "Strong Transferable")) classification = "Adjacent";
-  if (requirement.namedTool && candidate.exactMethodOverlap < 0.78 && classification === "Direct") classification = "Adjacent";
+  if (requirement.namedTool && candidate.exactMethodOverlap < 0.78) classification = "No Evidence";
   if ((hardScopeConflict || overclaimFlags.length) && classification === "Direct") classification = "Adjacent";
 
   const why = classification === "Direct"
