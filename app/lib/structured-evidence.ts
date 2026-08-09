@@ -40,17 +40,10 @@ export type StructuredCandidate = {
   limitation: string;
 };
 
-function unique(values: string[]) {
-  return [...new Set(values.filter(Boolean))];
-}
+function unique(values: string[]) { return [...new Set(values.filter(Boolean))]; }
 
 function requirementTerms(requirement: JdRequirement) {
-  return unique([
-    requirement.label,
-    ...requirement.literalTerms,
-    ...requirement.evidenceTerms,
-    ...requirement.normalizedConcepts.map((value) => value.replace(/_/g, " ")),
-  ]);
+  return unique([requirement.label, ...requirement.literalTerms, ...requirement.evidenceTerms, ...requirement.normalizedConcepts.map((value) => value.replace(/_/g, " "))]);
 }
 
 function tokenSimilarity(left: string, right: string) {
@@ -75,15 +68,16 @@ function acceptedCredentialField(text: string, record: StructuredFactRecord) {
   const field = record.field ?? "";
   if (containsPhrase(text, field)) return true;
   if (/biostatistics|生物统计/i.test(text) && /biostatistics/i.test(field)) return true;
-  if (/(^|[^a-z])statistics([^a-z]|$)|统计学/i.test(text) && /^(bio)?statistics$/i.test(field.replace(/\s+/g, ""))) return true;
-  if (/quantitative (field|discipline)|related quantitative|定量相关专业|相关量化专业/i.test(text) && /statistics/i.test(field)) return true;
+  if (/(^|[^a-z])statistics([^a-z]|$)|统计学|统计专业|数学.{0,4}统计|统计.{0,4}相关/i.test(text) && /^(bio)?statistics$/i.test(field.replace(/\s+/g, ""))) return true;
+  if (/quantitative (field|discipline)|related quantitative|定量相关专业|相关量化专业|stem|理工/i.test(text) && /statistics/i.test(field)) return true;
   return false;
 }
 
 function credentialCandidates(requirement: JdRequirement, records: StructuredFactRecord[]) {
   const text = requirement.sourceText;
   const levels = degreeLevels(text);
-  if (requirement.category !== "Education" && !levels.size) return [];
+  const fieldRequirement = /statistics|biostatistics|统计|定量|quantitative|stem|理工/i.test(text);
+  if (requirement.category !== "Education" && !levels.size && !fieldRequirement) return [];
   const explicitCompletion = /completed|conferred|degree awarded|must have (?:a |an )?(?:ph\.?d|doctorate)|已取得|已获得|须持有/i.test(text);
   return records.filter((record) => record.record_type === "education_credential" && acceptedCredentialField(text, record))
     .filter((record) => !levels.size || levels.has(record.degree_level ?? ""))
@@ -107,27 +101,44 @@ function courseworkCandidates(requirement: JdRequirement, records: StructuredFac
     const exact = requirementTerms(requirement).some((term) => containsPhrase(concepts, term) || containsPhrase(term, concepts));
     const similarity = tokenSimilarity(query, concepts);
     if (!exact && similarity < 0.45) return null;
-    return {
-      record,
-      classification: "Coursework Match" as const,
-      score: Math.round((exact ? 72 : 48 + 24 * similarity) * 10) / 10,
-      why: "A transcript-supported course covers the named topic.",
-      limitation: "Coursework shows academic exposure; it does not by itself establish professional implementation experience.",
-    };
+    return { record, classification: "Coursework Match" as const, score: Math.round((exact ? 72 : 48 + 24 * similarity) * 10) / 10, why: "A transcript-supported course covers the named topic.", limitation: "Coursework shows academic exposure; it does not by itself establish professional implementation experience." };
   }).filter((candidate): candidate is StructuredCandidate => Boolean(candidate));
 }
 
+function peerReviewedPublicationRequirement(requirement: JdRequirement) {
+  return /peer.?review|同行评议|高水平.{0,8}(期刊|会议)|发表.{0,8}论文|published publications?/i.test([requirement.label, requirement.sourceText].join(" "));
+}
+
+function publicationCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
+  if (record.record_type !== "publication") return null;
+  if (!["Communication", "Leadership", "Research"].includes(requirement.category)) return null;
+  if (peerReviewedPublicationRequirement(requirement)) {
+    if (record.publication_status !== "published") return null;
+    return {
+      record,
+      classification: "Direct",
+      score: 98,
+      why: "A formally published journal article directly supports a peer-reviewed publication requirement.",
+      limitation: "Only formally published papers support this requirement. Under-review or revision manuscripts and reviewer service do not count as published peer-reviewed papers.",
+    };
+  }
+  const terms = requirementTerms(requirement);
+  const exact = terms.some((term) => containsPhrase(record.retrieval_text, term) || containsPhrase(term, record.retrieval_text));
+  const similarity = tokenSimilarity(terms.join(" "), record.retrieval_text);
+  if (!exact && similarity < 0.38) return null;
+  if (requirement.label === "Manuscript development" && !/first author|corresponding author/i.test(record.authorship ?? "")) return null;
+  return { record, classification: "Direct", score: Math.round((exact ? 92 : 62 + 30 * similarity) * 10) / 10, why: "A structured publication record directly supports this requirement.", limitation: record.claim_boundary ?? "" };
+}
+
 function profileCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
-  if (!["skill", "publication", "professional_service", "teaching", "award", "research_literature"].includes(record.record_type)) return null;
+  if (record.record_type === "publication") return publicationCandidate(requirement, record);
+  if (!["skill", "professional_service", "teaching", "award", "research_literature"].includes(record.record_type)) return null;
   const terms = requirementTerms(requirement);
   const text = record.retrieval_text;
   const exact = terms.some((term) => containsPhrase(text, term) || containsPhrase(term, text));
   const similarity = tokenSimilarity(terms.join(" "), text);
   if (record.record_type === "skill") {
     if (!terms.some((term) => containsPhrase(record.skill ?? "", term) || containsPhrase(term, record.skill ?? ""))) return null;
-  } else if (record.record_type === "publication") {
-    if (!["Communication", "Leadership", "Research"].includes(requirement.category) || (!exact && similarity < 0.38)) return null;
-    if (requirement.label === "Manuscript development" && !/first author|corresponding author/i.test(record.authorship ?? "")) return null;
   } else if (record.record_type === "professional_service") {
     if (requirement.category !== "Professional Service" && !/reviewer|peer review|chair|organizer|同行评议|审稿|主持|组织/i.test(requirement.sourceText)) return null;
   } else if (record.record_type === "teaching") {
@@ -139,13 +150,7 @@ function profileCandidate(requirement: JdRequirement, record: StructuredFactReco
     if (/meta-analysis|meta analysis|prisma|prospero|risk.of.bias|hta|regulatory literature|荟萃分析|元分析/i.test(requirement.label)) return null;
   }
   if (!exact && similarity < 0.35 && !["professional_service", "teaching", "award"].includes(record.record_type)) return null;
-  return {
-    record,
-    classification: "Direct",
-    score: Math.round((exact ? 92 : 62 + 30 * similarity) * 10) / 10,
-    why: "A structured profile record directly supports this requirement.",
-    limitation: record.claim_boundary ?? "",
-  };
+  return { record, classification: "Direct", score: Math.round((exact ? 92 : 62 + 30 * similarity) * 10) / 10, why: "A structured profile record directly supports this requirement.", limitation: record.claim_boundary ?? "" };
 }
 
 export function matchStructuredEvidence(requirement: JdRequirement, records: StructuredFactRecord[]) {
