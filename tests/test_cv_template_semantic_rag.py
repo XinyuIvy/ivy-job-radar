@@ -64,6 +64,13 @@ def test_peer_reviewed_publication_requires_published_status():
     assert "Under-review or revision manuscripts and reviewer service do not count as published peer-reviewed papers." in structured
 
 
+def test_current_status_overlay_is_loaded_and_planned_facts_are_not_coverage_support():
+    route = read("app/api/cv-tailor/analyze/route.ts")
+    assert "FACT_INDEX_STATUS_ADDENDUM.jsonl" in route
+    assert 'fact.fact_status === "planned" ? "Adjacent"' in route
+    assert "cannot support completed-experience coverage" in route
+
+
 def test_ui_shows_jd_original_cv_original_and_relation_path():
     client = read("app/cv-tailor/cv-tailor-client.tsx")
     assert "JD 原文" in client
