@@ -77,9 +77,19 @@ const facts = [
   }),
 ];
 
-test("Alibaba JD is atomized without sibling collapse", () => {
-  const result = runHybridRag(alibabaJd, "tech", CV_JD_RULES, facts, []);
-  const labels = new Set(result.matches.map((item) => item.requirement.label));
+function completeRag() {
+  const matches = [];
+  for (let offset = 0; offset < CV_JD_RULES.length; offset += 30) {
+    matches.push(...runHybridRag(alibabaJd, "tech", CV_JD_RULES.slice(offset, offset + 30), facts, []).matches);
+  }
+  const unique = new Map();
+  for (const match of matches) unique.set(`${match.requirement.category}\u0000${match.requirement.label}`, match);
+  return [...unique.values()];
+}
+
+test("Alibaba JD is atomized without sibling collapse or a 45-item ceiling", () => {
+  const matches = completeRag();
+  const labels = new Set(matches.map((item) => item.requirement.label));
   const required = [
     "Doctoral degree", "Statistics background", "STEM-related field", "Interdisciplinary background",
     "STEM research domain", "Peer-reviewed publications", "Python", "PyTorch", "Reinforcement learning",
@@ -89,14 +99,17 @@ test("Alibaba JD is atomized without sibling collapse", () => {
     "Data cleaning", "Data filtering", "Data augmentation", "Data mixture", "Data pipeline", "LLM",
     "Multimodal foundation model", "Problem definition", "Independent research", "Literature review",
     "Paper reproduction", "Experiment design", "Result analysis", "Scientific writing", "Cross-disciplinary collaboration",
+    "Code generation", "Experiment execution", "Error fixing", "Training and evaluation loop", "Model robustness",
+    "Algorithm implementation", "Automated research", "Automated reasoning", "Theoretical background", "Innovation",
+    "Communication and collaboration",
   ];
   for (const label of required) assert.ok(labels.has(label), `missing atom: ${label}`);
-  console.log(`Alibaba fixture atomic requirement count: ${result.matches.length}`);
+  assert.ok(matches.length > 45, `complete extraction unexpectedly capped at ${matches.length}`);
+  console.log(`Alibaba fixture atomic requirement count: ${matches.length}`);
 });
 
 test("Alibaba named RL methods and PyTorch remain No Evidence", () => {
-  const result = runHybridRag(alibabaJd, "tech", CV_JD_RULES, facts, []);
-  const byLabel = new Map(result.matches.map((item) => [item.requirement.label, item]));
+  const byLabel = new Map(completeRag().map((item) => [item.requirement.label, item]));
   for (const label of ["PyTorch", "Reinforcement learning", "PPO", "DPO", "GRPO", "RL post-training", "Reward design", "Training stability", "Exploration efficiency"]) {
     assert.equal(byLabel.get(label)?.classification, "No Evidence", label);
   }
