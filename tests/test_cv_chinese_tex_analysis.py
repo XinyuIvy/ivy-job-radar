@@ -5,11 +5,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTE = ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts"
+LATEX_TEXT = ROOT / "app" / "lib" / "latex-text.ts"
 
 
 class CvChineseTexAnalysisTests(unittest.TestCase):
     def setUp(self):
         self.source = ROUTE.read_text(encoding="utf-8")
+        self.latex_source = LATEX_TEXT.read_text(encoding="utf-8")
 
     def test_chinese_auto_research_requirements_are_recognized(self):
         for phrase in [
@@ -32,9 +34,14 @@ class CvChineseTexAnalysisTests(unittest.TestCase):
         self.assertIn('!/^#{1,6}\\s/.test(line.trim())', self.source)
 
     def test_latex_template_is_converted_before_coverage_checks(self):
-        self.assertIn("function latexToPlainText", self.source)
+        self.assertIn('import { latexToPlainText } from "../../../lib/latex-text"', self.source)
         self.assertIn("const templateText = latexToPlainText(template)", self.source)
         self.assertIn("hasAlias(templateText, rule.literalTerms)", self.source)
+        self.assertIn('" $1 "', self.latex_source)
+
+    def test_ivy_job_radar_has_chinese_identity_aliases(self):
+        self.assertIn('"Ivy Job Radar 多源岗位情报平台"', self.source)
+        self.assertIn('"多源岗位情报平台"', self.source)
 
     def test_short_r_alias_uses_token_boundaries(self):
         self.assertRegex(self.source, re.compile(r"startBoundary.*a-z0-9"))
@@ -42,7 +49,7 @@ class CvChineseTexAnalysisTests(unittest.TestCase):
         self.assertIn('["r", "r programming"', self.source)
 
     def test_all_latin_aliases_use_complete_token_matching(self):
-        matcher = self.source.split("function hasAlias", 1)[1].split("function latexToPlainText", 1)[0]
+        matcher = self.source.split("function hasAlias", 1)[1].split("function evidenceContext", 1)[0]
         self.assertIn("escapeRegex(target)", matcher)
         self.assertIn("startBoundary", matcher)
         self.assertIn("endBoundary", matcher)
