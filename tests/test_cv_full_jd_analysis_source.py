@@ -5,40 +5,56 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CvFullJdAnalysisSourceTests(unittest.TestCase):
-    def test_analysis_covers_full_research_scientist_requirements(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
+    def test_analysis_covers_alibaba_atomic_requirements(self):
+        ontology = (ROOT / "app" / "lib" / "cv-capability-ontology.ts").read_text(encoding="utf-8")
         for phrase in [
-            "Scientific study design",
-            "Human-subjects research",
-            "Wearable data",
-            "Physiological data",
-            "Clinical data",
-            "Multimodal data",
-            "Time-series analysis",
-            "Regression",
-            "Mixed-effects models",
-            "Bayesian methods",
-            "Reproducible computational workflows",
-            "Manuscript development",
-            "Scientific dissemination",
-            "Cross-functional collaboration",
-            "Industry-academia experience",
-            "UAE research experience",
+            "Statistics background",
+            "STEM research domain",
+            "Interdisciplinary background",
+            "Peer-reviewed publications",
+            "Python",
+            "PyTorch",
+            "Reinforcement learning",
+            "PPO",
+            "DPO",
+            "GRPO",
+            "Reward design",
+            "Training stability",
+            "Exploration efficiency",
+            "Generalization",
+            "Agent system",
+            "Tool calling",
+            "Code execution",
+            "Experiment validation",
+            "Data cleaning",
+            "Data filtering",
+            "Data augmentation",
+            "Data mixture",
+            "Data pipeline",
+            "Problem definition",
+            "Independent research",
+            "Literature review",
+            "Paper reproduction",
+            "Experiment design",
+            "Result analysis",
+            "Scientific writing",
+            "Cross-disciplinary collaboration",
         ]:
-            self.assertIn(phrase, route)
+            self.assertIn(phrase, ontology)
 
-    def test_analysis_uses_aliases_and_structured_fact_evidence(self):
+    def test_analysis_uses_dual_corpus_semantic_matching(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("hasAlias(templateText, rule.literalTerms)", route)
-        self.assertIn("latexToPlainText(template)", route)
-        self.assertIn("runHybridRag(jd", route)
+        self.assertIn("runCompleteHybridRag", route)
         self.assertIn("verifiedSupportEvidence", route)
+        self.assertIn("buildCvTemplateIndex", route)
+        self.assertIn("searchCvTemplate", route)
         self.assertIn("supportEvidence", route)
-        self.assertIn("jdEvidence", route)
+        self.assertIn("templateMatches", route)
+        self.assertNotIn("hasAlias(templateText, rule.literalTerms)", route)
 
-    def test_analysis_ranks_fact_master_projects(self):
+    def test_analysis_ranks_verified_projects(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("recommendVerifiedProjects", route)
+        self.assertIn("projectRecommendations", route)
         self.assertIn("matchedRequirements", route)
         self.assertIn("alreadyInTemplate", route)
         self.assertIn("projects,", route)
