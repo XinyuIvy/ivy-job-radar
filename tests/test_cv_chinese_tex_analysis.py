@@ -64,6 +64,12 @@ class CvChineseTexAnalysisTests(unittest.TestCase):
         ]:
             self.assertIn(label, self.ontology)
 
+    def test_chinese_degree_list_uses_context_aliases(self):
+        for phrase in ["计算机、AI", "AI、信息", "信息、数学", "数学、统计", "统计、自动化"]:
+            self.assertIn(phrase, self.ontology)
+        self.assertNotIn('aliasesZh: ["信息"]', self.ontology)
+        self.assertNotIn('aliases: ["information science", "信息科学", "信息"]', self.ontology)
+
     def test_complete_jd_matching_is_chunked_not_truncated_in_route(self):
         self.assertIn("runCompleteHybridRag", self.route)
         self.assertIn("chunkSize = 30", self.route)
