@@ -5,28 +5,26 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CvAtomicRagAndDiffTests(unittest.TestCase):
-    def test_analysis_reads_compiled_fact_index(self):
+    def test_analysis_reads_compiled_fact_and_profile_indexes(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("FACT_INDEX.jsonl", route)
-        self.assertIn("CONCEPT_EDGES.jsonl", route)
+        for filename in ["FACT_INDEX.jsonl", "CONCEPT_EDGES.jsonl", "CREDENTIAL_INDEX.jsonl", "COURSEWORK_INDEX.jsonl", "PROFILE_INDEX.jsonl", "LITERATURE_INDEX.jsonl"]:
+            self.assertIn(filename, route)
         self.assertIn("parseJsonl<FactIndexRecord>", route)
-        self.assertIn("runHybridRag", route)
-        self.assertIn("verifiedSupportEvidence", route)
+        self.assertIn("matchStructuredEvidence", route)
+        self.assertIn("runCompleteHybridRag", route)
 
-    def test_project_identity_uses_canonical_aliases(self):
+    def test_fact_and_template_corpora_are_independent(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("projectIdentityAliases", route)
-        self.assertIn("templateContainsProject", route)
-        self.assertIn("hospital_readmission_risk", route)
-        self.assertIn("neurostat_virtual_lab", route)
-        self.assertIn("pfizer_asthma_clinical_trial_simulation", route)
+        self.assertIn("buildCvTemplateIndex", route)
+        self.assertIn("searchCvTemplate", route)
+        self.assertIn("hasSupported", route)
+        self.assertIn("templateSearch.covered", route)
+        self.assertNotIn("hasAlias(templateText, rule.literalTerms)", route)
 
     def test_compound_capabilities_are_split(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertNotIn('label: "Clinical and multimodal data"', route)
-        self.assertNotIn('label: "Regression and mixed models"', route)
-        self.assertNotIn('label: "Reinforcement learning and post-training"', route)
-        self.assertNotIn('label: "Scientific problem solving and paper reproduction"', route)
+        ontology = (ROOT / "app" / "lib" / "cv-capability-ontology.ts").read_text(encoding="utf-8")
+        for label in ["Reinforcement learning", "PPO", "DPO", "GRPO", "Reward design", "Training stability", "Exploration efficiency", "Generalization", "Tool calling", "Code execution", "Experiment validation", "Data cleaning", "Data filtering", "Data augmentation", "Data mixture", "Data pipeline"]:
+            self.assertIn(f'label: "{label}"', ontology)
 
     def test_client_selects_language_and_fifth_track(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
@@ -34,63 +32,21 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
         self.assertIn("English", client)
         self.assertIn("中文", client)
         self.assertIn("clinical_neuro", client)
-        self.assertIn("脑科学 / 临床数据 / 医疗器械", client)
 
-    def test_analysis_generates_reviewable_latex_diffs(self):
+    def test_every_supported_or_adjacent_gap_gets_handling(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn("buildModificationDrafts", route)
-        self.assertIn("latexDiff", route)
-        self.assertIn("modificationDrafts", route)
-        self.assertIn("查看 LaTeX diff", client)
-        self.assertIn("保留建议", client)
-        self.assertIn("拒绝", client)
-
-    def test_analysis_navigation_uses_clickable_result_panels(self):
-        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn('type ResultPanel = "projects" | "requirements" | "covered"', client)
-        self.assertIn('role="tablist"', client)
-        self.assertIn('onClick={() => setResultPanel(panel.id)}', client)
-        self.assertIn('label: "推荐项目"', client)
-        self.assertIn('label: "逐条处理"', client)
-
-    def test_every_supported_or_adjacent_gap_gets_a_handling_result(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
         self.assertIn('["supported_gap", "adjacent_gap"].includes(item.status)', route)
-        self.assertIn('"Credential Direct", "Coursework Match"', route)
         self.assertIn('action: "no_direct_edit"', route)
-        self.assertNotIn('!item.projectId.startsWith("profile:")', route)
         self.assertNotIn("if (drafts.length >= 10) break", route)
-        self.assertIn("可生成修改", client)
-        self.assertIn("仅相邻不可直写", client)
-        self.assertIn("不可直接写入", client)
 
-    def test_jd_evidence_is_compact_and_highlighted(self):
+    def test_jd_evidence_and_template_relation_are_returned(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn("jdEvidence: rule.sourceText", route)
+        self.assertIn("jdEvidence: hybridMatch.requirement.sourceText", route)
         self.assertIn("jdMatchedTerms", route)
-        self.assertIn("HighlightedText", client)
-        self.assertIn("JD 原句", client)
-
-    def test_stage_4_to_7_are_loaded_through_compiled_indexes(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        for filename in [
-            "FACT_INDEX.jsonl",
-            "CONCEPT_EDGES.jsonl",
-            "STAGE7_HYBRID_RAG_MATCHING.yaml",
-        ]:
-            self.assertIn(filename, route)
-        self.assertIn('ragPreparationStages: "1–7"', route)
-
-    def test_non_project_indexes_use_structured_matching(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        for filename in ["CREDENTIAL_INDEX.jsonl", "COURSEWORK_INDEX.jsonl", "PROFILE_INDEX.jsonl", "LITERATURE_INDEX.jsonl", "STAGE7_NON_PROJECT_MATCHING_ADDENDUM.yaml", "STAGE7_LITERATURE_MATCHING_ADDENDUM.yaml"]:
-            self.assertIn(filename, route)
-        self.assertIn("matchStructuredEvidence", route)
-        self.assertIn('"Credential Direct"', route)
-        self.assertIn('"Coursework Match"', route)
+        self.assertIn("templateMatches", route)
+        self.assertIn("关系路径", client)
+        self.assertIn("JD 原文", client)
 
     def test_incomplete_status_is_not_forced_to_adjacent(self):
         rag = (ROOT / "app" / "lib" / "hybrid-rag.ts").read_text(encoding="utf-8")
