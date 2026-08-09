@@ -8,6 +8,7 @@ import {
   type HybridMatch,
   type IndustryTrack,
 } from "../../../lib/hybrid-rag";
+import { latexToPlainText } from "../../../lib/latex-text";
 
 export const dynamic = "force-dynamic";
 
@@ -154,7 +155,7 @@ const projectIdentityAliases: Record<string, string[]> = {
   lumbosacral_resting_state_fc: ["Lumbosacral Spinal-Cord Resting-State Functional Connectivity", "spinal-cord functional connectivity", "脊髓功能连接", "多发性硬化脊髓神经影像标志物"],
   lumbosacral_mffe: ["Multi-echo Gradient-echo MRI", "mFFE", "多回波梯度回波", "腰骶部多发性硬化影像"],
   neurostat_virtual_lab: ["NeuroStat"],
-  ivy_job_radar: ["Ivy Job Radar"],
+  ivy_job_radar: ["Ivy Job Radar", "Ivy Job Radar 多源岗位情报平台", "多源岗位情报平台", "多源岗位信息平台"],
   ai_usage_dashboard: ["AI Usage Dashboard", "AI Usage", "AI 用量", "AI 配额"],
 };
 
@@ -176,18 +177,6 @@ function hasAlias(text: string, aliases: string[]) {
     const endBoundary = /[a-z0-9]$/i.test(target) ? "(?=$|[^a-z0-9])" : "";
     return new RegExp(`${startBoundary}${escapeRegex(target)}${endBoundary}`, "i").test(source);
   });
-}
-
-function latexToPlainText(value: string) {
-  return value
-    .replace(/%.*$/gm, " ")
-    .replace(/\\(?:href|url)\{[^{}]*\}\{([^{}]*)\}/g, "$1")
-    .replace(/\\(?:section|subsection|subsubsection|textbf|textit|emph|small|footnotesize)\*?\{([^{}]*)\}/g, "$1")
-    .replace(/\\&/g, "&")
-    .replace(/\\[a-zA-Z@]+\*?(?:\[[^\]]*\])?/g, " ")
-    .replace(/[{}~]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function evidenceContext(text: string, aliases: string[]) {
