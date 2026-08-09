@@ -8,8 +8,9 @@ class CvStructuredFactEvidenceTests(unittest.TestCase):
     def test_analysis_returns_structured_support_evidence(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("supportEvidence", route)
-        self.assertIn("collectAtomicEvidence", route)
-        self.assertIn("supportReasons", route)
+        self.assertIn("verifiedSupportEvidence", route)
+        self.assertIn("preverificationScore", route)
+        self.assertIn("retrievalChannels", route)
         self.assertIn("factId", route)
         self.assertIn("claimBoundary", route)
         self.assertIn("isRestrictionLine", route)

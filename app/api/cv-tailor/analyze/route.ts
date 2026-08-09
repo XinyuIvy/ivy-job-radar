@@ -1,4 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  parseJsonl,
+  runHybridRag,
+  type ConceptEdge,
+  type FactIndexRecord,
+  type HybridCandidate,
+  type HybridMatch,
+  type IndustryTrack,
+} from "../../../lib/hybrid-rag";
 
 export const dynamic = "force-dynamic";
 
@@ -10,20 +19,6 @@ type RequirementRule = {
   category: string;
   aliases: string[];
   projectTerms?: string[];
-};
-
-type AtomicFact = {
-  projectId: string;
-  projectName: string;
-  role: string;
-  factId: string;
-  verifiedFact: string;
-  factStatus: string;
-  personalAttribution: string;
-  evidenceStrength: string;
-  source: string;
-  evidenceLocation: string;
-  claimBoundary: string;
 };
 
 type SupportEvidence = {
@@ -38,6 +33,11 @@ type SupportEvidence = {
   source: string;
   evidenceLocation: string;
   claimBoundary: string;
+  capabilityContext?: string;
+  industryTranslation?: string;
+  industryGuardrail?: string;
+  score?: number;
+  retrievalChannels?: string[];
 };
 
 type ProjectRecommendation = {
@@ -59,6 +59,7 @@ type RequirementMatch = {
   supportEvidence: SupportEvidence[];
   templateEvidence: string;
   jdEvidence: string;
+  jdMatchedTerms: string[];
 };
 
 type ModificationDraft = {
@@ -157,12 +158,6 @@ const projectIdentityAliases: Record<string, string[]> = {
   ai_usage_dashboard: ["AI Usage Dashboard", "AI Usage", "AI 用量", "AI 配额"],
 };
 
-const supportReasons: Record<EvidenceClassification, string> = {
-  Direct: "原子事实直接记录了这项方法、数据、工具或职责。",
-  "Strong Transferable": "原子事实记录了可迁移的方法或工作过程，但不能写成该岗位要求的同名行业经历。",
-  Adjacent: "项目语境与要求相邻，但证据不足以写成已实际完成该项工作。",
-};
-
 function normalized(value: string) {
   return value.toLocaleLowerCase().replace(/[–—]/g, "-").replace(/\s+/g, " ").trim();
 }
@@ -234,6 +229,90 @@ function yamlValue(value: string) {
   return trimmed.replace(/^['"]|['"]$/g, "");
 }
 
+function inlineYamlList(value: string) {
+  const body = value.trim().replace(/^\[/, "").replace(/\]$/, "");
+  if (!body) return [];
+  return body.split(/\s*,\s*/).map(yamlValue).filter(Boolean);
+}
+
+function parseCapabilityLayers(yaml: string) {
+  const records = new Map<string, CapabilityLayer>();
+  let inRecords = false;
+  let factId = "";
+  for (const line of yaml.split(/\r?\n/)) {
+    if (line === "records:") { inRecords = true; continue; }
+    if (!inRecords) continue;
+    const recordMatch = line.match(/^  ([A-Z0-9-]+):\s*$/);
+    if (recordMatch) {
+      factId = recordMatch[1];
+      records.set(factId, { exactMethodsTools: [], statisticalConcepts: [], problemSolved: "", transferableCapabilities: [] });
+      continue;
+    }
+    const fieldMatch = line.match(/^    ([a-z_]+):\s*(.+)$/);
+    const current = records.get(factId);
+    if (!fieldMatch || !current) continue;
+    if (fieldMatch[1] === "exact_methods_tools") current.exactMethodsTools = inlineYamlList(fieldMatch[2]);
+    else if (fieldMatch[1] === "statistical_analytical_concepts") current.statisticalConcepts = inlineYamlList(fieldMatch[2]);
+    else if (fieldMatch[1] === "problem_solved") current.problemSolved = yamlValue(fieldMatch[2]);
+    else if (fieldMatch[1] === "transferable_capabilities") current.transferableCapabilities = inlineYamlList(fieldMatch[2]);
+  }
+  return records;
+}
+
+function parseIndustryTranslations(yaml: string, track: string) {
+  const records = new Map<string, IndustryTranslation>();
+  let inProjects = false;
+  let projectId = "";
+  let activeTrack = "";
+  let activeList: "validInterpretations" | "invalidOverclaims" | "" = "";
+  for (const line of yaml.split(/\r?\n/)) {
+    if (line === "projects:") { inProjects = true; continue; }
+    if (!inProjects) continue;
+    const projectMatch = line.match(/^  ([a-z0-9_]+):\s*$/);
+    if (projectMatch) { projectId = projectMatch[1]; activeTrack = ""; activeList = ""; continue; }
+    const trackMatch = line.match(/^    (pharma|tech|quant|consulting):\s*$/);
+    if (trackMatch) {
+      activeTrack = trackMatch[1];
+      activeList = "";
+      if (activeTrack === track) records.set(projectId, { translationType: "", supportingFacts: [], validInterpretations: [], invalidOverclaims: [] });
+      continue;
+    }
+    if (activeTrack !== track) continue;
+    const current = records.get(projectId);
+    if (!current) continue;
+    const fieldMatch = line.match(/^      ([a-z_]+):\s*(.*)$/);
+    if (fieldMatch) {
+      const [key, value] = [fieldMatch[1], fieldMatch[2]];
+      activeList = "";
+      if (key === "translation_type") current.translationType = yamlValue(value);
+      else if (key === "supporting_facts") current.supportingFacts = inlineYamlList(value);
+      else if (key === "valid_transferable_interpretation") current.validInterpretations = inlineYamlList(value);
+      else if (key === "invalid_overclaim") activeList = "invalidOverclaims";
+      continue;
+    }
+    const itemMatch = line.match(/^        -\s+(.+)$/);
+    if (itemMatch && activeList) current[activeList].push(yamlValue(itemMatch[1]));
+  }
+  return records;
+}
+
+function parseConceptGraph(yaml: string) {
+  const records = new Map<string, ConceptExpansion>();
+  const ensure = (factId: string) => {
+    const current = records.get(factId) ?? { direct: [], transferable: [], adjacent: [] };
+    records.set(factId, current);
+    return current;
+  };
+  for (const line of yaml.split(/\r?\n/)) {
+    const edge = line.match(/- \{from:\s*([^,]+),\s*to:\s*([^,]+),\s*type:\s*([^,]+),\s*evidence:\s*\[([^\]]+)\]/);
+    if (!edge) continue;
+    const terms = [edge[1], edge[2]].map((value) => value.trim().replace(/_/g, " "));
+    const bucket = edge[3].trim() === "exact_synonym" ? "direct" : edge[3].trim() === "adjacent_concept" ? "adjacent" : "transferable";
+    for (const factId of edge[4].split(/\s*,\s*/)) ensure(factId.trim())[bucket].push(...terms);
+  }
+  return records;
+}
+
 function parseAtomicFacts(yaml: string) {
   const facts: AtomicFact[] = [];
   let inProjectRecords = false;
@@ -299,11 +378,25 @@ function parseAtomicFacts(yaml: string) {
   return facts;
 }
 
-function evidenceClassification(fact: AtomicFact, rule: RequirementRule): EvidenceClassification | null {
-  const factText = `${fact.verifiedFact} ${fact.role}`;
-  const direct = hasAlias(factText, rule.aliases);
-  const transferable = hasAlias(factText, rule.projectTerms ?? []);
-  const adjacent = hasAlias(`${fact.projectName} ${factText}`, [...rule.aliases, ...(rule.projectTerms ?? [])]);
+function evidenceClassification(
+  fact: AtomicFact,
+  rule: RequirementRule,
+  capability: CapabilityLayer | undefined,
+  translation: IndustryTranslation | undefined,
+  graph: ConceptExpansion | undefined,
+): EvidenceClassification | null {
+  const exactText = [fact.verifiedFact, fact.role, ...(capability?.exactMethodsTools ?? []), ...(graph?.direct ?? [])].join(" ");
+  const transferableText = [
+    ...(capability?.statisticalConcepts ?? []),
+    capability?.problemSolved ?? "",
+    ...(capability?.transferableCapabilities ?? []),
+    ...(translation?.validInterpretations ?? []),
+    ...(graph?.transferable ?? []),
+  ].join(" ");
+  const adjacentText = [fact.projectName, exactText, transferableText, ...(graph?.adjacent ?? [])].join(" ");
+  const direct = hasAlias(exactText, rule.aliases);
+  const transferable = hasAlias(transferableText, [...rule.aliases, ...(rule.projectTerms ?? [])]);
+  const adjacent = hasAlias(adjacentText, [...rule.aliases, ...(rule.projectTerms ?? [])]);
   const incomplete = ["planned", "project_context"].includes(fact.factStatus);
   if (direct && !incomplete) return "Direct";
   if (transferable && !incomplete) return "Strong Transferable";
@@ -311,12 +404,24 @@ function evidenceClassification(fact: AtomicFact, rule: RequirementRule): Eviden
   return null;
 }
 
-function collectAtomicEvidence(atomicFacts: AtomicFact[], rule: RequirementRule) {
+function collectAtomicEvidence(
+  atomicFacts: AtomicFact[],
+  rule: RequirementRule,
+  capabilityLayers: Map<string, CapabilityLayer>,
+  industryTranslations: Map<string, IndustryTranslation>,
+  conceptGraph: Map<string, ConceptExpansion>,
+) {
   const rank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
   return atomicFacts
-    .map((fact) => ({ fact, classification: evidenceClassification(fact, rule) }))
-    .filter((item): item is { fact: AtomicFact; classification: EvidenceClassification } => Boolean(item.classification))
-    .map(({ fact, classification }) => ({
+    .map((fact) => {
+      const capability = capabilityLayers.get(fact.factId);
+      const projectTranslation = industryTranslations.get(fact.projectId);
+      const translation = projectTranslation?.supportingFacts.includes(fact.factId) ? projectTranslation : undefined;
+      const graph = conceptGraph.get(fact.factId);
+      return { fact, capability, translation, graph, classification: evidenceClassification(fact, rule, capability, translation, graph) };
+    })
+    .filter((item): item is typeof item & { classification: EvidenceClassification } => Boolean(item.classification))
+    .map(({ fact, capability, translation, classification }) => ({
       projectId: fact.projectId,
       project: fact.projectName,
       factId: fact.factId,
@@ -328,6 +433,9 @@ function collectAtomicEvidence(atomicFacts: AtomicFact[], rule: RequirementRule)
       source: fact.source,
       evidenceLocation: fact.evidenceLocation,
       claimBoundary: fact.claimBoundary,
+      capabilityContext: capability?.problemSolved || capability?.transferableCapabilities[0] || "",
+      industryTranslation: translation?.validInterpretations.find((value) => hasAlias(value, [...rule.aliases, ...(rule.projectTerms ?? [])])) || "",
+      industryGuardrail: translation?.invalidOverclaims[0] || "",
     } satisfies SupportEvidence))
     .sort((a, b) => rank[b.classification] - rank[a.classification] || Number(b.evidenceStrength === "high") - Number(a.evidenceStrength === "high"))
     .filter((item, index, all) => all.findIndex((candidate) => candidate.projectId === item.projectId && candidate.factId === item.factId) === index)
@@ -368,6 +476,60 @@ function localizedFactLine(factMaster: string, evidence: SupportEvidence, rule: 
   return localized || evidence.fact;
 }
 
+function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrack): SupportEvidence | null {
+  if (candidate.classification === "No Evidence") return null;
+  const fact = candidate.fact;
+  const translationTrack = track === "clinical_neuro" ? "pharma" : track;
+  const translation = fact.industry_translation[translationTrack];
+  return {
+    projectId: fact.project_id,
+    project: fact.project_name,
+    factId: fact.fact_id,
+    fact: fact.verified_fact,
+    factStatus: fact.fact_status,
+    evidenceStrength: fact.evidence_strength,
+    classification: candidate.classification,
+    relevance: candidate.why,
+    source: fact.source,
+    evidenceLocation: fact.evidence_location,
+    claimBoundary: fact.claim_boundary,
+    capabilityContext: fact.problem_solved,
+    industryTranslation: translation?.valid_transferable_interpretation[0] || "",
+    industryGuardrail: candidate.limitation,
+    score: Math.round(candidate.preverificationScore * 10) / 10,
+    retrievalChannels: candidate.retrievalChannels,
+  };
+}
+
+function recommendVerifiedProjects(ragMatches: HybridMatch[], templateText: string, track: IndustryTrack) {
+  const byProject = new Map<string, { name: string; requirements: Map<string, SupportEvidence> }>();
+  const rank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+  for (const match of ragMatches) {
+    for (const candidate of match.candidates) {
+      const evidence = verifiedSupportEvidence(candidate, track);
+      if (!evidence) continue;
+      const current = byProject.get(evidence.projectId) ?? { name: evidence.project, requirements: new Map<string, SupportEvidence>() };
+      const previous = current.requirements.get(match.requirement.label);
+      if (!previous || rank[evidence.classification] > rank[previous.classification] || (evidence.score ?? 0) > (previous.score ?? 0)) {
+        current.requirements.set(match.requirement.label, evidence);
+      }
+      byProject.set(evidence.projectId, current);
+    }
+  }
+  return [...byProject.entries()].map(([projectId, value]) => {
+    const evidence = [...value.requirements.values()];
+    return {
+      projectId,
+      name: value.name,
+      score: Math.round(evidence.reduce((sum, item) => sum + rank[item.classification] * 10 + (item.score ?? 0) / 10, 0)),
+      matchedRequirements: [...value.requirements.keys()],
+      classifications: [...new Set(evidence.map((item) => item.classification))],
+      alreadyInTemplate: templateContainsProject(templateText, projectId, value.name),
+      evidence: evidence.sort((left, right) => rank[right.classification] - rank[left.classification] || (right.score ?? 0) - (left.score ?? 0))[0] ?? null,
+    } satisfies ProjectRecommendation;
+  }).sort((left, right) => right.score - left.score).slice(0, 8);
+}
+
 function meaningfulTokens(value: string) {
   const stop = new Set(["with", "from", "using", "under", "model", "models", "analysis", "statistical", "project", "development", "application", "study"]);
   return normalized(value).split(/[^a-z0-9]+/).filter((token) => token.length >= 4 && !stop.has(token));
@@ -398,10 +560,17 @@ function latexEscape(value: string) {
   return value.replace(/\\/g, "\\textbackslash{}").replace(/([#$%&_{}])/g, "\\$1").replace(/~/g, "\\textasciitilde{}").replace(/\^/g, "\\textasciicircum{}");
 }
 
-function recommendProjects(atomicFacts: AtomicFact[], templateText: string, detected: RequirementRule[]) {
+function recommendProjects(
+  atomicFacts: AtomicFact[],
+  templateText: string,
+  detected: RequirementRule[],
+  capabilityLayers: Map<string, CapabilityLayer>,
+  industryTranslations: Map<string, IndustryTranslation>,
+  conceptGraph: Map<string, ConceptExpansion>,
+) {
   const byProject = new Map<string, { name: string; requirements: Map<string, SupportEvidence> }>();
   for (const rule of detected) {
-    for (const evidence of collectAtomicEvidence(atomicFacts, rule)) {
+    for (const evidence of collectAtomicEvidence(atomicFacts, rule, capabilityLayers, industryTranslations, conceptGraph)) {
       const current = byProject.get(evidence.projectId) ?? { name: evidence.project, requirements: new Map<string, SupportEvidence>() };
       if (!current.requirements.has(rule.label)) current.requirements.set(rule.label, evidence);
       byProject.set(evidence.projectId, current);
@@ -428,7 +597,8 @@ function buildModificationDrafts(matches: RequirementMatch[], template: string, 
     const evidence = match.supportEvidence.find((item) => item.classification !== "Adjacent");
     if (!evidence) continue;
     const block = findProjectBlock(template, evidence.projectId, evidence.project);
-    const proposedBullet = localizedFactLine(factMaster, evidence, requirements.find((item) => item.label === match.keyword)!, language);
+    const rule = requirements.find((item) => item.label === match.keyword) ?? { label: match.keyword, category: match.category, aliases: [match.keyword] };
+    const proposedBullet = localizedFactLine(factMaster, evidence, rule, language);
     const escapedBullet = latexEscape(proposedBullet);
     const existingBullet = block?.source.match(/\\item\s+([\s\S]*?)(?=\\item|\\end\{itemize\})/)?.[0]?.trim() || "% No matching bullet in the selected template";
     const after = block
@@ -479,29 +649,39 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const [template, factMaster, atomicYaml] = await Promise.all([
+    const [template, factMaster, factIndexJsonl, conceptEdgesJsonl, matchingSpecYaml] = await Promise.all([
       readPrivateFile(`master/template-cv/${templateFile}`, token),
       readPrivateFile("master/FACT_MASTER.md", token),
-      readPrivateFile("master/project-evidence/STAGE3_ATOMIC_FACTS.yaml", token),
+      readPrivateFile("master/project-evidence/FACT_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/CONCEPT_EDGES.jsonl", token),
+      readPrivateFile("master/project-evidence/STAGE7_HYBRID_RAG_MATCHING.yaml", token),
     ]);
     const templateText = latexToPlainText(template);
-    const atomicFacts = parseAtomicFacts(atomicYaml);
-    const detected = requirements.filter((rule) => hasAlias(jd, rule.aliases));
-    const matches: RequirementMatch[] = detected.map((rule) => {
-      const covered = hasAlias(templateText, rule.aliases);
-      const supportEvidence = covered ? [] : collectAtomicEvidence(atomicFacts, rule);
+    const factIndex = parseJsonl<FactIndexRecord>(factIndexJsonl);
+    const conceptEdges = parseJsonl<ConceptEdge>(conceptEdgesJsonl);
+    const rag = runHybridRag(jd, track as IndustryTrack, requirements, factIndex, conceptEdges);
+    const matches: RequirementMatch[] = rag.matches.map((hybridMatch) => {
+      const rule = hybridMatch.requirement;
+      const covered = hasAlias(templateText, rule.literalTerms);
+      const evidenceRank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+      const supportEvidence = hybridMatch.candidates
+        .map((candidate) => verifiedSupportEvidence(candidate, track as IndustryTrack))
+        .filter((evidence): evidence is SupportEvidence => Boolean(evidence))
+        .sort((left, right) => evidenceRank[right.classification] - evidenceRank[left.classification] || (right.score ?? 0) - (left.score ?? 0))
+        .slice(0, 4);
       const hasSupported = supportEvidence.some((item) => item.classification === "Direct" || item.classification === "Strong Transferable");
       const hasAdjacent = supportEvidence.some((item) => item.classification === "Adjacent");
       return {
         keyword: rule.label,
         category: rule.category,
         status: covered ? "covered" : hasSupported ? "supported_gap" : hasAdjacent ? "adjacent_gap" : "unsupported_gap",
-        supportEvidence,
-        templateEvidence: covered ? evidenceContext(templateText, rule.aliases) : "",
-        jdEvidence: evidenceContext(jd, rule.aliases),
+        supportEvidence: covered ? [] : supportEvidence,
+        templateEvidence: covered ? evidenceContext(templateText, rule.literalTerms) : "",
+        jdEvidence: rule.sourceText,
+        jdMatchedTerms: rule.literalTerms,
       };
     });
-    const projects = recommendProjects(atomicFacts, templateText, detected);
+    const projects = recommendVerifiedProjects(rag.matches, templateText, track as IndustryTrack);
     const modificationDrafts = buildModificationDrafts(matches, template, factMaster, language);
     return NextResponse.json({
       track,
@@ -513,8 +693,15 @@ export async function POST(request: NextRequest) {
         templateFile,
         templateLength: template.length,
         factMasterLength: factMaster.length,
-        atomicFactsFile: "master/project-evidence/STAGE3_ATOMIC_FACTS.yaml",
-        atomicFactCount: atomicFacts.length,
+        factIndexFile: "master/project-evidence/FACT_INDEX.jsonl",
+        conceptEdgesFile: "master/project-evidence/CONCEPT_EDGES.jsonl",
+        atomicFactCount: factIndex.length,
+        conceptEdgeCount: conceptEdges.length,
+        embeddingBackend: rag.diagnostics.embeddingBackend,
+        embeddingDimensions: rag.diagnostics.embeddingDimensions,
+        bm25Parameters: rag.diagnostics.bm25Parameters,
+        matchingSpecLoaded: matchingSpecYaml.includes("stage: 7"),
+        ragPreparationStages: "1–7",
       },
       summary: {
         required: matches.length,

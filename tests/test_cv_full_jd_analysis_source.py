@@ -29,16 +29,16 @@ class CvFullJdAnalysisSourceTests(unittest.TestCase):
 
     def test_analysis_uses_aliases_and_structured_fact_evidence(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("hasAlias(templateText, rule.aliases)", route)
+        self.assertIn("hasAlias(templateText, rule.literalTerms)", route)
         self.assertIn("latexToPlainText(template)", route)
-        self.assertIn("collectAtomicEvidence(atomicFacts, rule)", route)
-        self.assertIn("parseAtomicFacts", route)
+        self.assertIn("runHybridRag(jd", route)
+        self.assertIn("verifiedSupportEvidence", route)
         self.assertIn("supportEvidence", route)
         self.assertIn("jdEvidence", route)
 
     def test_analysis_ranks_fact_master_projects(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("recommendProjects", route)
+        self.assertIn("recommendVerifiedProjects", route)
         self.assertIn("matchedRequirements", route)
         self.assertIn("alreadyInTemplate", route)
         self.assertIn("projects,", route)
