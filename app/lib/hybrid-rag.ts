@@ -280,7 +280,7 @@ export function extractJdRequirements(jd: string, rules: RequirementRule[], fact
       hardRequirement,
       importance: hardRequirement ? "high" : "medium",
       scopes: requirementScopes(sourceText),
-      namedTool: rule.category === "Programming and Data" || literalTerms.some((term) => /^(ppo|dpo|grpo|fev1|acq)$/i.test(term.trim())),
+      namedTool: rule.category === "Programming and Data" || literalTerms.some((term) => /^(ppo|dpo|grpo|rl|reinforcement learning|强化学习|reinforcement learning post-training|rl post-training|强化学习后训练(?:方法)?|reward design|奖励设计|training stability|训练稳定性|exploration efficiency|探索效率|fev1|acq)$/i.test(term.trim())),
     });
   }
 
@@ -453,7 +453,7 @@ function verifyCandidate(candidate: Omit<HybridCandidate, "classification" | "wh
   if (fact.fact_status === "project_context") classification = "No Evidence";
   if (candidate.graphPath?.adjacentPath && candidate.exactMethodOverlap < 0.78) classification = "Adjacent";
   if (embeddingOnly && (classification === "Direct" || classification === "Strong Transferable")) classification = "Adjacent";
-  if (requirement.namedTool && candidate.exactMethodOverlap < 0.78 && classification === "Direct") classification = "Adjacent";
+  if (requirement.namedTool && candidate.exactMethodOverlap < 0.78) classification = "No Evidence";
   if ((hardScopeConflict || overclaimFlags.length) && classification === "Direct") classification = "Adjacent";
 
   const why = classification === "Direct"

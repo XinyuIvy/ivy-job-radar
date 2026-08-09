@@ -1,4 +1,5 @@
 import type { JdRequirement, RequirementRule } from "./hybrid-rag";
+import { CV_JD_EXTRA_RULES } from "./cv-jd-extra-rules.ts";
 
 export type CvRelationType =
   | "exact_equivalent"
@@ -125,7 +126,11 @@ export function conceptTerms(concept: CapabilityConcept) {
 }
 
 export function conceptsInText(text: string) {
-  return concepts.filter((concept) => conceptTerms(concept).some((term) => includesTerm(text, term))).map((concept) => concept.id);
+  const matched = concepts.filter((concept) => conceptTerms(concept).some((term) => includesTerm(text, term))).map((concept) => concept.id);
+  if (!matched.includes("biostatistics")) return matched;
+  const withoutBiostatistics = text.replace(/生物统计学|生物统计/giu, " ").replace(/biostatistics/giu, " ");
+  const hasSeparateStatistics = conceptTerms(CV_CAPABILITY_CONCEPTS.get("statistics")!).some((term) => includesTerm(withoutBiostatistics, term));
+  return hasSeparateStatistics ? matched : matched.filter((conceptId) => conceptId !== "statistics");
 }
 
 export function requirementConceptIds(requirement: Pick<JdRequirement, "label" | "literalTerms" | "normalizedConcepts">) {
@@ -178,7 +183,7 @@ export const CV_JD_RULES: RequirementRule[] = [
   { label: "Problem definition", category: "Research", aliases: ["problem definition", "问题定义", "科学问题定义"] },
   { label: "Independent research", category: "Research", aliases: ["independent research", "independently drive", "独立推进科研项目", "独立科研", "主导科研"] },
   { label: "Literature review", category: "Research", aliases: ["literature review", "systematic review", "paper reading", "论文阅读", "文献综述", "系统综述", "文献检索"] },
-  { label: "Paper reproduction", category: "Research", aliases: ["paper reproduction", "research reproduction", "论文复现", "研究复现"] },
+  { label: "Paper reproduction", category: "Research", aliases: ["paper reproduction", "research reproduction", "论文复现", "研究复现", "论文阅读与复现", "阅读与复现"] },
   { label: "Experiment design", category: "Research Design", aliases: ["experiment design", "study design", "实验设计", "试验设计", "研究设计"] },
   { label: "Result analysis", category: "Research", aliases: ["result analysis", "results analysis", "结果分析", "结果解读"] },
   { label: "Scientific writing", category: "Communication", aliases: ["scientific writing", "paper writing", "manuscript writing", "论文写作", "科研写作"] },
@@ -196,3 +201,5 @@ export const CV_JD_RULES: RequirementRule[] = [
   { label: "Manuscript revision and reviewer response", category: "Communication", aliases: ["manuscript revision", "reviewer comments", "response to reviewers", "论文修改", "回复审稿意见"] },
   { label: "Peer review and professional service", category: "Professional Service", aliases: ["peer review", "reviewer", "同行评议", "审稿"] },
 ];
+
+CV_JD_RULES.push(...CV_JD_EXTRA_RULES);

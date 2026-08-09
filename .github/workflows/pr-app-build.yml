@@ -6,6 +6,7 @@ on:
     paths:
       - "app/**"
       - "db/**"
+      - "tests/*.test.mjs"
       - "package.json"
       - "package-lock.json"
       - "vite.config.ts"
@@ -29,7 +30,16 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      - name: Run RAG and structured-evidence regression tests
+        run: >-
+          node --loader @esbuild-kit/esm-loader --test
+          tests/hybrid-rag.test.mjs
+          tests/structured-evidence.test.mjs
+          tests/latex-text.test.mjs
+          tests/cv-tailor-alibaba.test.mjs
       - name: Build deployable Sites artifact
         run: |
           chmod +x scripts/*.sh
           npm run build
+      - name: Run rendered artifact smoke test
+        run: node --test tests/rendered-html.test.mjs
