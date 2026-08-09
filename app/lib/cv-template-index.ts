@@ -106,13 +106,24 @@ function linkedFactIds(text: string, entityId: string, facts: FactIndexRecord[],
   return [...result];
 }
 
+function structuredConceptIds(factIds: string[], snippetType: CvSnippetType, structured: StructuredFactRecord[]) {
+  const records = structured.filter((record) => factIds.includes(record.fact_id));
+  const concepts = new Set(records.flatMap((record) => record.normalized_concepts ?? []).filter((value) => CV_CAPABILITY_CONCEPTS.has(value)));
+  if (snippetType === "publication" && records.some((record) => record.record_type === "publication" && record.publication_status === "published")) {
+    concepts.add("published_journal_article");
+  }
+  return [...concepts];
+}
+
 function makeSnippet(params: Omit<CvTemplateSnippet, "conceptIds" | "factIds" | "present">, facts: FactIndexRecord[], structured: StructuredFactRecord[]) {
   const visibleText = latexToPlainText(params.rawLatex).replace(/\s+/g, " ").trim();
+  const factIds = linkedFactIds(visibleText, params.entityId, facts, structured);
+  const conceptIds = new Set([...conceptsInText(visibleText), ...structuredConceptIds(factIds, params.snippetType, structured)]);
   return {
     ...params,
     visibleText,
-    conceptIds: conceptsInText(visibleText),
-    factIds: linkedFactIds(visibleText, params.entityId, facts, structured),
+    conceptIds: [...conceptIds],
+    factIds,
     present: true as const,
   };
 }
@@ -244,6 +255,28 @@ function twoHopRelation(from: string, to: string): TemplateRelationPath | null {
   return null;
 }
 
+function addInterdisciplinaryEvidence(requirement: JdRequirement, snippets: CvTemplateSnippet[], matches: CvTemplateMatch[]) {
+  const targets = requirementConceptIds(requirement);
+  if (!targets.includes("interdisciplinary_research")) return;
+  const statisticsSnippet = snippets.find((snippet) => snippet.conceptIds.some((concept) => ["statistics", "biostatistics"].includes(concept)));
+  const domainSnippet = snippets.find((snippet) => snippet.conceptIds.some((concept) => ["neuroimaging_research", "biomedical_research"].includes(concept)));
+  if (!statisticsSnippet || !domainSnippet) return;
+  for (const snippet of [statisticsSnippet, domainSnippet]) {
+    matches.push({
+      snippet,
+      relationPath: {
+        fromConcept: snippet.conceptIds.find((concept) => ["statistics", "biostatistics", "neuroimaging_research", "biomedical_research"].includes(concept)) ?? "interdisciplinary_research",
+        toConcept: "interdisciplinary_research",
+        relationType: "evidence_for",
+        nodes: [...snippet.conceptIds.slice(0, 1), "interdisciplinary_research"],
+        confidence: 0.86,
+        explanation: "当前 CV 同时包含统计/生物统计背景与神经影像或生物医学研究片段，组合证据支持交叉学科背景。",
+      },
+      confidence: 0.86,
+    });
+  }
+}
+
 export function searchCvTemplate(
   requirement: JdRequirement,
   snippets: CvTemplateSnippet[],
@@ -269,8 +302,9 @@ export function searchCvTemplate(
       confidence: 0.99,
     });
   }
+  addInterdisciplinaryEvidence(requirement, snippets, matches);
   const ranked = matches
-    .sort((a, b) => b.confidence - a.confidence || Number(Boolean(a.snippet.factIds.length)) - Number(Boolean(b.snippet.factIds.length)))
+    .sort((a, b) => b.confidence - a.confidence || Number(Boolean(b.snippet.factIds.length)) - Number(Boolean(a.snippet.factIds.length)))
     .filter((item, index, all) => all.findIndex((candidate) => candidate.snippet.snippetId === item.snippet.snippetId && candidate.relationPath.toConcept === item.relationPath.toConcept) === index)
     .slice(0, 4);
   return { covered: ranked.some((match) => match.confidence >= 0.78), matches: ranked };
