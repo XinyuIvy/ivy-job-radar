@@ -47,7 +47,10 @@ type Project = {
 
 type ModificationDraft = {
   id: string;
-  action: "revise_existing" | "consider_addition";
+  action: "revise_existing" | "consider_addition" | "add_to_section" | "no_direct_edit";
+  status: "supported_gap" | "adjacent_gap";
+  targetSection: string;
+  canGenerateEdit: boolean;
   projectId: string;
   project: string;
   requirement: string;
@@ -59,7 +62,7 @@ type ModificationDraft = {
   evidenceLocation: string;
   claimBoundary: string;
   rationale: string;
-  latexDiff: { before: string; after: string };
+  latexDiff: { before: string; after: string } | null;
 };
 
 type Analysis = {
@@ -122,7 +125,10 @@ const classificationColors: Record<EvidenceClassification, { color: string; back
 };
 
 function placement(item: Match) {
+  if (item.category === "Education") return "Education／教育背景。保留真实学位状态和预计毕业时间。";
   if (item.category === "Programming and Data") return "Technical Skills。仅在母版确实未覆盖时补充。";
+  if (item.category === "Communication") return "Publications、Research 或对应论文项目。";
+  if (["Professional Service", "Teaching", "Awards"].includes(item.category)) return "对应的学术服务、教学或荣誉栏目。";
   if (["Research Design", "Data", "Methods", "Domain"].includes(item.category)) return "相关项目 bullet 或项目排序。";
   return "Summary 或相关项目 bullet，用真实职责和成果证明。";
 }
@@ -187,7 +193,7 @@ export default function CvTailorClient() {
       setAnalysis(result as Analysis);
       setDecisions({});
       setResultPanel("projects");
-      setMessage("分析完成。修改草案均附有 fact ID、证据位置和 claim boundary，可逐条接受或拒绝。");
+      setMessage("分析完成。每条事实支持缺口和相邻经验都有明确处理结论；只有可安全写入的建议才能保留或拒绝。");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "分析失败。");
     } finally {
@@ -200,6 +206,8 @@ export default function CvTailorClient() {
   const adjacent = useMemo(() => analysis?.matches.filter((x) => x.status === "adjacent_gap") ?? [], [analysis]);
   const unsupported = useMemo(() => analysis?.matches.filter((x) => x.status === "unsupported_gap") ?? [], [analysis]);
   const drafts = analysis?.modificationDrafts ?? [];
+  const editableDrafts = drafts.filter((draft) => draft.canGenerateEdit);
+  const blockedDrafts = drafts.filter((draft) => !draft.canGenerateEdit);
   const resultPanels = analysis ? [
     { id: "projects" as const, label: "推荐项目", value: analysis.projects?.length ?? 0 },
     { id: "requirements" as const, label: "全部 JD 要求", value: analysis.summary.required },
@@ -207,7 +215,7 @@ export default function CvTailorClient() {
     { id: "supported" as const, label: "事实支持缺口", value: analysis.summary.supportedGaps },
     { id: "adjacent" as const, label: "仅相邻经验", value: analysis.summary.adjacentGaps },
     { id: "unsupported" as const, label: "无证据要求", value: analysis.summary.unsupportedGaps },
-    { id: "drafts" as const, label: "逐条修改", value: drafts.length },
+    { id: "drafts" as const, label: "逐条处理", value: drafts.length },
   ] : [];
 
   const changeTrack = (nextTrack: string) => {
@@ -279,31 +287,43 @@ export default function CvTailorClient() {
     }
 
     return <>
-      <PanelIntro title="逐条修改草案与 LaTeX Diff" text="草案不会自动改写母版。逐条核对事实、表述边界和 LaTeX diff 后，再选择保留或拒绝。" />
-      {drafts.length === 0 ? <p>当前没有可安全生成的修改草案。</p> : drafts.map((draft) => {
+      <PanelIntro
+        title={`逐条处理 ${drafts.length} 项：可生成修改 ${editableDrafts.length} 项，仅相邻不可直写 ${blockedDrafts.length} 项`}
+        text="每一条事实支持缺口和相邻经验都会在这里得到处理结论。相邻经验只展示真实相关事实与禁止边界，不生成 CV 修改。"
+      />
+      {drafts.length === 0 ? <p>当前没有需要逐条处理的事实支持缺口或相邻经验。</p> : drafts.map((draft) => {
         const decision = decisions[draft.id] ?? "pending";
         return <div key={draft.id} style={{ ...draftCard, opacity: decision === "rejected" ? 0.58 : 1 }}>
           <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "start" }}>
             <div><strong>{draft.requirement}</strong><p style={{ margin: "4px 0 0" }}>{draft.project}</p></div>
             <ClassificationBadge value={draft.classification} />
           </div>
-          <p><strong>建议操作：</strong>{draft.action === "revise_existing" ? "改写母版中已有项目的 bullet" : "考虑用该项目替换较弱项目"}</p>
-          <p><strong>建议句：</strong>{draft.proposedBullet}</p>
+          <p><strong>处理位置：</strong>{draft.targetSection}</p>
+          <p><strong>处理结论：</strong>{draft.action === "revise_existing"
+            ? "改写母版中已有项目的 bullet"
+            : draft.action === "consider_addition"
+              ? "考虑用该项目替换较弱项目"
+              : draft.action === "add_to_section"
+                ? "加入或合并到对应的非项目栏目"
+                : "不生成直接 CV 表述"}</p>
+          {draft.canGenerateEdit
+            ? <p><strong>建议句：</strong>{draft.proposedBullet}</p>
+            : <p style={blockedEditStyle}><strong>不可直接写入：</strong>{draft.rationale}<br /><strong>只能安全保留的事实：</strong>{draft.verifiedFact}</p>}
           <p><strong>依据：</strong>{draft.factId} · {draft.source} · {draft.evidenceLocation}</p>
-          <p>{draft.rationale}</p>
+          {draft.canGenerateEdit && <p>{draft.rationale}</p>}
           {draft.claimBoundary && <p style={boundaryStyle}><strong>Claim boundary：</strong>{draft.claimBoundary}</p>}
-          <details>
+          {draft.canGenerateEdit && draft.latexDiff && <details>
             <summary style={{ cursor: "pointer", fontWeight: 800 }}>查看 LaTeX diff</summary>
             <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
               <pre style={removedDiff}>{draft.latexDiff.before}</pre>
               <pre style={addedDiff}>{draft.latexDiff.after}</pre>
             </div>
-          </details>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
+          </details>}
+          {draft.canGenerateEdit && <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
             <button type="button" onClick={() => setDecisions((current) => ({ ...current, [draft.id]: "accepted" }))} style={decisionButton(decision === "accepted", "accept")}>保留建议</button>
             <button type="button" onClick={() => setDecisions((current) => ({ ...current, [draft.id]: "rejected" }))} style={decisionButton(decision === "rejected", "reject")}>拒绝</button>
             {decision !== "pending" && <button type="button" onClick={() => setDecisions((current) => ({ ...current, [draft.id]: "pending" }))} style={neutralButton}>撤销选择</button>}
-          </div>
+          </div>}
         </div>;
       })}
     </>;
@@ -507,6 +527,7 @@ const evidenceBlock = { marginTop: 10, padding: 12, borderRadius: 12, background
 const requirementCard = { border: "1px solid #ded9ca", borderRadius: 14, padding: 14, background: "#faf7ee", lineHeight: 1.55 } as const;
 const jdEvidenceStyle = { margin: "10px 0 0", borderLeft: "3px solid #16794b", padding: "8px 10px", background: "#f0f5ef", borderRadius: "0 10px 10px 0", lineHeight: 1.55 } as const;
 const boundaryStyle = { borderLeft: "3px solid #a96e31", paddingLeft: 10, color: "#76512e" } as const;
+const blockedEditStyle = { borderLeft: "3px solid #9a473b", padding: "9px 11px", background: "#f9e4e1", color: "#7c342d", borderRadius: "0 10px 10px 0", lineHeight: 1.65 } as const;
 const draftCard = { border: "1px solid #d8d2c3", borderRadius: 16, padding: 15, marginBottom: 12, background: "#fbf8f0", lineHeight: 1.55, transition: "opacity .2s ease" } as const;
 const removedDiff = { whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: 0, padding: 12, borderRadius: 10, background: "#fde8e5", color: "#7c2d25", fontSize: 12 } as const;
 const addedDiff = { whiteSpace: "pre-wrap", overflowWrap: "anywhere", margin: 0, padding: 12, borderRadius: 10, background: "#e4f4e8", color: "#155b38", fontSize: 12 } as const;
