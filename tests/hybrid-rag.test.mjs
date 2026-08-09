@@ -37,8 +37,8 @@ function fact(overrides = {}) {
   };
 }
 
-function rule(label, aliases, category = "Methods") {
-  return { label, aliases, category };
+function rule(label, aliases, category = "Methods", projectTerms = []) {
+  return { label, aliases, category, projectTerms };
 }
 
 test("exact named method can produce Direct evidence", () => {
@@ -93,7 +93,7 @@ test("project-level facts cannot support personal CV bullets", () => {
   assert.equal(result.matches[0].recommendedForCv, false);
 });
 
-test("planned and in-progress facts preserve readiness limits", () => {
+test("match strength and implementation status remain separate", () => {
   const planned = runHybridRag(
     "Experience with reinforcement learning.",
     "tech",
@@ -101,7 +101,8 @@ test("planned and in-progress facts preserve readiness limits", () => {
     [fact({ fact_status: "planned", exact_methods_tools: ["reinforcement learning"], retrieval_text: "Planned reinforcement learning experiments." })],
     [],
   );
-  assert.equal(planned.matches[0].classification, "Adjacent");
+  assert.equal(planned.matches[0].classification, "Direct");
+  assert.equal(planned.matches[0].recommendedForCv, "conditional");
 
   const inProgress = runHybridRag(
     "Experience with reinforcement learning.",
@@ -110,7 +111,43 @@ test("planned and in-progress facts preserve readiness limits", () => {
     [fact({ fact_status: "in_progress", exact_methods_tools: ["reinforcement learning"], retrieval_text: "Implementing reinforcement learning experiments." })],
     [],
   );
-  assert.equal(inProgress.matches[0].classification, "Strong Transferable");
+  assert.equal(inProgress.matches[0].classification, "Direct");
+  assert.equal(inProgress.matches[0].recommendedForCv, "conditional");
+});
+
+test("agent workflow design is direct while planned status stays visible", () => {
+  const result = runHybridRag(
+    "具备强化学习、大模型或 Agent 系统至少一个方向的经验。",
+    "tech",
+    [rule("Agent workflow", ["agent system", "agent 系统"], "AI Systems", ["multi-agent", "agent workflow", "workflow design"])],
+    [fact({
+      fact_id: "NEURO-001",
+      fact_status: "planned",
+      verified_fact: "Designed a matched single-agent, two-agent, and four-agent workflow evaluation.",
+      retrieval_text: "Designed a multi-agent workflow and evaluation protocol.",
+    })],
+    [],
+  );
+  assert.equal(result.matches[0].classification, "Direct");
+  assert.match(result.matches[0].candidates[0].limitation, /Planned work/i);
+});
+
+test("generic research responsibilities use verified task evidence", () => {
+  const cases = [
+    ["Scientific problem solving", "scientific problem solving", "Research", ["methodology"], "Developed the methodology and simulation design for a first-author study."],
+    ["Manuscript development", "manuscript development", "Communication", ["original draft", "manuscript"], "Contributed Writing – Original Draft and revised the manuscript."],
+    ["Cross-functional collaboration", "cross-functional", "Collaboration", ["multidisciplinary", "collaboration"], "Collaborated in a multidisciplinary biomedical research team."],
+  ];
+  for (const [label, alias, category, projectTerms, verifiedFact] of cases) {
+    const result = runHybridRag(
+      `Experience with ${alias}.`,
+      "tech",
+      [rule(label, [alias], category, projectTerms)],
+      [fact({ verified_fact: verifiedFact, retrieval_text: verifiedFact })],
+      [],
+    );
+    assert.equal(result.matches[0].classification, "Direct", label);
+  }
 });
 
 test("production scope cannot be inferred from a research prototype", () => {

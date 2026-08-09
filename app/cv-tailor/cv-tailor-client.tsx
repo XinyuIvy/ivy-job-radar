@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type TemplateLanguage = "en" | "zh";
-type EvidenceClassification = "Direct" | "Strong Transferable" | "Adjacent";
+type EvidenceClassification = "Direct" | "Credential Direct" | "Coursework Match" | "Strong Transferable" | "Credential Status Gap" | "Adjacent";
 
 type SupportEvidence = {
   projectId: string;
@@ -72,6 +72,8 @@ type Analysis = {
     factIndexFile?: string;
     conceptEdgesFile?: string;
     atomicFactCount: number;
+    structuredFactCount?: number;
+    unifiedFactCount?: number;
     conceptEdgeCount?: number;
     embeddingBackend?: string;
     embeddingDimensions?: number;
@@ -103,13 +105,19 @@ const trackLabels: Record<string, string> = {
 
 const classificationLabels: Record<EvidenceClassification, string> = {
   Direct: "Direct｜直接证据",
+  "Credential Direct": "Credential｜学历直接匹配",
+  "Coursework Match": "Coursework｜课程匹配",
   "Strong Transferable": "Transferable｜强可迁移能力",
+  "Credential Status Gap": "Status gap｜学位状态缺口",
   Adjacent: "Adjacent｜相邻经验",
 };
 
 const classificationColors: Record<EvidenceClassification, { color: string; background: string }> = {
   Direct: { color: "#10633d", background: "#e3f3e8" },
+  "Credential Direct": { color: "#10633d", background: "#dcefe7" },
+  "Coursework Match": { color: "#235c78", background: "#e3f1f7" },
   "Strong Transferable": { color: "#7a5500", background: "#fff2c8" },
+  "Credential Status Gap": { color: "#7a4b2a", background: "#f7e8dc" },
   Adjacent: { color: "#7a4b2a", background: "#f7e8dc" },
 };
 
@@ -339,7 +347,7 @@ export default function CvTailorClient() {
             {analysis && <article style={cardStyle}>
               <h2 style={headingStyle}>2. 分析导航</h2>
               <p style={{ marginTop: -5, color: "#5c665f", fontSize: 12, lineHeight: 1.5 }}>
-                {analysis.sourceDiagnostics?.templateFile} · {analysis.sourceDiagnostics?.atomicFactCount ?? 0} 条原子事实 · {analysis.sourceDiagnostics?.conceptEdgeCount ?? 0} 条概念边 · Hybrid RAG
+                {analysis.sourceDiagnostics?.templateFile} · {analysis.sourceDiagnostics?.atomicFactCount ?? 0} 条项目事实 · {analysis.sourceDiagnostics?.structuredFactCount ?? 0} 条学历/课程/技能与履历事实 · {analysis.sourceDiagnostics?.conceptEdgeCount ?? 0} 条概念边 · Hybrid RAG
               </p>
               <p style={{ lineHeight: 1.55, margin: "10px 0 12px" }}>点击一个分类，右侧只显示对应结果。</p>
               <div role="tablist" aria-label="CV 分析结果分类" style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8 }}>
@@ -426,12 +434,16 @@ const retrievalChannelLabels: Record<string, string> = {
   embedding: "Embedding",
   concept_graph: "概念图谱",
   industry_translation: "行业翻译",
+  credential_index: "学历索引",
+  coursework_index: "课程索引",
+  profile_index: "技能/履历索引",
 };
 
 function EvidenceCard({ evidence, compact = false }: { evidence: SupportEvidence; compact?: boolean }) {
   return <div style={evidenceBlock}>
     <p style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "center" }}><strong>{evidence.project}</strong><ClassificationBadge value={evidence.classification} /></p>
     <p><strong>支持事实：</strong>{evidence.fact}</p>
+    {evidence.factStatus && <p style={{ color: "#5c665f", fontSize: 12 }}><strong>事实状态：</strong>{evidence.factStatus}</p>}
     <p style={{ color: "#5c665f", fontSize: 12 }}>
       {typeof evidence.score === "number" ? `重排分 ${evidence.score}/100` : "已核验"}
       {(evidence.retrievalChannels ?? []).length > 0 ? ` · ${(evidence.retrievalChannels ?? []).map((channel) => retrievalChannelLabels[channel] ?? channel).join(" / ")}` : ""}

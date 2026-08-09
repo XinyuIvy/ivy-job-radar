@@ -9,11 +9,16 @@ import {
   type IndustryTrack,
 } from "../../../lib/hybrid-rag";
 import { latexToPlainText } from "../../../lib/latex-text";
+import {
+  matchStructuredEvidence,
+  type StructuredCandidate,
+  type StructuredFactRecord,
+} from "../../../lib/structured-evidence";
 
 export const dynamic = "force-dynamic";
 
 type TemplateLanguage = "en" | "zh";
-type EvidenceClassification = "Direct" | "Strong Transferable" | "Adjacent";
+type EvidenceClassification = "Direct" | "Credential Direct" | "Coursework Match" | "Strong Transferable" | "Credential Status Gap" | "Adjacent";
 
 type RequirementRule = {
   label: string;
@@ -99,6 +104,7 @@ const templateFiles: Record<TemplateLanguage, Record<string, string | null>> = {
 
 // Compound requirements stay split so one matched concept cannot imply another.
 const requirements: RequirementRule[] = [
+  { label: "Education credential", category: "Education", aliases: ["phd", "ph.d.", "doctorate", "doctoral degree", "master's", "masters degree", "master of science", "bachelor's", "bachelors degree", "博士", "硕士", "学士", "本科"], projectTerms: ["biostatistics", "statistics", "quantitative field", "生物统计", "统计学", "定量专业"] },
   { label: "Scientific study design", category: "Research Design", aliases: ["study design", "scientific studies", "clinical studies", "observational", "prospective", "retrospective", "interventional", "研究设计", "实验设计", "试验设计", "课题设计"], projectTerms: ["study design", "clinical trial", "simulation", "endpoint", "研究设计", "试验设计", "模拟", "终点"] },
   { label: "Human-subjects research", category: "Research Design", aliases: ["human subjects", "protocol development", "endpoint selection", "ethics", "irb", "人体研究", "受试者", "临床研究", "伦理审查"], projectTerms: ["clinical trial", "endpoint", "protocol", "ehr", "patient", "participants", "临床试验", "终点", "患者", "受试者"] },
   { label: "Wearable data", category: "Data", aliases: ["wearable", "wearables", "可穿戴"], projectTerms: ["wearable", "digital measurement", "daily diary", "可穿戴", "数字测量", "每日记录"] },
@@ -123,14 +129,25 @@ const requirements: RequirementRule[] = [
   { label: "Multimodal-model development", category: "AI Models", aliases: ["multimodal model", "multi-modal model", "multimodal foundation model", "多模态模型", "多模态大模型"], projectTerms: ["multimodal model", "multi-modal model", "多模态模型"] },
   { label: "Scientific problem solving", category: "Research", aliases: ["problem definition", "scientific problem solving", "科研能力", "问题定义", "创新性解决方案"], projectTerms: ["research question", "methodology", "research design", "研究问题", "方法", "研究设计"] },
   { label: "Paper reproduction", category: "Research", aliases: ["paper reproduction", "research reproduction", "论文复现", "研究复现"], projectTerms: ["reproducibility", "replication", "reproduction", "可复现", "复现"] },
-  { label: "Literature review", category: "Research", aliases: ["literature review", "paper reading", "论文阅读", "文献综述", "文献检索"], projectTerms: ["literature", "published studies", "manuscript", "文献", "公开研究", "论文"] },
+  { label: "Literature review", category: "Research", aliases: ["literature review", "systematic review", "scientific literature", "paper reading", "论文阅读", "文献综述", "系统综述", "文献检索"], projectTerms: ["literature search", "literature discovery", "scientific reading", "critical appraisal", "literature review", "文献检索", "文献阅读", "批判性评价"] },
+  { label: "Evidence synthesis", category: "Research", aliases: ["evidence synthesis", "research synthesis", "synthesize evidence", "literature synthesis", "证据综合", "研究综合", "文献综合"], projectTerms: ["evidence synthesis", "literature synthesis", "structured comparison", "证据综合", "结构化比较"] },
+  { label: "Meta-analysis", category: "Methods", aliases: ["meta-analysis", "meta analysis", "荟萃分析", "元分析"] },
+  { label: "PRISMA workflow", category: "Methods", aliases: ["prisma", "prospero", "risk-of-bias", "risk of bias", "偏倚风险工具"] },
   { label: "Python", category: "Programming and Data", aliases: ["python"] },
   { label: "R", category: "Programming and Data", aliases: ["r", "r programming", "using r"] },
   { label: "SQL", category: "Programming and Data", aliases: ["sql"] },
+  { label: "SAS", category: "Programming and Data", aliases: ["sas"] },
+  { label: "MATLAB", category: "Programming and Data", aliases: ["matlab"] },
+  { label: "LaTeX", category: "Programming and Data", aliases: ["latex"] },
+  { label: "Git/GitHub", category: "Programming and Data", aliases: ["git", "github", "version control", "版本控制"] },
   { label: "Reproducible computational workflows", category: "Engineering", aliases: ["reproducible", "computational workflow", "analytical workflow", "jupyter", "rstudio", "git", "docker", "conda", "可复现", "计算工作流", "分析流程"], projectTerms: ["reproducible", "git", "quarto", "pipeline", "workflow", "可复现", "流水线", "工作流"] },
   { label: "Scientific visualization", category: "Communication", aliases: ["visualization", "figures", "scientific data visualization", "可视化", "图表"], projectTerms: ["visualization", "figures", "dashboard", "shiny", "可视化", "图表", "仪表板"] },
   { label: "Manuscript development", category: "Communication", aliases: ["manuscripts", "manuscript development", "publication", "论文", "手稿"], projectTerms: ["first author", "manuscript", "publication", "第一作者", "论文", "手稿"] },
+  { label: "Manuscript revision and reviewer response", category: "Communication", aliases: ["manuscript revision", "revise manuscripts", "reviewer comments", "response to reviewers", "revise and resubmit", "论文修改", "回复审稿意见", "审稿意见"], projectTerms: ["manuscript revision", "scientific editing", "reviewer response", "revise and resubmit", "论文修改", "回复审稿意见"] },
   { label: "Scientific dissemination", category: "Communication", aliases: ["abstracts", "reports", "patents", "presentations", "scientific dissemination", "专利", "学术会议", "同行评议", "报告"], projectTerms: ["presentation", "report", "reviewer", "报告", "会议", "审稿"] },
+  { label: "Peer review and professional service", category: "Professional Service", aliases: ["peer review", "reviewer", "professional service", "session chair", "organizer", "同行评议", "审稿", "会议主持", "会议组织"] },
+  { label: "Teaching and mentoring", category: "Teaching", aliases: ["teaching", "teaching assistant", "mentor", "mentoring", "教学", "助教", "指导学生"] },
+  { label: "Awards and honors", category: "Awards", aliases: ["award", "honor", "prize", "奖励", "奖项", "荣誉"] },
   { label: "Research leadership", category: "Leadership", aliases: ["leading scientific research", "hypothesis through publication", "first-authored", "first authored", "主导科研", "研究能力", "课题设计"], projectTerms: ["first author", "led", "lead project", "project lead", "corresponding author", "第一作者", "主导", "通讯作者"] },
   { label: "Cross-functional collaboration", category: "Collaboration", aliases: ["cross-functionally", "cross-functional", "collaborative", "stakeholders", "partnership", "跨职能", "跨学科", "团队合作", "协作"], projectTerms: ["cross-functional", "collaboration", "stakeholder", "multidisciplinary", "team", "跨职能", "合作", "团队"] },
   { label: "Evidence-based decision support", category: "Decision Support", aliases: ["evidence-based decisions", "decision-ready", "insight generation", "practical health applications", "决策支持", "支持决策"], projectTerms: ["decision support", "recommendation", "trial design", "operating trade-offs", "决策", "建议", "试验设计", "权衡"] },
@@ -400,7 +417,7 @@ function collectAtomicEvidence(
   industryTranslations: Map<string, IndustryTranslation>,
   conceptGraph: Map<string, ConceptExpansion>,
 ) {
-  const rank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+  const rank: Record<EvidenceClassification, number> = { Direct: 5, "Credential Direct": 5, "Strong Transferable": 4, "Coursework Match": 2, "Credential Status Gap": 1, Adjacent: 1 };
   return atomicFacts
     .map((fact) => {
       const capability = capabilityLayers.get(fact.factId);
@@ -490,9 +507,42 @@ function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrac
   };
 }
 
+function structuredEvidenceLabel(candidate: StructuredCandidate) {
+  const record = candidate.record;
+  if (record.record_type === "education_credential") return `Education · ${record.institution}`;
+  if (record.record_type === "coursework") return `Coursework · ${record.institution}`;
+  if (record.record_type === "skill") return `Skill · ${record.skill}`;
+  if (record.record_type === "publication") return `Publication · ${record.title}`;
+  if (record.record_type === "research_literature") return "Scholarly literature workflow";
+  if (record.record_type === "professional_service") return "Professional service";
+  if (record.record_type === "teaching") return "Teaching";
+  return "Awards and honors";
+}
+
+function structuredSupportEvidence(candidate: StructuredCandidate): SupportEvidence {
+  const record = candidate.record;
+  return {
+    projectId: `profile:${record.fact_id}`,
+    project: structuredEvidenceLabel(candidate),
+    factId: record.fact_id,
+    fact: record.verified_fact,
+    factStatus: record.course_status || record.degree_status || record.publication_status || "verified",
+    evidenceStrength: record.evidence_strength,
+    classification: candidate.classification,
+    relevance: candidate.why,
+    source: record.source,
+    evidenceLocation: record.evidence_location || "",
+    claimBoundary: record.claim_boundary || "",
+    capabilityContext: record.normalized_concepts?.join(" · ") || "",
+    industryGuardrail: candidate.limitation,
+    score: candidate.score,
+    retrievalChannels: [record.record_type === "coursework" ? "coursework_index" : record.record_type === "education_credential" ? "credential_index" : "profile_index"],
+  };
+}
+
 function recommendVerifiedProjects(ragMatches: HybridMatch[], templateText: string, track: IndustryTrack) {
   const byProject = new Map<string, { name: string; requirements: Map<string, SupportEvidence> }>();
-  const rank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+  const rank: Record<EvidenceClassification, number> = { Direct: 5, "Credential Direct": 5, "Strong Transferable": 4, "Coursework Match": 2, "Credential Status Gap": 1, Adjacent: 1 };
   for (const match of ragMatches) {
     for (const candidate of match.candidates) {
       const evidence = verifiedSupportEvidence(candidate, track);
@@ -565,7 +615,7 @@ function recommendProjects(
       byProject.set(evidence.projectId, current);
     }
   }
-  const weights: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
+  const weights: Record<EvidenceClassification, number> = { Direct: 5, "Credential Direct": 5, "Strong Transferable": 4, "Coursework Match": 2, "Credential Status Gap": 1, Adjacent: 1 };
   return [...byProject.entries()].map(([projectId, value]) => {
     const evidence = [...value.requirements.values()];
     return {
@@ -583,7 +633,7 @@ function recommendProjects(
 function buildModificationDrafts(matches: RequirementMatch[], template: string, factMaster: string, language: TemplateLanguage) {
   const drafts: ModificationDraft[] = [];
   for (const match of matches.filter((item) => item.status === "supported_gap")) {
-    const evidence = match.supportEvidence.find((item) => item.classification !== "Adjacent");
+    const evidence = match.supportEvidence.find((item) => ["Direct", "Strong Transferable"].includes(item.classification) && !item.projectId.startsWith("profile:"));
     if (!evidence) continue;
     const block = findProjectBlock(template, evidence.projectId, evidence.project);
     const rule = requirements.find((item) => item.label === match.keyword) ?? { label: match.keyword, category: match.category, aliases: [match.keyword] };
@@ -638,28 +688,44 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const [template, factMaster, factIndexJsonl, conceptEdgesJsonl, matchingSpecYaml] = await Promise.all([
+    const [template, factMaster, factIndexJsonl, conceptEdgesJsonl, matchingSpecYaml, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl, nonProjectMatchingSpecYaml, literatureMatchingSpecYaml] = await Promise.all([
       readPrivateFile(`master/template-cv/${templateFile}`, token),
       readPrivateFile("master/FACT_MASTER.md", token),
       readPrivateFile("master/project-evidence/FACT_INDEX.jsonl", token),
       readPrivateFile("master/project-evidence/CONCEPT_EDGES.jsonl", token),
       readPrivateFile("master/project-evidence/STAGE7_HYBRID_RAG_MATCHING.yaml", token),
+      readPrivateFile("master/project-evidence/CREDENTIAL_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/COURSEWORK_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/PROFILE_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/LITERATURE_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/STAGE7_NON_PROJECT_MATCHING_ADDENDUM.yaml", token),
+      readPrivateFile("master/project-evidence/STAGE7_LITERATURE_MATCHING_ADDENDUM.yaml", token),
     ]);
     const templateText = latexToPlainText(template);
-    const factIndex = parseJsonl<FactIndexRecord>(factIndexJsonl);
+    const unifiedFactIndex = parseJsonl<FactIndexRecord>(factIndexJsonl);
+    const factIndex = unifiedFactIndex.filter((fact) => !fact.record_type || fact.record_type === "project_fact");
+    const structuredIndex = [
+      ...parseJsonl<StructuredFactRecord>(credentialIndexJsonl),
+      ...parseJsonl<StructuredFactRecord>(courseworkIndexJsonl),
+      ...parseJsonl<StructuredFactRecord>(profileIndexJsonl),
+      ...parseJsonl<StructuredFactRecord>(literatureIndexJsonl),
+    ];
     const conceptEdges = parseJsonl<ConceptEdge>(conceptEdgesJsonl);
     const rag = runHybridRag(jd, track as IndustryTrack, requirements, factIndex, conceptEdges);
     const matches: RequirementMatch[] = rag.matches.map((hybridMatch) => {
       const rule = hybridMatch.requirement;
       const covered = hasAlias(templateText, rule.literalTerms);
-      const evidenceRank: Record<EvidenceClassification, number> = { Direct: 3, "Strong Transferable": 2, Adjacent: 1 };
-      const supportEvidence = hybridMatch.candidates
+      const evidenceRank: Record<EvidenceClassification, number> = { Direct: 5, "Credential Direct": 5, "Strong Transferable": 4, "Coursework Match": 2, "Credential Status Gap": 1, Adjacent: 1 };
+      const projectEvidence = hybridMatch.candidates
         .map((candidate) => verifiedSupportEvidence(candidate, track as IndustryTrack))
-        .filter((evidence): evidence is SupportEvidence => Boolean(evidence))
+        .filter((evidence): evidence is SupportEvidence => Boolean(evidence));
+      const structuredEvidence = matchStructuredEvidence(rule, structuredIndex).map(structuredSupportEvidence);
+      const supportEvidence = [...projectEvidence, ...structuredEvidence]
         .sort((left, right) => evidenceRank[right.classification] - evidenceRank[left.classification] || (right.score ?? 0) - (left.score ?? 0))
+        .filter((item, index, all) => all.findIndex((candidate) => candidate.factId === item.factId) === index)
         .slice(0, 4);
-      const hasSupported = supportEvidence.some((item) => item.classification === "Direct" || item.classification === "Strong Transferable");
-      const hasAdjacent = supportEvidence.some((item) => item.classification === "Adjacent");
+      const hasSupported = supportEvidence.some((item) => ["Direct", "Credential Direct", "Coursework Match", "Strong Transferable"].includes(item.classification));
+      const hasAdjacent = supportEvidence.some((item) => ["Adjacent", "Credential Status Gap"].includes(item.classification));
       return {
         keyword: rule.label,
         category: rule.category,
@@ -685,11 +751,13 @@ export async function POST(request: NextRequest) {
         factIndexFile: "master/project-evidence/FACT_INDEX.jsonl",
         conceptEdgesFile: "master/project-evidence/CONCEPT_EDGES.jsonl",
         atomicFactCount: factIndex.length,
+        structuredFactCount: structuredIndex.length,
+        unifiedFactCount: unifiedFactIndex.length,
         conceptEdgeCount: conceptEdges.length,
         embeddingBackend: rag.diagnostics.embeddingBackend,
         embeddingDimensions: rag.diagnostics.embeddingDimensions,
         bm25Parameters: rag.diagnostics.bm25Parameters,
-        matchingSpecLoaded: matchingSpecYaml.includes("stage: 7"),
+        matchingSpecLoaded: matchingSpecYaml.includes("stage: 7") && nonProjectMatchingSpecYaml.includes("stage: 7") && literatureMatchingSpecYaml.includes("stage: 7"),
         ragPreparationStages: "1–7",
       },
       summary: {
