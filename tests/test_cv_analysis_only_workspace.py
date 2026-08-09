@@ -10,7 +10,7 @@ class CvAnalysisOnlyWorkspaceTests(unittest.TestCase):
         self.assertIn("CV 修改总结", client)
         self.assertIn("推荐优先使用的项目", client)
         self.assertIn("事实支持但母版未明确覆盖", client)
-        self.assertIn("逐条修改草案与 LaTeX Diff", client)
+        self.assertIn("逐条处理", client)
         self.assertIn("保留建议", client)
         self.assertIn("拒绝", client)
         self.assertNotIn("生成 LaTeX", client)
