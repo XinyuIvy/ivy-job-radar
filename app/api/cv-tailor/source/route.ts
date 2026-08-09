@@ -67,13 +67,16 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [template, facts, keywords, atomicFacts] = await Promise.all([
+    const [template, facts, keywords, factIndex, conceptEdges, projectIndex, hybridRagMatching] = await Promise.all([
       readPrivateFile(`master/template-cv/${filename}`, token),
       readPrivateFile("master/FACT_MASTER.md", token),
       readPrivateFile("master/template-cv/KEYWORD_ANALYSIS.md", token),
-      readPrivateFile("master/project-evidence/STAGE3_ATOMIC_FACTS.yaml", token),
+      readPrivateFile("master/project-evidence/FACT_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/CONCEPT_EDGES.jsonl", token),
+      readPrivateFile("master/project-evidence/PROJECT_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/STAGE7_HYBRID_RAG_MATCHING.yaml", token),
     ]);
-    return NextResponse.json({ track, language, filename, template, facts, keywords, atomicFacts });
+    return NextResponse.json({ track, language, filename, template, facts, keywords, factIndex, conceptEdges, projectIndex, hybridRagMatching });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "CV source loading failed." }, { status: 502 });
   }
