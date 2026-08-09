@@ -5,14 +5,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CvAtomicRagAndDiffTests(unittest.TestCase):
-    def test_analysis_reads_stage3_atomic_facts(self):
+    def test_analysis_reads_compiled_fact_index(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("STAGE3_ATOMIC_FACTS.yaml", route)
-        self.assertIn("parseAtomicFacts", route)
-        self.assertIn("verifiedFact", route)
-        self.assertIn("evidenceLocation", route)
-        self.assertIn("personalAttribution", route)
-        self.assertIn("claimBoundary", route)
+        self.assertIn("FACT_INDEX.jsonl", route)
+        self.assertIn("CONCEPT_EDGES.jsonl", route)
+        self.assertIn("parseJsonl<FactIndexRecord>", route)
+        self.assertIn("runHybridRag", route)
+        self.assertIn("verifiedSupportEvidence", route)
 
     def test_project_identity_uses_canonical_aliases(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
@@ -46,6 +45,32 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
         self.assertIn("查看 LaTeX diff", client)
         self.assertIn("保留建议", client)
         self.assertIn("拒绝", client)
+
+    def test_analysis_navigation_uses_clickable_result_panels(self):
+        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
+        self.assertIn('type ResultPanel = "projects" | "requirements" | "covered"', client)
+        self.assertIn('role="tablist"', client)
+        self.assertIn('onClick={() => setResultPanel(panel.id)}', client)
+        self.assertIn('label: "推荐项目"', client)
+        self.assertIn('label: "逐条修改"', client)
+
+    def test_jd_evidence_is_compact_and_highlighted(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
+        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
+        self.assertIn("jdEvidence: rule.sourceText", route)
+        self.assertIn("jdMatchedTerms", route)
+        self.assertIn("HighlightedText", client)
+        self.assertIn("JD 原句", client)
+
+    def test_stage_4_to_7_are_loaded_through_compiled_indexes(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
+        for filename in [
+            "FACT_INDEX.jsonl",
+            "CONCEPT_EDGES.jsonl",
+            "STAGE7_HYBRID_RAG_MATCHING.yaml",
+        ]:
+            self.assertIn(filename, route)
+        self.assertIn('ragPreparationStages: "1–7"', route)
 
 
 if __name__ == "__main__":
