@@ -5,7 +5,9 @@ import {
   type ConceptEdge,
   type FactIndexRecord,
   type HybridCandidate,
+  type HybridMatch,
   type IndustryTrack,
+  type RequirementRule,
 } from "../../../lib/hybrid-rag";
 import {
   matchStructuredEvidence,
@@ -241,6 +243,34 @@ function reasonFor(status: MatchStatus, templateMatches: TemplateMatchView[], ev
   return "事实索引、结构化学历/课程/论文索引均没有足够证据。";
 }
 
+function runCompleteHybridRag(
+  jd: string,
+  track: IndustryTrack,
+  rules: RequirementRule[],
+  factIndex: FactIndexRecord[],
+  conceptEdges: ConceptEdge[],
+) {
+  const chunkSize = 30;
+  const allMatches: HybridMatch[] = [];
+  for (let offset = 0; offset < rules.length; offset += chunkSize) {
+    allMatches.push(...runHybridRag(jd, track, rules.slice(offset, offset + chunkSize), factIndex, conceptEdges).matches);
+  }
+  const seen = new Set<string>();
+  const matches = allMatches.filter((match) => {
+    const key = `${match.requirement.category}\u0000${match.requirement.label}\u0000${match.requirement.sourceText}`.toLocaleLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).map((match, index) => ({
+    ...match,
+    requirement: {
+      ...match.requirement,
+      requirementId: `JD-R${String(index + 1).padStart(3, "0")}`,
+    },
+  }));
+  return { matches };
+}
+
 function projectRecommendations(matches: RequirementMatch[], snippets: ReturnType<typeof buildCvTemplateIndex>) {
   const byProject = new Map<string, { name: string; requirements: Map<string, SupportEvidence> }>();
   for (const match of matches) {
@@ -279,7 +309,7 @@ function targetSection(evidence: SupportEvidence, language: TemplateLanguage) {
 
 function buildModificationDrafts(matches: RequirementMatch[], language: TemplateLanguage) {
   const drafts: ModificationDraft[] = [];
-  for (const match of matches.filter((item) => item.status === "supported_gap" || item.status === "adjacent_gap")) {
+  for (const match of matches.filter((item) => ["supported_gap", "adjacent_gap"].includes(item.status))) {
     const evidence = match.supportEvidence[0];
     if (!evidence) continue;
     if (match.status === "adjacent_gap") {
@@ -360,7 +390,7 @@ export async function POST(request: NextRequest) {
       ...parseJsonl<StructuredFactRecord>(literatureIndexJsonl),
     ];
     const conceptEdges = parseJsonl<ConceptEdge>(conceptEdgesJsonl);
-    const rag = runHybridRag(jd, track as IndustryTrack, CV_JD_RULES, factIndex, conceptEdges);
+    const rag = runCompleteHybridRag(jd, track as IndustryTrack, CV_JD_RULES, factIndex, conceptEdges);
     const templateIndex = buildCvTemplateIndex(template, templateFile, factIndex, structuredIndex);
 
     const matches: RequirementMatch[] = rag.matches.map((hybridMatch) => {
@@ -427,7 +457,7 @@ export async function POST(request: NextRequest) {
         structuredFactCount: structuredIndex.length,
         conceptEdgeCount: conceptEdges.length,
         templateMatching: "independent_semantic_snippet_index",
-        factMatching: "hybrid_rag",
+        factMatching: "complete_chunked_hybrid_rag",
         ontology: "shared_bilingual_capability_ontology",
       },
     });
