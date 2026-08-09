@@ -8,6 +8,7 @@ export type IndustryTranslation = {
 };
 
 export type FactIndexRecord = {
+  record_type?: "project_fact" | "education_credential" | "coursework" | "skill" | "publication" | "professional_service" | "teaching" | "award" | "research_literature";
   fact_id: string;
   project_id: string;
   project_name: string;
@@ -59,6 +60,7 @@ export type JdRequirement = {
   sourceText: string;
   literalTerms: string[];
   normalizedConcepts: string[];
+  evidenceTerms: string[];
   hardRequirement: boolean;
   importance: "critical" | "high" | "medium" | "low";
   scopes: Array<"production" | "regulatory" | "causal" | "client_facing">;
@@ -79,6 +81,7 @@ export type HybridCandidate = {
   bm25Score: number;
   embeddingScore: number;
   exactMethodOverlap: number;
+  directEvidenceOverlap: number;
   statisticalConceptSimilarity: number;
   problemSolvedSimilarity: number;
   industryFunctionalSimilarity: number;
@@ -142,6 +145,7 @@ export function containsPhrase(text: string, phrase: string) {
 }
 
 function stem(token: string) {
+  if (token.startsWith("collaborat")) return "collaborat";
   if (token.length > 5 && token.endsWith("ing")) return token.slice(0, -3);
   if (token.length > 4 && token.endsWith("ed")) return token.slice(0, -2);
   if (token.length > 4 && token.endsWith("s")) return token.slice(0, -1);
@@ -215,8 +219,16 @@ function splitJdUnits(jd: string) {
     .filter(Boolean);
 }
 
+function atomicEvidenceUnits(jd: string) {
+  return splitJdUnits(jd)
+    .flatMap((unit) => unit.split(/\s*(?:,|，|、|\||\/)\s*/))
+    .map((unit) => unit.trim())
+    .filter(Boolean);
+}
+
 function evidenceUnit(jd: string, terms: string[]) {
-  const matched = splitJdUnits(jd).filter((unit) => terms.some((term) => containsPhrase(unit, term))).sort((a, b) => a.length - b.length)[0];
+  const matched = atomicEvidenceUnits(jd).filter((unit) => terms.some((term) => containsPhrase(unit, term))).sort((a, b) => a.length - b.length)[0]
+    ?? splitJdUnits(jd).filter((unit) => terms.some((term) => containsPhrase(unit, term))).sort((a, b) => a.length - b.length)[0];
   const source = matched || jd;
   const maxLength = /[\u3400-\u9fff]/u.test(source) ? 150 : 220;
   if (source.length <= maxLength) return source;
@@ -264,10 +276,11 @@ export function extractJdRequirements(jd: string, rules: RequirementRule[], fact
       sourceText,
       literalTerms,
       normalizedConcepts: stableUnique([normalized(rule.label).replace(/ /g, "_"), ...normalizedConcepts]),
+      evidenceTerms: stableUnique(rule.projectTerms ?? []),
       hardRequirement,
       importance: hardRequirement ? "high" : "medium",
       scopes: requirementScopes(sourceText),
-      namedTool: rule.category === "Programming and Data" || literalTerms.some((term) => /^[a-z0-9+#.-]{1,16}$/i.test(term)),
+      namedTool: rule.category === "Programming and Data" || literalTerms.some((term) => /^(ppo|dpo|grpo|fev1|acq)$/i.test(term.trim())),
     });
   }
 
@@ -282,6 +295,7 @@ export function extractJdRequirements(jd: string, rules: RequirementRule[], fact
       sourceText,
       literalTerms: [item.value],
       normalizedConcepts: [normalized(item.value).replace(/ /g, "_")],
+      evidenceTerms: [],
       hardRequirement,
       importance: hardRequirement ? "high" : "medium",
       scopes: requirementScopes(sourceText),
@@ -335,6 +349,26 @@ function exactMethodOverlap(requirement: JdRequirement, fact: FactIndexRecord) {
   const methods = fact.exact_methods_tools;
   if (terms.some((term) => methods.some((method) => containsPhrase(method, term) || containsPhrase(term, method)))) return 1;
   return setSimilarity(tokenSet(terms), tokenSet(methods));
+}
+
+function directEvidenceOverlap(requirement: JdRequirement, fact: FactIndexRecord) {
+  const literalTerms = stableUnique([...requirement.literalTerms, requirement.label]);
+  const genericEvidenceCategories = new Set([
+    "AI Systems", "Collaboration", "Communication", "Data", "Decision Support", "Experience",
+    "Leadership", "Research", "Research Design",
+  ]);
+  const terms = genericEvidenceCategories.has(requirement.category)
+    ? stableUnique([...literalTerms, ...requirement.evidenceTerms])
+    : literalTerms;
+  const evidenceText = [
+    fact.verified_fact,
+    fact.role,
+    ...fact.exact_methods_tools,
+    ...fact.statistical_analytical_concepts,
+    ...fact.concept_nodes.map((value) => value.replace(/_/g, " ")),
+  ].join(" ");
+  if (terms.some((term) => containsPhrase(evidenceText, term))) return 1;
+  return setSimilarity(tokenSet(terms), tokenSet(evidenceText));
 }
 
 function industryTrack(track: IndustryTrack) {
@@ -410,13 +444,13 @@ function verifyCandidate(candidate: Omit<HybridCandidate, "classification" | "wh
   const embeddingOnly = candidate.retrievalChannels.length === 1 && candidate.retrievalChannels[0] === "embedding";
   let classification: MatchClassification = "No Evidence";
 
-  if (fact.cv_eligible && candidate.exactMethodOverlap >= 0.78 && !hardScopeConflict && !overclaimFlags.length) classification = "Direct";
+  const directOverlap = requirement.namedTool ? candidate.exactMethodOverlap : Math.max(candidate.exactMethodOverlap, candidate.directEvidenceOverlap);
+  if (fact.cv_eligible && directOverlap >= 0.78 && !hardScopeConflict && !overclaimFlags.length) classification = "Direct";
   else if (fact.cv_eligible && candidate.preverificationScore >= 42 && (candidate.problemSolvedSimilarity >= 0.34 || candidate.industryFunctionalSimilarity >= 0.42 || candidate.graphPath?.transferablePath)) classification = "Strong Transferable";
   else if (candidate.preverificationScore >= 16 || candidate.graphPath || candidate.bm25Score > 0 || candidate.embeddingScore > 0.12) classification = "Adjacent";
 
   if (!fact.cv_eligible) classification = "No Evidence";
-  if (["planned", "project_context"].includes(fact.fact_status) && classification !== "No Evidence") classification = "Adjacent";
-  if (fact.fact_status === "in_progress" && classification === "Direct") classification = "Strong Transferable";
+  if (fact.fact_status === "project_context") classification = "No Evidence";
   if (candidate.graphPath?.adjacentPath && candidate.exactMethodOverlap < 0.78) classification = "Adjacent";
   if (embeddingOnly && (classification === "Direct" || classification === "Strong Transferable")) classification = "Adjacent";
   if (requirement.namedTool && candidate.exactMethodOverlap < 0.78 && classification === "Direct") classification = "Adjacent";
@@ -437,7 +471,8 @@ function verifyCandidate(candidate: Omit<HybridCandidate, "classification" | "wh
     fact.fact_status === "in_progress" ? "In-progress work must retain in-progress wording." : "",
     !fact.cv_eligible ? "Project-level context is not eligible for a personal CV bullet." : "",
   ]);
-  const recommendedForCv = classification === "Direct" ? true : classification === "Strong Transferable" ? "conditional" : false;
+  const incomplete = ["planned", "in_progress"].includes(fact.fact_status);
+  const recommendedForCv = classification === "Direct" ? (incomplete ? "conditional" : true) : classification === "Strong Transferable" ? "conditional" : false;
   return { ...candidate, classification, why, limitation: limitations.join(" "), overclaimFlags, hardScopeConflict, recommendedForCv };
 }
 
@@ -455,20 +490,21 @@ export function runHybridRag(jd: string, track: IndustryTrack, rules: Requiremen
       const bm25Value = bm25Score(queryText, index, bm25);
       const embeddingScore = cosine(queryEmbedding, factEmbeddings[index]);
       const exactOverlap = exactMethodOverlap(requirement, fact);
+      const directOverlap = directEvidenceOverlap(requirement, fact);
       const conceptSimilarity = setSimilarity(tokenSet(queryText), tokenSet(fact.statistical_analytical_concepts));
       const problemSimilarity = cosine(queryEmbedding, localEmbedding(fact.problem_solved));
       const translation = fact.industry_translation[industryTrack(track)] ?? { translation_type: "no_evidence", valid_transferable_interpretation: [], invalid_overclaim: [] };
       const industrySimilarity = setSimilarity(tokenSet(queryText), tokenSet(translation.valid_transferable_interpretation));
       const graphPath = graphResults.get(fact.fact_id) ?? null;
       const retrievalChannels = stableUnique([
-        exactOverlap >= 0.45 ? "exact" : "",
+        Math.max(exactOverlap, directOverlap) >= 0.45 ? "exact" : "",
         bm25Value > 0 ? "bm25" : "",
         embeddingScore > 0.08 ? "embedding" : "",
         graphPath ? "concept_graph" : "",
         industrySimilarity > 0 ? "industry_translation" : "",
       ]);
       const preverificationScore = Math.min(100,
-        24 * Math.min(1, exactOverlap) +
+        24 * Math.min(1, Math.max(exactOverlap, directOverlap)) +
         16 * Math.min(1, conceptSimilarity) +
         22 * Math.min(1, problemSimilarity) +
         12 * Math.min(1, industrySimilarity) +
@@ -481,6 +517,7 @@ export function runHybridRag(jd: string, track: IndustryTrack, rules: Requiremen
         bm25Score: bm25Value,
         embeddingScore,
         exactMethodOverlap: exactOverlap,
+        directEvidenceOverlap: directOverlap,
         statisticalConceptSimilarity: conceptSimilarity,
         problemSolvedSimilarity: problemSimilarity,
         industryFunctionalSimilarity: industrySimilarity,
@@ -492,7 +529,7 @@ export function runHybridRag(jd: string, track: IndustryTrack, rules: Requiremen
     const bm25Cutoff = [...raw].sort((a, b) => b.bm25Score - a.bm25Score)[19]?.bm25Score ?? 0;
     const embeddingCutoff = [...raw].sort((a, b) => b.embeddingScore - a.embeddingScore)[19]?.embeddingScore ?? 0;
     const candidates = raw
-      .filter((candidate) => candidate.exactMethodOverlap > 0 || candidate.graphPath || candidate.industryFunctionalSimilarity > 0 || candidate.bm25Score >= bm25Cutoff || candidate.embeddingScore >= embeddingCutoff)
+      .filter((candidate) => candidate.exactMethodOverlap > 0 || candidate.directEvidenceOverlap > 0 || candidate.graphPath || candidate.industryFunctionalSimilarity > 0 || candidate.bm25Score >= bm25Cutoff || candidate.embeddingScore >= embeddingCutoff)
       .map((candidate) => verifyCandidate(candidate, requirement))
       .sort((a, b) => b.preverificationScore - a.preverificationScore)
       .slice(0, 8);
