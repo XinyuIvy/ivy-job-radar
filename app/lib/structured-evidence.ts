@@ -76,10 +76,10 @@ function acceptedCredentialField(text: string, record: StructuredFactRecord) {
 function credentialCandidates(requirement: JdRequirement, records: StructuredFactRecord[]) {
   const text = requirement.sourceText;
   const levels = degreeLevels(text);
-  const fieldRequirement = /statistics|biostatistics|统计|定量|quantitative|stem|理工/i.test(text);
+  const fieldRequirement = /statistics|biostatistics|统计|定量|quantitative|stem|理工|computer science|计算机|artificial intelligence|\bai\b|人工智能|information science|信息科学|mathematics|数学|automation|自动化/i.test(text);
   if (requirement.category !== "Education" && !levels.size && !fieldRequirement) return [];
   const explicitCompletion = /completed|conferred|degree awarded|must have (?:a |an )?(?:ph\.?d|doctorate)|已取得|已获得|须持有/i.test(text);
-  return records.filter((record) => record.record_type === "education_credential" && acceptedCredentialField(text, record))
+  return records.filter((record) => record.record_type === "education_credential" && (!fieldRequirement || acceptedCredentialField(text, record)))
     .filter((record) => !levels.size || levels.has(record.degree_level ?? ""))
     .map((record): StructuredCandidate => {
       const statusGap = explicitCompletion && /candidate|progress/i.test(record.degree_status ?? "");
@@ -87,7 +87,9 @@ function credentialCandidates(requirement: JdRequirement, records: StructuredFac
         record,
         classification: statusGap ? "Credential Status Gap" : "Credential Direct",
         score: statusGap ? 78 : 100,
-        why: "The degree level and named field are matched structurally before semantic project retrieval.",
+        why: fieldRequirement
+          ? "The degree field is matched structurally before semantic project retrieval."
+          : "The named degree level is matched structurally without inventing a field requirement.",
         limitation: statusGap ? "The field matches directly, but the PhD is still in progress and the JD explicitly requires a completed degree." : (record.claim_boundary ?? ""),
       };
     });
