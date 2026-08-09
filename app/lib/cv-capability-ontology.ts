@@ -1,4 +1,5 @@
 import type { JdRequirement, RequirementRule } from "./hybrid-rag";
+import { CV_JD_EXTRA_RULES } from "./cv-jd-extra-rules.ts";
 
 export type CvRelationType =
   | "exact_equivalent"
@@ -200,3 +201,5 @@ export const CV_JD_RULES: RequirementRule[] = [
   { label: "Manuscript revision and reviewer response", category: "Communication", aliases: ["manuscript revision", "reviewer comments", "response to reviewers", "论文修改", "回复审稿意见"] },
   { label: "Peer review and professional service", category: "Professional Service", aliases: ["peer review", "reviewer", "同行评议", "审稿"] },
 ];
+
+CV_JD_RULES.push(...CV_JD_EXTRA_RULES);
