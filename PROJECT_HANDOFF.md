@@ -194,7 +194,89 @@ CI 在 review complete 状态下明确跳过 frozen runtime checkout、baseline 
 
 这三个数字用途不同；不得用 post-review report 覆盖 `LEGACY_BASELINE_REPORT.yaml`。
 
-## 7. 必须保持的事实边界
+## 7. Offline canonical RAG v2（已完成，未切 consumer）
+
+CV implementation merge：
+
+- PR #17 `Build and evaluate offline canonical RAG v2`
+- merge commit `8b4f32f91edf63e913dc6c6a097ea182d6e4efe2`
+- main-push validation workflow PR #18
+- workflow merge commit `93369207abdf891f18ddc180c58eb558928a0e4b`
+
+Private CV 路径：`master/project-evidence/rag-v2/`
+
+核心 artifacts：
+
+- `RAG_V2_ARCHITECTURE.yaml`
+- `RAG_V2_EVALUATION_PROTOCOL.yaml`
+- `RAG_V2_RESULTS.json`
+- `RAG_V2_ABLATION_RESULTS.yaml`
+- `RAG_V2_COMPARISON_REPORT.yaml`
+- `RAG_V2_EXECUTION_MANIFEST.yaml`
+- `RAG_V2_VALIDATION_REPORT.yaml`
+- `scripts/rag_v2.py`
+- `scripts/run_rag_v2_eval.py`
+- `scripts/test_rag_v2.py`
+- `scripts/validate_rag_v2.py`
+- `.github/workflows/rag-v2-offline.yml`
+
+架构边界：
+
+- canonical Stage 2 indexes 是唯一 evidence input。
+- candidate retrieval 与 evidence adjudication 分成两个阶段。
+- retrieval 使用 positive canonical fields、field-aware BM25、bounded bilingual phrase aliases、deterministic character n-gram similarity 和 structural canonical linkage。
+- adjudication 单独读取 status、ownership、allowed expression、prohibited expansion，再输出 Direct / Transferable / Adjacent / Unsupported。
+- runtime 不读取 evaluation query IDs、gold IDs/labels 或 legacy outputs 作推断。
+- 未调用外部 embedding/model/API，未用 42-query gold 作 supervised parameter fitting。
+
+预声明 ablation 后选中 `without_canonical_graph`，准确含义是：
+
+- **关闭 graph rank propagation**，因为它降低早期排序质量；
+- canonical relations 仍用于 fact-capability-concept evidence linkage 和 guardrail inheritance；
+- 不是删除 ontology，也不是退回 legacy graph。
+
+选中 v2 与 frozen legacy 对比：
+
+```text
+Metric                                      Legacy       V2
+Project Recall@1                            0.647436     0.844017
+Project Recall@3                            0.844017     0.938034
+Project Recall@8                            0.920940     0.991453
+Project MRR                                 0.839744     0.987179
+Project nDCG@8                              0.838915     0.974253
+Exact fact-ID recall                        0.461616     0.912821
+Full reviewed-gold classification accuracy  0.595238     1.000000
+Unsupported hard-negative accuracy          0.250000     1.000000
+Must-not-be-Direct false-positive rate       0.230769     0.000000
+```
+
+Exact fact-ID 指标的 denominator 不完全相同：v2 覆盖全部 39 个有 canonical fact references 的 query；legacy 只能评估 33 个 canonical-compatible cases。因此该 delta 是重要 diagnostic，但不能伪装成完全同 denominator 的严格估计。
+
+Ablation 结论：
+
+- 去掉 structured guardrail adjudication 后，full accuracy 降至 `0.690476`。
+- Unsupported hard-negative accuracy 降至 `0.0`。
+- must-not-be-Direct false-positive rate 升至 `1.0`。
+- 这说明主要改进不是“换了 embedding”，而是 canonical fact alignment + explicit evidence adjudication。
+
+Validation：
+
+- 9 个 focused regression/safety tests passed。
+- 42 queries、unique IDs、canonical reference resolution、input hashes、gold-leakage checks、positive-retrieval/guardrail separation、deterministic rerun 和所有 acceptance gates passed。
+- PR #17 passing Actions run `31340437108`。
+- workflow-only PR #18 passing Actions run `31340515159`；main 现在会在相关文件 push 时重跑同一套 tests/build/validator/drift check。
+
+解释限制：42 条是 small authored benchmark。该数据集上的 perfect adjudication **不是外部验证，也不能证明 unseen JDs 上完美**。这是选择下一阶段的重要原因。
+
+Scope remains unchanged：
+
+- Job Radar `app/lib/hybrid-rag.ts` 未修改。
+- `app/api/cv-tailor/analyze/route.ts` 未切换。
+- legacy indexes / frozen outputs 未修改。
+- canonical facts、CV templates 未修改。
+- 当前 production consumer 仍是 legacy baseline。
+
+## 8. 必须保持的事实边界
 
 - Direct ≠ Transferable ≠ Adjacent。
 - Transferable 不能写成真实目标行业经验。
@@ -215,7 +297,7 @@ CI 在 review complete 状态下明确跳过 frozen runtime checkout、baseline 
 - RESI：`up to about 50x` 必须保留 benchmark context。
 - Model Reliance：model reliance ≠ causal feature importance / SHAP；research analysis ≠ production deployment。
 
-## 8. Legacy Hybrid RAG 保留
+## 9. Legacy Hybrid RAG 保留
 
 旧 runtime 与 indexes 必须继续保留为 baseline/prototype，不是 canonical truth：
 
@@ -231,7 +313,7 @@ CI 在 review complete 状态下明确跳过 frozen runtime checkout、baseline 
 
 Job Radar current consumer 仍使用 legacy indexes。不要静默切换。
 
-## 9. Future application archive contract
+## 10. Future application archive contract
 
 Durable specification：[`docs/APPLICATION_ARCHIVE_CONTRACT.md`](docs/APPLICATION_ARCHIVE_CONTRACT.md)。
 
@@ -243,15 +325,17 @@ Durable specification：[`docs/APPLICATION_ARCHIVE_CONTRACT.md`](docs/APPLICATIO
 - requisition ID、数据库 row ID、UI applicationId 不自动等于 archive primary key。
 - 当前 archive repo/packages 尚未创建。
 
-## 10. 下一阶段入口
+## 11. 下一阶段入口
 
-**到本 handoff 为止停止。不要自动开始 RAG v2。**
+**到本 handoff 为止停止。Offline RAG v2 已完成，但不要自动切换 Job Radar consumer。**
 
-如果未来用户明确开启 RAG v2，必须以以下两套结果作为不可变比较基准：
+下一阶段应先做独立的 **held-out / unseen-JD validation**：
 
-1. frozen deterministic baseline：27 deterministic cases；
-2. reviewed subjective-label evaluation：15 user-confirmed cases + full 42-case report。
+1. 建立不用于 v2 aliases/规则设计的新 query/JD requirement set；
+2. 保留 Direct / Transferable / Adjacent / Unsupported 与 overclaim 边界的真实人工复核；
+3. 比较 frozen legacy、selected offline v2，以及必要的 paraphrase/adversarial robustness；
+4. 明确报告 authored 42-query 与 held-out 指标，不合并掩盖；
+5. held-out safety/performance 通过后，才可另开阶段讨论 Job Radar shadow-mode dual run；
+6. shadow mode 通过后，再单独决定是否迁移 consumer。
 
-未来 RAG v2 可以针对 requirement extraction、canonical fact alignment、field-aware retrieval、semantic embeddings、fusion/reranking、evidence adjudication、overclaim guardrails 提出新设计，但任何改动必须另开 branch/PR，并与上述 frozen/reviewed reports 比较。
-
-在用户另行授权前继续禁止：重新生成 embeddings、调 legacy scoring、切 consumer、修改 CV templates、生成具体 JD CV、创建 application archive repo。
+在用户另行授权前继续禁止：切换 production consumer、覆盖 legacy baseline、修改 canonical facts、修改 CV templates、生成具体 JD CV、创建 application archive repo。
