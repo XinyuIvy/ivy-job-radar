@@ -34,7 +34,7 @@ class CvChineseTexAnalysisTests(unittest.TestCase):
     def test_latex_template_is_converted_before_coverage_checks(self):
         self.assertIn("function latexToPlainText", self.source)
         self.assertIn("const templateText = latexToPlainText(template)", self.source)
-        self.assertIn("hasAlias(templateText, rule.aliases)", self.source)
+        self.assertIn("hasAlias(templateText, rule.literalTerms)", self.source)
 
     def test_short_r_alias_uses_token_boundaries(self):
         self.assertRegex(self.source, re.compile(r"startBoundary.*a-z0-9"))
