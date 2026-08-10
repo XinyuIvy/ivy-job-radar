@@ -325,17 +325,65 @@ Durable specification：[`docs/APPLICATION_ARCHIVE_CONTRACT.md`](docs/APPLICATIO
 - requisition ID、数据库 row ID、UI applicationId 不自动等于 archive primary key。
 - 当前 archive repo/packages 尚未创建。
 
-## 11. 下一阶段入口
+## 11. Held-out / unseen-JD validation（已完成，未通过迁移门槛）
 
-**到本 handoff 为止停止。Offline RAG v2 已完成，但不要自动切换 Job Radar consumer。**
+CV validation merge：
 
-下一阶段应先做独立的 **held-out / unseen-JD validation**：
+- PR #19 `Validate RAG v2 on held-out real JDs`
+- merge commit `ce2998317bde5ddba56741edf3fb69e99e06280f`
+- passing Actions run `31345339501`
+- private artifacts: `master/project-evidence/heldout-validation/`
 
-1. 建立不用于 v2 aliases/规则设计的新 query/JD requirement set；
-2. 保留 Direct / Transferable / Adjacent / Unsupported 与 overclaim 边界的真实人工复核；
-3. 比较 frozen legacy、selected offline v2，以及必要的 paraphrase/adversarial robustness；
-4. 明确报告 authored 42-query 与 held-out 指标，不合并掩盖；
-5. held-out safety/performance 通过后，才可另开阶段讨论 Job Radar shadow-mode dual run；
-6. shadow mode 通过后，再单独决定是否迁移 consumer。
+冻结设计：
 
-在用户另行授权前继续禁止：切换 production consumer、覆盖 legacy baseline、修改 canonical facts、修改 CV templates、生成具体 JD CV、创建 application archive repo。
+- 5 个 v2 完成后才选取的真实 Job Radar JD snapshots；
+- 20 条 core requirements；
+- 4 条 adversarial overclaim cases；
+- 4 条中文 paraphrases；
+- 3 条 general skills / coursework coverage gaps，不强迫判成 Unsupported；
+- 24 条 scored labels 全部由用户在预测运行前明确确认。
+
+用户确认后的 label distribution：Direct 10、Transferable 2、Adjacent 6、Unsupported 6。`HOLD-007 = Direct` 的语义是具备真实 cross-functional collaboration 即满足要求，不需要和列举的每一个职能部门都有合作经历；实际 CV 仍只能写真实合作过的团队。
+
+冻结 legacy 与 selected v2 的 held-out 结果：
+
+```text
+Metric                                      Legacy       V2
+Project Recall@8                            0.378788     0.810606
+Exact canonical fact-ID Recall@8            0.037879     0.435606
+Full reviewed-gold classification accuracy  0.375000     0.583333
+Unsupported accuracy                        0.000000     0.333333
+Must-not-be-Direct false-positive rate       0.000000     0.250000
+Chinese paraphrase label consistency         0.000000     0.000000
+```
+
+结论：v2 在 project retrieval 和整体 classification 上明显优于 legacy，但只通过 8 个预声明 gates 中的 `Project Recall@8`。其余 7 个 gates 失败，因此：
+
+- 不允许 production consumer migration；
+- 不进入 Job Radar shadow mode；
+- 不修改 `app/lib/hybrid-rag.ts` 或 `app/api/cv-tailor/analyze/route.ts`；
+- 不把 authored 42-query 上的 1.0 accuracy 当成 unseen-JD 表现。
+
+主要 failure taxonomy：
+
+- exact fact alignment 仍弱：project recall 已到 `0.810606`，fact recall 只有 `0.435606`；
+- Unsupported guardrails 缺口：wet-lab molecular、neuromodulation/electrophysiology、platform ownership、trading deployment 等被判成 Direct/Adjacent；
+- implicit target-domain transfer 检测不足：economic model、trading idea 等在没有显式 `transfer/apply` 时被升级成 Direct；
+- Chinese-to-English sparse retrieval 失败：4 条中文 paraphrase 全部 Unsupported；
+- related-context retrieval 不足：部分 client communication 案例被判 Unsupported，而不是 Adjacent。
+
+两次完整执行的 legacy、v2 和 comparison outputs 均 byte-identical。Canonical facts、authored benchmark、frozen runtimes、CV templates 和 production consumer 均未修改。
+
+## 12. 下一阶段入口
+
+当前 held-out set 已经被查看并用于 error analysis，后续只能作为 frozen diagnostic / regression set，不能在修复后继续称作 untouched held-out validation。
+
+下一阶段必须：
+
+1. 基于 failure taxonomy 设计独立的 RAG v2.1 offline changes；
+2. 不改当前 reviewed labels 或 requirements 来提高成绩；
+3. 在检查 v2.1 predictions 之前，另行冻结第二套 untouched real-JD validation set；
+4. 同时报告 authored benchmark、held-out diagnostic set 和第二套 untouched validation，不合并 denominator；
+5. 只有第二套 untouched validation 通过预声明 gates，才重新讨论 shadow mode。
+
+继续禁止：切换 production consumer、覆盖 legacy baseline、修改 canonical facts、修改 CV templates、生成具体 JD CV、创建 application archive repo。
