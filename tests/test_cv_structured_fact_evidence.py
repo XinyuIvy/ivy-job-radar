@@ -17,13 +17,11 @@ class CvStructuredFactEvidenceTests(unittest.TestCase):
         self.assertIn('record.publication_status === "published"', template_index)
         self.assertIn('concepts.add("published_journal_article")', template_index)
 
-    def test_client_displays_fact_and_template_evidence(self):
-        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn("事实证据", client)
-        self.assertIn("当前 CV 命中片段", client)
-        self.assertIn("代表性事实", client)
-        self.assertIn("关系路径", client)
-        self.assertNotIn("查看事实母版证据", client)
+    def test_archive_preserves_fact_evidence_for_chat_review(self):
+        archive = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+        for field in ["fact_id", "verified_fact", "source", "evidence_location", "claim_boundary", "industry_guardrail"]:
+            self.assertIn(field, archive)
+        self.assertIn("preliminary_only", archive)
 
 
 if __name__ == "__main__":

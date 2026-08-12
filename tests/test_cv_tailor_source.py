@@ -39,13 +39,12 @@ class CvTailorSourceTests(unittest.TestCase):
         self.assertIn('"unsupported_gap"', route)
         self.assertIn("supportEvidence", route)
 
-    def test_cv_publish_writes_markdown_and_latex_to_cv_repo(self):
+    def test_cv_publish_endpoint_is_fail_closed(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "publish" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("CV_GITHUB_TOKEN", route)
-        self.assertIn("generated/", route)
-        self.assertIn("main.tex", route)
-        self.assertIn("cv.md", route)
-        self.assertIn('/pulls', route)
+        self.assertIn("AUTOMATIC_CV_PUBLISH_DISABLED", route)
+        self.assertIn("人工分类与内容确认", route)
+        self.assertNotIn("CV_GITHUB_TOKEN", route)
+        self.assertNotIn('/pulls', route)
 
     def test_workspace_is_linked_from_pending_application_actions(self):
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
