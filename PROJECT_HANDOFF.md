@@ -1,6 +1,161 @@
 # Job Application / CV Knowledge Base 项目交接
 
-最后更新：2026-08-09（America/New_York）
+最后更新：2026-08-12（America/New_York）
+
+
+
+## 0. 2026-08-12 权威交接：人工复核版定制 CV 已接入，下一步只做第一次真实申请包验证
+
+> 本节是当前运行状态与 next step 的最高优先级记录，覆盖下方旧章节中“application archive 尚未创建”“继续下一轮 RAG / shadow mode”等过时表述。下方第 1–12 节保留用于追溯 RAG 建设与验证历史，不再作为当前行动指令。**下一个 Chat 不得重新启动第三套验证、v10/v2.1、shadow mode、production RAG migration、自动 TeX 或无人工确认的 CV 生成。**
+
+### 0.1 用户最终确认的使用流程
+
+用户在 Ivy Job Radar 页面上的日常操作只有：
+
+1. 在“待提交申请”中点击某个真实岗位的“定制 CV”。
+2. 系统为该申请生成稳定的 `APP-...` ID，在私有仓库建立独立目录，冻结完整输入。
+3. 页面显示“复制 Prompt”；用户把 Prompt 粘贴进新的 Work / Codex Chat。
+4. 后续分类复核、纯文本内容修改、TeX、PDF 检查和归档全部在 Chat 中完成。Job Radar 页面不提供复杂 CV 编辑器，也不自动生成最终 CV。
+
+初始 application bundle 固定写入：
+
+```text
+XinyuIvy/job-application-archive
+└── applications/<year>/<APP-ID>/
+    ├── application_record.yaml
+    ├── jd_snapshot.md
+    ├── jd_requirements.json
+    ├── match_packet.json
+    ├── fact_master_snapshot.md
+    ├── canonical_project_index.jsonl
+    ├── canonical_fact_index.jsonl
+    ├── canonical_capability_index.jsonl
+    ├── canonical_concept_index.jsonl
+    ├── canonical_relation_index.jsonl
+    ├── canonical_retrieval_index.jsonl
+    ├── cv_base.tex
+    └── chat_prompt.txt
+```
+
+后续人工复核与定稿产生的文件仍写入同一申请目录：
+
+```text
+match_analysis.md
+evidence_manifest.json
+cv_changes.md
+cv_customized.tex
+cv_customized.pdf
+cv_submitted.pdf
+interview_brief.md
+```
+
+`cv_submitted.pdf` 只有在用户明确确认“这就是实际投递版本”后才创建；`interview_brief.md` 只在 CV 定稿后生成。
+
+### 0.2 Job Radar、Chat、RAG 和 Codex 的职责边界
+
+- Job Radar 保存完整 JD、拆分要求、生成**初步** Direct / Transferable / Adjacent / Unsupported 分类，并创建申请包。
+- 事实母版与 canonical indexes 保存用户完整、已验证的事实、能力、限制和 evidence IDs。
+- Chat 必须读取完整 JD、完整事实母版快照、canonical indexes、`cv_base.tex` 和 Job Radar 初步分类，独立复核；初步分类不是最终结论。
+- Chat 与 Job Radar 分类一致时直接合并，不逐条打扰用户。
+- 分类不一致但不会影响实际 CV 时只记录；只有可能影响项目选择、顺序或表述的分歧才找用户确认，每批最多 3–5 条。
+- RAG 只在事实母版不足以确认具体数字、方法、贡献边界或争议分类时，按 evidence ID 回查相关原始片段；不得一开始通读全部论文/代码，也不得仅凭检索分数判定事实。
+- 分类完成后必须先给用户**纯文本内容方案**，在 Chat 中逐条调整 summary、skills、项目、顺序和 bullets。只有用户明确说“内容定稿”后才能创建 `cv_customized.tex`。
+- TeX 必须复制并保持 `cv_base.tex` 的 document class、packages、字体、字号、页边距、section、bullet、行距、项目间距、联系方式、日期/地点、`\\hfill` 和自定义命令。不得重新设计版式或明显缩小字体硬塞两页。
+- JD 关键词优先；只要事实支持，尽量使用 JD 原词或自然变体。不与 JD 冲突且仍有价值的行业关键词继续保留。Transferable/Adjacent 必须保留迁移或边界语义；Unsupported 关键词不得为 ATS 强塞。
+- Job Radar 不自动修改 CV、不自动生成/发布 TeX/PDF、不改变申请状态。旧 `/api/cv-tailor/publish` 已关闭自动发布能力。
+
+三个确认点：
+
+1. 分类阶段：只确认会影响 CV 的重要分歧。
+2. 内容阶段：确认所有纯文本内容与项目顺序。
+3. PDF 阶段：确认最终排版和实际投递版本。
+
+### 0.3 2026-08-12 已完成并合并
+
+私有归档仓库：
+
+- `XinyuIvy/job-application-archive` 已创建，visibility = Private。
+- 初始化 PR #1 已合并，merge commit `a9d2195484317f563be6db1ddff3777a0957f8ca`。
+- PR #2 已合并，使 `scripts/build_cv.sh` 可直接执行，merge commit `7641dc06ecdbf150f62db843c2555bac595970c6`。
+- 仓库已有：README、完整 archive contract、`applications/README.md`、LaTeX build ignore rules、统一 XeLaTeX build script。
+- build script 会运行 XeLaTeX、拒绝超过两页的 PDF、并用 `pdftotext` 检查 ATS 文本；它不会自动创建 `cv_submitted.pdf`。
+
+Job Radar：
+
+- PR #72 `Add human-reviewed application archive workflow` 已合并。
+- merge commit：`d6b7a5e0e1e2db344f965b56b3465ee60d9c4ab3`。
+- 13 个 source/test files 已同步到 GitHub `main`。
+- PR Python tests、app lint、app build 全部通过。
+- Site 生产部署 version 96 已成功：
+  - `https://ivy-job-radar.rourou1199.chatgpt.site`
+- Site 环境已配置：
+  - `APPLICATION_ARCHIVE_GITHUB_REPO=XinyuIvy/job-application-archive`
+- 现有 `CV_GITHUB_TOKEN` 被代码用作 archive token fallback；未在仓库或日志中泄露 token。
+- 站点和归档仓库代码/目录/Prompt 合同已验证；没有改 canonical facts、CV 母版或 RAG frozen outputs。
+
+### 0.4 唯一尚未完成的运行时验证
+
+**尚未创建第一份真实 application bundle。**
+
+这是刻意停止点，不是功能回滚：用户还没有在已部署站点中选择具体哪个“待提交申请”作为第一份真实归档，因此本 Chat 没有擅自在私有仓库制造测试/假申请。
+
+第一份真实 bundle 创建前，仍有一个必须实测的权限问题：
+
+- GitHub connector 对 `job-application-archive` 有 admin/push 权限，证明 Chat 可以写该仓库。
+- 但 Site 使用的是既有 secret `CV_GITHUB_TOKEN`；secret 值不可读取。
+- 如果该 token 是覆盖全部 private repos 的 classic token，新仓库通常可直接写。
+- 如果它是只授权旧仓库的 fine-grained token，刚创建的 archive repo 可能未被包含。
+- 因此，在真实点击成功前，不得宣称“Site runtime 已验证拥有 archive write permission”。
+
+### 0.5 下一个 Chat 必须按此顺序继续
+
+1. 先读取并核对三个当前状态：
+   - `XinyuIvy/ivy-job-radar@main`
+   - `XinyuIvy/job-application-archive@main`
+   - 已部署的 Ivy Job Radar Site
+2. 不启动任何新 RAG 训练、验证轮次、shadow mode 或 consumer migration。
+3. 让用户在“待提交申请”里选择一个她确实准备定制的真实岗位，并点击“定制 CV”；不要由 Chat 随机挑选，也不要创建 synthetic bundle。
+4. 页面应依次显示：
+   - 正在读取完整 JD 与申请信息
+   - 正在生成 Job Radar 初步匹配
+   - 正在冻结事实母版、行业 CV 母版和申请输入
+   - 申请档案已创建 + 稳定 `APP-...` ID + “复制 Prompt”
+5. 点击成功后，立即读取私有仓库中新建的申请目录并核验：
+   - 13 个必需初始文件全部存在；
+   - 目录名、`application_record.yaml.application_id` 和页面 APP ID 完全一致；
+   - `jd_snapshot.md` 是该岗位完整 JD，不是 URL、摘要或关键词列表；
+   - `application_record.yaml` 固定 CV repo commit、模板路径、行业、语言和 Job Radar mapping；
+   - `match_packet.json` 明确标记 `preliminary_only`；
+   - `fact_master_snapshot.md` 与 canonical indexes 来自同一个冻结的 CV commit；
+   - `cv_base.tex` 是所选行业/语言母版；
+   - `chat_prompt.txt` 包含小批量分歧确认、JD 关键词优先、行业关键词保留、内容先于 TeX、母版布局锁定等规则。
+6. 再点击一次同一岗位的“定制 CV”，验证幂等性：应返回 existing bundle，不得创建第二个 APP ID 或覆盖已冻结文件。
+7. 如果成功，把生成的 Prompt 复制到 Work / Codex Chat。该 Chat 只执行“读取、独立分类审核、第一版纯文本内容建议”，然后停下来等待用户确认；不得直接生成 TeX。
+8. 如果页面报 archive access 错误：
+   - 先记录准确 error code 和 worker log；
+   - 最可能是既有 Site GitHub token 没有包含新 private repo；
+   - 不要把 private JD 写回 public Job Radar 或 CV repo；
+   - 不要在聊天里索要或粘贴 token；
+   - 停止并让用户在 GitHub 安全界面把 `XinyuIvy/job-application-archive` 加入现有 fine-grained token，或安全创建专用 token；
+   - 然后把它作为 secret `APPLICATION_ARCHIVE_GITHUB_TOKEN` 更新到同一个 Site，重新部署相同 source version，再重复第 3–7 步。
+9. 如果初始包验证通过，本阶段即完成。不要继续批量迁移历史申请，也不要自动为其他岗位创建 bundle，除非用户另行要求。
+
+### 0.6 下一 Chat 可直接使用的接手指令
+
+```text
+继续 Ivy Job Radar 的人工复核版“定制 CV”接入，只完成第一次真实 application bundle 的端到端验证，不开始新的 RAG 改进或验证轮次。
+
+开始前读取：
+1. XinyuIvy/ivy-job-radar 最新 main 的 PROJECT_HANDOFF.md，严格以顶部 0 节为权威；
+2. XinyuIvy/job-application-archive 最新 main；
+3. 当前 Ivy Job Radar Site 状态。
+
+让用户从“待提交申请”中选择一个她确实要定制的真实岗位并点击“定制 CV”。不要随机选择岗位，不要创建 synthetic bundle。点击后验证稳定 APP ID、13 个必需文件、完整 JD、冻结的事实母版/canonical indexes/CV 母版、preliminary-only match packet 和 chat_prompt。再点击同一岗位一次验证幂等性。
+
+如果 Site 无法写入新私有仓库，记录准确错误并判断是否为现有 fine-grained GitHub token 未包含 XinyuIvy/job-application-archive。不得把材料写入 public Job Radar 或 XinyuIvy/CV，不得在聊天中索要 token。需要用户在 GitHub 安全界面扩展 repo access 后，再安全更新 Site secret APPLICATION_ARCHIVE_GITHUB_TOKEN 并重新部署。
+
+验证成功后，让用户复制生成的 Prompt 到 Work/Codex Chat。该 Chat 第一阶段只读取并独立复核分类、给纯文本 CV 内容建议，然后等待用户确认；内容定稿前不得生成 TeX。
+```
 
 > 新 Chat 接手时必须重新读取 `XinyuIvy/CV` 与 `XinyuIvy/ivy-job-radar` 的最新 `main`、开放 PR、recent commits、Actions、manifest/handoff 和可见并发状态。GitHub 当前状态优先于本文记录的 SHA。
 
