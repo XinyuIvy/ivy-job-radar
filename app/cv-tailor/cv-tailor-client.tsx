@@ -1,146 +1,218 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type TemplateLanguage = "en" | "zh";
-type EvidenceClassification = "Direct" | "Credential Direct" | "Coursework Match" | "Strong Transferable" | "Credential Status Gap" | "Adjacent";
-type MatchStatus = "covered" | "supported_gap" | "adjacent_gap" | "unsupported_gap";
 
-type SupportEvidence = {
-  projectId: string; project: string; factId: string; fact: string; factStatus: string; evidenceStrength: string;
-  classification: EvidenceClassification; relevance: string; source: string; evidenceLocation: string; claimBoundary: string;
-  capabilityContext?: string; industryTranslation?: string; industryGuardrail?: string; score?: number; retrievalChannels?: string[];
+type ApplicationPrefill = {
+  applicationId: number;
+  company: string;
+  title: string;
+  track: string;
+  language: TemplateLanguage;
+  region: string;
+  location: string;
+  jd: string;
 };
 
-type TemplateMatch = {
-  snippetId: string; section: string; entityId: string; rawLatex: string; visibleText: string; conceptIds: string[]; factIds: string[];
-  sourceFile: string; location: string; relationType: string; relationPath: string[]; relationExplanation: string; confidence: number;
+type ArchiveResult = {
+  ok: true;
+  existing: boolean;
+  applicationId: string;
+  archivePath: string;
+  prompt: string;
+  repositoryUrl: string;
 };
 
-type Match = {
-  requirementId: string; keyword: string; category: string; canonicalConcepts: string[]; status: MatchStatus;
-  evidenceClassification: EvidenceClassification | "No Evidence"; supportEvidence: SupportEvidence[]; templateCovered: boolean;
-  templateEvidence: string; templateMatches: TemplateMatch[]; jdEvidence: string; jdMatchedTerms: string[]; confidence: number; action: string; reason: string;
+type Stage = "loading" | "analyzing" | "archiving" | "ready" | "error";
+
+const trackLabels: Record<string, string> = {
+  pharma: "Pharma / Biostatistics",
+  tech: "Tech / Data Science / Applied ML",
+  quant: "Quantitative Research",
+  consulting: "Healthcare Consulting",
+  clinical_neuro: "脑科学 / 临床数据 / 医疗器械",
 };
 
-type Project = { projectId: string; name: string; score: number; matchedRequirements: string[]; classifications: EvidenceClassification[]; alreadyInTemplate: boolean; evidence: SupportEvidence | null };
-type ModificationDraft = { id: string; action: string; status: "supported_gap" | "adjacent_gap"; targetSection: string; canGenerateEdit: boolean; projectId: string; project: string; requirement: string; classification: EvidenceClassification; factId: string; verifiedFact: string; proposedBullet: string; source: string; evidenceLocation: string; claimBoundary: string; rationale: string; latexDiff: null | { before: string; after: string } };
-type Analysis = { language: TemplateLanguage; matches: Match[]; projects: Project[]; modificationDrafts: ModificationDraft[]; summary: { required: number; covered: number; supportedGaps: number; adjacentGaps: number; unsupportedGaps: number }; sourceDiagnostics?: { templateFile: string; templateSnippetCount?: number; atomicFactCount: number; structuredFactCount?: number; conceptEdgeCount?: number; templateMatching?: string; factMatching?: string; ontology?: string } };
-type ApplicationPrefill = { applicationId: number; company: string; title: string; track: string; jd: string };
-type ResultPanel = "projects" | "requirements" | "covered" | "supported" | "adjacent" | "unsupported" | "drafts";
-
-const trackLabels: Record<string, string> = { pharma: "Pharma / Biostatistics", tech: "Tech / Data Science / Applied ML", quant: "Quantitative Research", consulting: "Healthcare Consulting", clinical_neuro: "脑科学 / 临床数据 / 医疗器械" };
-const statusLabels: Record<MatchStatus, string> = { covered: "母版已覆盖", supported_gap: "事实支持缺口", adjacent_gap: "仅相邻经验", unsupported_gap: "无事实支持" };
-const statusColors: Record<MatchStatus, { color: string; background: string }> = { covered: { color: "#10633d", background: "#e3f3e8" }, supported_gap: { color: "#6b5100", background: "#fff2c8" }, adjacent_gap: { color: "#7a4b2a", background: "#f7e8dc" }, unsupported_gap: { color: "#8b312b", background: "#f9e4e1" } };
-const classLabels: Record<EvidenceClassification, string> = { Direct: "Direct", "Credential Direct": "Credential Direct", "Coursework Match": "Coursework", "Strong Transferable": "Strong Transferable", "Credential Status Gap": "Credential Status Gap", Adjacent: "Adjacent" };
+const stageText: Record<Exclude<Stage, "ready" | "error">, string> = {
+  loading: "正在读取完整 JD 与申请信息…",
+  analyzing: "正在生成 Job Radar 初步匹配…",
+  archiving: "正在冻结事实母版、行业 CV 母版和申请输入…",
+};
 
 export default function CvTailorClient() {
-  const [track, setTrack] = useState("tech");
-  const [language, setLanguage] = useState<TemplateLanguage>("en");
-  const [company, setCompany] = useState("");
-  const [title, setTitle] = useState("");
-  const [jd, setJd] = useState("");
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
-  const [panel, setPanel] = useState<ResultPanel>("requirements");
-  const [loading, setLoading] = useState(false);
-  const [loadingApplication, setLoadingApplication] = useState(true);
+  const [application, setApplication] = useState<ApplicationPrefill | null>(null);
+  const [archive, setArchive] = useState<ArchiveResult | null>(null);
+  const [stage, setStage] = useState<Stage>("loading");
   const [message, setMessage] = useState("");
+  const [errorCode, setErrorCode] = useState("");
+  const [copied, setCopied] = useState(false);
+  const startedFor = useRef<number | null>(null);
+
+  const createArchive = useCallback(async (value: ApplicationPrefill) => {
+    setArchive(null);
+    setCopied(false);
+    setErrorCode("");
+    setStage("analyzing");
+    setMessage("");
+    try {
+      if (!value.jd.trim()) throw new Error("该申请没有完整 JD，不能创建申请档案。");
+      const analysisResponse = await fetch("/api/cv-tailor/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ track: value.track, language: value.language, jd: value.jd }),
+      });
+      const analysis = await analysisResponse.json() as { error?: string; code?: string } & Record<string, unknown>;
+      if (!analysisResponse.ok) {
+        setErrorCode(String(analysis.code || ""));
+        throw new Error(String(analysis.error || "初步匹配失败"));
+      }
+
+      setStage("archiving");
+      const archiveResponse = await fetch("/api/cv-tailor/archive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ applicationId: value.applicationId, track: value.track, language: value.language, analysis }),
+      });
+      const result = await archiveResponse.json() as ArchiveResult & { error?: string; code?: string };
+      if (!archiveResponse.ok) {
+        setErrorCode(String(result.code || ""));
+        throw new Error(String(result.error || "申请档案创建失败"));
+      }
+      setArchive(result);
+      setStage("ready");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "申请档案创建失败");
+      setStage("error");
+    }
+  }, []);
 
   useEffect(() => {
     const rawId = new URLSearchParams(window.location.search).get("applicationId");
-    if (!rawId) { setLoadingApplication(false); return; }
     const id = Number(rawId);
-    if (!Number.isInteger(id) || id <= 0) { setLoadingApplication(false); return; }
+    if (!Number.isInteger(id) || id <= 0) {
+      setMessage("缺少有效的待提交申请 ID。请从待提交申请卡片点击“定制 CV”。");
+      setStage("error");
+      return;
+    }
     fetch(`/api/cv-tailor/application?applicationId=${id}`, { cache: "no-store" })
-      .then(async (response) => { const value = await response.json(); if (!response.ok) throw new Error(value.error || "无法读取申请"); return value as ApplicationPrefill; })
-      .then((value) => { setCompany(value.company); setTitle(value.title); setTrack(value.track); setJd(value.jd); setLoadingApplication(false); })
-      .catch((error) => { setMessage(error instanceof Error ? error.message : "申请读取失败"); setLoadingApplication(false); });
-  }, []);
+      .then(async (response) => {
+        const result = await response.json() as ApplicationPrefill & { error?: string };
+        if (!response.ok) throw new Error(result.error || "无法读取申请");
+        return result;
+      })
+      .then((result) => {
+        setApplication(result);
+        if (startedFor.current !== result.applicationId) {
+          startedFor.current = result.applicationId;
+          void createArchive(result);
+        }
+      })
+      .catch((error) => {
+        setMessage(error instanceof Error ? error.message : "申请读取失败");
+        setStage("error");
+      });
+  }, [createArchive]);
 
-  const analyze = async () => {
-    if (!jd.trim()) { setMessage("该申请没有完整 JD，无法分析。"); return; }
-    setLoading(true); setMessage("正在分别检索事实库与当前 CV 片段…");
+  const copyPrompt = async () => {
+    if (!archive?.prompt) return;
     try {
-      const response = await fetch("/api/cv-tailor/analyze", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ track, language, jd }) });
-      const value = await response.json();
-      if (!response.ok) throw new Error(value.error || "分析失败");
-      setAnalysis(value as Analysis); setPanel("requirements"); setMessage("分析完成：事实证据与母版片段已独立检索，并显示关系路径。");
-    } catch (error) { setMessage(error instanceof Error ? error.message : "分析失败"); }
-    finally { setLoading(false); }
+      await navigator.clipboard.writeText(archive.prompt);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2200);
+    } catch {
+      setMessage("浏览器未允许自动复制。请在下方 Prompt 中全选并复制。");
+    }
   };
 
-  const filtered = useMemo(() => {
-    if (!analysis) return [];
-    if (panel === "requirements") return analysis.matches;
-    const map: Partial<Record<ResultPanel, MatchStatus>> = { covered: "covered", supported: "supported_gap", adjacent: "adjacent_gap", unsupported: "unsupported_gap" };
-    return map[panel] ? analysis.matches.filter((item) => item.status === map[panel]) : [];
-  }, [analysis, panel]);
-
-  const nav = analysis ? [
-    ["requirements", "全部 JD 原子要求", analysis.summary.required], ["covered", "母版已覆盖", analysis.summary.covered], ["supported", "事实支持缺口", analysis.summary.supportedGaps],
-    ["adjacent", "仅相邻经验", analysis.summary.adjacentGaps], ["unsupported", "无事实支持", analysis.summary.unsupportedGaps], ["drafts", "逐条处理", analysis.modificationDrafts.length], ["projects", "推荐项目", analysis.projects.length],
-  ] as const : [];
-
-  return <main style={{ minHeight: "100vh", background: "#f5f2e9", color: "#1f2c25", padding: "26px 18px 90px" }}>
-    <div style={{ maxWidth: 1380, margin: "0 auto" }}>
-      <header style={{ display: "flex", justifyContent: "space-between", gap: 18, marginBottom: 22 }}>
-        <div><p style={eyebrow}>CV TAILOR · DUAL-CORPUS RAG</p><h1 style={titleStyle}>岗位 CV 分析</h1><p style={subtle}>事实库回答“你是否真的具备”，当前 CV 片段回答“母版是否已经写出来”。两条检索链共用同一 capability ontology，但证据 corpus 完全独立。</p></div>
-        <Link href="/" style={{ color: "#16794b", fontWeight: 800 }}>返回申请页</Link>
+  return <main className="archive-page">
+    <div className="archive-shell">
+      <header className="archive-header">
+        <div>
+          <p className="archive-eyebrow">CV TAILOR · HUMAN-REVIEWED WORKFLOW</p>
+          <h1>定制 CV 申请档案</h1>
+          <p>Job Radar 只准备完整输入和初步匹配。分类复核、内容修改、TeX 与 PDF 都在 Chat 中完成。</p>
+        </div>
+        <Link href="/">返回申请页</Link>
       </header>
 
-      {loadingApplication ? <p>正在读取申请…</p> : <div className="cv-grid" style={{ display: "grid", gridTemplateColumns: "minmax(330px,.78fr) minmax(560px,1.22fr)", gap: 18 }}>
-        <aside style={{ display: "grid", gap: 14, alignContent: "start" }}>
-          <section style={card}><h2 style={h2}>岗位与母版</h2><p><strong>{company || "未关联公司"}</strong>{title ? ` · ${title}` : ""}</p>
-            <label style={label}>行业母版<select value={track} onChange={(e) => { setTrack(e.target.value); if (e.target.value === "clinical_neuro") setLanguage("zh"); setAnalysis(null); }} style={input}>{Object.entries(trackLabels).map(([value, text]) => <option key={value} value={value}>{text}</option>)}</select></label>
-            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}><button style={langButton(language === "en")} disabled={track === "clinical_neuro"} onClick={() => { setLanguage("en"); setAnalysis(null); }}>English</button><button style={langButton(language === "zh")} onClick={() => { setLanguage("zh"); setAnalysis(null); }}>中文</button></div>
-            <label style={label}>完整 JD<textarea value={jd} onChange={(e) => setJd(e.target.value)} style={{ ...input, minHeight: 360, resize: "vertical" }} /></label>
-            <button disabled={loading} onClick={() => void analyze()} style={primary}>{loading ? "分析中…" : "开始分析"}</button>{message && <p style={notice}>{message}</p>}
-          </section>
-          {analysis && <section style={card}><h2 style={h2}>结果导航</h2><p style={small}>模板：{analysis.sourceDiagnostics?.templateFile}<br />模板片段：{analysis.sourceDiagnostics?.templateSnippetCount ?? 0} · 项目事实：{analysis.sourceDiagnostics?.atomicFactCount ?? 0} · 结构化事实：{analysis.sourceDiagnostics?.structuredFactCount ?? 0}</p><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>{nav.map(([id, text, value]) => <button key={id} onClick={() => setPanel(id)} style={navButton(panel === id)}><strong style={{ fontSize: 23 }}>{value}</strong><span>{text}</span></button>)}</div></section>}
-        </aside>
+      {application && <section className="application-summary" aria-label="申请信息">
+        <div><span>公司</span><strong>{application.company}</strong></div>
+        <div><span>岗位</span><strong>{application.title}</strong></div>
+        <div><span>母版</span><strong>{trackLabels[application.track] || application.track} · {application.language === "zh" ? "中文" : "English"}</strong></div>
+      </section>}
 
-        <section style={{ ...card, minHeight: 520 }}>
-          {!analysis ? <p>运行分析后，这里会展示每一个 JD 原子要求的事实证据、当前 CV 原文、概念关系路径与建议动作。</p> : panel === "projects" ? <Projects projects={analysis.projects} /> : panel === "drafts" ? <Drafts drafts={analysis.modificationDrafts} /> : <><h2 style={h2}>{nav.find(([id]) => id === panel)?.[1]}</h2><p style={subtle}>优先显示 JD 原始中文；英文 canonical concept 仅用于解释和跨语言检索。</p>{filtered.length ? filtered.map((item) => <RequirementCard key={item.requirementId} item={item} />) : <p style={empty}>这一类当前没有内容。</p>}</>}
+      {stage !== "ready" && stage !== "error" && <section className="progress-card" aria-live="polite">
+        <div className="spinner" aria-hidden="true" />
+        <div><h2>正在创建申请档案</h2><p>{stageText[stage]}</p></div>
+      </section>}
+
+      {stage === "error" && <section className="error-card" aria-live="assertive">
+        <p className="archive-eyebrow">需要处理</p>
+        <h2>{errorCode === "ARCHIVE_REPOSITORY_REQUIRED" ? "私有归档连接尚未就绪" : "申请档案暂未创建"}</h2>
+        <p>{message}</p>
+        {errorCode === "ARCHIVE_REPOSITORY_REQUIRED" && <p className="boundary-note">为避免泄露 JD 和定制 CV，系统不会把申请包写入公开的 Job Radar 仓库，也不会改写 CV 母版仓库。</p>}
+        {application && <button type="button" onClick={() => void createArchive(application)}>重试创建</button>}
+      </section>}
+
+      {stage === "ready" && archive && <div className="ready-grid">
+        <section className="ready-card">
+          <p className="archive-eyebrow">申请档案已创建</p>
+          <h2>{archive.applicationId}</h2>
+          <p>{archive.existing ? "已找到此前冻结的同一申请档案，没有重复创建。" : "完整 JD、事实母版、canonical indexes、当前行业 CV 母版和初步匹配已冻结。"}</p>
+          <dl>
+            <div><dt>申请目录</dt><dd>{archive.archivePath}</dd></div>
+            <div><dt>下一步</dt><dd>复制 Prompt 到新的 Work / Codex Chat</dd></div>
+          </dl>
+          <div className="ready-actions">
+            <button type="button" onClick={() => void copyPrompt()}>{copied ? "已复制" : "复制 Prompt"}</button>
+            <a href={archive.repositoryUrl} target="_blank" rel="noreferrer noopener">查看申请档案 ↗</a>
+          </div>
+        </section>
+
+        <section className="prompt-card">
+          <div className="prompt-heading"><h2>复制到 Chat 的 Prompt</h2><button type="button" onClick={() => void copyPrompt()}>{copied ? "已复制" : "复制"}</button></div>
+          <textarea readOnly value={archive.prompt} aria-label="复制到 Chat 的 Prompt" />
         </section>
       </div>}
-    </div><style>{`@media(max-width:980px){.cv-grid{grid-template-columns:1fr!important}}`}</style>
+    </div>
+    <style>{`
+      .archive-page{min-height:100vh;background:#f5f2e9;color:#1f2c25;padding:28px 18px 90px}
+      .archive-shell{max-width:1120px;margin:0 auto}
+      .archive-header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:22px}
+      .archive-header h1{font:700 clamp(34px,6vw,58px)/1.08 Georgia,serif;margin:5px 0 8px}
+      .archive-header p{color:#56645c;line-height:1.65;max-width:760px;margin:0}
+      .archive-header a{color:#16794b;font-weight:800;white-space:nowrap}
+      .archive-eyebrow{letter-spacing:.13em!important;font-size:11px!important;font-weight:850!important;color:#16794b!important;margin:0!important}
+      .application-summary{display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:1px;background:#d9d4c7;border:1px solid #d9d4c7;border-radius:16px;overflow:hidden;margin-bottom:18px}
+      .application-summary div{display:grid;gap:5px;background:#fffef9;padding:15px 17px}
+      .application-summary span{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#6a746d;font-weight:800}
+      .application-summary strong{line-height:1.45}
+      .progress-card,.error-card,.ready-card,.prompt-card{background:#fffef9;border:1px solid #ddd8ca;border-radius:19px;box-shadow:0 8px 28px rgba(31,44,37,.055)}
+      .progress-card{display:flex;align-items:center;gap:17px;padding:24px}
+      .progress-card h2,.error-card h2,.ready-card h2,.prompt-card h2{font-family:Georgia,serif;margin:0 0 7px}
+      .progress-card p,.error-card p,.ready-card p{color:#58655e;line-height:1.65;margin:0}
+      .spinner{width:34px;height:34px;border:4px solid #d9eadf;border-top-color:#16794b;border-radius:50%;animation:archive-spin .8s linear infinite;flex:0 0 auto}
+      .error-card{padding:24px;border-color:#e5c8bf}
+      .error-card h2{margin-top:6px}
+      .error-card button,.ready-actions button,.prompt-heading button{border:0;border-radius:11px;background:#16794b;color:#fff;font-weight:850;padding:11px 16px;cursor:pointer;margin-top:15px}
+      .boundary-note{background:#fff1e9;border-radius:10px;padding:11px 13px;margin-top:12px!important;color:#744333!important}
+      .ready-grid{display:grid;grid-template-columns:minmax(320px,.72fr) minmax(460px,1.28fr);gap:18px}
+      .ready-card,.prompt-card{padding:22px}
+      .ready-card h2{font-size:31px;margin-top:6px;word-break:break-word}
+      .ready-card dl{display:grid;gap:10px;margin:20px 0}
+      .ready-card dl div{padding:11px 12px;background:#f3f5f0;border-radius:10px}
+      .ready-card dt{font-size:11px;font-weight:850;color:#657067;text-transform:uppercase;letter-spacing:.08em}
+      .ready-card dd{margin:4px 0 0;line-height:1.45;word-break:break-word}
+      .ready-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+      .ready-actions button{margin:0}
+      .ready-actions a{border:1px solid #bfc9c1;border-radius:11px;padding:10px 14px;color:#1f5f42;font-weight:800;text-decoration:none}
+      .prompt-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+      .prompt-heading button{margin:0;padding:8px 13px}
+      .prompt-card textarea{width:100%;min-height:560px;box-sizing:border-box;border:1px solid #d5d0c3;border-radius:12px;background:#f8f7f1;color:#25332b;padding:14px;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;margin-top:10px}
+      @keyframes archive-spin{to{transform:rotate(360deg)}}
+      @media(max-width:820px){.archive-header{display:grid}.application-summary,.ready-grid{grid-template-columns:1fr}.prompt-card textarea{min-height:430px}}
+    `}</style>
   </main>;
 }
-
-function RequirementCard({ item }: { item: Match }) {
-  return <article style={resultCard}>
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "start" }}><div><p style={eyebrow}>{item.requirementId} · {item.category}</p><h3 style={{ margin: "3px 0" }}>{item.keyword}</h3></div><span style={{ ...statusColors[item.status], borderRadius: 999, padding: "4px 9px", fontSize: 11, fontWeight: 800 }}>{statusLabels[item.status]}</span></div>
-    <blockquote style={quote}><strong>JD 原文：</strong>{item.jdEvidence}</blockquote>
-    <p><strong>Canonical concept：</strong>{item.canonicalConcepts.length ? item.canonicalConcepts.join(" · ") : item.keyword}</p>
-    <p><strong>事实分类：</strong>{item.evidenceClassification === "No Evidence" ? "No Evidence" : classLabels[item.evidenceClassification]} · <strong>置信度：</strong>{item.confidence}%</p>
-    <p><strong>判定理由：</strong>{item.reason}</p>
-    {item.supportEvidence.length > 0 && <details open><summary style={summaryStyle}>事实证据 ({item.supportEvidence.length})</summary><div style={{ display: "grid", gap: 8, marginTop: 8 }}>{item.supportEvidence.map((evidence) => <div key={evidence.factId} style={evidenceBox}><div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><strong>{evidence.factId}</strong><span>{classLabels[evidence.classification]}</span></div><p>{evidence.fact}</p><small>{evidence.project} · {evidence.source} · {evidence.evidenceLocation}</small>{evidence.claimBoundary && <p style={boundary}><strong>边界：</strong>{evidence.claimBoundary}</p>}{evidence.industryGuardrail && <p style={boundary}><strong>Guardrail：</strong>{evidence.industryGuardrail}</p>}</div>)}</div></details>}
-    {item.templateMatches.length > 0 && <details open><summary style={summaryStyle}>当前 CV 命中片段 ({item.templateMatches.length})</summary><div style={{ display: "grid", gap: 9, marginTop: 8 }}>{item.templateMatches.map((match) => <div key={`${match.snippetId}-${match.relationType}`} style={templateBox}><div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}><strong>{match.section}</strong><span>{match.relationType} · {Math.round(match.confidence * 100)}%</span></div><p style={{ fontSize: 16 }}>{match.visibleText}</p><p><strong>关系路径：</strong>{match.relationPath.join(" → ")}</p><small>{match.sourceFile} · {match.location}{match.factIds.length ? ` · fact IDs: ${match.factIds.slice(0, 6).join(", ")}` : ""}</small></div>)}</div></details>}
-    <p style={actionBox}><strong>建议动作：</strong>{item.action}</p>
-  </article>;
-}
-
-function Projects({ projects }: { projects: Project[] }) { return <><h2 style={h2}>推荐优先使用的项目</h2>{projects.length ? projects.map((project, index) => <div key={project.projectId} style={resultCard}><strong>{index + 1}. {project.name}</strong><p>匹配要求：{project.matchedRequirements.join("、")}</p><p>{project.alreadyInTemplate ? "当前母版已包含该项目。" : "当前母版未包含该项目，仅在明显更匹配时考虑替换加入。"}</p>{project.evidence && <p><strong>代表性事实：</strong>{project.evidence.fact} ({project.evidence.factId})</p>}</div>) : <p style={empty}>没有可推荐项目。</p>}</>; }
-function Drafts({ drafts }: { drafts: ModificationDraft[] }) { return <><h2 style={h2}>逐条处理</h2><p style={subtle}>No Evidence 不生成修改；Adjacent 只显示安全边界，不生成虚假经历。</p>{drafts.length ? drafts.map((draft) => <div key={draft.id} style={resultCard}><div style={{ display: "flex", justifyContent: "space-between" }}><strong>{draft.requirement}</strong><span>{classLabels[draft.classification]}</span></div><p><strong>目标位置：</strong>{draft.targetSection}</p>{draft.canGenerateEdit ? <><p><strong>真实依据：</strong>{draft.verifiedFact}</p><p><strong>处理建议：</strong>{draft.rationale}</p></> : <p style={boundary}><strong>不可直接写入：</strong>{draft.rationale}<br />只能保留事实：{draft.verifiedFact}</p>}{draft.claimBoundary && <p style={boundary}><strong>Claim boundary：</strong>{draft.claimBoundary}</p>}</div>) : <p style={empty}>没有需要处理的 gap。</p>}</>; }
-
-const card: React.CSSProperties = { background: "#fffef9", border: "1px solid #ddd8ca", borderRadius: 18, padding: 20, boxShadow: "0 7px 25px rgba(31,44,37,.05)" };
-const resultCard: React.CSSProperties = { border: "1px solid #ddd8ca", borderRadius: 14, padding: 15, marginTop: 12, background: "#fff" };
-const evidenceBox: React.CSSProperties = { background: "#f4f6f2", borderRadius: 10, padding: 11 };
-const templateBox: React.CSSProperties = { background: "#eef5ff", border: "1px solid #cdddec", borderRadius: 10, padding: 11 };
-const quote: React.CSSProperties = { margin: "10px 0", padding: "10px 12px", borderLeft: "4px solid #d5a83a", background: "#fff8df", lineHeight: 1.6 };
-const boundary: React.CSSProperties = { background: "#fff2ed", padding: 9, borderRadius: 8, color: "#733f31" };
-const actionBox: React.CSSProperties = { background: "#edf5ee", padding: 10, borderRadius: 9 };
-const empty: React.CSSProperties = { padding: 14, borderRadius: 12, background: "#f5f2e9", color: "#5c665f" };
-const eyebrow: React.CSSProperties = { letterSpacing: ".12em", fontSize: 11, fontWeight: 800, color: "#16794b", margin: 0 };
-const titleStyle: React.CSSProperties = { fontFamily: "Georgia,serif", fontSize: "clamp(30px,5vw,52px)", margin: "4px 0" };
-const h2: React.CSSProperties = { fontFamily: "Georgia,serif", margin: "0 0 12px" };
-const subtle: React.CSSProperties = { color: "#56645c", lineHeight: 1.6 };
-const small: React.CSSProperties = { color: "#657067", fontSize: 12, lineHeight: 1.5 };
-const label: React.CSSProperties = { display: "grid", gap: 6, fontWeight: 800, fontSize: 13, marginBottom: 12 };
-const input: React.CSSProperties = { width: "100%", boxSizing: "border-box", border: "1px solid #cfcabd", borderRadius: 10, padding: "10px 11px", background: "#fff", color: "#1f2c25" };
-const primary: React.CSSProperties = { border: 0, borderRadius: 11, padding: "11px 15px", background: "#16794b", color: "white", fontWeight: 800, cursor: "pointer" };
-const notice: React.CSSProperties = { marginTop: 12, padding: 11, background: "#eef3ed", borderRadius: 10, lineHeight: 1.5 };
-const langButton = (active: boolean): React.CSSProperties => ({ border: `1px solid ${active ? "#16794b" : "#cfcabd"}`, background: active ? "#e6f2ea" : "#fff", color: "#1f2c25", borderRadius: 9, padding: "8px 12px", fontWeight: 800, cursor: "pointer" });
-const navButton = (active: boolean): React.CSSProperties => ({ display: "grid", gap: 2, border: `1px solid ${active ? "#16794b" : "#d7d1c3"}`, background: active ? "#e6f2ea" : "#fff", borderRadius: 11, padding: 10, textAlign: "left", cursor: "pointer", color: "#1f2c25" });
-const summaryStyle: React.CSSProperties = { cursor: "pointer", fontWeight: 800, marginTop: 10 };

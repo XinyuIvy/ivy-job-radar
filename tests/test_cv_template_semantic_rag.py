@@ -71,11 +71,11 @@ def test_current_status_overlay_is_loaded_and_planned_facts_are_not_coverage_sup
     assert "cannot support completed-experience coverage" in route
 
 
-def test_ui_shows_jd_original_cv_original_and_relation_path():
-    client = read("app/cv-tailor/cv-tailor-client.tsx")
-    assert "JD 原文" in client
-    assert "当前 CV 命中片段" in client
-    assert "关系路径" in client
-    assert "Canonical concept" in client
-    assert "事实证据" in client
-    assert "建议动作" in client
+def test_archive_keeps_jd_cv_and_canonical_context_for_chat():
+    archive = read("app/api/cv-tailor/archive/route.ts")
+    helper = read("app/lib/application-archive.ts")
+    assert "jd_snapshot.md" in archive
+    assert "cv_base.tex" in helper
+    assert "canonical_concept_index.jsonl" in helper
+    assert "canonical_relation_index.jsonl" in helper
+    assert "support_evidence" in archive

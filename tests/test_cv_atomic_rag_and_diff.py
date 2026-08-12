@@ -28,7 +28,7 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
 
     def test_client_selects_language_and_fifth_track(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn('body: JSON.stringify({ track, language, jd })', client)
+        self.assertIn('track: value.track, language: value.language, jd: value.jd', client)
         self.assertIn("English", client)
         self.assertIn("中文", client)
         self.assertIn("clinical_neuro", client)
@@ -41,12 +41,13 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
 
     def test_jd_evidence_and_template_relation_are_returned(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
+        archive = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("jdEvidence: hybridMatch.requirement.sourceText", route)
         self.assertIn("jdMatchedTerms", route)
         self.assertIn("templateMatches", route)
-        self.assertIn("关系路径", client)
-        self.assertIn("JD 原文", client)
+        self.assertIn("jd_source_text", archive)
+        self.assertIn("literal_terms", archive)
+        self.assertIn("support_evidence", archive)
 
     def test_incomplete_status_is_not_forced_to_adjacent(self):
         rag = (ROOT / "app" / "lib" / "hybrid-rag.ts").read_text(encoding="utf-8")

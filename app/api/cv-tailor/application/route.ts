@@ -19,6 +19,7 @@ function inferTrack(track: string) {
   if (lower.includes("pharma") || lower.includes("biostat")) return "pharma";
   if (lower.includes("quant")) return "quant";
   if (lower.includes("consult")) return "consulting";
+  if (lower.includes("neuro") || lower.includes("medical device") || lower.includes("脑科学") || lower.includes("医疗器械")) return "clinical_neuro";
   return "tech";
 }
 
@@ -44,6 +45,9 @@ export async function GET(request: NextRequest) {
     company: application.company,
     title: application.title,
     track: inferTrack(application.track),
+    language: /中国|china/i.test(application.region) ? "zh" : "en",
+    region: application.region,
+    location: application.location,
     jobUrl: application.jobUrl,
     jd: job?.description || "",
     resumeVersion: application.resumeVersion,

@@ -28,12 +28,11 @@ class ApplicationCvActionsSourceTests(unittest.TestCase):
         self.assertIn('/api/cv-tailor/application', client)
         self.assertIn('job?.description', route)
 
-    def test_publish_creates_branch_and_pull_request(self):
+    def test_automatic_cv_publish_is_disabled(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "publish" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn('/git/refs', route)
-        self.assertIn('/pulls', route)
-        self.assertIn('base: "main"', route)
-        self.assertNotIn('branch: "main"', route)
+        self.assertIn("AUTOMATIC_CV_PUBLISH_DISABLED", route)
+        self.assertIn("status: 410", route)
+        self.assertNotIn('/pulls', route)
 
 
 if __name__ == "__main__":
