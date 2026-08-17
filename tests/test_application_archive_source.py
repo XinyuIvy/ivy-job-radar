@@ -53,6 +53,15 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         self.assertIn("ARCHIVE_WRITE_PERMISSION_REQUIRED", route)
         self.assertIn("请检查该凭据是否包含这个私有仓库", route)
 
+    def test_missing_jd_can_be_supplied_manually(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
+        self.assertIn("jdOverride?: string", route)
+        self.assertIn("const jd = jdOverride || job?.description?.trim() || \"\"", route)
+        self.assertIn("手动输入完整 JD", client)
+        self.assertIn("使用此 JD 创建申请档案", client)
+        self.assertIn("jdOverride: jd", client)
+
     def test_contract_records_completed_repository_initialization(self):
         contract = (ROOT / "docs" / "APPLICATION_ARCHIVE_CONTRACT.md").read_text(encoding="utf-8")
         self.assertIn("private archive repository initialized", contract)
