@@ -47,21 +47,31 @@ export default function CvTailorClient() {
   const [stage, setStage] = useState<Stage>("loading");
   const [message, setMessage] = useState("");
   const [errorCode, setErrorCode] = useState("");
+  const [manualJd, setManualJd] = useState("");
   const [copied, setCopied] = useState(false);
   const startedFor = useRef<number | null>(null);
 
   const createArchive = useCallback(async (value: ApplicationPrefill) => {
+    const jd = value.jd.trim();
+    if (!jd) {
+      setArchive(null);
+      setCopied(false);
+      setErrorCode("JD_REQUIRED");
+      setMessage("系统没有读取到完整 JD。请手动粘贴完整 JD 后创建申请档案。");
+      setStage("error");
+      return;
+    }
+
     setArchive(null);
     setCopied(false);
     setErrorCode("");
     setStage("analyzing");
     setMessage("");
     try {
-      if (!value.jd.trim()) throw new Error("该申请没有完整 JD，不能创建申请档案。");
       const analysisResponse = await fetch("/api/cv-tailor/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ track: value.track, language: value.language, jd: value.jd }),
+        body: JSON.stringify({ track: value.track, language: value.language, jd }),
       });
       const analysis = await analysisResponse.json() as { error?: string; code?: string } & Record<string, unknown>;
       if (!analysisResponse.ok) {
@@ -73,7 +83,7 @@ export default function CvTailorClient() {
       const archiveResponse = await fetch("/api/cv-tailor/archive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ applicationId: value.applicationId, track: value.track, language: value.language, analysis }),
+        body: JSON.stringify({ applicationId: value.applicationId, track: value.track, language: value.language, jdOverride: jd, analysis }),
       });
       const result = await archiveResponse.json() as ArchiveResult & { error?: string; code?: string };
       if (!archiveResponse.ok) {
@@ -104,6 +114,13 @@ export default function CvTailorClient() {
       })
       .then((result) => {
         setApplication(result);
+        setManualJd(result.jd || "");
+        if (!result.jd.trim()) {
+          setErrorCode("JD_REQUIRED");
+          setMessage("系统没有读取到完整 JD。请手动粘贴完整 JD 后创建申请档案。");
+          setStage("error");
+          return;
+        }
         if (startedFor.current !== result.applicationId) {
           startedFor.current = result.applicationId;
           void createArchive(result);
@@ -124,6 +141,19 @@ export default function CvTailorClient() {
     } catch {
       setMessage("浏览器未允许自动复制。请在下方 Prompt 中全选并复制。");
     }
+  };
+
+  const createFromManualJd = () => {
+    if (!application) return;
+    const jd = manualJd.trim();
+    if (!jd) {
+      setErrorCode("JD_REQUIRED");
+      setMessage("请先粘贴完整 JD，再创建申请档案。");
+      return;
+    }
+    const nextApplication = { ...application, jd };
+    setApplication(nextApplication);
+    void createArchive(nextApplication);
   };
 
   return <main className="archive-page">
@@ -150,10 +180,22 @@ export default function CvTailorClient() {
 
       {stage === "error" && <section className="error-card" aria-live="assertive">
         <p className="archive-eyebrow">需要处理</p>
-        <h2>{errorCode === "ARCHIVE_REPOSITORY_REQUIRED" ? "私有归档连接尚未就绪" : "申请档案暂未创建"}</h2>
+        <h2>{errorCode === "ARCHIVE_REPOSITORY_REQUIRED" ? "私有归档连接尚未就绪" : errorCode === "JD_REQUIRED" ? "需要补充完整 JD" : "申请档案暂未创建"}</h2>
         <p>{message}</p>
+        {errorCode === "JD_REQUIRED" && application && <div className="manual-jd-card">
+          <label htmlFor="manual-jd">完整 JD</label>
+          <p>把招聘页面中的职位描述和职位要求完整粘贴到这里。系统会用这份文本做初步匹配，并将同一份 JD 冻结进申请档案。</p>
+          <textarea
+            id="manual-jd"
+            value={manualJd}
+            onChange={(event) => setManualJd(event.target.value)}
+            placeholder="在这里粘贴完整 Job Description…"
+            aria-label="手动输入完整 JD"
+          />
+          <button type="button" onClick={createFromManualJd} disabled={!manualJd.trim()}>使用此 JD 创建申请档案</button>
+        </div>}
         {errorCode === "ARCHIVE_REPOSITORY_REQUIRED" && <p className="boundary-note">为避免泄露 JD 和定制 CV，系统不会把申请包写入公开的 Job Radar 仓库，也不会改写 CV 母版仓库。</p>}
-        {application && <button type="button" onClick={() => void createArchive(application)}>重试创建</button>}
+        {application && errorCode !== "JD_REQUIRED" && <button type="button" onClick={() => void createArchive(application)}>重试创建</button>}
       </section>}
 
       {stage === "ready" && archive && <div className="ready-grid">
@@ -197,6 +239,12 @@ export default function CvTailorClient() {
       .error-card{padding:24px;border-color:#e5c8bf}
       .error-card h2{margin-top:6px}
       .error-card button,.ready-actions button,.prompt-heading button{border:0;border-radius:11px;background:#16794b;color:#fff;font-weight:850;padding:11px 16px;cursor:pointer;margin-top:15px}
+      .error-card button:disabled{opacity:.45;cursor:not-allowed}
+      .manual-jd-card{margin-top:18px;padding:16px;background:#f6f5ef;border:1px solid #ddd8ca;border-radius:14px}
+      .manual-jd-card label{display:block;font-weight:850;margin-bottom:5px}
+      .manual-jd-card p{font-size:13px;margin-bottom:10px}
+      .manual-jd-card textarea{width:100%;min-height:300px;box-sizing:border-box;border:1px solid #cbc6b8;border-radius:11px;background:#fff;color:#25332b;padding:13px;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
+      .manual-jd-card button{margin-top:11px}
       .boundary-note{background:#fff1e9;border-radius:10px;padding:11px 13px;margin-top:12px!important;color:#744333!important}
       .ready-grid{display:grid;grid-template-columns:minmax(320px,.72fr) minmax(460px,1.28fr);gap:18px}
       .ready-card,.prompt-card{padding:22px}
@@ -212,7 +260,7 @@ export default function CvTailorClient() {
       .prompt-heading button{margin:0;padding:8px 13px}
       .prompt-card textarea{width:100%;min-height:560px;box-sizing:border-box;border:1px solid #d5d0c3;border-radius:12px;background:#f8f7f1;color:#25332b;padding:14px;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;margin-top:10px}
       @keyframes archive-spin{to{transform:rotate(360deg)}}
-      @media(max-width:820px){.archive-header{display:grid}.application-summary,.ready-grid{grid-template-columns:1fr}.prompt-card textarea{min-height:430px}}
+      @media(max-width:820px){.archive-header{display:grid}.application-summary,.ready-grid{grid-template-columns:1fr}.prompt-card textarea{min-height:430px}.manual-jd-card textarea{min-height:240px}}
     `}</style>
   </main>;
 }
