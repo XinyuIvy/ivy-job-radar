@@ -212,6 +212,7 @@ export async function POST(request: NextRequest) {
     applicationId?: number;
     track?: ArchiveTrack;
     language?: ArchiveLanguage;
+    jdOverride?: string;
     analysis?: InitialAnalysis;
   };
   const applicationRowId = Number(body.applicationId);
@@ -219,6 +220,7 @@ export async function POST(request: NextRequest) {
   const track: ArchiveTrack = body.track && body.track in templateFiles[language] ? body.track : "tech";
   const templateFile = templateFiles[language][track];
   const analysis = body.analysis ?? {};
+  const jdOverride = String(body.jdOverride || "").trim();
 
   if (!Number.isInteger(applicationRowId) || applicationRowId <= 0) {
     return NextResponse.json({ error: "A valid applicationId is required.", code: "APPLICATION_ID_REQUIRED" }, { status: 400 });
@@ -247,7 +249,7 @@ export async function POST(request: NextRequest) {
     const job = allJobs.find((row) => application.jobUrl && row.jobUrl === application.jobUrl)
       ?? allJobs.find((row) => row.company === application.company && row.title === application.title)
       ?? null;
-    const jd = job?.description?.trim() || "";
+    const jd = jdOverride || job?.description?.trim() || "";
     if (!jd) return NextResponse.json({ error: "该申请没有完整 JD，不能创建申请档案。", code: "JD_REQUIRED" }, { status: 400 });
 
     const archiveId = stableArchiveId(application.company, application.id, application.applicationId);
