@@ -1,0 +1,34 @@
+name: Apply pending feed patch
+
+on:
+  push:
+    branches:
+      - fix/hide-pending-from-today
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/hide-pending-from-today
+      - name: Patch server-side pending application filtering
+        run: python scripts/patch_hide_pending_from_today.py
+      - name: Remove one-off patch files
+        run: |
+          rm scripts/patch_hide_pending_from_today.py
+          rm .github/workflows/one-off-patch-hide-pending.yml
+      - name: Commit patched files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/api/jobs/route.ts scripts/patch_hide_pending_from_today.py .github/workflows/one-off-patch-hide-pending.yml
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Hide tracked applications from today's job feed"
+          git push origin HEAD:fix/hide-pending-from-today
