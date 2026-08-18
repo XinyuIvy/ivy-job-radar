@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
 import { applications } from "../../../db/schema";
-import { sameLogicalJob } from "../../lib/job-identity";
+import {
+  canonicalizeJobIdentityUrl,
+  isPlaceholderJobTitle,
+  sameLogicalJob,
+} from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -55,6 +59,17 @@ function normalize(value: unknown) {
     .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
 }
 
+function baseJobPageUrl(value: unknown) {
+  const canonical = canonicalizeJobIdentityUrl(value);
+  try {
+    const url = new URL(canonical);
+    if (/^#ivy-job-/i.test(url.hash)) url.hash = "";
+    return url.toString();
+  } catch {
+    return canonical;
+  }
+}
+
 export async function GET() {
   const db = await getDb();
   const rows = await db
@@ -84,15 +99,32 @@ export async function POST(request: NextRequest) {
     jobUrl,
     applicationId: String(payload.applicationId ?? ""),
   };
-  const duplicate = rows.find((row) =>
-    (jobUrl && row.jobUrl.trim() === jobUrl && normalize(row.title) === normalize(payload.title))
-    || sameLogicalJob(row, incoming),
-  );
+  const duplicate = rows.find((row) => sameLogicalJob(row, incoming));
   if (duplicate) {
     return NextResponse.json(duplicate, { status: 200 });
   }
 
   const now = new Date().toISOString();
+  const legacyAmbiguous = incoming.applicationId && isPlaceholderJobTitle(incoming.title)
+    ? rows.find((row) =>
+      !row.applicationId
+      && normalize(row.company) === normalize(incoming.company)
+      && normalize(row.title) === normalize(incoming.title)
+      && baseJobPageUrl(row.jobUrl) === baseJobPageUrl(jobUrl),
+    )
+    : undefined;
+  if (legacyAmbiguous) {
+    const [updated] = await db
+      .update(applications)
+      .set({
+        ...(payload as Partial<typeof applications.$inferInsert>),
+        updatedAt: now,
+      })
+      .where(eq(applications.id, legacyAmbiguous.id))
+      .returning();
+    return NextResponse.json(updated, { status: 200 });
+  }
+
   const [created] = await db
     .insert(applications)
     .values({

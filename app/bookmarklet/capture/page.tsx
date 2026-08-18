@@ -10,6 +10,7 @@ type CaptureResult = {
   company: string;
   title: string;
   jobUrl: string;
+  applicationId: string;
 };
 
 type PendingApplication = {
@@ -19,6 +20,7 @@ type PendingApplication = {
   location?: string;
   region?: string;
   jobUrl?: string;
+  applicationId?: string;
   priority?: string;
   status?: string;
   source?: string;
@@ -32,6 +34,8 @@ type CapturePayload = {
   description?: string;
   jobUrl?: string;
   addressCountry?: string;
+  captureId?: string;
+  bookmarkVersion?: string;
 };
 
 type CaptureMessage = { type?: unknown; payload?: unknown };
@@ -88,7 +92,7 @@ export default function BookmarkCapturePage() {
             location: payload.location || "",
             track: "",
             jobUrl: result.jobUrl,
-            applicationId: payload.applicationId || "",
+            applicationId: result.applicationId || payload.applicationId || "",
             source: "Chrome 手动保存",
             fit: 5,
             interest: 5,
@@ -133,7 +137,7 @@ export default function BookmarkCapturePage() {
 
   useEffect(() => {
     if (state.status !== "success") return;
-    const timer = window.setTimeout(() => window.close(), 1200);
+    const timer = window.setTimeout(() => window.close(), 1600);
     return () => window.clearTimeout(timer);
   }, [state.status]);
 
@@ -152,7 +156,7 @@ export default function BookmarkCapturePage() {
         {successful && <strong style={{ display: "block", marginTop: 16, fontSize: 18 }}>{state.result.company} · {state.result.title}</strong>}
         <p style={{ lineHeight: 1.65, color: "#526058" }}>
           {state.status === "saving"
-            ? "正在保存完整岗位信息并建立待提交申请记录。"
+            ? "正在保存完整岗位信息并建立待提交申请记录。连续保存其他岗位不需要等待。"
             : successful
               ? "该岗位已直接进入待提交申请。打开的 Job Radar 会自动同步，不需要刷新。"
               : state.message}

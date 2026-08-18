@@ -14,6 +14,19 @@ const CHINA_JOB_HOSTS = [
   "yingjiesheng.com",
 ];
 
+const KNOWN_COMPANY_HOSTS: ReadonlyArray<readonly [string, string]> = [
+  ["qq.com", "腾讯"],
+  ["tencent.com", "腾讯"],
+  ["alibaba.com", "阿里巴巴"],
+  ["alibabagroup.com", "阿里巴巴"],
+  ["antgroup.com", "蚂蚁集团"],
+  ["bytedance.com", "字节跳动"],
+  ["meituan.com", "美团"],
+  ["jd.com", "京东"],
+  ["baidu.com", "百度"],
+  ["huawei.com", "华为"],
+];
+
 const TRACK_RULES: Array<[string, RegExp]> = [
   ["Pharma", /biostat|生物统计|临床统计|clinical trial|流行病|epidemiolog|真实世界|health economics|卫生经济/i],
   ["Quant", /quantitative|quant research|量化研究|量化分析|systematic trading/i],
@@ -62,10 +75,34 @@ export function bookmarkFingerprint(company: string, title: string) {
   return `${normalizeJobIdentityText(company)}::${normalizeJobIdentityText(title)}`;
 }
 
-export function inferBookmarkCompany(rawCompany: unknown, jobUrl: string) {
+function portalTitleCompany(value: unknown) {
+  const title = cleanBookmarkText(value, 300)
+    .replace(/(?:校园招聘|校招|社会招聘|人才招聘|招聘官网|招聘平台|招聘中心|加入我们)$/u, "")
+    .replace(/(?:campus talent|campus recruiting|campus recruitment|careers?|join us)$/i, "")
+    .replace(/[|·\-–—]+$/g, "")
+    .trim();
+  if (!title || title.length > 40 || /^(job|jobs|career|careers|join|campus|招聘)$/i.test(title)) return "";
+  return title;
+}
+
+function genericCompanyLabel(value: string) {
+  return /^(join|jobs?|careers?|career site|campus talent|campus recruiting|campus recruitment|recruiting|招聘|校园招聘|招聘官网|招聘平台)$/i.test(value.trim());
+}
+
+function hostnameMatches(hostname: string, host: string) {
+  return hostname === host || hostname.endsWith(`.${host}`);
+}
+
+export function inferBookmarkCompany(rawCompany: unknown, jobUrl: string, portalTitle: unknown = "") {
   const company = cleanBookmarkText(rawCompany, 300);
-  if (company) return company;
-  const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.replace(/^www\./, "") ?? "";
+  const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.toLowerCase().replace(/^www\./, "") ?? "";
+  const knownCompany = KNOWN_COMPANY_HOSTS.find(([host]) => hostnameMatches(hostname, host))?.[1] ?? "";
+  if (company && !genericCompanyLabel(company)) return company;
+  if (knownCompany) return knownCompany;
+
+  const titleCompany = portalTitleCompany(portalTitle);
+  if (titleCompany) return titleCompany;
+
   const firstLabel = hostname.split(".")[0] || "待补充公司";
   return firstLabel
     .split(/[-_]/)
@@ -78,8 +115,12 @@ export function inferBookmarkRegion(jobUrl: string, location: string, addressCou
   const country = `${addressCountry} ${location}`.toLowerCase();
   if (/中国|china|\bcn\b|中华人民共和国/.test(country)) return "中国";
   if (/美国|united states|\busa?\b/.test(country)) return "美国";
-  const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.toLowerCase() ?? "";
-  if (hostname.endsWith(".cn") || CHINA_JOB_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`))) {
+  const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.toLowerCase().replace(/^www\./, "") ?? "";
+  if (
+    hostname.endsWith(".cn")
+    || CHINA_JOB_HOSTS.some((host) => hostnameMatches(hostname, host))
+    || KNOWN_COMPANY_HOSTS.some(([host]) => hostnameMatches(hostname, host))
+  ) {
     return "中国";
   }
   return "美国";

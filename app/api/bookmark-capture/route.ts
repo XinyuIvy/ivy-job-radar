@@ -18,6 +18,7 @@ import {
   secureBookmarkKeyEqual,
 } from "../../lib/bookmark-capture";
 import {
+  deriveAmbiguousCaptureId,
   isPlaceholderJobTitle,
   makeDistinctStoredJobUrl,
   sameLogicalJob,
@@ -121,15 +122,27 @@ export async function POST(request: NextRequest) {
 
   const sourcePageTitle = cleanBookmarkText(body.sourcePageTitle, 500);
   const title = cleanBookmarkText(body.title, 500) || sourcePageTitle || "待补充职位名称";
-  const company = inferBookmarkCompany(body.company, rawJobUrl);
+  const company = inferBookmarkCompany(body.company, rawJobUrl, title);
   const location = cleanBookmarkText(body.location, 500);
   const description = cleanBookmarkText(body.description, 50_000);
-  const applicationId = cleanBookmarkText(body.applicationId, 500);
+  const suppliedApplicationId = cleanBookmarkText(body.applicationId, 500);
+  const captureId = cleanBookmarkText(body.captureId, 200);
+  const applicationId = suppliedApplicationId || (isPlaceholderJobTitle(title)
+    ? deriveAmbiguousCaptureId({
+      company,
+      title,
+      location,
+      canonicalUrl,
+      description: description || captureId,
+    })
+    : "");
   const region = inferBookmarkRegion(rawJobUrl, location, cleanBookmarkText(body.addressCountry, 200));
   const track = inferBookmarkTrack(title, description);
   const skills = inferBookmarkSkills(title, description);
   const now = new Date().toISOString();
-  const evidence = "你通过 Chrome 书签在原招聘页面手动确认并加入；此岗位不经过自动核验。";
+  const evidence = isPlaceholderJobTitle(title)
+    ? "你通过 Chrome 书签手动加入；页面只暴露了招聘门户标题，系统用完整 JD 内容生成独立岗位身份。"
+    : "你通过 Chrome 书签在原招聘页面手动确认并加入；此岗位不经过自动核验。";
   const incomingIdentity = { company, title, location, jobUrl: rawJobUrl, canonicalUrl, applicationId };
 
   const db = await getDb();
@@ -140,16 +153,22 @@ export async function POST(request: NextRequest) {
       eq(jobs.applicationId, applicationId),
       and(eq(jobs.company, company), eq(jobs.title, title)),
     )
-    : isPlaceholderJobTitle(title)
-      ? or(eq(jobs.jobUrl, rawJobUrl), eq(jobs.canonicalUrl, canonicalUrl))
-      : or(
-        eq(jobs.jobUrl, rawJobUrl),
-        eq(jobs.canonicalUrl, canonicalUrl),
-        and(eq(jobs.company, company), eq(jobs.title, title)),
-      );
+    : or(
+      eq(jobs.jobUrl, rawJobUrl),
+      eq(jobs.canonicalUrl, canonicalUrl),
+      and(eq(jobs.company, company), eq(jobs.title, title)),
+    );
   const candidates = await db.select().from(jobs).where(candidateCondition);
-  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
-  const exactUrlCollision = candidates.some((row) => row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
+  const logicalExisting = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+  const legacyAmbiguous = isPlaceholderJobTitle(title) && applicationId
+    ? candidates.find((row) =>
+      !row.applicationId
+      && bookmarkFingerprint(row.company, row.title) === bookmarkFingerprint(company, title)
+      && (row.jobUrl === rawJobUrl || row.canonicalUrl === canonicalUrl),
+    )
+    : undefined;
+  const existing = logicalExisting ?? legacyAmbiguous;
+  const exactUrlCollision = candidates.some((row) => row.id !== existing?.id && row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
   const storedJobUrl = existing?.jobUrl
     || (exactUrlCollision ? makeDistinctStoredJobUrl(rawJobUrl, incomingIdentity) : rawJobUrl);
 
@@ -218,6 +237,7 @@ export async function POST(request: NextRequest) {
     title,
     jobUrl: storedJobUrl,
     canonicalUrl,
+    applicationId,
     status: BOOKMARK_CAPTURE_STATUS,
   };
   if (wantsJson(request)) return NextResponse.json(result, { status: created ? 201 : 200 });
@@ -228,6 +248,6 @@ export async function POST(request: NextRequest) {
     jobTitle: title,
     detail: created
       ? "该岗位已直接以“开放”状态加入，不会进入核验队列。"
-      : "系统只会合并同一职位编号或同一公司、同一职位、同一地点的记录。",
+      : "系统只会合并同一职位编号，或完整 JD 内容确认相同的岗位。",
   });
 }

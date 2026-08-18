@@ -20,20 +20,24 @@ const address=(()=>{const raw=Array.isArray(posting&&posting.jobLocation)?postin
 const organization=posting&&posting.hiringOrganization;
 const selected=clean(window.getSelection&&window.getSelection().toString(),40000);
 const description=stripHtml(posting&&posting.description)||selected||queryText(['[data-testid*="job-description"]','.job-description','.job-sec-text','[class*="job-description"]','[class*="jobDescription"]','main','article'])||clean(document.body&&document.body.innerText,40000);
-const title=clean(posting&&posting.title,500)||queryText(['[data-testid*="job-title"]','[data-automation-id="jobPostingHeader"]','[data-ui="job-title"]','.posting-headline h2','.app-title','.job-name','[class*="job-title"]','[class*="jobTitle"]','h1'])||clean((document.querySelector('meta[property="og:title"]')||{}).content,500)||clean(document.title,500);
+const rolePattern=/(?:research|applied|data|quantitative|machine learning|statistical|biostatistics?|clinical|imaging|algorithm|decision)\s+(?:scientist|researcher|analyst)|(?:scientist|researcher|analyst),?\s+(?:research|data|ai|ml)|(?:研究|应用|数据|量化|算法|统计|生物统计|临床|影像|决策)(?:科学家|研究员|分析师|统计师)/i;
+const genericTitlePattern=/(?:校园招聘|校招|社会招聘|人才招聘|招聘官网|招聘平台|招聘中心|加入我们|campus talent|campus recruiting|campus recruitment|careers?|join us)/i;
+const roleHeading=Array.from(document.querySelectorAll('h1,h2,h3,[role="heading"]')).map(text).find((value)=>value&&value.length<=180&&rolePattern.test(value)&&!genericTitlePattern.test(value))||"";
+const title=clean(posting&&posting.title,500)||queryText(['[data-testid*="job-title"]','[data-automation-id="jobPostingHeader"]','[data-ui="job-title"]','.posting-headline h2','.app-title','.job-name','[class*="job-title"]','[class*="jobTitle"]'])||roleHeading||queryText(['h1'])||clean((document.querySelector('meta[property="og:title"]')||{}).content,500)||clean(document.title,500);
 const company=clean(organization&&(organization.name||organization.legalName),300)||queryText(['[data-testid*="company-name"]','.company-name','[class*="company-name"]','[class*="companyName"]','a[href*="company"] h2','a[href*="company"] h3'])||clean((document.querySelector('meta[property="og:site_name"]')||{}).content,300);
 const jobLocation=clean([address.addressLocality,address.addressRegion,address.addressCountry].filter(Boolean).join(" · "),500)||queryText(['[data-testid*="location"]','.job-location','.job-area','[class*="job-location"]','[class*="jobLocation"]']);
 const country=clean(address.addressCountry,200);
 const identifier=posting&&posting.identifier;
 const params=new URL(window.location.href).searchParams;
 const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("currentJobId")||params.get("postingId")||params.get("positionId")||params.get("reqId")||params.get("requisitionId")||params.get("vacancyId"),500);
-const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title};
+const captureId=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2);
+const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title,captureId,bookmarkVersion:"v3"};
 const captureUrl=new URL(${JSON.stringify(capturePageUrl)});
 let popup=null;
 let sent=false;
 const listener=(event)=>{if(sent||event.source!==popup||event.origin!==captureUrl.origin||event.data!=="ivy-job-radar-ready")return;sent=true;window.removeEventListener("message",listener);popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);};
 window.addEventListener("message",listener);
-const popupName="ivy_job_radar_capture_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+const popupName="ivy_job_radar_capture_"+captureId;
 popup=window.open(captureUrl.href,popupName,"popup,width=600,height=760");
 if(!popup){window.removeEventListener("message",listener);alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");return;}
 setTimeout(()=>{if(!sent){window.removeEventListener("message",listener);try{popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);}catch{}}},2500);
@@ -101,8 +105,8 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16, marginTop: 20 }}>
           {[
             ["直接待申请", "手动点击代表你已经决定考虑申请，因此自动建立“准备材料”记录。"],
-            ["独立保存", "每次点击使用独立保存窗口，连续保存多个岗位不会互相覆盖。"],
-            ["自动去重", "优先按规范化链接和 Requisition ID 去重，重复岗位不会重复建立申请。"],
+            ["连续保存", "每次点击都有独立保存身份，可连续保存多个岗位，不需要等待一分钟。"],
+            ["自动去重", "优先按 Requisition ID；招聘门户只显示通用标题时，再按完整 JD 内容识别。"],
           ].map(([title, body]) => (
             <article key={title} style={{ background: "rgba(255,255,255,.68)", border: "1px solid #ded9ce", borderRadius: 18, padding: 20 }}>
               <strong>{title}</strong><p style={{ marginBottom: 0, lineHeight: 1.6, color: "#647169" }}>{body}</p>
