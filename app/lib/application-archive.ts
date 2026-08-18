@@ -129,6 +129,10 @@ export function buildApplicationRecord(input: {
 }
 
 export function buildChatPrompt(archiveId: string, path: string) {
+  const customizedTex = `cv_customized_${archiveId}.tex`;
+  const customizedPdf = `cv_customized_${archiveId}.pdf`;
+  const submittedPdf = `cv_submitted_${archiveId}.pdf`;
+
   return `请为申请 \`${archiveId}\` 定制定向 CV。
 
 请从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支读取目录：
@@ -178,11 +182,11 @@ export function buildChatPrompt(archiveId: string, path: string) {
 - 不改变申请状态
 - 不写入任何仓库
 
-我确认内容定稿后，才从 \`cv_base.tex\` 创建本申请自己的 \`cv_customized.tex\`。必须保持母版的 document class、packages、字体、字号、页边距、section 样式、bullet 样式、行距、项目间距、联系方式格式、日期和地点排版、\`\\hfill\` 规则及全部自定义命令。可以调整文字和项目顺序，但不得重新设计版式，也不得通过明显缩小字体强行塞进两页。
+我确认内容定稿后，才从 \`cv_base.tex\` 创建本申请自己的 \`${customizedTex}\`。文件名必须保留完整 application ID，不得简化为 \`cv_customized.tex\` 或其他不带 application ID 的名称。必须保持母版的 document class、packages、字体、字号、页边距、section 样式、bullet 样式、行距、项目间距、联系方式格式、日期和地点排版、\`\\hfill\` 规则及全部自定义命令。可以调整文字和项目顺序，但不得重新设计版式，也不得通过明显缩小字体强行塞进两页。
 
-之后使用仓库规定的 XeLaTeX 编译流程生成并检查 PDF：不超过两页、无溢出或异常断行、文本可正常提取、每项 claim 均有事实支持。若编译环境不可用，明确报告，不要声称已经生成 PDF。
+之后使用仓库规定的 XeLaTeX 编译流程生成并检查 \`${customizedPdf}\`：不超过两页、无溢出或异常断行、文本可正常提取、每项 claim 均有事实支持。若编译环境不可用，明确报告，不要声称已经生成 PDF。
 
-最终仍需经过我的 PDF 确认。确认后，才把定制 TeX、PDF、修改记录和证据清单保存回这个申请自己的目录；不得修改其他申请，也不得覆盖 \`XinyuIvy/CV\` 中的行业母版。
+最终仍需经过我的 PDF 确认。确认后，才把 \`${customizedTex}\`、\`${customizedPdf}\`、修改记录和证据清单保存回这个申请自己的目录；如果我明确确认这是实际投递版本，再保存为 \`${submittedPdf}\`。不得修改其他申请，也不得覆盖 \`XinyuIvy/CV\` 中的行业母版。
 
 现在只执行读取、独立分类审核和第一版纯文本内容建议，完成后停下来等我确认。
 `;
