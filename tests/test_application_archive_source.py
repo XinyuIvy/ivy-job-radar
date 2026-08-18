@@ -67,6 +67,20 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         ]:
             self.assertIn(phrase, helper)
 
+    def test_prompt_allows_local_pdf_preview_before_archive_write(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "local_chat_pdf_preview_authorized: true",
+            "local_preview_repository_write_authorized: false",
+            "Chat 内 PDF 预览规则",
+            "不要只告诉我“编译成功”",
+            "PDF定稿",
+            "GitHub connector 不能可靠读取二进制 PDF 内容",
+            "cv_customized_${archiveId}.txt",
+            "cv_build_manifest_${archiveId}.json",
+        ]:
+            self.assertIn(phrase, helper)
+
     def test_existing_archive_gets_current_operational_prompt_without_rewriting_snapshot(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("const existingPrompt = await existingArchivePrompt", route)
