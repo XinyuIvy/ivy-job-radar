@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
 
   const sourcePageTitle = cleanBookmarkText(body.sourcePageTitle, 500);
   const title = cleanBookmarkText(body.title, 500) || sourcePageTitle || "待补充职位名称";
-  const company = inferBookmarkCompany(body.company, rawJobUrl);
+  const company = inferBookmarkCompany(body.company, rawJobUrl, title);
   const location = cleanBookmarkText(body.location, 500);
   const description = cleanBookmarkText(body.description, 50_000);
   const suppliedApplicationId = cleanBookmarkText(body.applicationId, 500);
