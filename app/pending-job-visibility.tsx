@@ -2,36 +2,38 @@
 
 import { useEffect } from "react";
 
-type ApplicationRow = {
-  company: string;
-  title: string;
+import { sameLogicalJob, type JobIdentityInput } from "./lib/job-identity";
+
+type ApplicationRow = JobIdentityInput & {
   status: string;
 };
 
-function normalize(value: string) {
-  return value
-    .trim()
-    .toLocaleLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+function cardIdentity(card: HTMLElement): JobIdentityInput {
+  const title = card.querySelector(".job-title h3")?.textContent?.trim() ?? "";
+  const companyLine = card.querySelector(".job-title p")?.textContent ?? "";
+  const [companyPart, ...locationParts] = companyLine.split("·");
+  const jobUrl = card.querySelector<HTMLAnchorElement>("a.job-link")?.href ?? "";
+
+  return {
+    company: companyPart?.trim() ?? "",
+    title,
+    location: locationParts.join("·").trim(),
+    jobUrl,
+  };
 }
 
 export default function PendingJobVisibility() {
   useEffect(() => {
     let disposed = false;
     let observer: MutationObserver | null = null;
-    let pendingKeys = new Set<string>();
+    let pendingApplications: ApplicationRow[] = [];
     let modalWasOpen = Boolean(document.querySelector(".modal-backdrop"));
 
-    const refreshPendingKeys = async () => {
+    const refreshPendingApplications = async () => {
       const response = await fetch("/api/applications", { cache: "no-store" });
       if (!response.ok || disposed) return;
       const rows = await response.json() as ApplicationRow[];
-      pendingKeys = new Set(
-        rows
-          .filter((row) => row.status === "准备材料")
-          .map((row) => `${normalize(row.company)}::${normalize(row.title)}`),
-      );
+      pendingApplications = rows.filter((row) => row.status === "准备材料");
     };
 
     const applyVisibility = () => {
@@ -46,10 +48,9 @@ export default function PendingJobVisibility() {
           card.removeAttribute("aria-hidden");
           continue;
         }
-        const title = card.querySelector(".job-title h3")?.textContent ?? "";
-        const companyLine = card.querySelector(".job-title p")?.textContent ?? "";
-        const company = companyLine.split("·")[0]?.trim() ?? "";
-        const shouldHide = pendingKeys.has(`${normalize(company)}::${normalize(title)}`);
+
+        const identity = cardIdentity(card);
+        const shouldHide = pendingApplications.some((row) => sameLogicalJob(row, identity));
         if (shouldHide) {
           card.style.setProperty("display", "none", "important");
           card.setAttribute("aria-hidden", "true");
@@ -61,7 +62,7 @@ export default function PendingJobVisibility() {
     };
 
     const run = async () => {
-      await refreshPendingKeys();
+      await refreshPendingApplications();
       applyVisibility();
     };
 
