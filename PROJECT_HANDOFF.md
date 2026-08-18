@@ -77,8 +77,8 @@ interview_brief.md
 - `XinyuIvy/job-application-archive` 已创建，visibility = Private。
 - 初始化 PR #1 已合并，merge commit `a9d2195484317f563be6db1ddff3777a0957f8ca`。
 - PR #2 已合并，使 `scripts/build_cv.sh` 可直接执行，merge commit `7641dc06ecdbf150f62db843c2555bac595970c6`。
-- 仓库已有：README、完整 archive contract、`applications/README.md`、LaTeX build ignore rules、统一 XeLaTeX build script。
-- build script 会运行 XeLaTeX、拒绝超过两页的 PDF、并用 `pdftotext` 检查 ATS 文本；它不会自动创建 `cv_submitted.pdf`。
+- 仓库已有：README、完整 archive contract、`applications/README.md`、LaTeX build ignore rules、统一 LuaLaTeX build script。
+- build script 会运行 LuaLaTeX、拒绝超过两页的 PDF、并用 `pdftotext` 检查 ATS 文本；它不会自动创建 `cv_submitted.pdf`。
 
 Job Radar：
 

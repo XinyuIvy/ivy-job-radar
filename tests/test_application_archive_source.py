@@ -67,6 +67,11 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         ]:
             self.assertIn(phrase, helper)
 
+    def test_prompt_uses_lualatex_for_local_and_archived_pdfs(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        self.assertIn("LuaLaTeX", helper)
+        self.assertNotIn("XeLaTeX", helper)
+
     def test_prompt_allows_local_pdf_preview_before_archive_write(self):
         helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
         for phrase in [
