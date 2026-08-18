@@ -42,7 +42,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "已有的行业关键词",
             "内容定稿",
             "保持母版",
-            "不写入任何仓库",
+            "不能写入任何仓库",
         ]:
             self.assertIn(phrase, helper)
         self.assertIn("automatic_tex_generation_authorized: false", helper)
@@ -63,7 +63,21 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "Build customized CV PDF",
             "不要在 Chat 中把 PDF 二进制重新编码成 base64",
             "scripts/build_cv.sh",
-            "workflow 成功且 PDF 文件确实存在之前，不得声称已经生成 PDF",
+            "workflow 成功且这些归档文件确实存在之前，不得声称归档 PDF 已成功生成",
+        ]:
+            self.assertIn(phrase, helper)
+
+    def test_prompt_allows_local_pdf_preview_before_archive_write(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "local_chat_pdf_preview_authorized: true",
+            "local_preview_repository_write_authorized: false",
+            "Chat 内 PDF 预览规则",
+            "不要只告诉我“编译成功”",
+            "PDF定稿",
+            "GitHub connector 不能可靠读取二进制 PDF 内容",
+            "cv_customized_${archiveId}.txt",
+            "cv_build_manifest_${archiveId}.json",
         ]:
             self.assertIn(phrase, helper)
 
