@@ -55,6 +55,25 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         self.assertIn("文件名必须保留完整 application ID", helper)
         self.assertIn("不得简化为 \\`cv_customized.tex\\`", helper)
 
+    def test_prompt_delegates_binary_pdf_build_to_github_actions(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "automatic_pdf_compilation_authorized: true",
+            "manual_binary_pdf_upload_by_chat_authorized: false",
+            "Build customized CV PDF",
+            "不要在 Chat 中把 PDF 二进制重新编码成 base64",
+            "scripts/build_cv.sh",
+            "workflow 成功且 PDF 文件确实存在之前，不得声称已经生成 PDF",
+        ]:
+            self.assertIn(phrase, helper)
+
+    def test_existing_archive_gets_current_operational_prompt_without_rewriting_snapshot(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+        self.assertIn("const existingPrompt = await existingArchivePrompt", route)
+        self.assertIn("const currentPrompt = buildChatPrompt(archiveId, path)", route)
+        self.assertIn("prompt: currentPrompt", route)
+        self.assertIn("promptContractUpdated: existingPrompt !== currentPrompt", route)
+
     def test_archive_stops_when_private_repo_is_missing(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("ARCHIVE_REPOSITORY_REQUIRED", route)

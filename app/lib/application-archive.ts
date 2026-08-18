@@ -109,6 +109,8 @@ export function buildApplicationRecord(input: {
     "  chat_independent_review_required: true",
     "  human_confirmation_required_for_cv_content: true",
     "  automatic_tex_generation_authorized: false",
+    "  automatic_pdf_compilation_authorized: true",
+    "  manual_binary_pdf_upload_by_chat_authorized: false",
     "  application_status_mutation_authorized: false",
     "required_initial_inputs:",
     "  - application_record.yaml",
@@ -184,9 +186,11 @@ export function buildChatPrompt(archiveId: string, path: string) {
 
 我确认内容定稿后，才从 \`cv_base.tex\` 创建本申请自己的 \`${customizedTex}\`。文件名必须保留完整 application ID，不得简化为 \`cv_customized.tex\` 或其他不带 application ID 的名称。必须保持母版的 document class、packages、字体、字号、页边距、section 样式、bullet 样式、行距、项目间距、联系方式格式、日期和地点排版、\`\\hfill\` 规则及全部自定义命令。可以调整文字和项目顺序，但不得重新设计版式，也不得通过明显缩小字体强行塞进两页。
 
-之后使用仓库规定的 XeLaTeX 编译流程生成并检查 \`${customizedPdf}\`：不超过两页、无溢出或异常断行、文本可正常提取、每项 claim 均有事实支持。若编译环境不可用，明确报告，不要声称已经生成 PDF。
+TeX 内容确认无误后，把 \`${customizedTex}\` 写入本申请目录并提交到 \`${ARCHIVE_REPOSITORY}\` 的 \`main\`。这次 TeX 提交会自动触发 GitHub Actions 中的 \`Build customized CV PDF\` workflow。不要在 Chat 中把 PDF 二进制重新编码成 base64、分块传输，或通过 GitHub connector 手动上传 PDF。
 
-最终仍需经过我的 PDF 确认。确认后，才把 \`${customizedTex}\`、\`${customizedPdf}\`、修改记录和证据清单保存回这个申请自己的目录；如果我明确确认这是实际投递版本，再保存为 \`${submittedPdf}\`。不得修改其他申请，也不得覆盖 \`XinyuIvy/CV\` 中的行业母版。
+提交 TeX 后，检查并等待该 GitHub Action 完成。workflow 会调用仓库的 \`scripts/build_cv.sh\`，使用 XeLaTeX 生成 \`${customizedPdf}\`，检查不超过两页，并使用 \`pdftotext\` 验证 ATS 文本可提取；验证成功后由 GitHub 自动把 \`${customizedPdf}\` 提交回同一个申请目录。如果 workflow 失败，读取失败步骤或日志，修正 TeX 后重新提交；在 workflow 成功且 PDF 文件确实存在之前，不得声称已经生成 PDF。
+
+GitHub Action 成功后，再读取并检查 \`${customizedPdf}\` 的最终版式、分页、异常断行和内容。最终仍需经过我的 PDF 确认。在我明确确认实际投递版本之前，不创建 \`${submittedPdf}\`。如果我确认这就是实际投递版本，再从已经验证过的 \`${customizedPdf}\` 保存 \`${submittedPdf}\`，不得重新编译或通过 Chat 重新上传一份二进制 PDF。不得修改其他申请，也不得覆盖 \`XinyuIvy/CV\` 中的行业母版。
 
 现在只执行读取、独立分类审核和第一版纯文本内容建议，完成后停下来等我确认。
 `;
