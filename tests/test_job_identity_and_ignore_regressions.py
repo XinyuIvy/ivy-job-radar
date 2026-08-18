@@ -22,11 +22,13 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
         self.assertIn("!isPlaceholderJobTitle(left.title)", helper)
         self.assertIn("!isPlaceholderJobTitle(right.title)", helper)
 
-    def test_display_dedup_is_separate_from_persistence_identity(self):
+    def test_display_dedup_is_separate_but_keeps_distinct_requisitions(self):
         display = (ROOT / "app" / "lib" / "job-display-identity.ts").read_text(encoding="utf-8")
         jobs_route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("sameDisplayedJob", display)
         self.assertIn("sameLogicalJob", display)
+        self.assertIn("extractStableJobId", display)
+        self.assertIn("if (leftId && rightId) return false", display)
         self.assertIn("sameDisplayedJob(candidate, row)", jobs_route)
         self.assertIn("sameLogicalJob(row, incomingIdentity)", jobs_route)
 
