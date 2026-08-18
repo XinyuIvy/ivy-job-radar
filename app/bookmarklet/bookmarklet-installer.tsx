@@ -20,13 +20,13 @@ const address=(()=>{const raw=Array.isArray(posting&&posting.jobLocation)?postin
 const organization=posting&&posting.hiringOrganization;
 const selected=clean(window.getSelection&&window.getSelection().toString(),40000);
 const description=stripHtml(posting&&posting.description)||selected||queryText(['[data-testid*="job-description"]','.job-description','.job-sec-text','[class*="job-description"]','[class*="jobDescription"]','main','article'])||clean(document.body&&document.body.innerText,40000);
-const title=clean(posting&&posting.title,500)||queryText(['h1','[data-testid*="job-title"]','.job-name','[class*="job-title"]','[class*="jobTitle"]'])||clean(document.title,500);
+const title=clean(posting&&posting.title,500)||queryText(['[data-testid*="job-title"]','[data-automation-id="jobPostingHeader"]','[data-ui="job-title"]','.posting-headline h2','.app-title','.job-name','[class*="job-title"]','[class*="jobTitle"]','h1'])||clean((document.querySelector('meta[property="og:title"]')||{}).content,500)||clean(document.title,500);
 const company=clean(organization&&(organization.name||organization.legalName),300)||queryText(['[data-testid*="company-name"]','.company-name','[class*="company-name"]','[class*="companyName"]','a[href*="company"] h2','a[href*="company"] h3'])||clean((document.querySelector('meta[property="og:site_name"]')||{}).content,300);
 const jobLocation=clean([address.addressLocality,address.addressRegion,address.addressCountry].filter(Boolean).join(" · "),500)||queryText(['[data-testid*="location"]','.job-location','.job-area','[class*="job-location"]','[class*="jobLocation"]']);
 const country=clean(address.addressCountry,200);
 const identifier=posting&&posting.identifier;
 const params=new URL(window.location.href).searchParams;
-const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("reqId")||params.get("requisitionId"),500);
+const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("currentJobId")||params.get("postingId")||params.get("positionId")||params.get("reqId")||params.get("requisitionId")||params.get("vacancyId"),500);
 const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title};
 const captureUrl=new URL(${JSON.stringify(capturePageUrl)});
 let popup=null;

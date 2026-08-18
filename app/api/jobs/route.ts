@@ -6,6 +6,7 @@ import { applications, ignoredJobs, jobs, savedJobs, scanStatus } from "../../..
 import { ashbyBoards, greenhouseBoards, iCimsBoards, leverBoards, paylocityBoards, workdayBoards } from "../../lib/company-sources";
 import { extractDeadline } from "../../lib/data-quality";
 import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/job-expiration";
+import { sameDisplayedJob } from "../../lib/job-display-identity";
 import {
   canonicalizeJobIdentityUrl,
   makeDistinctStoredJobUrl,
@@ -810,7 +811,7 @@ export async function GET() {
     .filter((row) => !activeJobStatuses.has(row.status) || row.score >= 55);
 
   const uniqueRows = filteredRows.reduce<typeof filteredRows>((result, row) => {
-    const duplicateIndex = result.findIndex((candidate) => sameLogicalJob(candidate, row));
+    const duplicateIndex = result.findIndex((candidate) => sameDisplayedJob(candidate, row));
     if (duplicateIndex < 0) {
       result.push(row);
       return result;
