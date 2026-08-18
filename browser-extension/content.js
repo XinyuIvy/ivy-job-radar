@@ -1,4 +1,7 @@
 (() => {
+  if (window.__ivyJobAutofillLoaded) return;
+  window.__ivyJobAutofillLoaded = true;
+
   const SENSITIVE_RE = /(race|ethnic|gender|sex(?!ual)|veteran|disability|religion|marital|sexual orientation|pronoun|date of birth|birth date|ssn|social security|demographic|eeo|equal employment)/i;
   const SUBMIT_RE = /(submit|send application|complete application|apply now|finish application)/i;
 
