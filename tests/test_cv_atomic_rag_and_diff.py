@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class CvAtomicRagAndDiffTests(unittest.TestCase):
     def test_analysis_reads_compiled_fact_and_profile_indexes(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")
-        for filename in ["FACT_INDEX.jsonl", "CONCEPT_EDGES.jsonl", "CREDENTIAL_INDEX.jsonl", "COURSEWORK_INDEX.jsonl", "PROFILE_INDEX.jsonl", "LITERATURE_INDEX.jsonl"]:
+        for filename in ["FACT_INDEX.jsonl", "CONCEPT_EDGES.jsonl", "CREDENTIAL_INDEX.jsonl", "COURSEWORK_INDEX.jsonl", "PROFILE_INDEX.jsonl", "LITERATURE_INDEX.jsonl", "CONFERENCE_INDEX.jsonl"]:
             self.assertIn(filename, route)
         self.assertIn("parseJsonl<FactIndexRecord>", route)
         self.assertIn("matchStructuredEvidence", route)
@@ -28,7 +28,8 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
 
     def test_client_selects_language_and_fifth_track(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn('track: value.track, language: value.language, jd: value.jd', client)
+        self.assertIn("const jd = value.jd.trim()", client)
+        self.assertIn('track: value.track, language: value.language, jd', client)
         self.assertIn("English", client)
         self.assertIn("中文", client)
         self.assertIn("clinical_neuro", client)
