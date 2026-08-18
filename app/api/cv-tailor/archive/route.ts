@@ -256,12 +256,14 @@ export async function POST(request: NextRequest) {
     const path = archivePath(archiveId);
     const existingPrompt = await existingArchivePrompt(archiveApiRoot, path, archiveToken);
     if (existingPrompt) {
+      const currentPrompt = buildChatPrompt(archiveId, path);
       return NextResponse.json({
         ok: true,
         existing: true,
         applicationId: archiveId,
         archivePath: path,
-        prompt: existingPrompt,
+        prompt: currentPrompt,
+        promptContractUpdated: existingPrompt !== currentPrompt,
         repositoryUrl: `https://github.com/${archiveRepository}/tree/main/${path}`,
       });
     }
