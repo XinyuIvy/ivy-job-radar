@@ -192,7 +192,7 @@ export function buildChatPrompt(archiveId: string, path: string) {
 
 ### Chat 内 PDF 预览规则
 
-1. 在根 Chat 中需要查看版式时，直接在本地工作区用 XeLaTeX 编译当前工作 TeX，生成临时预览 PDF。编译用的本地工作 TeX 必须在 \`\\documentclass\` 之前启用 \`\\XeTeXgenerateactualtext=1\`，确保中文和嵌入字体文本可由 Chat 的语义预览读取；该设置不改变版式。预览文件不要写入申请归档仓库。
+1. 在根 Chat 中需要查看版式时，直接在本地工作区用 LuaLaTeX 编译当前工作 TeX，生成临时预览 PDF。预览文件不要写入申请归档仓库。
 2. 每次涉及 wording、项目顺序、分页、间距或可能改变行数的修改后，如果我正在看 PDF，就重新编译最新预览。
 3. 检查预览 PDF 不超过两页、无明显溢出或异常断行、文本可提取。不要只告诉我“编译成功”；要把生成的预览 PDF 作为 Chat 中可打开的文件或链接直接给我看。
 4. 如果本地编译环境暂时不可用，明确告诉我缺少什么，不要改成通过 GitHub connector 读取或上传二进制 PDF 来冒充预览。
@@ -202,7 +202,7 @@ export function buildChatPrompt(archiveId: string, path: string) {
 
 提交 \`${customizedTex}\` 到 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 后，会自动触发 GitHub Actions 中的 \`Build customized CV PDF\` workflow。不要在 Chat 中把 PDF 二进制重新编码成 base64、分块传输，或通过 GitHub connector 手动上传 PDF。
 
-workflow 会调用仓库的 \`scripts/build_cv.sh\`，使用 XeLaTeX 生成并验证 \`${customizedPdf}\`，同时保存 \`${customizedText}\` 和 \`${buildManifest}\`。其中：
+workflow 会调用仓库的 \`scripts/build_cv.sh\`，使用 LuaLaTeX 生成并验证 \`${customizedPdf}\`，同时保存 \`${customizedText}\` 和 \`${buildManifest}\`。其中：
 
 - \`${customizedPdf}\` 是归档 PDF；
 - \`${customizedText}\` 是从最终 PDF 提取出的 UTF-8 文本，供其他 Chat / GitHub 文本连接读取；
