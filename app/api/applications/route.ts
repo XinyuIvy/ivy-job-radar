@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
 import { applications } from "../../../db/schema";
+import { sameLogicalJob } from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,10 @@ const editableFields = [
   "interest",
   "priority",
   "status",
+  "deadline",
+  "deadlineType",
+  "deadlineSource",
+  "plannedApplicationDate",
   "discoveredDate",
   "appliedDate",
   "followUpDate",
@@ -71,14 +76,17 @@ export async function POST(request: NextRequest) {
 
   const db = await getDb();
   const rows = await db.select().from(applications);
-  const companyKey = normalize(payload.company);
-  const titleKey = normalize(payload.title);
   const jobUrl = String(payload.jobUrl ?? "").trim();
-  const applicationId = String(payload.applicationId ?? "").trim().toLocaleLowerCase();
+  const incoming = {
+    company: String(payload.company),
+    title: String(payload.title),
+    location: String(payload.location ?? ""),
+    jobUrl,
+    applicationId: String(payload.applicationId ?? ""),
+  };
   const duplicate = rows.find((row) =>
-    (jobUrl && row.jobUrl.trim() === jobUrl)
-    || (applicationId && row.applicationId.trim().toLocaleLowerCase() === applicationId)
-    || (normalize(row.company) === companyKey && normalize(row.title) === titleKey),
+    (jobUrl && row.jobUrl.trim() === jobUrl && normalize(row.title) === normalize(payload.title))
+    || sameLogicalJob(row, incoming),
   );
   if (duplicate) {
     return NextResponse.json(duplicate, { status: 200 });

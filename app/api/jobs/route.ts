@@ -1,4 +1,4 @@
-import { desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
@@ -6,6 +6,12 @@ import { applications, ignoredJobs, jobs, savedJobs, scanStatus } from "../../..
 import { ashbyBoards, greenhouseBoards, iCimsBoards, leverBoards, paylocityBoards, workdayBoards } from "../../lib/company-sources";
 import { extractDeadline } from "../../lib/data-quality";
 import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/job-expiration";
+import { sameDisplayedJob } from "../../lib/job-display-identity";
+import {
+  canonicalizeJobIdentityUrl,
+  makeDistinctStoredJobUrl,
+  sameLogicalJob,
+} from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -172,21 +178,7 @@ function fingerprint(company: string, title: string) {
 }
 
 function canonicalizeJobUrl(raw: string) {
-  try {
-    const url = new URL(raw);
-    url.hash = "";
-    url.hostname = url.hostname.toLowerCase().replace(/^www\./, "");
-    const removable = [
-      "gh_jid", "gh_src", "source", "src", "ref", "referrer",
-      "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
-    ];
-    removable.forEach((key) => url.searchParams.delete(key));
-    url.searchParams.sort();
-    url.pathname = url.pathname.replace(/\/+$/, "") || "/";
-    return url.toString();
-  } catch {
-    return raw.trim();
-  }
+  return canonicalizeJobIdentityUrl(raw);
 }
 
 function extractApplicationId(rawUrl: string, supplied?: unknown) {
@@ -377,17 +369,22 @@ async function saveCandidate(candidate: CandidateJob, ignored: Set<string>, now:
 
   const db = await getDb();
   const canonicalUrl = canonicalizeJobUrl(jobUrl);
-  const [existing] = await db
-    .select({ id: jobs.id, discoveredAt: jobs.discoveredAt })
+  const incomingIdentity = { company, title, location, jobUrl, canonicalUrl, applicationId };
+  const candidates = await db
+    .select()
     .from(jobs)
     .where(
       or(
         eq(jobs.jobUrl, jobUrl),
         eq(jobs.canonicalUrl, canonicalUrl),
         applicationId ? eq(jobs.applicationId, applicationId) : eq(jobs.jobUrl, jobUrl),
+        and(eq(jobs.company, company), eq(jobs.title, title)),
       ),
-    )
-    .limit(1);
+    );
+  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+  const exactUrlCollision = candidates.some((row) => row.jobUrl === jobUrl && !sameLogicalJob(row, incomingIdentity));
+  const storedJobUrl = existing?.jobUrl
+    || (exactUrlCollision ? makeDistinctStoredJobUrl(jobUrl, incomingIdentity) : jobUrl);
   const values = {
     company,
     title,
@@ -398,7 +395,7 @@ async function saveCandidate(candidate: CandidateJob, ignored: Set<string>, now:
     visa,
     evidence: ["公司当前职位列表中仍有该岗位", ...scoring.details].join("；"),
     skills: JSON.stringify(extractSkills(content)),
-    jobUrl,
+    jobUrl: storedJobUrl,
     canonicalUrl,
     applicationId,
     source,
@@ -797,40 +794,45 @@ export async function GET() {
   const appliedIds = new Set(activeApplications.map((row) => normalize(row.applicationId)).filter(Boolean));
   const rows = await db.select().from(jobs).orderBy(desc(jobs.discoveredAt));
 
-  const seen = new Set<string>();
+  const filteredRows = rows
+    .filter((row) => {
+      const tracked = savedIds.has(row.id)
+        || appliedFingerprints.has(fingerprint(row.company, row.title))
+        || appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl))
+        || Boolean(row.applicationId && appliedIds.has(normalize(row.applicationId)));
+      return activeJobStatuses.has(row.status) || tracked;
+    })
+    .filter((row) => !ignored.has(fingerprint(row.company, row.title)))
+    .filter((row) => !activeJobStatuses.has(row.status) || !appliedFingerprints.has(fingerprint(row.company, row.title)))
+    .filter((row) => !activeJobStatuses.has(row.status) || !appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl)))
+    .filter((row) => !activeJobStatuses.has(row.status) || !row.applicationId || !appliedIds.has(normalize(row.applicationId)))
+    .filter((row) => !activeJobStatuses.has(row.status) || !(row.region === "美国" && row.visa === "明确不支持"))
+    .filter((row) => !activeJobStatuses.has(row.status) || !isExcludedTitle(row.title))
+    .filter((row) => !activeJobStatuses.has(row.status) || row.score >= 55);
+
+  const uniqueRows = filteredRows.reduce<typeof filteredRows>((result, row) => {
+    const duplicateIndex = result.findIndex((candidate) => sameDisplayedJob(candidate, row));
+    if (duplicateIndex < 0) {
+      result.push(row);
+      return result;
+    }
+
+    const current = result[duplicateIndex];
+    const rank = (candidate: typeof row) =>
+      Number(savedIds.has(candidate.id)) * 100
+      + Number(candidate.source.includes("手动")) * 30
+      + Number(Boolean(candidate.description)) * 10
+      + Math.min(10, candidate.skills.length)
+      + Math.min(10, candidate.score / 10);
+    if (rank(row) > rank(current)) result[duplicateIndex] = row;
+    return result;
+  }, []);
+
   return NextResponse.json(
-    rows
-      .filter((row) => {
-        const tracked = savedIds.has(row.id)
-          || appliedFingerprints.has(fingerprint(row.company, row.title))
-          || appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl))
-          || Boolean(row.applicationId && appliedIds.has(normalize(row.applicationId)));
-        return activeJobStatuses.has(row.status) || tracked;
-      })
-      .filter((row) => !ignored.has(fingerprint(row.company, row.title)))
-      .filter((row) => !activeJobStatuses.has(row.status) || !appliedFingerprints.has(fingerprint(row.company, row.title)))
-      .filter((row) => !activeJobStatuses.has(row.status) || !appliedUrls.has(row.canonicalUrl || canonicalizeJobUrl(row.jobUrl)))
-      .filter((row) => !activeJobStatuses.has(row.status) || !row.applicationId || !appliedIds.has(normalize(row.applicationId)))
-      .filter((row) => !activeJobStatuses.has(row.status) || !(row.region === "美国" && row.visa === "明确不支持"))
-      .filter((row) => !activeJobStatuses.has(row.status) || !isExcludedTitle(row.title))
-      .filter((row) => !activeJobStatuses.has(row.status) || row.score >= 55)
-      .filter((row) => {
-        const canonicalUrl = row.canonicalUrl || canonicalizeJobUrl(row.jobUrl);
-        const key = row.status === "待官网核验"
-          ? `pending::${fingerprint(row.company, row.title)}`
-          : row.applicationId
-          ? `${normalize(row.company)}::id::${normalize(row.applicationId)}`
-          : canonicalUrl
-            ? `url::${canonicalUrl}`
-            : `${fingerprint(row.company, row.title)}::${normalize(row.location)}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .map((row) => ({
-        ...row,
-        skills: JSON.parse(row.skills || "[]"),
-      })),
+    uniqueRows.map((row) => ({
+      ...row,
+      skills: JSON.parse(row.skills || "[]"),
+    })),
   );
 }
 
@@ -919,21 +921,27 @@ export async function POST(request: NextRequest) {
   const jobUrl = String(body.jobUrl).trim();
   const canonicalUrl = canonicalizeJobUrl(jobUrl);
   const applicationId = extractApplicationId(jobUrl, body.applicationId);
-  const [existing] = await db
-    .select({ id: jobs.id })
+  const company = String(body.company).trim();
+  const title = String(body.title).trim();
+  const location = String(body.location ?? "").trim();
+  const incomingIdentity = { company, title, location, jobUrl, canonicalUrl, applicationId };
+  const candidates = await db
+    .select()
     .from(jobs)
-    .where(
-      or(
-        eq(jobs.jobUrl, jobUrl),
-        eq(jobs.canonicalUrl, canonicalUrl),
-        applicationId ? eq(jobs.applicationId, applicationId) : eq(jobs.jobUrl, jobUrl),
-      ),
-    )
-    .limit(1);
+    .where(or(
+      eq(jobs.jobUrl, jobUrl),
+      eq(jobs.canonicalUrl, canonicalUrl),
+      applicationId ? eq(jobs.applicationId, applicationId) : eq(jobs.jobUrl, jobUrl),
+      and(eq(jobs.company, company), eq(jobs.title, title)),
+    ));
+  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+  const exactUrlCollision = candidates.some((row) => row.jobUrl === jobUrl && !sameLogicalJob(row, incomingIdentity));
+  const storedJobUrl = existing?.jobUrl
+    || (exactUrlCollision ? makeDistinctStoredJobUrl(jobUrl, incomingIdentity) : jobUrl);
   const values = {
-    company: String(body.company).trim(),
-    title: String(body.title).trim(),
-    location: String(body.location ?? "").trim(),
+    company,
+    title,
+    location,
     region: String(body.region).trim(),
     track: String(body.track).trim(),
     score: Math.max(0, Math.min(100, Number(body.score ?? 0))),
@@ -941,7 +949,7 @@ export async function POST(request: NextRequest) {
     evidence: String(body.evidence ?? "").trim(),
     description: String(body.description ?? "").trim().slice(0, 50000),
     skills: JSON.stringify(Array.isArray(body.skills) ? body.skills : []),
-    jobUrl,
+    jobUrl: storedJobUrl,
     canonicalUrl,
     applicationId,
     source: String(body.source ?? "公司官网").trim(),

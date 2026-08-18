@@ -1,4 +1,4 @@
-import { eq, or } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
@@ -17,6 +17,11 @@ import {
   safeBookmarkJobUrl,
   secureBookmarkKeyEqual,
 } from "../../lib/bookmark-capture";
+import {
+  isPlaceholderJobTitle,
+  makeDistinctStoredJobUrl,
+  sameLogicalJob,
+} from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -116,25 +121,42 @@ export async function POST(request: NextRequest) {
 
   const sourcePageTitle = cleanBookmarkText(body.sourcePageTitle, 500);
   const title = cleanBookmarkText(body.title, 500) || sourcePageTitle || "待补充职位名称";
-  const company = inferBookmarkCompany(body.company, canonicalUrl);
+  const company = inferBookmarkCompany(body.company, rawJobUrl);
   const location = cleanBookmarkText(body.location, 500);
   const description = cleanBookmarkText(body.description, 50_000);
   const applicationId = cleanBookmarkText(body.applicationId, 500);
-  const region = inferBookmarkRegion(canonicalUrl, location, cleanBookmarkText(body.addressCountry, 200));
+  const region = inferBookmarkRegion(rawJobUrl, location, cleanBookmarkText(body.addressCountry, 200));
   const track = inferBookmarkTrack(title, description);
   const skills = inferBookmarkSkills(title, description);
   const now = new Date().toISOString();
   const evidence = "你通过 Chrome 书签在原招聘页面手动确认并加入；此岗位不经过自动核验。";
+  const incomingIdentity = { company, title, location, jobUrl: rawJobUrl, canonicalUrl, applicationId };
 
   const db = await getDb();
-  const duplicateCondition = applicationId
-    ? or(eq(jobs.jobUrl, canonicalUrl), eq(jobs.canonicalUrl, canonicalUrl), eq(jobs.applicationId, applicationId))
-    : or(eq(jobs.jobUrl, canonicalUrl), eq(jobs.canonicalUrl, canonicalUrl));
-  const [existing] = await db.select().from(jobs).where(duplicateCondition).limit(1);
+  const candidateCondition = applicationId
+    ? or(
+      eq(jobs.jobUrl, rawJobUrl),
+      eq(jobs.canonicalUrl, canonicalUrl),
+      eq(jobs.applicationId, applicationId),
+      and(eq(jobs.company, company), eq(jobs.title, title)),
+    )
+    : isPlaceholderJobTitle(title)
+      ? or(eq(jobs.jobUrl, rawJobUrl), eq(jobs.canonicalUrl, canonicalUrl))
+      : or(
+        eq(jobs.jobUrl, rawJobUrl),
+        eq(jobs.canonicalUrl, canonicalUrl),
+        and(eq(jobs.company, company), eq(jobs.title, title)),
+      );
+  const candidates = await db.select().from(jobs).where(candidateCondition);
+  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+  const exactUrlCollision = candidates.some((row) => row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
+  const storedJobUrl = existing?.jobUrl
+    || (exactUrlCollision ? makeDistinctStoredJobUrl(rawJobUrl, incomingIdentity) : rawJobUrl);
 
   await db.delete(ignoredJobs).where(or(
     eq(ignoredJobs.jobUrl, rawJobUrl),
     eq(ignoredJobs.jobUrl, canonicalUrl),
+    eq(ignoredJobs.jobUrl, storedJobUrl),
     eq(ignoredJobs.fingerprint, bookmarkFingerprint(company, title)),
   ));
 
@@ -143,7 +165,7 @@ export async function POST(request: NextRequest) {
   if (existing) {
     const [updated] = await db.update(jobs).set({
       company: company === "待补充公司" ? existing.company : company,
-      title: title === "待补充职位名称" ? existing.title : title,
+      title: isPlaceholderJobTitle(title) ? existing.title : title,
       location: location || existing.location,
       region,
       track,
@@ -152,7 +174,6 @@ export async function POST(request: NextRequest) {
       evidence,
       description: description.length >= existing.description.length ? description : existing.description,
       skills: skills.length ? JSON.stringify(skills) : existing.skills,
-      jobUrl: canonicalUrl,
       canonicalUrl,
       applicationId: applicationId || existing.applicationId,
       source: BOOKMARK_CAPTURE_SOURCE,
@@ -175,7 +196,7 @@ export async function POST(request: NextRequest) {
       evidence,
       description,
       skills: JSON.stringify(skills),
-      jobUrl: canonicalUrl,
+      jobUrl: storedJobUrl,
       canonicalUrl,
       applicationId,
       source: BOOKMARK_CAPTURE_SOURCE,
@@ -195,7 +216,8 @@ export async function POST(request: NextRequest) {
     jobId,
     company,
     title,
-    jobUrl: canonicalUrl,
+    jobUrl: storedJobUrl,
+    canonicalUrl,
     status: BOOKMARK_CAPTURE_STATUS,
   };
   if (wantsJson(request)) return NextResponse.json(result, { status: created ? 201 : 200 });
@@ -206,6 +228,6 @@ export async function POST(request: NextRequest) {
     jobTitle: title,
     detail: created
       ? "该岗位已直接以“开放”状态加入，不会进入核验队列。"
-      : "系统已按链接或职位编号去重，并保留了最新页面信息。",
+      : "系统只会合并同一职位编号或同一公司、同一职位、同一地点的记录。",
   });
 }
