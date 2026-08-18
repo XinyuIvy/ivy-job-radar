@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01T18:55:49.048891+00:00",
+  "generated_at": "2026-08-18T19:27:46.282263+00:00",
   "matched_jobs": 0,
   "sources": [
     {
@@ -11,7 +11,7 @@
     {
       "source": "remotive",
       "state": "success",
-      "scanned": 34,
+      "scanned": 17,
       "matched": 0
     },
     {
@@ -29,7 +29,7 @@
     {
       "source": "arbeitnow",
       "state": "success",
-      "scanned": 175,
+      "scanned": 176,
       "matched": 0
     },
     {
