@@ -60,7 +60,10 @@ export default function AutofillProfileClient() {
   useEffect(() => {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return;
-    try { setProfile({ ...emptyProfile, ...JSON.parse(raw) } as Profile); } catch { /* Keep an empty profile if the old value is invalid. */ }
+    let parsed: Profile;
+    try { parsed = { ...emptyProfile, ...JSON.parse(raw) } as Profile; } catch { return; }
+    const timer = window.setTimeout(() => setProfile(parsed), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const save = (event?: FormEvent) => {
