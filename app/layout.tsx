@@ -94,6 +94,22 @@ export default function RootLayout({
             ◇ 筛选学习
           </a>
           <a
+            href="/autofill"
+            aria-label="打开申请自动填资料页"
+            style={{
+              borderRadius: 999,
+              padding: "11px 16px",
+              background: "#2d5f78",
+              color: "#fff",
+              textDecoration: "none",
+              fontSize: 13,
+              fontWeight: 800,
+              boxShadow: "0 10px 30px rgba(45,95,120,.24)",
+            }}
+          >
+            ✦ 申请自动填
+          </a>
+          <a
             href="/bookmarklet"
             aria-label="安装 Chrome 保存岗位书签"
             style={{
