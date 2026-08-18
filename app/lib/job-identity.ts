@@ -54,9 +54,19 @@ const PLACEHOLDER_TITLES = new Set([
   "job detail",
   "open positions",
   "current openings",
+  "campus talent",
+  "campus recruiting",
+  "campus recruitment",
+  "join us",
   "待补充职位名称",
   "职位详情",
   "招聘职位",
+  "校园招聘",
+  "社会招聘",
+  "人才招聘",
+  "招聘官网",
+  "招聘平台",
+  "加入我们",
 ]);
 
 export function normalizeJobIdentityText(value: unknown) {
@@ -75,8 +85,10 @@ export function normalizeJobLocation(value: unknown) {
 
 export function isPlaceholderJobTitle(value: unknown) {
   const normalized = String(value ?? "").normalize("NFKC").trim().toLowerCase();
-  return PLACEHOLDER_TITLES.has(normalized)
-    || /^(jobs?|careers?|open positions?|current openings?)(\s*[|·-].*)?$/.test(normalized);
+  if (PLACEHOLDER_TITLES.has(normalized)) return true;
+  if (/^(jobs?|careers?|open positions?|current openings?)(\s*[|·-].*)?$/.test(normalized)) return true;
+  if (/^(?:[\p{L}\p{N}·&（）()\s]{1,40})?(?:校园招聘|校招|社会招聘|人才招聘|招聘官网|招聘平台|招聘中心|加入我们)$/u.test(normalized)) return true;
+  return /^(?:[\p{L}\p{N}·&()\s]{1,40}\s*[|·-]\s*)?(?:campus talent|campus recruiting|campus recruitment|careers?|join us)$/u.test(normalized);
 }
 
 function safeUrl(raw: unknown) {
@@ -197,6 +209,27 @@ function shortHash(value: string) {
     hash = Math.imul(hash, 16777619);
   }
   return (hash >>> 0).toString(36);
+}
+
+export function deriveAmbiguousCaptureId(input: {
+  company?: string;
+  title?: string;
+  location?: string;
+  canonicalUrl?: string;
+  description?: string;
+}) {
+  const normalizedDescription = String(input.description ?? "")
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim();
+  const signature = [
+    normalizeJobIdentityText(input.company),
+    normalizeJobIdentityText(input.title),
+    normalizeJobLocation(input.location),
+    canonicalizeJobIdentityUrl(input.canonicalUrl),
+    normalizedDescription,
+  ].join("::");
+  return `capture-1-${shortHash(signature)}`;
 }
 
 export function makeDistinctStoredJobUrl(rawUrl: string, identity: JobIdentityInput) {
