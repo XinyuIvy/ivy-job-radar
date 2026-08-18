@@ -36,23 +36,20 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
         self.assertIn('const captureId=', installer)
         self.assertIn('bookmarkVersion:"v3"', installer)
         self.assertIn('const popupName="ivy_job_radar_capture_"+captureId', installer)
+        self.assertIn('roleHeading', installer)
         self.assertNotIn('form.method="POST"', installer)
         self.assertNotIn('encodeURIComponent(JSON.stringify(payload))', installer)
 
-    def test_capture_window_queues_multiple_messages_and_posts_to_private_endpoint(self):
+    def test_capture_window_isolates_each_popup_and_posts_generated_identity(self):
         capture_page = (ROOT / "app" / "bookmarklet" / "capture" / "page.tsx").read_text(encoding="utf-8")
 
+        self.assertIn('event.source !== window.opener', capture_page)
         self.assertIn('event.data?.type !== "ivy-job-radar-capture"', capture_page)
-        self.assertIn('const seenMessages = new Set<string>()', capture_page)
-        self.assertIn('queue = queue.then(() => save(payload))', capture_page)
-        self.assertIn('pendingCount += 1', capture_page)
-        self.assertIn('savedCount += 1', capture_page)
         self.assertIn('result.applicationId || payload.applicationId', capture_page)
+        self.assertIn('连续保存其他岗位不需要等待', capture_page)
         self.assertIn('postMessage("ivy-job-radar-ready", "*")', capture_page)
         self.assertIn('fetch("/api/bookmark-capture"', capture_page)
         self.assertIn('"Content-Type": "application/json"', capture_page)
-        self.assertNotIn('let received = false', capture_page)
-        self.assertNotIn('event.source !== window.opener', capture_page)
         self.assertNotIn('window.location.hash', capture_page)
 
     def test_install_entry_and_scoped_key_are_present(self):
