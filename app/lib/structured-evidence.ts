@@ -3,7 +3,7 @@ import { containsPhrase, tokenize, type JdRequirement } from "./hybrid-rag.ts";
 export type StructuredClassification = "Direct" | "Credential Direct" | "Credential Status Gap" | "Coursework Match";
 
 export type StructuredFactRecord = {
-  record_type: "education_credential" | "coursework" | "skill" | "publication" | "professional_service" | "teaching" | "award" | "research_literature";
+  record_type: "education_credential" | "coursework" | "skill" | "publication" | "professional_service" | "teaching" | "award" | "research_literature" | "conference_participation";
   fact_id: string;
   verified_fact: string;
   evidence_strength: string;
@@ -25,6 +25,10 @@ export type StructuredFactRecord = {
   publication_status?: string;
   venue?: string;
   authorship?: string;
+  conference?: string;
+  year?: number;
+  conference_role?: string;
+  presentation_status?: string;
   normalized_concepts?: string[];
   supporting_fact_ids?: string[];
   supporting_projects?: string[];
@@ -132,8 +136,26 @@ function publicationCandidate(requirement: JdRequirement, record: StructuredFact
   return { record, classification: "Direct", score: Math.round((exact ? 92 : 62 + 30 * similarity) * 10) / 10, why: "A structured publication record directly supports this requirement.", limitation: record.claim_boundary ?? "" };
 }
 
+function conferenceCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
+  if (record.record_type !== "conference_participation") return null;
+  const requirementText = [requirement.label, requirement.sourceText, ...requirement.literalTerms].join(" ");
+  if (/presentation|oral|poster|invited talk|speaker|报告|口头|海报|特邀|chair|organizer|主持|组织/i.test(requirementText)) return null;
+  if (!/conference|meeting|scientific community|professional engagement|学术会议|会议参与|参会|科研交流/i.test(requirementText)) return null;
+  const exact = requirementTerms(requirement).some((term) => containsPhrase(record.retrieval_text, term) || containsPhrase(term, record.retrieval_text));
+  const similarity = tokenSimilarity(requirementTerms(requirement).join(" "), record.retrieval_text);
+  if (!exact && similarity < 0.3) return null;
+  return {
+    record,
+    classification: "Direct",
+    score: Math.round((exact ? 94 : 68 + 26 * similarity) * 10) / 10,
+    why: "A structured conference-participation record directly supports conference attendance/scientific-community engagement.",
+    limitation: record.claim_boundary ?? "Attendance does not establish a presentation or conference leadership role.",
+  };
+}
+
 function profileCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
   if (record.record_type === "publication") return publicationCandidate(requirement, record);
+  if (record.record_type === "conference_participation") return conferenceCandidate(requirement, record);
   if (!["skill", "professional_service", "teaching", "award", "research_literature"].includes(record.record_type)) return null;
   const terms = requirementTerms(requirement);
   const text = record.retrieval_text;

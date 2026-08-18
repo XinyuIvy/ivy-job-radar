@@ -37,6 +37,7 @@ jobs:
           tests/structured-evidence.test.mjs
           tests/latex-text.test.mjs
           tests/cv-tailor-alibaba.test.mjs
+          tests/conference-evidence.test.mjs
       - name: Build deployable Sites artifact
         run: |
           chmod +x scripts/*.sh
