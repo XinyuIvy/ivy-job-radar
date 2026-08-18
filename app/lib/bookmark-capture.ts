@@ -89,10 +89,14 @@ function genericCompanyLabel(value: string) {
   return /^(join|jobs?|careers?|career site|campus talent|campus recruiting|campus recruitment|recruiting|招聘|校园招聘|招聘官网|招聘平台)$/i.test(value.trim());
 }
 
+function hostnameMatches(hostname: string, host: string) {
+  return hostname === host || hostname.endsWith(`.${host}`);
+}
+
 export function inferBookmarkCompany(rawCompany: unknown, jobUrl: string, portalTitle: unknown = "") {
   const company = cleanBookmarkText(rawCompany, 300);
   const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.toLowerCase().replace(/^www\./, "") ?? "";
-  const knownCompany = KNOWN_COMPANY_HOSTS.find(([host]) => hostname === host || hostname.endsWith(`.${host}`))?.[1] ?? "";
+  const knownCompany = KNOWN_COMPANY_HOSTS.find(([host]) => hostnameMatches(hostname, host))?.[1] ?? "";
   if (company && !genericCompanyLabel(company)) return company;
   if (knownCompany) return knownCompany;
 
@@ -111,8 +115,12 @@ export function inferBookmarkRegion(jobUrl: string, location: string, addressCou
   const country = `${addressCountry} ${location}`.toLowerCase();
   if (/中国|china|\bcn\b|中华人民共和国/.test(country)) return "中国";
   if (/美国|united states|\busa?\b/.test(country)) return "美国";
-  const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.toLowerCase() ?? "";
-  if (hostname.endsWith(".cn") || CHINA_JOB_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`))) {
+  const hostname = safeBookmarkJobUrl(jobUrl)?.hostname.toLowerCase().replace(/^www\./, "") ?? "";
+  if (
+    hostname.endsWith(".cn")
+    || CHINA_JOB_HOSTS.some((host) => hostnameMatches(hostname, host))
+    || KNOWN_COMPANY_HOSTS.some(([host]) => hostnameMatches(hostname, host))
+  ) {
     return "中国";
   }
   return "美国";
