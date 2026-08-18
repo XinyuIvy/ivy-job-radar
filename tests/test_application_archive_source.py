@@ -47,6 +47,14 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             self.assertIn(phrase, helper)
         self.assertIn("automatic_tex_generation_authorized: false", helper)
 
+    def test_prompt_uses_application_id_in_cv_filenames(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        self.assertIn("cv_customized_${archiveId}.tex", helper)
+        self.assertIn("cv_customized_${archiveId}.pdf", helper)
+        self.assertIn("cv_submitted_${archiveId}.pdf", helper)
+        self.assertIn("文件名必须保留完整 application ID", helper)
+        self.assertIn("不得简化为 `cv_customized.tex`", helper)
+
     def test_archive_stops_when_private_repo_is_missing(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("ARCHIVE_REPOSITORY_REQUIRED", route)
