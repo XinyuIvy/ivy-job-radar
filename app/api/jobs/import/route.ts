@@ -1,10 +1,15 @@
-import { eq, or } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../../db";
 import { ignoredJobs, jobs, scanStatus } from "../../../../db/schema";
 import { extractDeadline } from "../../../lib/data-quality";
 import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../../lib/job-expiration";
+import {
+  canonicalizeJobIdentityUrl,
+  makeDistinctStoredJobUrl,
+  sameLogicalJob,
+} from "../../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -80,20 +85,7 @@ function displayStatus(incomingStatus: string) {
 }
 
 function canonicalizeJobUrl(raw: string) {
-  try {
-    const url = new URL(raw);
-    url.hash = "";
-    url.hostname = url.hostname.toLowerCase().replace(/^www\./, "");
-    [
-      "gh_jid", "gh_src", "source", "src", "ref", "referrer",
-      "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
-    ].forEach((key) => url.searchParams.delete(key));
-    url.searchParams.sort();
-    url.pathname = url.pathname.replace(/\/+$/, "") || "/";
-    return url.toString();
-  } catch {
-    return raw.trim();
-  }
+  return canonicalizeJobIdentityUrl(raw);
 }
 
 export async function POST(request: NextRequest) {
@@ -166,20 +158,29 @@ export async function POST(request: NextRequest) {
       continue;
     }
 
-    const canonicalUrl = cleanText(raw.canonical_url) || canonicalizeJobUrl(jobUrl);
+    const canonicalUrl = canonicalizeJobUrl(cleanText(raw.canonical_url) || jobUrl);
     const applicationId = cleanText(raw.application_id);
-    const [existing] = await db
-      .select()
-      .from(jobs)
-      .where(
-        or(
-          eq(jobs.jobUrl, jobUrl),
-          originalJobUrl ? eq(jobs.jobUrl, originalJobUrl) : eq(jobs.jobUrl, jobUrl),
-          eq(jobs.canonicalUrl, canonicalUrl),
-          applicationId ? eq(jobs.applicationId, applicationId) : eq(jobs.jobUrl, jobUrl),
-        ),
+    const location = cleanText(raw.location);
+    const incomingIdentity = { company, title, location, jobUrl, canonicalUrl, applicationId };
+    const candidateCondition = applicationId
+      ? or(
+        eq(jobs.jobUrl, jobUrl),
+        originalJobUrl ? eq(jobs.jobUrl, originalJobUrl) : eq(jobs.jobUrl, jobUrl),
+        eq(jobs.canonicalUrl, canonicalUrl),
+        eq(jobs.applicationId, applicationId),
+        and(eq(jobs.company, company), eq(jobs.title, title)),
       )
-      .limit(1);
+      : or(
+        eq(jobs.jobUrl, jobUrl),
+        originalJobUrl ? eq(jobs.jobUrl, originalJobUrl) : eq(jobs.jobUrl, jobUrl),
+        eq(jobs.canonicalUrl, canonicalUrl),
+        and(eq(jobs.company, company), eq(jobs.title, title)),
+      );
+    const candidates = await db.select().from(jobs).where(candidateCondition);
+    const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+    const exactUrlCollision = candidates.some((row) => row.jobUrl === jobUrl && !sameLogicalJob(row, incomingIdentity));
+    const storedJobUrl = existing?.jobUrl
+      || (exactUrlCollision ? makeDistinctStoredJobUrl(jobUrl, incomingIdentity) : jobUrl);
 
     const skills = Array.isArray(raw.skills)
       ? raw.skills.map(cleanText).filter(Boolean).slice(0, 12)
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
     const values = {
       company,
       title,
-      location: cleanText(raw.location),
+      location,
       region,
       track: cleanText(raw.track) || "Technology",
       score,
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest) {
       evidence,
       description: description.slice(0, 50000),
       skills: JSON.stringify(skills),
-      jobUrl,
+      jobUrl: storedJobUrl,
       canonicalUrl,
       applicationId,
       source: cleanText(raw.source) || "JobSpy",

@@ -133,15 +133,21 @@ export async function POST(request: NextRequest) {
   const incomingIdentity = { company, title, location, jobUrl: rawJobUrl, canonicalUrl, applicationId };
 
   const db = await getDb();
-  const identityConditions = [
-    eq(jobs.jobUrl, rawJobUrl),
-    eq(jobs.canonicalUrl, canonicalUrl),
-  ];
-  if (applicationId) identityConditions.push(eq(jobs.applicationId, applicationId));
-  if (!isPlaceholderJobTitle(title)) {
-    identityConditions.push(and(eq(jobs.company, company), eq(jobs.title, title)));
-  }
-  const candidates = await db.select().from(jobs).where(or(...identityConditions));
+  const candidateCondition = applicationId
+    ? or(
+      eq(jobs.jobUrl, rawJobUrl),
+      eq(jobs.canonicalUrl, canonicalUrl),
+      eq(jobs.applicationId, applicationId),
+      and(eq(jobs.company, company), eq(jobs.title, title)),
+    )
+    : isPlaceholderJobTitle(title)
+      ? or(eq(jobs.jobUrl, rawJobUrl), eq(jobs.canonicalUrl, canonicalUrl))
+      : or(
+        eq(jobs.jobUrl, rawJobUrl),
+        eq(jobs.canonicalUrl, canonicalUrl),
+        and(eq(jobs.company, company), eq(jobs.title, title)),
+      );
+  const candidates = await db.select().from(jobs).where(candidateCondition);
   const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
   const exactUrlCollision = candidates.some((row) => row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
   const storedJobUrl = existing?.jobUrl

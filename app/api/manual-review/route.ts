@@ -11,6 +11,10 @@ import {
   inferBookmarkSkills,
   inferBookmarkTrack,
 } from "../../lib/bookmark-capture";
+import {
+  makeDistinctStoredJobUrl,
+  sameLogicalJob,
+} from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -85,14 +89,26 @@ export async function POST(request: NextRequest) {
   const region = inferBookmarkRegion(canonicalUrl, "", "");
   const track = inferBookmarkTrack(title, description);
   const skills = inferBookmarkSkills(title, description);
-  const [existing] = await db.select().from(jobs).where(
+  const incomingIdentity = {
+    company: inferredCompany,
+    title,
+    location: "",
+    jobUrl: rawJobUrl,
+    canonicalUrl,
+    applicationId: "",
+  };
+  const candidates = await db.select().from(jobs).where(
     or(
       eq(jobs.jobUrl, rawJobUrl),
       eq(jobs.jobUrl, canonicalUrl),
       eq(jobs.canonicalUrl, canonicalUrl),
       and(eq(jobs.company, inferredCompany), eq(jobs.title, title)),
     ),
-  ).limit(1);
+  );
+  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+  const exactUrlCollision = candidates.some((row) => row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
+  const storedJobUrl = existing?.jobUrl
+    || (exactUrlCollision ? makeDistinctStoredJobUrl(rawJobUrl, incomingIdentity) : rawJobUrl);
 
   let jobId: number;
   if (existing) {
@@ -106,7 +122,7 @@ export async function POST(request: NextRequest) {
       evidence: "核验未能自动确认，由你人工检查原 JD 后直接通过。",
       description: description || existing.description,
       skills: skills.length ? JSON.stringify(skills) : existing.skills,
-      jobUrl: canonicalUrl,
+      jobUrl: existing.jobUrl,
       canonicalUrl,
       source: "核验队列人工通过",
       status: "开放",
@@ -128,7 +144,7 @@ export async function POST(request: NextRequest) {
       evidence: "核验未能自动确认，由你人工检查原 JD 后直接通过。",
       description,
       skills: JSON.stringify(skills),
-      jobUrl: canonicalUrl,
+      jobUrl: storedJobUrl,
       canonicalUrl,
       applicationId: "",
       source: "核验队列人工通过",
