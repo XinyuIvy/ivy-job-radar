@@ -183,6 +183,7 @@ function structuredEvidenceLabel(candidate: StructuredCandidate) {
   if (record.record_type === "skill") return `Skill · ${record.skill}`;
   if (record.record_type === "publication") return `Publication · ${record.title}`;
   if (record.record_type === "research_literature") return "Scholarly literature workflow";
+  if (record.record_type === "conference_participation") return `Conference participation · ${record.conference ?? "conference"}${record.year ? ` ${record.year}` : ""}`;
   if (record.record_type === "professional_service") return "Professional service";
   if (record.record_type === "teaching") return "Teaching";
   return "Awards and honors";
@@ -205,7 +206,7 @@ function structuredSupportEvidence(candidate: StructuredCandidate): SupportEvide
     capabilityContext: record.normalized_concepts?.join(" · ") || "",
     industryGuardrail: candidate.limitation,
     score: candidate.score,
-    retrievalChannels: [record.record_type === "coursework" ? "coursework_index" : record.record_type === "education_credential" ? "credential_index" : "profile_index"],
+    retrievalChannels: [record.record_type === "coursework" ? "coursework_index" : record.record_type === "education_credential" ? "credential_index" : record.record_type === "conference_participation" ? "conference_index" : "profile_index"],
     evidenceType: record.record_type,
   };
 }
@@ -304,6 +305,7 @@ function targetSection(evidence: SupportEvidence, language: TemplateLanguage) {
   if (evidence.evidenceType === "coursework") return zh ? "专业技能 / 相关课程" : "Relevant Coursework";
   if (evidence.evidenceType === "skill") return zh ? "专业技能" : "Technical Skills";
   if (evidence.evidenceType === "publication") return zh ? "部分论文与荣誉" : "Selected Publications";
+  if (evidence.evidenceType === "conference_participation") return zh ? "学术会议 / 学术服务" : "Conferences / Professional Service";
   if (evidence.evidenceType === "professional_service") return zh ? "学术服务" : "Professional Service";
   if (evidence.evidenceType === "teaching") return zh ? "教学经历" : "Teaching";
   if (evidence.evidenceType === "award") return zh ? "部分论文与荣誉" : "Honors & Awards";
@@ -374,7 +376,7 @@ export async function POST(request: NextRequest) {
   if (!templateFile) return NextResponse.json({ error: "该方向当前没有所选语言的 LaTeX 母版。", code: "CV_TEMPLATE_LANGUAGE_UNAVAILABLE" }, { status: 400 });
 
   try {
-    const [template, factIndexJsonl, statusAddendumJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl] = await Promise.all([
+    const [template, factIndexJsonl, statusAddendumJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl, conferenceIndexJsonl] = await Promise.all([
       readPrivateFile(`master/template-cv/${templateFile}`, token),
       readPrivateFile("master/project-evidence/FACT_INDEX.jsonl", token),
       readPrivateFile("master/project-evidence/FACT_INDEX_STATUS_ADDENDUM.jsonl", token),
@@ -383,6 +385,7 @@ export async function POST(request: NextRequest) {
       readPrivateFile("master/project-evidence/COURSEWORK_INDEX.jsonl", token),
       readPrivateFile("master/project-evidence/PROFILE_INDEX.jsonl", token),
       readPrivateFile("master/project-evidence/LITERATURE_INDEX.jsonl", token),
+      readPrivateFile("master/project-evidence/CONFERENCE_INDEX.jsonl", token),
     ]);
 
     const unifiedFactIndex = [
@@ -395,6 +398,7 @@ export async function POST(request: NextRequest) {
       ...parseJsonl<StructuredFactRecord>(courseworkIndexJsonl),
       ...parseJsonl<StructuredFactRecord>(profileIndexJsonl),
       ...parseJsonl<StructuredFactRecord>(literatureIndexJsonl),
+      ...parseJsonl<StructuredFactRecord>(conferenceIndexJsonl),
     ];
     const conceptEdges = parseJsonl<ConceptEdge>(conceptEdgesJsonl);
     const rag = runCompleteHybridRag(jd, track as IndustryTrack, CV_JD_RULES, factIndex, conceptEdges);
