@@ -22,6 +22,17 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
         self.assertIn("!isPlaceholderJobTitle(left.title)", helper)
         self.assertIn("!isPlaceholderJobTitle(right.title)", helper)
 
+    def test_generic_recruitment_portal_titles_use_content_identity(self):
+        helper = (ROOT / "app" / "lib" / "job-identity.ts").read_text(encoding="utf-8")
+        route = (ROOT / "app" / "api" / "bookmark-capture" / "route.ts").read_text(encoding="utf-8")
+        self.assertIn('"campus talent"', helper)
+        self.assertIn('"校园招聘"', helper)
+        self.assertIn('(?:校园招聘|校招|社会招聘|人才招聘|招聘官网|招聘平台|招聘中心|加入我们)', helper)
+        self.assertIn('deriveAmbiguousCaptureId', helper)
+        self.assertIn('normalizedDescription', helper)
+        self.assertIn('isPlaceholderJobTitle(title)', route)
+        self.assertIn('deriveAmbiguousCaptureId({', route)
+
     def test_display_dedup_is_separate_but_keeps_distinct_requisitions(self):
         display = (ROOT / "app" / "lib" / "job-display-identity.ts").read_text(encoding="utf-8")
         jobs_route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
