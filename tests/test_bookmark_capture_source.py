@@ -15,6 +15,7 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
         self.assertIn('eq(jobs.applicationId, applicationId)', route)
         self.assertIn('deriveAmbiguousCaptureId', route)
         self.assertIn('description: description || captureId', route)
+        self.assertIn('inferBookmarkCompany(body.company, rawJobUrl, title)', route)
         self.assertIn('applicationId,', route)
         self.assertIn('db.update(jobs)', route)
         self.assertIn('db.insert(jobs)', route)
@@ -51,6 +52,15 @@ class BookmarkCaptureSourceTests(unittest.TestCase):
         self.assertIn('fetch("/api/bookmark-capture"', capture_page)
         self.assertIn('"Content-Type": "application/json"', capture_page)
         self.assertNotIn('window.location.hash', capture_page)
+
+    def test_campus_portals_infer_real_company_and_china_region(self):
+        helpers = (ROOT / "app" / "lib" / "bookmark-capture.ts").read_text(encoding="utf-8")
+
+        self.assertIn('["qq.com", "腾讯"]', helpers)
+        self.assertIn('["alibaba.com", "阿里巴巴"]', helpers)
+        self.assertIn('portalTitleCompany', helpers)
+        self.assertIn('genericCompanyLabel', helpers)
+        self.assertIn('KNOWN_COMPANY_HOSTS.some', helpers)
 
     def test_install_entry_and_scoped_key_are_present(self):
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
