@@ -42,7 +42,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "已有的行业关键词",
             "内容定稿",
             "保持母版",
-            "不写入任何仓库",
+            "不能写入任何仓库",
         ]:
             self.assertIn(phrase, helper)
         self.assertIn("automatic_tex_generation_authorized: false", helper)
@@ -63,7 +63,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "Build customized CV PDF",
             "不要在 Chat 中把 PDF 二进制重新编码成 base64",
             "scripts/build_cv.sh",
-            "workflow 成功且 PDF 文件确实存在之前，不得声称已经生成 PDF",
+            "workflow 成功且这些归档文件确实存在之前，不得声称归档 PDF 已成功生成",
         ]:
             self.assertIn(phrase, helper)
 
