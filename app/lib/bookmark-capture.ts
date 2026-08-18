@@ -1,3 +1,5 @@
+import { canonicalizeJobIdentityUrl, normalizeJobIdentityText } from "./job-identity";
+
 export const BOOKMARK_CAPTURE_SOURCE = "Chrome 书签手动加入";
 export const BOOKMARK_CAPTURE_STATUS = "开放";
 
@@ -53,23 +55,11 @@ export function safeBookmarkJobUrl(raw: unknown) {
 }
 
 export function canonicalizeBookmarkJobUrl(raw: string) {
-  const url = safeBookmarkJobUrl(raw);
-  if (!url) return "";
-  url.hash = "";
-  url.hostname = url.hostname.toLowerCase().replace(/^www\./, "");
-  [
-    "gh_jid", "gh_src", "source", "src", "ref", "referrer",
-    "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
-    "trk", "trackingId", "from", "fromSearch",
-  ].forEach((key) => url.searchParams.delete(key));
-  url.searchParams.sort();
-  url.pathname = url.pathname.replace(/\/+$/, "") || "/";
-  return url.toString();
+  return canonicalizeJobIdentityUrl(raw);
 }
 
 export function bookmarkFingerprint(company: string, title: string) {
-  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
-  return `${normalize(company)}::${normalize(title)}`;
+  return `${normalizeJobIdentityText(company)}::${normalizeJobIdentityText(title)}`;
 }
 
 export function inferBookmarkCompany(rawCompany: unknown, jobUrl: string) {
