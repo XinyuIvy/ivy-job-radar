@@ -159,8 +159,16 @@ export async function POST(request: NextRequest) {
       and(eq(jobs.company, company), eq(jobs.title, title)),
     );
   const candidates = await db.select().from(jobs).where(candidateCondition);
-  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
-  const exactUrlCollision = candidates.some((row) => row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
+  const logicalExisting = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
+  const legacyAmbiguous = isPlaceholderJobTitle(title) && applicationId
+    ? candidates.find((row) =>
+      !row.applicationId
+      && bookmarkFingerprint(row.company, row.title) === bookmarkFingerprint(company, title)
+      && (row.jobUrl === rawJobUrl || row.canonicalUrl === canonicalUrl),
+    )
+    : undefined;
+  const existing = logicalExisting ?? legacyAmbiguous;
+  const exactUrlCollision = candidates.some((row) => row.id !== existing?.id && row.jobUrl === rawJobUrl && !sameLogicalJob(row, incomingIdentity));
   const storedJobUrl = existing?.jobUrl
     || (exactUrlCollision ? makeDistinctStoredJobUrl(rawJobUrl, incomingIdentity) : rawJobUrl);
 
