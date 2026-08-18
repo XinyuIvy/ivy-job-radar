@@ -216,7 +216,7 @@ export default function BookmarkCapturePage() {
           {state.status === "saving"
             ? "正在依次保存收到的岗位。连续点击不需要等待，也不会覆盖前一个岗位。"
             : successful
-              ? `${state.savedCount} 个岗位已处理并进入待提交申请。打开的 Job Radar 会自动同步。`
+              ? `${state.savedCount} 个岗位已直接进入待提交申请。打开的 Job Radar 会自动同步。`
               : state.message}
         </p>
         <Link href="/" style={{ display: "inline-block", marginTop: 18, borderRadius: 999, padding: "12px 18px", background: "#18221d", color: "#fff", textDecoration: "none", fontWeight: 750 }}>返回 Ivy Job Radar</Link>
