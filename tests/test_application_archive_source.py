@@ -53,7 +53,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         self.assertIn("cv_customized_${archiveId}.pdf", helper)
         self.assertIn("cv_submitted_${archiveId}.pdf", helper)
         self.assertIn("文件名必须保留完整 application ID", helper)
-        self.assertIn("不得简化为 `cv_customized.tex`", helper)
+        self.assertIn("不得简化为 \\`cv_customized.tex\\`", helper)
 
     def test_archive_stops_when_private_repo_is_missing(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
