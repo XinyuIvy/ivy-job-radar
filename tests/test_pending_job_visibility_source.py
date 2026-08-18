@@ -16,12 +16,15 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
         self.assertIn('card.style.setProperty("display", "none", "important")', component)
         self.assertIn('<PendingJobVisibility />', layout)
 
-    def test_application_post_deduplicates_case_insensitively(self):
+    def test_application_post_uses_case_insensitive_logical_identity(self):
         route = (ROOT / "app" / "api" / "applications" / "route.ts").read_text(encoding="utf-8")
+        identity = (ROOT / "app" / "lib" / "job-identity.ts").read_text(encoding="utf-8")
 
-        self.assertIn('normalize(row.company) === companyKey', route)
-        self.assertIn('normalize(row.title) === titleKey', route)
-        self.assertIn('row.applicationId.trim().toLocaleLowerCase()', route)
+        self.assertIn('sameLogicalJob(row, incoming)', route)
+        self.assertIn('normalize(row.title) === normalize(payload.title)', route)
+        self.assertIn('extractStableJobId(left.jobUrl, left.applicationId)', identity)
+        self.assertIn('normalizeJobIdentityText(left.title)', identity)
+        self.assertIn('.toLowerCase()', identity)
         self.assertIn('return NextResponse.json(duplicate, { status: 200 })', route)
 
 
