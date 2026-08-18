@@ -14,4 +14,8 @@ export const CV_JD_EXTRA_RULES: RequirementRule[] = [
   { label: "Theoretical background", category: "Research", aliases: ["theoretical background", "strong theory", "扎实理论背景", "理论背景"] },
   { label: "Innovation", category: "Research", aliases: ["innovation", "innovative", "创新", "创新能力"] },
   { label: "Communication and collaboration", category: "Collaboration", aliases: ["communication and collaboration", "communication skills", "沟通协作", "沟通合作", "沟通能力"] },
+  { label: "Conference participation", category: "Professional Service", aliases: ["conference participation", "scientific conference attendance", "attended conferences", "学术会议", "参加学术会议", "参加会议", "参会"] },
+  { label: "Conference presentation", category: "Communication", aliases: ["conference presentation", "oral presentation", "poster presentation", "invited talk", "会议报告", "口头报告", "海报展示", "特邀报告"] },
+  { label: "Session organizer", category: "Professional Service", aliases: ["session organizer", "organized a session", "session organization", "分会组织", "专题组织", "组织会议分会"] },
+  { label: "Session chair", category: "Professional Service", aliases: ["session chair", "chaired a session", "session moderator", "分会主席", "会议主持", "主持会议分会"] },
 ];
