@@ -88,12 +88,14 @@ function renderCandidates(context) {
   }
   const blank = document.createElement("option");
   blank.value = "";
-  blank.textContent = "请选择…";
+  blank.textContent = "请选择已提交申请…";
   candidateSelect.append(blank);
   for (const candidate of candidates) {
     const option = document.createElement("option");
     option.value = String(candidate.id);
-    option.textContent = `${candidate.company} · ${candidate.title}`;
+    const location = candidate.location ? ` · ${candidate.location}` : "";
+    const appId = candidate.applicationId ? ` · ${candidate.applicationId}` : "";
+    option.textContent = `${candidate.company} · ${candidate.title}${location}${appId}`;
     candidateSelect.append(option);
   }
   candidateWrap.classList.remove("hidden");
@@ -118,11 +120,18 @@ function renderContext(context) {
     );
     return;
   }
-  showContext(
-    context.needsSelection ? "当前页面对应多个已提交申请" : "没有自动匹配到已提交申请",
-    context.needsSelection ? "请在下方选择当前岗位；不会猜测并上传错误 CV。" : "仍可填写标准资料，但不会使用 application-specific 经历或 CV。",
-    "warn",
-  );
+  if (context.needsSelection) {
+    const ambiguous = context.selectionReason === "ambiguous-auto-match";
+    showContext(
+      ambiguous ? "自动匹配到多个已提交申请" : "没有自动匹配到已提交申请",
+      ambiguous
+        ? "请在下方手动选择当前岗位；不会猜测并上传错误 CV。"
+        : "没关系，可以在下方从已提交申请中手动选择当前岗位。",
+      "warn",
+    );
+    return;
+  }
+  showContext("没有可选的已提交申请", "仍可填写标准资料，但不会使用 application-specific 经历或 CV。", "warn");
 }
 
 async function refreshContext(interactive = false) {
