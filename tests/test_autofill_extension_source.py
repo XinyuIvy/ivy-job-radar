@@ -103,15 +103,18 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertNotIn("CV_GITHUB_TOKEN", popup)
         self.assertNotIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", popup)
 
-    def test_server_bridges_require_derived_key_private_archive_and_submitted_status(self):
+    def test_server_bridges_require_derived_key_private_archive_and_real_submitted_status(self):
         context_route = (ROOT / "app" / "api" / "autofill" / "application-context" / "route.ts").read_text(encoding="utf-8")
         resume_route = (ROOT / "app" / "api" / "autofill" / "resume" / "route.ts").read_text(encoding="utf-8")
         packet_route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
+        job_radar = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+        self.assertIn('const statuses = ["准备材料", "已申请"', job_radar)
         for source in [context_route, resume_route, packet_route]:
             self.assertIn("deriveBookmarkCaptureKey", source)
             self.assertIn("secureBookmarkKeyEqual", source)
             self.assertIn("x-ivy-autofill-key", source.lower())
-            self.assertIn('AUTOFILL_APPLICATION_STATUS = "已提交"', source)
+            self.assertIn('AUTOFILL_APPLICATION_STATUS = "已申请"', source)
+            self.assertNotIn('AUTOFILL_APPLICATION_STATUS = "已提交"', source)
             self.assertNotIn('AUTOFILL_APPLICATION_STATUS = "准备材料"', source)
         self.assertIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", resume_route)
         self.assertIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", packet_route)
