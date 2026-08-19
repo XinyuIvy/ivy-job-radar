@@ -1,22 +1,27 @@
-# Ivy Job Radar Application Autofill (MVP)
+# Ivy Job Radar Application Autofill (V2)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
 ## What it does
 
-- Fills common identity, contact, location, professional-link, education, work-authorization, sponsorship and relocation fields.
-- Uses generic label/name/placeholder matching so it works across Greenhouse, Lever, Ashby, Workday and many custom ATS pages.
-- Runs only when the user clicks **填写当前申请页** in the extension popup.
-- Stores the application profile in `chrome.storage.local` on the user's browser.
-- Can import the profile saved on Ivy Job Radar `/autofill` from the current tab.
+- Fills common identity, contact, address, professional-link, education, recent-employment, work-authorization, sponsorship, relocation and other configured application fields.
+- Uses generic label/name/placeholder matching plus custom combobox support so it works across Greenhouse, Lever, Ashby, Workday and many custom ATS pages.
+- Runs only when the user clicks **填写当前申请页 + CV** in the extension popup.
+- Stores the standard application profile in `chrome.storage.local` on the user's browser.
+- Imports both the saved profile and a derived Job Radar bridge key from Ivy Job Radar `/autofill`.
+- Matches the current job page to the user's **待提交申请** record using exact URL, stable job ID, or canonical URL. If the page is ambiguous, it asks the user to choose instead of guessing.
+- When the matched application already has `cv_customized_<APP-ID>.pdf` in the private `job-application-archive`, downloads it through an authenticated Job Radar endpoint and attaches it only to a Resume/CV file input.
+- Surfaces unresolved required/open-ended questions and lets the user copy them for review or drafting in Chat.
 
-## What it deliberately does not do
+## Safety boundaries
 
 - Never clicks Submit / Apply / Finish.
 - Never auto-fills EEO, race, ethnicity, gender, disability, veteran, religion, marital status, sexual orientation, pronouns, date of birth, SSN or similar sensitive questions.
-- Does not answer open-ended application questions.
+- Never guesses which application-specific CV to upload when multiple pending applications share the same recruiting portal URL.
+- Never fills cover-letter, transcript, portfolio or other non-resume file inputs with the CV.
 - Does not bypass CAPTCHA or anti-bot controls.
-- Does not currently upload a per-application CV automatically.
+- Open-ended questions are surfaced but not fabricated automatically.
+- Application-specific CV retrieval requires the derived Job Radar autofill key and private archive server credentials; the private GitHub token is never stored in the extension.
 
 ## Install locally in Chrome
 
@@ -25,16 +30,19 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 3. Turn on **Developer mode**.
 4. Click **Load unpacked**.
 5. Select this `browser-extension/` directory.
-6. Open the extension's **编辑资料** page, or open Ivy Job Radar `/autofill`, save the profile there, then use **从当前 Job Radar 页面导入资料**.
+6. Open Ivy Job Radar `/autofill`, save the profile, then open the extension and click **从当前 Job Radar 页面导入资料**.
+7. Chrome will ask once for permission to access that Job Radar site origin so the extension can retrieve your own application context and finalized CV.
 
 ## Usage
 
-1. Open the company's application form.
-2. Click the Ivy Job Radar Autofill extension.
-3. Click **填写当前申请页**.
-4. Review every filled field and complete anything that was skipped.
-5. Submit manually after review.
+1. Make sure the target role is in **待提交申请**.
+2. Finalize the application-specific CV if you want automatic resume attachment. The archive must contain `cv_customized_<APP-ID>.pdf`.
+3. Open the company's application form.
+4. Click the Ivy Job Radar Autofill extension.
+5. Confirm the detected application; if several roles share one portal URL, choose the correct one from the dropdown.
+6. Click **填写当前申请页 + CV**.
+7. Review every filled field, use **复制未填问题** for anything the extension intentionally leaves unresolved, and submit manually.
 
 ## Current scope
 
-This is the first usable autofill layer. Platform-specific adapters, per-`APP-...` resume upload, open-question drafting and post-submit status synchronization are intentionally left for later iterations after this generic mapper is validated on real forms.
+V2 provides application-aware form filling and finalized CV attachment. It still does not autonomously draft open-ended answers or submit applications. Those remain human-reviewed steps.
