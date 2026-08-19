@@ -10,7 +10,8 @@
     const context = document.getElementById("context");
     if (!wrap || !select || !context) return;
 
-    // If automatic matching already selected a job or supplied candidates, do nothing.
+    // If automatic/manual matching already selected a job or supplied candidates, do nothing.
+    if (context.dataset.matched === "true") return;
     if (!wrap.classList.contains("hidden") || select.options.length > 0) return;
 
     const { ivyRadarConfig } = await chrome.storage.local.get(["ivyRadarConfig"]);
@@ -47,6 +48,7 @@
 
       wrap.classList.remove("hidden");
       context.replaceChildren();
+      context.dataset.matched = "false";
       const strong = document.createElement("strong");
       strong.textContent = "没有自动匹配到；请手动选择";
       const span = document.createElement("span");
