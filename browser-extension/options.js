@@ -1,12 +1,16 @@
 const SPEC = [
   ["section","身份信息"],
   ["identity.firstName","First name"],["identity.middleName","Middle name"],["identity.lastName","Last name"],["identity.preferredName","Preferred name"],["identity.email","Email","email"],["identity.phone","Phone","tel"],
-  ["section","地点与链接"],
-  ["location.city","City"],["location.state","State / Province"],["location.country","Country"],["links.linkedin","LinkedIn","url"],["links.github","GitHub","url"],["links.website","Personal website","url"],
+  ["section","地址与链接"],
+  ["location.address1","Address line 1"],["location.address2","Address line 2"],["location.city","City"],["location.state","State / Province"],["location.postalCode","ZIP / Postal code"],["location.country","Country"],["links.linkedin","LinkedIn","url"],["links.github","GitHub","url"],["links.website","Personal website","url"],
   ["section","最高/当前教育"],
   ["education.school","School / University"],["education.degree","Degree"],["education.major","Major / Field of study"],["education.graduationMonth","Graduation month"],["education.graduationYear","Graduation year"],
+  ["section","最近一段经历（可选）"],
+  ["employment.employer","Employer"],["employment.title","Job title"],["employment.location","Employment location"],["employment.startMonth","Start month"],["employment.startYear","Start year"],["employment.endMonth","End month"],["employment.endYear","End year"],
   ["section","常见资格问题"],
-  ["eligibility.workAuthorizationUS","Authorized to work in the U.S.?","yesno"],["eligibility.sponsorshipUS","Need U.S. visa sponsorship now or in the future?","yesno"],["eligibility.relocation","Willing to relocate?","yesno"]
+  ["eligibility.age18","At least 18 years old?","yesno"],["eligibility.workAuthorizationUS","Authorized to work in the U.S.?","yesno"],["eligibility.sponsorshipUS","Need U.S. visa sponsorship now or in the future?","yesno"],["eligibility.relocation","Willing to relocate?","yesno"],["eligibility.remoteWork","Willing / able to work remotely?","yesno"],
+  ["section","常见申请信息（可选）"],
+  ["application.availableStartDate","Available start date"],["application.salaryExpectation","Salary expectation"],["application.hearAboutUs","How did you hear about us?"]
 ];
 
 const fields = document.getElementById("fields");
@@ -59,7 +63,7 @@ async function load() {
 }
 
 function collect() {
-  const profile = { version: 1 };
+  const profile = { version: 2 };
   document.querySelectorAll("[data-path]").forEach((el) => setPath(profile, el.dataset.path, el.value.trim()));
   return profile;
 }
