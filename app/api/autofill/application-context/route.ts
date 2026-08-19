@@ -74,6 +74,7 @@ export async function GET(request: NextRequest) {
     ? rows.find((row) => row.id === requestedApplicationRowId) ?? null
     : null;
   let matchedBy = selected ? "manual-selection" : "";
+  let ambiguousAutomaticMatch = false;
 
   if (!selected && jobUrl) {
     const targetCanonical = canonicalizeJobIdentityUrl(jobUrl);
@@ -93,20 +94,32 @@ export async function GET(request: NextRequest) {
     if (top && top.score >= 80 && tied.length === 1) {
       selected = top.row;
       matchedBy = top.reason;
+    } else if (top && top.score >= 80 && tied.length > 1) {
+      ambiguousAutomaticMatch = true;
     }
   }
 
-  const sameHostCandidates = jobUrl
-    ? rows.filter((row) => hostOf(row.jobUrl) && hostOf(row.jobUrl) === hostOf(jobUrl))
-    : rows;
-  const candidates = sameHostCandidates
+  const currentHost = hostOf(jobUrl);
+  const candidates = rows
     .slice()
-    .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
-    .slice(0, 12)
+    .sort((a, b) => {
+      const aSameHost = Boolean(currentHost && hostOf(a.jobUrl) === currentHost);
+      const bSameHost = Boolean(currentHost && hostOf(b.jobUrl) === currentHost);
+      if (aSameHost !== bSameHost) return Number(bSameHost) - Number(aSameHost);
+      return (b.updatedAt || "").localeCompare(a.updatedAt || "");
+    })
+    .slice(0, 50)
     .map((row) => ({ id: row.id, applicationId: row.applicationId, company: row.company, title: row.title, location: row.location, jobUrl: row.jobUrl }));
 
   if (!selected) {
-    return json({ ok: true, matched: false, needsSelection: candidates.length > 0, candidates });
+    return json({
+      ok: true,
+      matched: false,
+      needsSelection: candidates.length > 0,
+      selectionReason: ambiguousAutomaticMatch ? "ambiguous-auto-match" : "no-auto-match",
+      candidateScope: "submitted-applications",
+      candidates,
+    });
   }
 
   const archiveId = stableArchiveId(selected.applicationId);
