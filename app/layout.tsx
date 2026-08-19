@@ -5,6 +5,7 @@ import HardRequirementIgnoreActions from "./hard-requirement-ignore-actions";
 import JobDataCache from "./job-data-cache";
 import NavigationStatePersistence from "./navigation-state-persistence";
 import OptimisticDashboardActions from "./optimistic-dashboard-actions";
+import PendingApplicationFitScores from "./pending-application-fit-scores";
 import PendingApplicationLiveSync from "./pending-application-live-sync";
 import PendingJobVisibility from "./pending-job-visibility";
 import VerificationQueueActions from "./verification-queue-actions";
@@ -48,6 +49,7 @@ export default function RootLayout({
         <PendingApplicationLiveSync />
         <OptimisticDashboardActions />
         <ApplicationCvActions />
+        <PendingApplicationFitScores />
         <HardRequirementIgnoreActions />
         <NavigationStatePersistence />
         <div
