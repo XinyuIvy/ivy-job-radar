@@ -34,7 +34,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             self.assertIn(term, content.lower())
         self.assertIn("SENSITIVE_RE.test(text)", content)
 
-    def test_common_application_fields_are_supported(self):
+    def test_common_and_application_specific_fields_are_supported(self):
         content = (EXT / "content.js").read_text(encoding="utf-8")
         for key in [
             "identity.firstName",
@@ -50,12 +50,20 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             "education.major",
             "employment.employer",
             "employment.title",
+            "employment.description",
+            "project.name",
+            "project.role",
+            "project.description",
+            "cv.skills",
+            "cv.publications",
             "eligibility.age18",
             "eligibility.workAuthorizationUS",
             "eligibility.sponsorshipUS",
             "application.availableStartDate",
         ]:
             self.assertIn(key, content)
+        self.assertIn("packetIsAuthoritative", content)
+        self.assertIn('authority === "final_customized_cv_only"', content)
         self.assertIn("setCombobox", content)
         self.assertIn("unresolvedQuestions", content)
 
@@ -69,26 +77,33 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("不会点击 Submit", client)
         self.assertIn("最终定制 CV", client)
 
-    def test_popup_matches_application_and_attaches_finalized_cv(self):
+    def test_popup_matches_application_fetches_final_cv_packet_and_attaches_pdf(self):
         popup = (EXT / "popup.js").read_text(encoding="utf-8")
         self.assertIn("/api/autofill/application-context", popup)
+        self.assertIn("/api/autofill/application-packet", popup)
         self.assertIn("/api/autofill/resume", popup)
+        self.assertIn("applicationPacket", popup)
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", (EXT / "popup.html").read_text(encoding="utf-8"))
         self.assertNotIn("CV_GITHUB_TOKEN", popup)
         self.assertNotIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", popup)
 
-    def test_server_resume_bridge_requires_derived_key_and_private_archive(self):
+    def test_server_bridges_require_derived_key_and_private_archive(self):
         context_route = (ROOT / "app" / "api" / "autofill" / "application-context" / "route.ts").read_text(encoding="utf-8")
         resume_route = (ROOT / "app" / "api" / "autofill" / "resume" / "route.ts").read_text(encoding="utf-8")
-        for source in [context_route, resume_route]:
+        packet_route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
+        for source in [context_route, resume_route, packet_route]:
             self.assertIn("deriveBookmarkCaptureKey", source)
             self.assertIn("secureBookmarkKeyEqual", source)
             self.assertIn("x-ivy-autofill-key", source.lower())
         self.assertIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", resume_route)
+        self.assertIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", packet_route)
         self.assertIn("cv_customized_${archiveId}.pdf", resume_route)
+        self.assertIn("application_autofill_${archiveId}.json", packet_route)
+        self.assertIn('packet.authority !== "final_customized_cv_only"', packet_route)
         self.assertIn("application/vnd.github.raw+json", resume_route)
+        self.assertIn("application/vnd.github.raw+json", packet_route)
         self.assertIn("canonicalizeJobIdentityUrl", context_route)
         self.assertIn("extractStableJobId", context_route)
         self.assertIn("needsSelection", context_route)
