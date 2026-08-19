@@ -132,12 +132,13 @@ export function buildApplicationRecord(input: {
   ].join("\n");
 }
 
-export function buildChatPrompt(archiveId: string, path: string) {
+export function buildChatPrompt(archiveId: string, path: string, fullJd: string) {
   const customizedTex = `cv_customized_${archiveId}.tex`;
   const customizedPdf = `cv_customized_${archiveId}.pdf`;
   const customizedText = `cv_customized_${archiveId}.txt`;
   const buildManifest = `cv_build_manifest_${archiveId}.json`;
   const submittedPdf = `cv_submitted_${archiveId}.pdf`;
+  const confirmedFullJd = fullJd.trim();
 
   return `请为申请 \`${archiveId}\` 定制定向 CV。
 
@@ -145,7 +146,15 @@ export function buildChatPrompt(archiveId: string, path: string) {
 
 \`${path}/\`
 
-首先只读取以下申请输入：
+## 完整 JD 是本次定制的主输入
+
+下面已经直接内嵌了你在 Job Radar 中确认并冻结的完整 JD 原文。必须把它从头到尾作为一级输入阅读，不能只看 Job Radar 抽取出的几条 requirement / fact。随后再打开 \`jd_snapshot.md\`，从第一行读到文件结尾并核对它与下方完整 JD 是否一致；如果 GitHub/connector 返回内容被截断，继续分段读取直到 EOF。若两者不一致，立即停止并告诉我，不要自行选择其中一版。
+
+----- BEGIN CONFIRMED FULL JD -----
+${confirmedFullJd}
+----- END CONFIRMED FULL JD -----
+
+完成完整 JD 核对后，再读取以下申请输入：
 
 - \`application_record.yaml\`
 - \`jd_snapshot.md\`
@@ -162,7 +171,9 @@ export function buildChatPrompt(archiveId: string, path: string) {
 
 如果申请 ID、目录或任何必需文件不存在，立即停止并明确告诉我缺少什么。不要根据聊天记忆、岗位名称或相似申请猜测。
 
-\`match_packet.json\` 只是 Job Radar 的初步分类，不是最终结论。请读取完整 JD、完整事实母版、canonical indexes 和当前 CV，独立审核每项 JD 要求属于 Direct、Transferable、Adjacent 还是 Unsupported。你可以纠正、补充或推翻 Job Radar 的分类，但必须说明事实依据。
+\`jd_snapshot.md\` 与上面内嵌的完整 JD 是岗位要求的主权威来源。\`jd_requirements.json\` 和 \`match_packet.json\` 都只是从完整 JD 派生出的结构化摘要，绝对不能替代完整 JD，也不能把分析范围限制在其中已经抽取的几条要求。不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配。必须自行从完整 JD 中识别所有职责、必需条件、优先条件、学历/经验、方法与工具、合作与沟通要求、工作授权/地点/工作方式以及其他会影响 CV 的信息；即使某项没有出现在结构化摘要里，也要纳入审核。
+
+\`match_packet.json\` 只是 Job Radar 的初步分类，不是最终结论。请在完整阅读 JD 后，再结合完整事实母版、canonical indexes 和当前 CV，独立审核每项 JD 要求属于 Direct、Transferable、Adjacent 还是 Unsupported。你可以纠正、补充或推翻 Job Radar 的分类，但必须说明事实依据。
 
 分类处理规则：
 
@@ -214,7 +225,7 @@ GitHub Action 成功后，读取 \`${customizedText}\` 和 \`${buildManifest}\` 
 
 最终仍需经过我的确认。在我明确确认实际投递版本之前，不创建 \`${submittedPdf}\`。不得修改其他申请，也不得覆盖 \`XinyuIvy/CV\` 中的行业母版。
 
-现在只执行读取、独立分类审核和第一版纯文本内容建议，完成后停下来等我确认。
+现在只执行完整 JD 核对、独立分类审核和第一版纯文本内容建议，完成后停下来等我确认。第一版分析必须体现完整 JD 的全部主要板块，而不是只复述 jd_requirements.json / match_packet.json 中已经抽出的条目。
 `;
 }
 

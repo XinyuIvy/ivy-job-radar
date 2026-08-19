@@ -105,8 +105,8 @@ async function readPrivateFile(path: string, ref: string, token: string) {
   return decodeBase64Utf8(payload.content);
 }
 
-async function existingArchivePrompt(apiRoot: string, path: string, token: string) {
-  const response = await fetch(`${apiRoot}/contents/${path}/chat_prompt.txt?ref=main`, {
+async function existingArchiveTextFile(apiRoot: string, path: string, filename: string, token: string) {
+  const response = await fetch(`${apiRoot}/contents/${path}/${filename}?ref=main`, {
     cache: "no-store",
     headers: githubHeaders(token),
   });
@@ -118,6 +118,11 @@ async function existingArchivePrompt(apiRoot: string, path: string, token: strin
   }
   const payload = await response.json() as { content?: string; encoding?: string };
   return payload.encoding === "base64" && payload.content ? decodeBase64Utf8(payload.content) : null;
+}
+
+function fullJdFromSnapshot(snapshot: string) {
+  const firstSectionBreak = snapshot.indexOf("\n\n");
+  return (firstSectionBreak >= 0 ? snapshot.slice(firstSectionBreak + 2) : snapshot).trim();
 }
 
 async function commitFilesAtomically(input: {
@@ -254,9 +259,11 @@ export async function POST(request: NextRequest) {
 
     const archiveId = stableArchiveId(application.company, application.id, application.applicationId);
     const path = archivePath(archiveId);
-    const existingPrompt = await existingArchivePrompt(archiveApiRoot, path, archiveToken);
+    const existingPrompt = await existingArchiveTextFile(archiveApiRoot, path, "chat_prompt.txt", archiveToken);
     if (existingPrompt) {
-      const currentPrompt = buildChatPrompt(archiveId, path);
+      const existingJdSnapshot = await existingArchiveTextFile(archiveApiRoot, path, "jd_snapshot.md", archiveToken);
+      if (!existingJdSnapshot) throw new Error(`Existing application archive ${archiveId} is missing jd_snapshot.md.`);
+      const currentPrompt = buildChatPrompt(archiveId, path, fullJdFromSnapshot(existingJdSnapshot));
       return NextResponse.json({
         ok: true,
         existing: true,
@@ -277,7 +284,7 @@ export async function POST(request: NextRequest) {
       content: await readPrivateFile(sourcePath, cvCommit, cvToken),
     })));
     const capturedAt = new Date().toISOString();
-    const prompt = buildChatPrompt(archiveId, path);
+    const prompt = buildChatPrompt(archiveId, path, jd);
     const applicationRecord = buildApplicationRecord({
       archiveId,
       applicationRowId: application.id,
