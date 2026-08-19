@@ -88,10 +88,29 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
 
     def test_existing_archive_gets_current_operational_prompt_without_rewriting_snapshot(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("const existingPrompt = await existingArchivePrompt", route)
-        self.assertIn("const currentPrompt = buildChatPrompt(archiveId, path)", route)
+        self.assertIn("const existingPrompt = await existingArchiveTextFile", route)
+        self.assertIn("jd_snapshot.md", route)
+        self.assertIn("const currentPrompt = buildChatPrompt(archiveId, path, fullJdFromSnapshot(existingJdSnapshot))", route)
         self.assertIn("prompt: currentPrompt", route)
         self.assertIn("promptContractUpdated: existingPrompt !== currentPrompt", route)
+
+    def test_prompt_embeds_complete_confirmed_jd_and_treats_summaries_as_secondary(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "完整 JD 是本次定制的主输入",
+            "BEGIN CONFIRMED FULL JD",
+            "END CONFIRMED FULL JD",
+            "${confirmedFullJd}",
+            "如果 GitHub/connector 返回内容被截断，继续分段读取直到 EOF",
+            "绝对不能替代完整 JD",
+            "不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配",
+            "完整 JD 的全部主要板块",
+        ]:
+            self.assertIn(phrase, helper)
+        self.assertIn("buildChatPrompt(archiveId, path, jd)", route)
+        self.assertIn('existingArchiveTextFile(archiveApiRoot, path, "jd_snapshot.md", archiveToken)', route)
+        self.assertIn("fullJdFromSnapshot(existingJdSnapshot)", route)
 
     def test_archive_stops_when_private_repo_is_missing(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
