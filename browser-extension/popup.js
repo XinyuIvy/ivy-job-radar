@@ -2,10 +2,27 @@ const status = document.getElementById("status");
 const fillButton = document.getElementById("fill");
 const importButton = document.getElementById("import");
 const optionsButton = document.getElementById("options");
+const questionsButton = document.getElementById("questions");
+const contextBox = document.getElementById("context");
+const candidateWrap = document.getElementById("candidateWrap");
+const candidateSelect = document.getElementById("candidate");
+
+let lastQuestions = [];
+let currentContext = null;
 
 function show(message, tone = "") {
   status.textContent = message;
   status.dataset.tone = tone;
+}
+
+function showContext(title, detail, tone = "") {
+  contextBox.replaceChildren();
+  const strong = document.createElement("strong");
+  strong.textContent = title;
+  const span = document.createElement("span");
+  span.textContent = detail;
+  contextBox.append(strong, span);
+  contextBox.dataset.tone = tone;
 }
 
 async function activeTab() {
@@ -17,20 +34,190 @@ async function ensureContentScript(tabId) {
   await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
 }
 
+async function getStored() {
+  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig"]);
+}
+
+function originPattern(origin) {
+  return `${new URL(origin).origin}/*`;
+}
+
+async function ensureRadarPermission(config, interactive) {
+  if (!config?.siteOrigin) return false;
+  const origins = [originPattern(config.siteOrigin)];
+  const granted = await chrome.permissions.contains({ origins });
+  if (granted) return true;
+  if (!interactive) return false;
+  return chrome.permissions.request({ origins });
+}
+
+async function fetchContext(config, jobUrl, applicationId = 0) {
+  if (!config?.siteOrigin || !config?.accessKey) return null;
+  const endpoint = new URL("/api/autofill/application-context", config.siteOrigin);
+  endpoint.searchParams.set("jobUrl", jobUrl || "");
+  if (applicationId) endpoint.searchParams.set("applicationId", String(applicationId));
+  const response = await fetch(endpoint, {
+    cache: "no-store",
+    headers: { "X-Ivy-Autofill-Key": config.accessKey },
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || `Job Radar context failed (${response.status}).`);
+  return result;
+}
+
+function renderCandidates(context) {
+  const candidates = Array.isArray(context?.candidates) ? context.candidates : [];
+  candidateSelect.replaceChildren();
+  if (!candidates.length || context?.matched) {
+    candidateWrap.classList.add("hidden");
+    return;
+  }
+  const blank = document.createElement("option");
+  blank.value = "";
+  blank.textContent = "请选择…";
+  candidateSelect.append(blank);
+  for (const candidate of candidates) {
+    const option = document.createElement("option");
+    option.value = String(candidate.id);
+    option.textContent = `${candidate.company} · ${candidate.title}`;
+    candidateSelect.append(option);
+  }
+  candidateWrap.classList.remove("hidden");
+}
+
+function renderContext(context) {
+  currentContext = context;
+  renderCandidates(context);
+  if (!context) {
+    showContext("尚未连接 Job Radar", "先到 /autofill 保存资料，并用下面的导入按钮同步到扩展。", "warn");
+    return;
+  }
+  if (context.matched) {
+    const app = context.application || {};
+    const resume = context.resume || {};
+    showContext(
+      `${app.company || "当前申请"} · ${app.title || ""}`,
+      resume.available
+        ? `${app.archiveId || app.applicationId} · 已找到最终定制 CV`
+        : `${app.archiveId || app.applicationId || "尚无 APP-ID"} · ${resume.reason === "final-pdf-not-found" ? "最终 PDF 尚未生成" : "尚未建立可用最终 CV"}`,
+      resume.available ? "ok" : "warn",
+    );
+    return;
+  }
+  showContext(
+    context.needsSelection ? "当前页面对应多个待提交申请" : "没有自动匹配到待提交申请",
+    context.needsSelection ? "请在下方选择当前岗位；不会猜测并上传错误 CV。" : "仍可填写标准资料，但不会自动上传 application-specific CV。",
+    "warn",
+  );
+}
+
+async function refreshContext(interactive = false) {
+  const tab = await activeTab();
+  const { ivyRadarConfig } = await getStored();
+  if (!ivyRadarConfig) return renderContext(null);
+  if (!tab?.url || !/^https?:/i.test(tab.url)) return renderContext(null);
+  if (!await ensureRadarPermission(ivyRadarConfig, interactive)) {
+    showContext("需要一次站点权限", "点“填写当前申请页 + CV”时授权扩展读取你自己的 Job Radar application context。", "warn");
+    return null;
+  }
+  try {
+    const context = await fetchContext(ivyRadarConfig, tab.url);
+    renderContext(context);
+    return context;
+  } catch (error) {
+    showContext("Job Radar 连接失败", String(error.message || error), "warn");
+    return null;
+  }
+}
+
+function bufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunk = 0x8000;
+  for (let index = 0; index < bytes.length; index += chunk) {
+    binary += String.fromCharCode(...bytes.subarray(index, Math.min(index + chunk, bytes.length)));
+  }
+  return btoa(binary);
+}
+
+async function attachResume(tabId, config, context) {
+  if (!context?.matched || !context?.resume?.available || !context?.application?.id) return { uploaded: 0, reason: "not-available" };
+  const endpoint = new URL("/api/autofill/resume", config.siteOrigin);
+  endpoint.searchParams.set("applicationId", String(context.application.id));
+  const response = await fetch(endpoint, {
+    cache: "no-store",
+    headers: { "X-Ivy-Autofill-Key": config.accessKey },
+  });
+  if (!response.ok) {
+    const result = await response.json().catch(() => ({}));
+    throw new Error(result.error || `CV download failed (${response.status}).`);
+  }
+  const buffer = await response.arrayBuffer();
+  return chrome.tabs.sendMessage(tabId, {
+    type: "IVY_UPLOAD_RESUME",
+    fileName: context.resume.fileName,
+    mimeType: "application/pdf",
+    base64: bufferToBase64(buffer),
+  });
+}
+
+candidateSelect.addEventListener("change", async () => {
+  const applicationId = Number(candidateSelect.value);
+  if (!applicationId) return;
+  const tab = await activeTab();
+  const { ivyRadarConfig } = await getStored();
+  if (!tab?.url || !ivyRadarConfig) return;
+  try {
+    const context = await fetchContext(ivyRadarConfig, tab.url, applicationId);
+    renderContext(context);
+  } catch (error) {
+    show(String(error.message || error), "error");
+  }
+});
+
 fillButton.addEventListener("click", async () => {
+  fillButton.disabled = true;
+  show("正在填写当前页面…");
   try {
     const tab = await activeTab();
     if (!tab?.id || !/^https?:/i.test(tab.url || "")) return show("请先打开招聘申请页面。", "error");
-    const stored = await chrome.storage.local.get(["ivyProfile"]);
-    if (!stored.ivyProfile) return show("还没有申请资料。先打开“编辑资料”。", "error");
+    const stored = await getStored();
+    if (!stored.ivyProfile) return show("还没有申请资料。先打开“编辑资料”或从 Job Radar 导入。", "error");
+
     await ensureContentScript(tab.id);
-    const result = await chrome.tabs.sendMessage(tab.id, { type: "IVY_FILL_PAGE" });
-    if (!result?.ok) return show(result?.error || "自动填写失败。", "error");
-    const sensitive = result.skippedSensitive?.length ? "；敏感/EEO 项已跳过" : "";
-    show(`${result.platform}: 已填写 ${result.filled} 个字段${sensitive}。`, result.filled ? "ok" : "warn");
+    const fillResult = await chrome.tabs.sendMessage(tab.id, { type: "IVY_FILL_PAGE" });
+    if (!fillResult?.ok) return show(fillResult?.error || "自动填写失败。", "error");
+
+    lastQuestions = Array.isArray(fillResult.unresolved) ? fillResult.unresolved : [];
+    questionsButton.classList.toggle("hidden", lastQuestions.length === 0);
+
+    let context = currentContext;
+    if (stored.ivyRadarConfig && await ensureRadarPermission(stored.ivyRadarConfig, true)) {
+      const selectedId = Number(candidateSelect.value || 0);
+      context = await fetchContext(stored.ivyRadarConfig, tab.url, selectedId);
+      renderContext(context);
+    }
+
+    let uploadResult = { uploaded: 0, reason: "not-available" };
+    if (stored.ivyRadarConfig && context?.matched && context?.resume?.available) {
+      uploadResult = await attachResume(tab.id, stored.ivyRadarConfig, context);
+    }
+
+    const sensitive = fillResult.skippedSensitive?.length ? "；敏感/EEO 项已跳过" : "";
+    const cv = uploadResult?.uploaded ? "；已上传对应定制 CV" : context?.matched ? "；未上传 CV（最终 PDF 不可用或页面未找到 Resume 字段）" : "；未绑定 application-specific CV";
+    const unresolved = lastQuestions.length ? `；另有 ${lastQuestions.length} 个未填问题` : "";
+    show(`${fillResult.platform}: 已填写 ${fillResult.filled} 个字段${cv}${unresolved}${sensitive}。请检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
   } catch (error) {
     show(`自动填写失败：${error.message || error}`, "error");
+  } finally {
+    fillButton.disabled = false;
   }
+});
+
+questionsButton.addEventListener("click", async () => {
+  if (!lastQuestions.length) return;
+  await navigator.clipboard.writeText(["当前申请页仍未填写的问题：", ...lastQuestions.map((question, index) => `${index + 1}. ${question}`)].join("\n"));
+  show(`已复制 ${lastQuestions.length} 个未填问题，可以粘贴到 Chat 里逐项生成答案。`, "ok");
 });
 
 importButton.addEventListener("click", async () => {
@@ -39,15 +226,27 @@ importButton.addEventListener("click", async () => {
     if (!tab?.id || !/^https?:/i.test(tab.url || "")) return show("请先打开 Ivy Job Radar 的 /autofill 页面。", "error");
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: () => localStorage.getItem("ivy_job_application_profile_v1"),
+      func: () => ({
+        profile: localStorage.getItem("ivy_job_application_profile_v1"),
+        config: localStorage.getItem("ivy_job_autofill_config_v1"),
+        origin: location.origin,
+      }),
     });
-    if (!result) return show("当前页面没有保存的 Job Radar 申请资料。", "error");
-    const profile = JSON.parse(result);
-    await chrome.storage.local.set({ ivyProfile: profile });
-    show("已从当前 Job Radar 页面导入申请资料。", "ok");
+    if (!result?.profile) return show("当前页面没有保存的 Job Radar 申请资料。请先在 /autofill 点“保存资料”。", "error");
+    const profile = JSON.parse(result.profile);
+    const config = result.config ? JSON.parse(result.config) : null;
+    if (!config?.accessKey) return show("当前 Job Radar 还没有生成扩展桥接信息。请部署最新版 Site 后刷新 /autofill。", "error");
+    config.siteOrigin = result.origin || config.siteOrigin;
+    const granted = await ensureRadarPermission(config, true);
+    if (!granted) return show("没有授予 Job Radar 站点权限；基础字段仍可使用，但不能自动匹配并上传定制 CV。", "warn");
+    await chrome.storage.local.set({ ivyProfile: profile, ivyRadarConfig: config });
+    show("已导入申请资料并连接 Job Radar。以后在招聘页可识别当前 APP 和最终定制 CV。", "ok");
+    renderContext(null);
   } catch (error) {
     show(`导入失败：${error.message || error}`, "error");
   }
 });
 
 optionsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
+
+void refreshContext(false);
