@@ -81,6 +81,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_popup_matches_application_fetches_final_cv_packet_and_attaches_pdf(self):
         popup = (EXT / "popup.js").read_text(encoding="utf-8")
         popup_html = (EXT / "popup.html").read_text(encoding="utf-8")
+        fallback = (EXT / "manual-fallback.js").read_text(encoding="utf-8")
         self.assertIn("/api/autofill/application-context", popup)
         self.assertIn("/api/autofill/application-packet", popup)
         self.assertIn("/api/autofill/resume", popup)
@@ -91,6 +92,10 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("AUTOFILL V3", popup_html)
         self.assertNotIn("AUTOFILL V2", popup_html)
         self.assertIn("从已提交申请中手动选择", popup_html)
+        self.assertIn('src="manual-fallback.js"', popup_html)
+        self.assertIn('endpoint.searchParams.set("jobUrl", "")', fallback)
+        self.assertIn("请选择已提交申请", fallback)
+        self.assertIn("没有自动匹配到；请手动选择", fallback)
         self.assertIn("请选择已提交申请", popup)
         self.assertIn("没关系，可以在下方从已提交申请中手动选择当前岗位", popup)
         self.assertIn('context.selectionReason === "ambiguous-auto-match"', popup)
