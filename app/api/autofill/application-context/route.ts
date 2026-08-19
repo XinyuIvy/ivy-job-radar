@@ -15,6 +15,8 @@ const CORS_HEADERS = {
   "Cache-Control": "no-store",
 };
 
+const AUTOFILL_APPLICATION_STATUS = "已提交";
+
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: CORS_HEADERS });
 }
@@ -66,7 +68,7 @@ export async function GET(request: NextRequest) {
   const jobUrl = String(url.searchParams.get("jobUrl") || "").trim();
   const requestedApplicationRowId = Number(url.searchParams.get("applicationId") || 0);
   const db = await getDb();
-  const rows = (await db.select().from(applications)).filter((row) => row.status === "准备材料");
+  const rows = (await db.select().from(applications)).filter((row) => row.status === AUTOFILL_APPLICATION_STATUS);
 
   let selected = Number.isInteger(requestedApplicationRowId) && requestedApplicationRowId > 0
     ? rows.find((row) => row.id === requestedApplicationRowId) ?? null

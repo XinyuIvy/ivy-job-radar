@@ -86,10 +86,12 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", (EXT / "popup.html").read_text(encoding="utf-8"))
+        self.assertIn("当前页面对应多个已提交申请", popup)
+        self.assertNotIn("当前页面对应多个待提交申请", popup)
         self.assertNotIn("CV_GITHUB_TOKEN", popup)
         self.assertNotIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", popup)
 
-    def test_server_bridges_require_derived_key_and_private_archive(self):
+    def test_server_bridges_require_derived_key_private_archive_and_submitted_status(self):
         context_route = (ROOT / "app" / "api" / "autofill" / "application-context" / "route.ts").read_text(encoding="utf-8")
         resume_route = (ROOT / "app" / "api" / "autofill" / "resume" / "route.ts").read_text(encoding="utf-8")
         packet_route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
@@ -97,6 +99,8 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             self.assertIn("deriveBookmarkCaptureKey", source)
             self.assertIn("secureBookmarkKeyEqual", source)
             self.assertIn("x-ivy-autofill-key", source.lower())
+            self.assertIn('AUTOFILL_APPLICATION_STATUS = "已提交"', source)
+            self.assertNotIn('AUTOFILL_APPLICATION_STATUS = "准备材料"', source)
         self.assertIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", resume_route)
         self.assertIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", packet_route)
         self.assertIn("cv_customized_${archiveId}.pdf", resume_route)
@@ -107,6 +111,9 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("canonicalizeJobIdentityUrl", context_route)
         self.assertIn("extractStableJobId", context_route)
         self.assertIn("needsSelection", context_route)
+        self.assertIn("row.status === AUTOFILL_APPLICATION_STATUS", context_route)
+        self.assertIn("application.status !== AUTOFILL_APPLICATION_STATUS", resume_route)
+        self.assertIn("application.status !== AUTOFILL_APPLICATION_STATUS", packet_route)
 
 
 if __name__ == "__main__":

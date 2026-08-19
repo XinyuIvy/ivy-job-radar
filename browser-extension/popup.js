@@ -119,7 +119,7 @@ function renderContext(context) {
     return;
   }
   showContext(
-    context.needsSelection ? "当前页面对应多个待提交申请" : "没有自动匹配到待提交申请",
+    context.needsSelection ? "当前页面对应多个已提交申请" : "没有自动匹配到已提交申请",
     context.needsSelection ? "请在下方选择当前岗位；不会猜测并上传错误 CV。" : "仍可填写标准资料，但不会使用 application-specific 经历或 CV。",
     "warn",
   );

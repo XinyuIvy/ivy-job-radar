@@ -15,6 +15,8 @@ const CORS_HEADERS = {
   "Cache-Control": "no-store",
 };
 
+const AUTOFILL_APPLICATION_STATUS = "已提交";
+
 export function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
 }
@@ -44,8 +46,8 @@ export async function GET(request: NextRequest) {
   const db = await getDb();
   const [application] = await db.select().from(applications).where(eq(applications.id, applicationRowId)).limit(1);
   if (!application) return NextResponse.json({ error: "Application not found." }, { status: 404, headers: CORS_HEADERS });
-  if (application.status !== "准备材料") {
-    return NextResponse.json({ error: "Only pending applications can provide an autofill resume." }, { status: 409, headers: CORS_HEADERS });
+  if (application.status !== AUTOFILL_APPLICATION_STATUS) {
+    return NextResponse.json({ error: "Only submitted applications can provide an autofill resume." }, { status: 409, headers: CORS_HEADERS });
   }
 
   const archiveId = archiveIdFrom(application.applicationId);
