@@ -7,6 +7,11 @@
   const RESUME_RE = /\b(resume|résumé|cv|curriculum vitae)\b|简历/i;
   const NON_RESUME_FILE_RE = /(cover letter|portfolio|transcript|writing sample|certificate|photo|头像|成绩单|作品集)/i;
   const OPEN_QUESTION_RE = /(why|motivat|interest|describe|tell us|additional information|anything else|experience with|what excites|why this|cover letter|statement|请描述|为什么|动机|补充信息|相关经验)/i;
+  const MONTH_NAMES = {
+    "01": ["jan", "january"], "02": ["feb", "february"], "03": ["mar", "march"], "04": ["apr", "april"],
+    "05": ["may"], "06": ["jun", "june"], "07": ["jul", "july"], "08": ["aug", "august"],
+    "09": ["sep", "sept", "september"], "10": ["oct", "october"], "11": ["nov", "november"], "12": ["dec", "december"],
+  };
 
   function normalize(value) {
     return String(value || "").normalize("NFKC").toLowerCase().replace(/[\s_\-/:*()\[\].,?]+/g, " ").trim();
@@ -73,6 +78,7 @@
     ["education.major", /\b(field of study|major|discipline|program)\b|专业/],
     ["education.graduationMonth", /\b(graduation month|graduate month|education end month)\b/],
     ["education.graduationYear", /\b(graduation year|graduate year|education end year)\b/],
+    ["employment.description", /\b(job description|role description|description of duties|job duties|work responsibilities)\b|工作职责|工作内容|岗位职责/],
     ["employment.employer", /\b(current employer|employer|company name|organization name)\b|雇主|公司名称/],
     ["employment.title", /\b(current title|job title|position title|role title)\b|职位名称|职位/],
     ["employment.location", /\b(employment location|work location)\b/],
@@ -80,6 +86,11 @@
     ["employment.startYear", /\b(employment start year|job start year)\b/],
     ["employment.endMonth", /\b(employment end month|job end month)\b/],
     ["employment.endYear", /\b(employment end year|job end year)\b/],
+    ["project.description", /\b(project description|project summary|research description)\b|项目描述|项目简介|研究描述/],
+    ["project.name", /\b(project name|project title|research project title)\b|项目名称|项目标题/],
+    ["project.role", /\b(project role|research role|role in project|project contribution)\b|项目角色|项目职责/],
+    ["cv.skills", /\b(technical skills|key skills|skills)\b|专业技能|技能清单/],
+    ["cv.publications", /\b(selected publications|publications|publication list)\b|论文列表|代表论文/],
     ["eligibility.age18", /\b(at least|over)\s*18|18 years old|age of 18\b/],
     ["eligibility.workAuthorizationUS", /\b(authorized|authorised|legally authorized|legally authorised).*\b(work|employment).*\b(united states|u s|usa)\b|\bwork authorization\b/],
     ["eligibility.sponsorshipUS", /\b(sponsor|sponsorship|visa sponsorship|immigration sponsorship)\b/],
@@ -94,6 +105,94 @@
     if (!text || SENSITIVE_RE.test(text)) return null;
     for (const [key, re] of RULES) if (re.test(text)) return key;
     return null;
+  }
+
+  function packetIsAuthoritative(packet) {
+    return Boolean(packet && packet.authority === "final_customized_cv_only" && /^APP-\d{4}-/i.test(String(packet.application_id || "")));
+  }
+
+  function deriveMajor(degree) {
+    const value = String(degree || "").trim();
+    if (!value) return "";
+    const english = value.match(/\b(?:ph\.?d\.?|doctor(?:ate)?|m\.?s\.?|master(?:'s)?|b\.?s\.?|bachelor(?:'s)?)\s+(?:in|of)\s+(.+)/i);
+    if (english) return english[1].trim();
+    return value.replace(/博士|硕士|学士|博士学位|硕士学位|学士学位/g, "").trim();
+  }
+
+  function nextPacketIndex(counters, group, key) {
+    const counterKey = `${group}:${key}`;
+    const index = counters.get(counterKey) || 0;
+    counters.set(counterKey, index + 1);
+    return index;
+  }
+
+  function packetEntryValue(packet, key, counters) {
+    if (!packetIsAuthoritative(packet)) return { handled: false, value: "" };
+
+    if (key.startsWith("education.")) {
+      const entries = Array.isArray(packet.education) ? packet.education : [];
+      const index = nextPacketIndex(counters, "education", key);
+      const entry = entries[index];
+      if (!entry) return { handled: true, value: "" };
+      const map = {
+        "education.school": entry.school,
+        "education.degree": entry.degree,
+        "education.major": entry.major || deriveMajor(entry.degree),
+        "education.graduationMonth": entry.end_month || entry.start_month,
+        "education.graduationYear": entry.end_year || entry.start_year,
+      };
+      return { handled: true, value: String(map[key] || "").trim() };
+    }
+
+    if (key.startsWith("employment.")) {
+      const entries = Array.isArray(packet.experience) ? packet.experience : [];
+      const index = nextPacketIndex(counters, "experience", key);
+      const entry = entries[index];
+      if (!entry) return { handled: true, value: "" };
+      const map = {
+        "employment.employer": entry.organization,
+        "employment.title": entry.title,
+        "employment.location": entry.location,
+        "employment.startMonth": entry.start_month,
+        "employment.startYear": entry.start_year,
+        "employment.endMonth": entry.end_month,
+        "employment.endYear": entry.end_year,
+        "employment.description": Array.isArray(entry.bullets) ? entry.bullets.join("\n") : "",
+      };
+      return { handled: true, value: String(map[key] || "").trim() };
+    }
+
+    if (key.startsWith("project.")) {
+      const entries = Array.isArray(packet.projects) ? packet.projects : [];
+      const index = nextPacketIndex(counters, "projects", key);
+      const entry = entries[index];
+      if (!entry) return { handled: true, value: "" };
+      const map = {
+        "project.name": entry.name,
+        "project.role": entry.role,
+        "project.description": Array.isArray(entry.bullets) ? entry.bullets.join("\n") : "",
+      };
+      return { handled: true, value: String(map[key] || "").trim() };
+    }
+
+    if (key === "cv.skills") {
+      const categories = Array.isArray(packet.skills) ? packet.skills : [];
+      const items = categories.flatMap((category) => Array.isArray(category.items) ? category.items : []);
+      return { handled: true, value: [...new Set(items)].join(", ") };
+    }
+
+    if (key === "cv.publications") {
+      const publications = Array.isArray(packet.publications) ? packet.publications : [];
+      return { handled: true, value: publications.join("\n") };
+    }
+
+    return { handled: false, value: "" };
+  }
+
+  function resolveValue(profile, packet, key, counters) {
+    const packetValue = packetEntryValue(packet, key, counters);
+    if (packetValue.handled) return packetValue.value;
+    return getProfileValue(profile, key);
   }
 
   function dispatch(el) {
@@ -111,11 +210,20 @@
     return true;
   }
 
+  function monthEquivalent(optionText, wanted) {
+    const numeric = String(wanted || "").padStart(2, "0");
+    const aliases = MONTH_NAMES[numeric];
+    if (!aliases) return false;
+    const option = normalize(optionText);
+    return aliases.some((alias) => option === alias || option.startsWith(`${alias} `) || option.includes(` ${alias}`));
+  }
+
   function setSelect(el, value) {
     if (!value || el.disabled) return false;
     const wanted = normalize(value);
     const options = Array.from(el.options || []);
     let match = options.find((option) => normalize(option.value) === wanted || normalize(option.textContent) === wanted);
+    if (!match) match = options.find((option) => monthEquivalent(option.textContent, value));
     if (!match) match = options.find((option) => normalize(option.textContent).includes(wanted) || wanted.includes(normalize(option.textContent)));
     if (!match) return false;
     el.value = match.value;
@@ -165,6 +273,7 @@
     const options = Array.from(document.querySelectorAll('[role="option"], [data-automation-id="promptOption"], .select__option'))
       .filter(visible);
     let match = options.find((option) => normalize(option.textContent) === wanted);
+    if (!match) match = options.find((option) => monthEquivalent(option.textContent, value));
     if (!match) match = options.find((option) => normalize(option.textContent).includes(wanted) || wanted.includes(normalize(option.textContent)));
     if (match) {
       match.click();
@@ -201,11 +310,12 @@
     return questions;
   }
 
-  async function fill(profile) {
+  async function fill(profile, applicationPacket = null) {
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select'));
     let filled = 0;
     const fields = [];
     const skippedSensitive = [];
+    const counters = new Map();
 
     for (const el of elements) {
       const text = fieldText(el);
@@ -216,7 +326,7 @@
       }
       const key = inferKey(text);
       if (!key) continue;
-      const value = getProfileValue(profile, key);
+      const value = resolveValue(profile, applicationPacket, key, counters);
       if (!value) continue;
 
       let changed = false;
@@ -235,6 +345,8 @@
     return {
       filled,
       fields: [...new Set(fields)],
+      applicationSpecific: packetIsAuthoritative(applicationPacket),
+      applicationId: packetIsAuthoritative(applicationPacket) ? applicationPacket.application_id : "",
       skippedSensitive: [...new Set(skippedSensitive)].slice(0, 10),
       unresolved: unresolvedQuestions(),
       platform: detectPlatform(),
@@ -283,7 +395,7 @@
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === "IVY_FILL_PAGE") {
       chrome.storage.local.get(["ivyProfile"], (result) => {
-        fill(result.ivyProfile || {})
+        fill(result.ivyProfile || {}, message.applicationPacket || null)
           .then((payload) => sendResponse({ ok: true, ...payload }))
           .catch((error) => sendResponse({ ok: false, error: String(error?.message || error) }));
       });
