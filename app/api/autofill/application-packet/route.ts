@@ -15,6 +15,8 @@ const CORS_HEADERS = {
   "Cache-Control": "no-store",
 };
 
+const AUTOFILL_APPLICATION_STATUS = "已提交";
+
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: CORS_HEADERS });
 }
@@ -46,7 +48,7 @@ export async function GET(request: NextRequest) {
   const db = await getDb();
   const [application] = await db.select().from(applications).where(eq(applications.id, applicationRowId)).limit(1);
   if (!application) return json({ error: "Application not found." }, 404);
-  if (application.status !== "准备材料") return json({ error: "Only pending applications can provide application-specific autofill data." }, 409);
+  if (application.status !== AUTOFILL_APPLICATION_STATUS) return json({ error: "Only submitted applications can provide application-specific autofill data." }, 409);
 
   const archiveId = archiveIdFrom(application.applicationId);
   if (!archiveId) return json({ error: "This application does not have a finalized archive ID yet." }, 409);
