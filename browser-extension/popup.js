@@ -9,6 +9,7 @@ const candidateSelect = document.getElementById("candidate");
 
 let lastQuestions = [];
 let currentContext = null;
+let selectedApplicationRowId = 0;
 
 function show(message, tone = "") {
   status.textContent = message;
@@ -104,6 +105,7 @@ function renderCandidates(context) {
 function renderContext(context) {
   currentContext = context;
   renderCandidates(context);
+  contextBox.dataset.matched = context?.matched ? "true" : "false";
   if (!context) {
     showContext("尚未连接 Job Radar", "先到 /autofill 保存资料，并用下面的导入按钮同步到扩展。", "warn");
     return;
@@ -111,6 +113,7 @@ function renderContext(context) {
   if (context.matched) {
     const app = context.application || {};
     const resume = context.resume || {};
+    if (Number(app.id) > 0) selectedApplicationRowId = Number(app.id);
     showContext(
       `${app.company || "当前申请"} · ${app.title || ""}`,
       resume.available
@@ -187,6 +190,7 @@ async function attachResume(tabId, config, context) {
 candidateSelect.addEventListener("change", async () => {
   const applicationId = Number(candidateSelect.value);
   if (!applicationId) return;
+  selectedApplicationRowId = applicationId;
   const tab = await activeTab();
   const { ivyRadarConfig } = await getStored();
   if (!tab?.url || !ivyRadarConfig) return;
@@ -210,7 +214,11 @@ fillButton.addEventListener("click", async () => {
     let context = currentContext;
     let applicationPacket = null;
     if (stored.ivyRadarConfig && await ensureRadarPermission(stored.ivyRadarConfig, true)) {
-      const selectedId = Number(candidateSelect.value || 0);
+      const selectedId = Number(
+        currentContext?.matched && currentContext?.application?.id
+          ? currentContext.application.id
+          : selectedApplicationRowId || candidateSelect.value || 0,
+      );
       context = await fetchContext(stored.ivyRadarConfig, tab.url, selectedId);
       renderContext(context);
       applicationPacket = await fetchApplicationPacket(stored.ivyRadarConfig, context);
@@ -235,7 +243,9 @@ fillButton.addEventListener("click", async () => {
     const cv = uploadResult?.uploaded ? "；已上传对应定制 CV" : context?.matched ? "；未上传 CV（最终 PDF 不可用或页面未找到 Resume 字段）" : "；未绑定 application-specific CV";
     const appData = applicationPacket ? `；经历/项目来自 ${applicationPacket.application_id || context?.application?.archiveId || "当前 APP"} 最终 CV` : context?.matched ? "；未找到最终 CV 的结构化经历包，经历字段回退到标准资料" : "";
     const unresolved = lastQuestions.length ? `；另有 ${lastQuestions.length} 个未填问题` : "";
-    show(`${fillResult.platform}: 已填写 ${fillResult.filled} 个字段${appData}${cv}${unresolved}${sensitive}。请检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
+    const fieldKinds = Array.isArray(fillResult.fields) ? fillResult.fields.length : 0;
+    const fieldSummary = fieldKinds ? `（${fieldKinds} 类字段）` : "";
+    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${appData}${cv}${unresolved}${sensitive}。分段/折叠页面可能把部分控件放在当前不可见区域，请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
   } catch (error) {
     show(`自动填写失败：${error.message || error}`, "error");
   } finally {
