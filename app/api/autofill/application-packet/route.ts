@@ -88,6 +88,12 @@ export async function GET(request: NextRequest) {
       company: application.company,
       title: application.title,
     },
+    source: {
+      repository,
+      archivePath: archivePath(archiveId),
+      fileName,
+      authority: "final_customized_cv_only",
+    },
     packet,
   });
 }
