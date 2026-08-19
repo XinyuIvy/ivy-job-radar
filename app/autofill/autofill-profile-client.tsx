@@ -38,11 +38,11 @@ const fieldGroups = [
     ["location.city", "City"], ["location.state", "State / Province"], ["location.postalCode", "ZIP / Postal code"], ["location.country", "Country"],
     ["links.linkedin", "LinkedIn"], ["links.github", "GitHub"], ["links.website", "Personal website"],
   ]],
-  ["最高 / 当前教育", [
+  ["教育信息（最终 APP CV 可覆盖）", [
     ["education.school", "School / University"], ["education.degree", "Degree"], ["education.major", "Major / Field of study"],
     ["education.graduationMonth", "Graduation month"], ["education.graduationYear", "Graduation year"],
   ]],
-  ["最近一段经历（可选）", [
+  ["经历备用值（仅无最终 APP CV 时使用）", [
     ["employment.employer", "Employer"], ["employment.title", "Job title"], ["employment.location", "Employment location"],
     ["employment.startMonth", "Start month"], ["employment.startYear", "Start year"], ["employment.endMonth", "End month"], ["employment.endYear", "End year"],
   ]],
@@ -110,7 +110,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     if (accessKey) {
       window.localStorage.setItem(CONFIG_KEY, JSON.stringify({ version: 1, siteOrigin: window.location.origin, accessKey }));
     }
-    setMessage("已保存。打开 Chrome 扩展并点“从当前 Job Radar 页面导入资料”；导入后扩展也能识别当前 APP 并尝试上传对应的定制 CV。 ");
+    setMessage("已保存。扩展会先识别当前 APP-ID；如果该 APP 已有最终定制 CV，Education / Experience / Projects / Skills 优先读取最终 CV 的 application-specific packet，这里的教育/经历只作为回退值。");
   };
 
   const copyJson = async () => {
@@ -122,9 +122,9 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     <div className="profile-shell">
       <header>
         <div>
-          <p className="eyebrow">APPLICATION AUTOFILL · V2</p>
+          <p className="eyebrow">APPLICATION AUTOFILL · V3</p>
           <h1>标准申请资料</h1>
-          <p>资料保存在当前浏览器，本页同时给扩展配置 Job Radar 的安全桥接信息。扩展只在你主动点击时填表；若当前岗位已经有最终定制 CV，会尝试把对应 PDF 上传到 Resume/CV 字段。</p>
+          <p>身份、地址、链接和资格问题作为跨岗位稳定资料保存在当前浏览器。对于已经定稿的申请，扩展会根据 APP-ID 从私有归档读取该岗位最终定制 CV 的结构化 Education / Experience / Projects / Skills，并优先使用那一份，而不是固定套用这里的经历。</p>
         </div>
         <Link href="/">返回 Job Radar</Link>
       </header>
