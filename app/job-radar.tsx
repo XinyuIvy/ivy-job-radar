@@ -1293,38 +1293,54 @@ export default function JobRadar() {
 
   const saveApplication = async (event: FormEvent) => {
     event.preventDefault();
-    if (!form) return;
+    if (!form || saving) return;
+    const submittedForm = form;
     setSaving(true);
     setMessage("");
-    const response = await fetch("/api/applications", {
-      method: form.id ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    setSaving(false);
-    if (!response.ok) {
-      setMessage("保存失败，请稍后重试。");
-      return;
-    }
-    const savedApplication = await response.json() as Application;
-    const taskDueDate = savedApplication.plannedApplicationDate || savedApplication.deadline;
-    if (savedApplication.id && taskDueDate && !tasks.some((task) => task.applicationId === savedApplication.id && task.title === "准备并提交申请")) {
-      await fetch("/api/workflow", {
-        method: "POST",
+    try {
+      const response = await fetch("/api/applications", {
+        method: submittedForm.id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind: "task", applicationId: savedApplication.id, title: "准备并提交申请", dueDate: taskDueDate, reminderDate: taskDueDate, status: "pending", source: "automatic" }),
+        body: JSON.stringify(submittedForm),
       });
-      await loadWorkflow();
-    }
-    await loadApplications();
-    setForm(null);
-    if (form.status === "准备材料") {
-      setView("saved");
-      setSavedBucket("pending");
-    } else if (form.status === "撤回" || form.status === "拒绝") {
-      setView("today");
-    } else {
-      setView("applications");
+      if (!response.ok) {
+        setMessage("保存失败，请稍后重试。");
+        return;
+      }
+
+      const savedApplication = await response.json() as Application;
+      setApplicationsList((current) => {
+        const index = current.findIndex((item) => item.id === savedApplication.id);
+        if (index < 0) return [savedApplication, ...current];
+        return current.map((item, itemIndex) => itemIndex === index ? savedApplication : item);
+      });
+
+      // The application record is already durable at this point. Close the editor immediately;
+      // automatic task creation and a server reconciliation must not block the user's save UI.
+      setForm(null);
+      if (savedApplication.status === "准备材料") {
+        setView("saved");
+        setSavedBucket("pending");
+      } else if (savedApplication.status === "撤回" || savedApplication.status === "拒绝") {
+        setView("today");
+      } else {
+        setView("applications");
+      }
+
+      void (async () => {
+        const taskDueDate = savedApplication.plannedApplicationDate || savedApplication.deadline;
+        if (savedApplication.id && taskDueDate && !tasks.some((task) => task.applicationId === savedApplication.id && task.title === "准备并提交申请")) {
+          const taskResponse = await fetch("/api/workflow", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ kind: "task", applicationId: savedApplication.id, title: "准备并提交申请", dueDate: taskDueDate, reminderDate: taskDueDate, status: "pending", source: "automatic" }),
+          });
+          if (taskResponse.ok) await loadWorkflow();
+        }
+        await loadApplications();
+      })();
+    } finally {
+      setSaving(false);
     }
   };
 

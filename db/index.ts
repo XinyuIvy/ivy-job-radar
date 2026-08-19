@@ -1,6 +1,8 @@
 import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
+let schemaInitialization: Promise<void> | null = null;
+
 export async function getDb() {
   // Load the runtime binding only when an API request reaches the database.
   const { env } = await import("cloudflare:workers");
@@ -10,6 +12,8 @@ export async function getDb() {
     );
   }
 
+  if (!schemaInitialization) {
+    schemaInitialization = (async () => {
   // Runtime initialization keeps local previews and fresh deployments usable.
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS applications (
@@ -344,6 +348,13 @@ export async function getDb() {
       WHERE application_status_events.application_id = applications.id
     )
   `).run();
+
+    })().catch((error) => {
+      schemaInitialization = null;
+      throw error;
+    });
+  }
+  await schemaInitialization;
 
   return drizzle(env.DB, { schema });
 }
