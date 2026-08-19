@@ -118,6 +118,14 @@ function tag(label: string, value: number) {
   return span;
 }
 
+function labeledLine(label: string, values: string[]) {
+  const line = document.createElement("p");
+  const bold = document.createElement("b");
+  bold.textContent = label;
+  line.append(bold, document.createTextNode(values.join(" · ")));
+  return line;
+}
+
 function renderScore(panel: HTMLElement, applicationId: number, score: ApplicationFactFitScore, refresh: () => void) {
   panel.replaceChildren();
   panel.dataset.factFitState = "ready";
@@ -166,16 +174,9 @@ function renderScore(panel: HTMLElement, applicationId: number, score: Applicati
   );
   details.append(summary, counts);
 
-  if (score.topMatches.length) {
-    const positive = document.createElement("p");
-    positive.innerHTML = `<b>最强命中：</b>${score.topMatches.join(" · ")}`;
-    details.append(positive);
-  }
-  if (score.gaps.length) {
-    const gaps = document.createElement("p");
-    gaps.innerHTML = `<b>主要缺口：</b>${score.gaps.join(" · ")}`;
-    details.append(gaps);
-  }
+  if (score.topMatches.length) details.append(labeledLine("最强命中：", score.topMatches));
+  if (score.gaps.length) details.append(labeledLine("主要缺口：", score.gaps));
+
   const note = document.createElement("p");
   note.className = "fact-fit-note";
   note.textContent = "基于完整 JD 与 CV 私有事实库 / capability ontology 的初步匹配；Direct、Transferable、Adjacent 边界沿用定制 CV 分析规则。";
@@ -203,7 +204,12 @@ function renderError(panel: HTMLElement, message: string, retry: () => void) {
   const head = document.createElement("div");
   head.className = "fact-fit-head";
   const title = document.createElement("div");
-  title.innerHTML = '<span class="fact-fit-eyebrow">FACT MASTER MATCH</span><strong>评分暂时失败</strong>';
+  const eyebrow = document.createElement("span");
+  eyebrow.className = "fact-fit-eyebrow";
+  eyebrow.textContent = "FACT MASTER MATCH";
+  const strong = document.createElement("strong");
+  strong.textContent = "评分暂时失败";
+  title.append(eyebrow, strong);
   const button = document.createElement("button");
   button.type = "button";
   button.textContent = "重试";
