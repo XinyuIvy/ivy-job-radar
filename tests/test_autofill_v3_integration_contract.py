@@ -11,7 +11,7 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
         manifest = (ROOT / "browser-extension" / "manifest.json").read_text(encoding="utf-8")
 
-        self.assertIn('"version":"0.3.0"', manifest)
+        self.assertIn('"version":"0.3.1"', manifest)
         self.assertIn('/api/autofill/application-packet', popup)
         self.assertIn('applicationPacket', popup)
         self.assertIn('message.applicationPacket || null', content)
