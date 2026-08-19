@@ -15,7 +15,7 @@ const CORS_HEADERS = {
   "Cache-Control": "no-store",
 };
 
-const AUTOFILL_APPLICATION_STATUS = "已提交";
+const AUTOFILL_APPLICATION_STATUS = "已申请";
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: CORS_HEADERS });
