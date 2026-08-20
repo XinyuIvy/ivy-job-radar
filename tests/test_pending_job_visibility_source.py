@@ -6,12 +6,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PendingJobVisibilitySourceTests(unittest.TestCase):
-    def test_pending_applications_are_hidden_from_today_by_logical_identity(self):
+    def test_pending_applications_are_hidden_from_today_by_stored_url_then_logical_identity(self):
         component = (ROOT / "app" / "pending-job-visibility.tsx").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
 
         self.assertIn('row.status === "准备材料"', component)
-        self.assertIn('sameLogicalJob(row, identity)', component)
+        self.assertIn('normalizedStoredJobUrl(application.jobUrl)', component)
+        self.assertIn('normalizedStoredJobUrl(identity.jobUrl)', component)
+        self.assertIn('applicationUrl === cardUrl', component)
+        self.assertIn('sameLogicalJob(application, identity)', component)
+        self.assertIn('samePendingJob(row, identity)', component)
         self.assertIn('a.job-link', component)
         self.assertIn('locationParts.join("·")', component)
         self.assertIn('card.style.setProperty("display", "none", "important")', component)
