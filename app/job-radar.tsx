@@ -559,6 +559,32 @@ function deadlineLabel(deadline: string, type: string) {
   return "JD 未公布";
 }
 
+
+const JOB_PAGE_SIZE = 20;
+const COMPANY_PAGE_SIZE = 20;
+const APPLICATION_PAGE_SIZE = 15;
+
+function PaginationControls({
+  page,
+  pageCount,
+  onPageChange,
+  label,
+}: {
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+  label: string;
+}) {
+  if (pageCount <= 1) return null;
+  return (
+    <nav className="pagination" aria-label={`${label}分页`}>
+      <button type="button" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>上一页</button>
+      <span>第 <strong>{page}</strong> / {pageCount} 页</span>
+      <button type="button" disabled={page >= pageCount} onClick={() => onPageChange(page + 1)}>下一页</button>
+    </nav>
+  );
+}
+
 export default function JobRadar() {
   const [view, setView] = useState<View>("today");
   const [track, setTrack] = useState("全部");
@@ -605,7 +631,10 @@ export default function JobRadar() {
   const [resumeInputKey, setResumeInputKey] = useState(0);
   const [analytics, setAnalytics] = useState<ApplicationAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [visibleJobCount, setVisibleJobCount] = useState(20);
+  const [jobPage, setJobPage] = useState(1);
+  const [companyPage, setCompanyPage] = useState(1);
+  const [applicationPage, setApplicationPage] = useState(1);
+  const [pendingPage, setPendingPage] = useState(1);
   const [quality, setQuality] = useState<DataQuality | null>(null);
   const [qualityLoading, setQualityLoading] = useState(false);
   const [qualityAutomationRunning, setQualityAutomationRunning] = useState(false);
@@ -710,6 +739,22 @@ export default function JobRadar() {
   };
 
   useEffect(() => {
+    if (view !== "applications") return;
+    let active = true;
+    Promise.all([
+      fetch("/api/workflow", { cache: "no-store" }).then((response) => response.ok ? response.json() : { tasks: [], interviews: [] }),
+      fetch("/api/contacts", { cache: "no-store" }).then((response) => response.ok ? response.json() : []),
+    ]).then(([workflow, contactRows]) => {
+      if (!active) return;
+      setTasks(workflow.tasks ?? []);
+      setInterviews(workflow.interviews ?? []);
+      setContacts(contactRows);
+    });
+    return () => { active = false; };
+  }, [view]);
+
+  useEffect(() => {
+    if (view !== "companies") return;
     let active = true;
     Promise.all([
       fetch("/api/workflow", { cache: "no-store" }).then((response) => response.ok ? response.json() : { tasks: [], interviews: [] }),
@@ -725,7 +770,7 @@ export default function JobRadar() {
       setExperiences(prep.experiences ?? []);
     });
     return () => { active = false; };
-  }, []);
+  }, [view]);
 
   useEffect(() => {
     const today = new Date().toISOString().slice(0, 10);
@@ -770,24 +815,22 @@ export default function JobRadar() {
   }, [tasks, interviews, applicationsList]);
 
   useEffect(() => {
-    const initialTimer = window.setTimeout(() => {
+    if (view !== "today") return;
+    const refreshStatus = () => {
       void loadScanStatus();
       void loadChinaScanStatus();
       void loadChinaScanControl();
       setClock(Date.now());
-    }, 0);
-    const statusTimer = window.setInterval(() => {
-      void loadScanStatus();
-      void loadChinaScanStatus();
-      void loadChinaScanControl();
-    }, 15000);
-    const clockTimer = window.setInterval(() => setClock(Date.now()), 1000);
+    };
+    const initialTimer = window.setTimeout(refreshStatus, 0);
+    const statusTimer = window.setInterval(refreshStatus, 10000);
+    const clockTimer = window.setInterval(() => setClock(Date.now()), 5000);
     return () => {
       window.clearTimeout(initialTimer);
       window.clearInterval(statusTimer);
       window.clearInterval(clockTimer);
     };
-  }, []);
+  }, [view]);
 
   const enableBrowserNotifications = async () => {
     if (!("Notification" in window)) return;
@@ -816,6 +859,7 @@ export default function JobRadar() {
   };
 
   useEffect(() => {
+    if (!["saved", "applications", "companies"].includes(view)) return;
     let active = true;
     fetch("/api/applications", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
@@ -825,7 +869,7 @@ export default function JobRadar() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [view]);
 
   useEffect(() => {
     if (view !== "applications") return;
@@ -834,6 +878,7 @@ export default function JobRadar() {
   }, [view, applicationsList]);
 
   useEffect(() => {
+    if (view !== "verify") return;
     let active = true;
     let nextBatchTimer: number | undefined;
     const runAutomation = async () => {
@@ -859,7 +904,7 @@ export default function JobRadar() {
       window.clearTimeout(initialTimer);
       if (nextBatchTimer) window.clearTimeout(nextBatchTimer);
     };
-  }, []);
+  }, [view]);
 
   useEffect(() => {
     if (view !== "verify") return;
@@ -1108,6 +1153,7 @@ export default function JobRadar() {
   };
 
   useEffect(() => {
+    if (view !== "verify") return;
     let active = true;
     fetch("/api/job-requests", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
@@ -1117,7 +1163,7 @@ export default function JobRadar() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [view]);
 
   const jobs = useMemo(
     () => {
@@ -1155,11 +1201,13 @@ export default function JobRadar() {
   );
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setVisibleJobCount(20), 0);
+    const timer = window.setTimeout(() => setJobPage(1), 0);
     return () => window.clearTimeout(timer);
   }, [track, region, jobSort, view, savedBucket, jobQuery]);
 
-  const visibleJobs = jobs.slice(0, visibleJobCount);
+  const jobPageCount = Math.max(1, Math.ceil(jobs.length / JOB_PAGE_SIZE));
+  const safeJobPage = Math.min(jobPage, jobPageCount);
+  const visibleJobs = jobs.slice((safeJobPage - 1) * JOB_PAGE_SIZE, safeJobPage * JOB_PAGE_SIZE);
   const manualRequestKeys = new Set(requests.map((item) => `${item.company.trim().toLowerCase()}::${item.title.trim().toLowerCase()}`));
   const qualityQueueIssues = (quality?.issues ?? [])
     .filter((issue) => issue.automationStatus !== "resolved")
@@ -1211,6 +1259,14 @@ export default function JobRadar() {
     });
   }, [companyRecords, companyQuery, companyPriority, companyRegion, companyCollection]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setCompanyPage(1), 0);
+    return () => window.clearTimeout(timer);
+  }, [companyQuery, companyPriority, companyRegion, companyCollection]);
+  const companyPageCount = Math.max(1, Math.ceil(companies.length / COMPANY_PAGE_SIZE));
+  const safeCompanyPage = Math.min(companyPage, companyPageCount);
+  const visibleCompanies = companies.slice((safeCompanyPage - 1) * COMPANY_PAGE_SIZE, safeCompanyPage * COMPANY_PAGE_SIZE);
+
   const pendingApplications = applicationsList.filter((item) => item.status === "准备材料");
   const submittedApplications = applicationsList.filter((item) => item.status === "已申请");
   const interviewingApplications = applicationsList.filter((item) => interviewStatuses.includes(item.status));
@@ -1226,6 +1282,20 @@ export default function JobRadar() {
       : applicationBucket === "offer"
         ? offerApplications
         : rejectedApplications;
+  useEffect(() => {
+    const timer = window.setTimeout(() => setApplicationPage(1), 0);
+    return () => window.clearTimeout(timer);
+  }, [applicationBucket]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPendingPage(1), 0);
+    return () => window.clearTimeout(timer);
+  }, [savedBucket]);
+  const applicationPageCount = Math.max(1, Math.ceil(visibleApplications.length / APPLICATION_PAGE_SIZE));
+  const safeApplicationPage = Math.min(applicationPage, applicationPageCount);
+  const pagedApplications = visibleApplications.slice((safeApplicationPage - 1) * APPLICATION_PAGE_SIZE, safeApplicationPage * APPLICATION_PAGE_SIZE);
+  const pendingPageCount = Math.max(1, Math.ceil(pendingApplications.length / APPLICATION_PAGE_SIZE));
+  const safePendingPage = Math.min(pendingPage, pendingPageCount);
+  const pagedPendingApplications = pendingApplications.slice((safePendingPage - 1) * APPLICATION_PAGE_SIZE, safePendingPage * APPLICATION_PAGE_SIZE);
   const expirationForApplication = (application: Application) => dailyJobs.find((job) =>
     ["已过期", "疑似过期"].includes(job.status)
       && ((application.applicationId && job.applicationId === application.applicationId)
@@ -1297,6 +1367,7 @@ export default function JobRadar() {
     const submittedForm = form;
     setSaving(true);
     setMessage("");
+    setForm(null);
     try {
       const response = await fetch("/api/applications", {
         method: submittedForm.id ? "PUT" : "POST",
@@ -1304,6 +1375,7 @@ export default function JobRadar() {
         body: JSON.stringify(submittedForm),
       });
       if (!response.ok) {
+        setForm(submittedForm);
         setMessage("保存失败，请稍后重试。");
         return;
       }
@@ -1315,9 +1387,8 @@ export default function JobRadar() {
         return current.map((item, itemIndex) => itemIndex === index ? savedApplication : item);
       });
 
-      // The application record is already durable at this point. Close the editor immediately;
-      // automatic task creation and a server reconciliation must not block the user's save UI.
-      setForm(null);
+      // The editor already closed optimistically. Automatic task creation and server
+      // reconciliation stay in the background and never block the perceived save action.
       if (savedApplication.status === "准备材料") {
         setView("saved");
         setSavedBucket("pending");
@@ -1346,8 +1417,11 @@ export default function JobRadar() {
 
   const deleteApplication = async (id?: number) => {
     if (!id || !window.confirm("确定删除这条申请记录吗？")) return;
-    await fetch(`/api/applications?id=${id}`, { method: "DELETE" });
-    await loadApplications();
+    const snapshot = applicationsList;
+    setApplicationsList((current) => current.filter((item) => item.id !== id));
+    const response = await fetch(`/api/applications?id=${id}`, { method: "DELETE" });
+    if (!response.ok) setApplicationsList(snapshot);
+    else if (view === "applications") void loadAnalytics();
   };
 
   const updateForm = (patch: Partial<Application>) => {
@@ -1377,8 +1451,10 @@ export default function JobRadar() {
   };
 
   const toggleTask = async (task: ApplicationTask) => {
-    await fetch("/api/workflow", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "task", ...task, status: task.status === "done" ? "pending" : "done" }) });
-    await loadWorkflow();
+    const nextStatus = task.status === "done" ? "pending" : "done";
+    setTasks((current) => current.map((item) => item.id === task.id ? { ...item, status: nextStatus } : item));
+    const response = await fetch("/api/workflow", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "task", ...task, status: nextStatus }) });
+    if (!response.ok) await loadWorkflow();
   };
 
   const openInterview = (application: Application, interview?: Interview) => {
@@ -1918,9 +1994,10 @@ export default function JobRadar() {
           </section>
           {view === "saved" && savedBucket === "pending" ? (
             <section className="application-list" aria-live="polite">
+              <PaginationControls page={safePendingPage} pageCount={pendingPageCount} onPageChange={setPendingPage} label="待提交申请" />
               {pendingApplications.length === 0 ? (
                 <div className="empty-state"><span>▤</span><h3>没有待提交申请</h3><p>加入申请追踪但尚未提交的记录会显示在这里。</p></div>
-              ) : pendingApplications.map((item) => (
+              ) : pagedPendingApplications.map((item) => (
                 <article className="application-card" key={item.id}>
                   <div className="application-head">
                     <div><span className={`status status-${item.status}`}>{item.status}</span>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
@@ -1988,11 +2065,7 @@ export default function JobRadar() {
                 </div>
               </article>
             ))}
-            {visibleJobCount < jobs.length && (
-              <button className="load-more-button" onClick={() => setVisibleJobCount((current) => current + 20)}>
-                再显示 20 个岗位 <span>已显示 {visibleJobs.length} / {jobs.length}</span>
-              </button>
-            )}
+            <PaginationControls page={safeJobPage} pageCount={jobPageCount} onPageChange={setJobPage} label="岗位" />
           </section>}
         </>
       )}
@@ -2038,7 +2111,8 @@ export default function JobRadar() {
             <div className="empty-state"><span>▤</span><h3>{applicationBucket === "rejected" ? "没有拒绝记录" : "还没有申请记录"}</h3><p>{applicationBucket === "rejected" ? "被拒绝的岗位会保留在这个隐藏列表中。" : "发现具体 JD 后新增一条，之后直接在这里更新状态。"}</p></div>
           ) : (
             <div className="application-list">
-              {visibleApplications.map((item) => (
+              <PaginationControls page={safeApplicationPage} pageCount={applicationPageCount} onPageChange={setApplicationPage} label="申请" />
+              {pagedApplications.map((item) => (
                 <article className="application-card" key={item.id}>
                   <div className="application-head">
                     <div><span className={`status status-${item.status}`}>{item.status}</span>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
@@ -2089,9 +2163,10 @@ export default function JobRadar() {
               <option value="manual">需人工核实</option>
             </select>
           </div>
-          <p className="result-count">显示 {companies.length} / {companyRecords.length} 条目标公司记录</p>
+          <p className="result-count">匹配 {companies.length} / {companyRecords.length} 条目标公司记录</p>
+          <PaginationControls page={safeCompanyPage} pageCount={companyPageCount} onPageChange={setCompanyPage} label="公司" />
           <div className="company-list">
-            {companies.map((company) => {
+            {visibleCompanies.map((company) => {
               const companyJobs = dailyJobs.filter((job) => !["已过期", "疑似过期"].includes(job.status) && job.company.toLowerCase() === company.company.toLowerCase());
               const companyApplications = applicationsList.filter((item) => item.company.toLowerCase() === company.company.toLowerCase());
               const companyApplicationIds = new Set(companyApplications.map((item) => item.id).filter(Boolean));

@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
   }
 
   const db = await getDb();
-  const rows = await db.select().from(applications);
   const jobUrl = String(payload.jobUrl ?? "").trim();
   const incoming = {
     company: String(payload.company),
@@ -99,6 +98,17 @@ export async function POST(request: NextRequest) {
     jobUrl,
     applicationId: String(payload.applicationId ?? ""),
   };
+  const candidateCondition = incoming.applicationId
+    ? or(
+      eq(applications.jobUrl, jobUrl),
+      eq(applications.applicationId, incoming.applicationId),
+      and(eq(applications.company, incoming.company), eq(applications.title, incoming.title)),
+    )
+    : or(
+      eq(applications.jobUrl, jobUrl),
+      and(eq(applications.company, incoming.company), eq(applications.title, incoming.title)),
+    );
+  const rows = await db.select().from(applications).where(candidateCondition);
   const duplicate = rows.find((row) => sameLogicalJob(row, incoming));
   if (duplicate) {
     return NextResponse.json(duplicate, { status: 200 });
