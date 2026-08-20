@@ -44,6 +44,8 @@ function pendingTabIsActive() {
 }
 
 function applicationIdFromCard(card: HTMLElement) {
+  const directId = Number(card.dataset.applicationRowId || 0);
+  if (Number.isInteger(directId) && directId > 0) return directId;
   const link = card.querySelector<HTMLAnchorElement>('a[data-cv-tailor-action="true"], a[href^="/cv-tailor?applicationId="]');
   if (!link) return null;
   try {
@@ -247,6 +249,8 @@ export default function PendingApplicationFitScores() {
     let active = 0;
     const queue: Array<() => Promise<void>> = [];
     const running = new Set<number>();
+    let enhanceTimer = 0;
+    let visibilityObserver: IntersectionObserver | null = null;
 
     const pump = () => {
       if (disposed) return;
@@ -329,21 +333,40 @@ export default function PendingApplicationFitScores() {
           if (note) card.insertBefore(panel, note);
           else card.append(panel);
         }
-        enqueue(applicationId, panel);
+        if (panel.dataset.factFitObserved !== "true") {
+          panel.dataset.factFitObserved = "true";
+          panel.dataset.factFitApplicationId = String(applicationId);
+          visibilityObserver?.observe(panel);
+        }
       }
     };
 
-    enhance();
-    const observer = new MutationObserver(enhance);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "href"] });
-    const focus = () => enhance();
-    window.addEventListener("focus", focus);
+    const scheduleEnhance = () => {
+      window.clearTimeout(enhanceTimer);
+      enhanceTimer = window.setTimeout(enhance, 80);
+    };
+    visibilityObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const panel = entry.target as HTMLElement;
+        const applicationId = Number(panel.dataset.factFitApplicationId || 0);
+        if (Number.isInteger(applicationId) && applicationId > 0) enqueue(applicationId, panel);
+        visibilityObserver?.unobserve(panel);
+      }
+    }, { rootMargin: "300px 0px" });
+
+    scheduleEnhance();
+    const observer = new MutationObserver(scheduleEnhance);
+    observer.observe(document.body, { childList: true, subtree: true });
+    window.addEventListener("focus", scheduleEnhance);
 
     return () => {
       disposed = true;
       queue.length = 0;
       observer.disconnect();
-      window.removeEventListener("focus", focus);
+      visibilityObserver?.disconnect();
+      window.removeEventListener("focus", scheduleEnhance);
+      window.clearTimeout(enhanceTimer);
     };
   }, []);
 

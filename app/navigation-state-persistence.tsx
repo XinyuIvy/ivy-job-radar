@@ -51,16 +51,13 @@ function isSearchInput(input: HTMLInputElement) {
 
 function restoreControls() {
   const state = readState();
-
   document.querySelectorAll<HTMLSelectElement>("main select").forEach((select) => {
     const saved = state.selects[selectKey(select)];
     if (!saved || select.value === saved || !Array.from(select.options).some((option) => option.value === saved)) return;
     select.value = saved;
     select.dispatchEvent(new Event("change", { bubbles: true }));
   });
-
-  document.querySelectorAll<HTMLInputElement>('main input[type="search"], main input[type="text"]').forEach((input) => {
-    if (!isSearchInput(input)) return;
+  document.querySelectorAll<HTMLInputElement>('main input[type="search"]').forEach((input) => {
     const saved = state.inputs[inputKey(input)];
     if (saved === undefined || input.value === saved) return;
     const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
@@ -68,17 +65,11 @@ function restoreControls() {
     input.dispatchEvent(new Event("input", { bubbles: true }));
     input.dispatchEvent(new Event("change", { bubbles: true }));
   });
-
   if (state.selectedNav) {
     const button = Array.from(document.querySelectorAll<HTMLButtonElement>(".bottom-nav button"))
       .find((item) => normalizedText(item.textContent || "") === state.selectedNav);
     if (button && !button.classList.contains("selected")) button.click();
   }
-
-  document.querySelectorAll<HTMLAnchorElement>('a[href^="http://"], a[href^="https://"]').forEach((anchor) => {
-    anchor.target = "_blank";
-    anchor.rel = "noreferrer noopener";
-  });
 }
 
 export default function NavigationStatePersistence() {
@@ -87,7 +78,7 @@ export default function NavigationStatePersistence() {
     let scrollTimer = 0;
     let restoredScroll = false;
 
-    const scheduleRestore = () => {
+    const scheduleRestore = (delay = 60) => {
       window.clearTimeout(restoreTimer);
       restoreTimer = window.setTimeout(() => {
         restoreControls();
@@ -96,7 +87,7 @@ export default function NavigationStatePersistence() {
           if (scrollY > 0) window.requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
           restoredScroll = true;
         }
-      }, 80);
+      }, delay);
     };
 
     const handleChange = (event: Event) => {
@@ -113,32 +104,31 @@ export default function NavigationStatePersistence() {
 
     const handleClick = (event: MouseEvent) => {
       const button = (event.target as Element | null)?.closest<HTMLButtonElement>(".bottom-nav button");
-      if (button) writeState({ selectedNav: normalizedText(button.textContent || "") });
+      if (!button) return;
+      writeState({ selectedNav: normalizedText(button.textContent || "") });
+      // New view controls mount after the click; one delayed restore replaces the old
+      // whole-document MutationObserver.
+      scheduleRestore(80);
     };
 
     const handleScroll = () => {
       window.clearTimeout(scrollTimer);
-      scrollTimer = window.setTimeout(() => writeState({ scrollY: window.scrollY }), 120);
+      scrollTimer = window.setTimeout(() => writeState({ scrollY: window.scrollY }), 160);
     };
 
-    const observer = new MutationObserver(scheduleRestore);
-    observer.observe(document.body, { childList: true, subtree: true });
     document.addEventListener("change", handleChange, true);
     document.addEventListener("input", handleChange, true);
     document.addEventListener("click", handleClick, true);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("pageshow", scheduleRestore);
-    window.addEventListener("popstate", scheduleRestore);
-    scheduleRestore();
+    window.addEventListener("pageshow", () => scheduleRestore(20));
+    window.addEventListener("popstate", () => scheduleRestore(20));
+    scheduleRestore(20);
 
     return () => {
-      observer.disconnect();
       document.removeEventListener("change", handleChange, true);
       document.removeEventListener("input", handleChange, true);
       document.removeEventListener("click", handleClick, true);
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("pageshow", scheduleRestore);
-      window.removeEventListener("popstate", scheduleRestore);
       window.clearTimeout(restoreTimer);
       window.clearTimeout(scrollTimer);
     };

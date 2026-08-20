@@ -29,6 +29,7 @@ type Job = {
   expirationReason?: string;
   discoveredAt: string;
   checkedAt: string;
+  saved?: boolean;
 };
 
 type Application = {
@@ -980,18 +981,6 @@ export default function JobRadar() {
     setSaved(rows.map((row) => row.jobId));
   };
 
-  useEffect(() => {
-    let active = true;
-    fetch("/api/saved-jobs", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : []))
-      .then((rows: Array<{ jobId: number }>) => {
-        if (active) setSaved(rows.map((row) => row.jobId));
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
   const loadIgnoredJobs = async () => {
     const response = await fetch("/api/ignored-jobs", { cache: "no-store" });
     if (response.ok) setIgnoredJobs(await response.json());
@@ -1184,6 +1173,7 @@ export default function JobRadar() {
     const cachedRows = readJobSessionCache();
     if (cachedRows.length) {
       setDailyJobs(cachedRows);
+      setSaved(cachedRows.filter((job) => job.saved).map((job) => job.id));
       setJobsLoading(false);
     }
     fetch("/api/jobs", { cache: "no-store" })
@@ -1191,6 +1181,7 @@ export default function JobRadar() {
       .then((rows) => {
         if (active && Array.isArray(rows)) {
           setDailyJobs(rows);
+          setSaved(rows.filter((job: Job) => job.saved).map((job: Job) => job.id));
           writeJobSessionCache(rows);
           setJobsLoading(false);
         }
@@ -1502,7 +1493,6 @@ export default function JobRadar() {
           });
           if (taskResponse.ok) await loadWorkflow();
         }
-        await loadApplications();
       })();
     } finally {
       setSaving(false);
@@ -1912,6 +1902,12 @@ export default function JobRadar() {
       )}
 
       {view === "today" && (
+        <section className="quick-start" aria-label="使用流程">
+          <span><b>1</b> 找岗位</span><i>→</i><span><b>2</b> ☆ 保存到候选</span><i>→</i><span><b>3</b> 定制 CV 后投递</span>
+        </section>
+      )}
+
+      {view === "today" && (
         <section className="quick-update-bar">
           <div><strong>岗位会自动更新</strong><span>{dailyJobs[0]?.checkedAt ? `最近核验 ${new Date(dailyJobs[0].checkedAt).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}` : "打开后会自动读取最新岗位"}</span></div>
           <button type="button" onClick={() => setScanPanelOpen((current) => !current)}>{scanPanelOpen ? "收起更新设置" : "更新岗位"}</button>
@@ -2099,7 +2095,7 @@ export default function JobRadar() {
               ) : pagedSavedItems.map((entry) => entry.kind === "application" ? (() => {
                 const item = entry.application;
                 return (
-                  <article className="application-card" key={`application-${item.id}`}>
+                  <article className="application-card" data-application-row-id={item.id} key={`application-${item.id}`}>
                     <div className="application-head">
                       <div>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
                       <span className="priority">{item.priority}</span>

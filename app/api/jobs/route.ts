@@ -870,8 +870,12 @@ export async function GET() {
     const existingKey = uniqueRows.has(primaryKey) ? primaryKey : (fallbackKey ? fallbackKeys.get(fallbackKey) : undefined);
     if (existingKey) {
       const current = uniqueRows.get(existingKey);
-      if (current && sameDisplayedJob(current, row) && rank(row) > rank(current)) uniqueRows.set(existingKey, row);
-      continue;
+      if (current && sameDisplayedJob(current, row)) {
+        if (rank(row) > rank(current)) uniqueRows.set(existingKey, row);
+        continue;
+      }
+      // Same visible title/location can still represent different requisitions when both
+      // postings expose distinct stable IDs. Keep both instead of collapsing them.
     }
     uniqueRows.set(primaryKey, row);
     if (fallbackKey) fallbackKeys.set(fallbackKey, primaryKey);
@@ -880,6 +884,7 @@ export async function GET() {
   const responseRows = [...uniqueRows.values()].map((row) => ({
     ...row,
     skills: JSON.parse(row.skills || "[]"),
+    saved: savedIds.has(row.id),
   }));
   visibleJobsCache = { expiresAt: nowMs + VISIBLE_JOBS_CACHE_MS, rows: responseRows };
   return NextResponse.json(responseRows);
