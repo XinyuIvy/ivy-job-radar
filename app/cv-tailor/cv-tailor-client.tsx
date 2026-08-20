@@ -27,6 +27,14 @@ type ArchiveResult = {
 
 type Stage = "loading" | "review" | "analyzing" | "archiving" | "ready" | "error";
 
+type TemplateChoice = {
+  key: string;
+  label: string;
+  filename: string;
+  track: string;
+  language: TemplateLanguage;
+};
+
 const trackLabels: Record<string, string> = {
   pharma: "Pharma / Biostatistics",
   tech: "Tech / Data Science / Applied ML",
@@ -35,11 +43,27 @@ const trackLabels: Record<string, string> = {
   clinical_neuro: "脑科学 / 临床数据 / 医疗器械",
 };
 
+const templateChoices: TemplateChoice[] = [
+  { key: "zh:tech", label: "中文 · Tech / Data Science / Applied ML", filename: "cv_tech_cn.tex", track: "tech", language: "zh" },
+  { key: "zh:quant", label: "中文 · Quantitative Research", filename: "cv_quant_cn.tex", track: "quant", language: "zh" },
+  { key: "zh:pharma", label: "中文 · Pharma / Biostatistics", filename: "cv_pharma_cn.tex", track: "pharma", language: "zh" },
+  { key: "zh:consulting", label: "中文 · Healthcare / Life Sciences Consulting", filename: "cv_healthcare_consulting_cn.tex", track: "consulting", language: "zh" },
+  { key: "zh:clinical_neuro", label: "中文 · 脑科学 / 临床数据 / 医疗器械", filename: "cv_clinical_data_neuro_cn.tex", track: "clinical_neuro", language: "zh" },
+  { key: "en:tech", label: "English · Tech / Data Science / Applied ML", filename: "cv_tech.tex", track: "tech", language: "en" },
+  { key: "en:quant", label: "English · Quantitative Research", filename: "cv_quant.tex", track: "quant", language: "en" },
+  { key: "en:pharma", label: "English · Pharma / Biostatistics", filename: "cv_pharma.tex", track: "pharma", language: "en" },
+  { key: "en:consulting", label: "English · Healthcare Consulting", filename: "cv_healthcare_consulting.tex", track: "consulting", language: "en" },
+];
+
 const stageText: Record<"loading" | "analyzing" | "archiving", string> = {
   loading: "正在读取完整 JD 与申请信息…",
   analyzing: "正在生成 Job Radar 初步匹配…",
-  archiving: "正在冻结事实母版、行业 CV 母版和申请输入…",
+  archiving: "正在冻结事实母版、你选择的 CV 母版和申请输入…",
 };
+
+function choiceLabel(key: string) {
+  return templateChoices.find((choice) => choice.key === key)?.label || "";
+}
 
 export default function CvTailorClient() {
   const [application, setApplication] = useState<ApplicationPrefill | null>(null);
@@ -51,6 +75,8 @@ export default function CvTailorClient() {
   const [confirmedJd, setConfirmedJd] = useState("");
   const [jdWasAutoRead, setJdWasAutoRead] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [selectedTemplateKey, setSelectedTemplateKey] = useState("");
+  const [recommendedTemplateKey, setRecommendedTemplateKey] = useState("");
 
   const createArchive = useCallback(async (value: ApplicationPrefill, jdInput?: string) => {
     const jd = String(jdInput ?? value.jd).trim();
@@ -117,13 +143,16 @@ export default function CvTailorClient() {
       })
       .then((result) => {
         const jd = result.jd || "";
+        const recommendation = `${result.language}:${result.track}`;
         setApplication(result);
+        setRecommendedTemplateKey(templateChoices.some((choice) => choice.key === recommendation) ? recommendation : "");
+        setSelectedTemplateKey("");
         setJdDraft(jd);
         setJdWasAutoRead(Boolean(jd.trim()));
         setErrorCode("");
         setMessage(jd.trim()
-          ? "系统已读取到 JD。请先核对，必要时直接编辑；只有你确认后才会生成匹配和 Prompt。"
-          : "系统没有读取到完整 JD。请在下方手动粘贴职位描述和职位要求。");
+          ? "系统已读取到 JD。请先明确选择 CV 母版，再核对 JD；只有你确认后才会生成匹配和 Prompt。"
+          : "请先明确选择 CV 母版，并在下方手动粘贴完整职位描述和职位要求。");
         setStage("review");
       })
       .catch((error) => {
@@ -143,8 +172,21 @@ export default function CvTailorClient() {
     }
   };
 
+  const selectTemplate = (key: string) => {
+    setSelectedTemplateKey(key);
+    const choice = templateChoices.find((item) => item.key === key);
+    if (!choice || !application) return;
+    setApplication({ ...application, track: choice.track, language: choice.language });
+    setErrorCode("");
+  };
+
   const confirmJdAndCreate = () => {
     if (!application) return;
+    if (!selectedTemplateKey) {
+      setErrorCode("CV_TEMPLATE_REQUIRED");
+      setMessage("请先选择本次定制要使用的 CV 母版。");
+      return;
+    }
     const jd = jdDraft.trim();
     if (!jd) {
       setErrorCode("JD_REQUIRED");
@@ -160,6 +202,12 @@ export default function CvTailorClient() {
 
   const retryArchive = () => {
     if (!application) return;
+    if (!selectedTemplateKey) {
+      setStage("review");
+      setErrorCode("CV_TEMPLATE_REQUIRED");
+      setMessage("请先选择本次定制要使用的 CV 母版。");
+      return;
+    }
     const jd = (confirmedJd || jdDraft || application.jd).trim();
     if (!jd) {
       setStage("review");
@@ -175,7 +223,7 @@ export default function CvTailorClient() {
         <div>
           <p className="archive-eyebrow">CV TAILOR · HUMAN-REVIEWED WORKFLOW</p>
           <h1>定制 CV 申请档案</h1>
-          <p>先确认完整 JD，再生成初步匹配和申请档案。分类复核、内容修改、TeX 与 PDF 都在 Chat 中完成。</p>
+          <p>先选择 CV 母版并确认完整 JD，再生成初步匹配和申请档案。分类复核、内容修改、TeX 与 PDF 都在 Chat 中完成。</p>
         </div>
         <Link href="/">返回申请页</Link>
       </header>
@@ -183,20 +231,34 @@ export default function CvTailorClient() {
       {application && <section className="application-summary" aria-label="申请信息">
         <div><span>公司</span><strong>{application.company}</strong></div>
         <div><span>岗位</span><strong>{application.title}</strong></div>
-        <div><span>母版</span><strong>{trackLabels[application.track] || application.track} · {application.language === "zh" ? "中文" : "English"}</strong></div>
+        <div><span>系统建议</span><strong>{recommendedTemplateKey ? choiceLabel(recommendedTemplateKey) : `${trackLabels[application.track] || application.track} · ${application.language === "zh" ? "中文" : "English"}`}</strong></div>
       </section>}
 
       {stage === "review" && application && <section className="jd-review-card" aria-live="polite">
         <div className="jd-review-heading">
           <div>
-            <p className="archive-eyebrow">JD REVIEW · REQUIRED BEFORE ARCHIVE</p>
-            <h2>确认完整 JD</h2>
+            <p className="archive-eyebrow">TEMPLATE + JD REVIEW · REQUIRED BEFORE ARCHIVE</p>
+            <h2>选择母版并确认完整 JD</h2>
           </div>
           <span className={jdWasAutoRead ? "jd-source auto" : "jd-source manual"}>
-            {jdWasAutoRead ? "系统已读取" : "需要手动补充"}
+            {jdWasAutoRead ? "JD 已读取" : "JD 需补充"}
           </span>
         </div>
         <p className="jd-review-copy">{message}</p>
+
+        <div className="template-picker">
+          <label htmlFor="cv-template-choice">CV 母版 <strong>必选</strong></label>
+          <select id="cv-template-choice" value={selectedTemplateKey} onChange={(event) => selectTemplate(event.target.value)}>
+            <option value="">请选择 CV 母版…</option>
+            {templateChoices.map((choice) => <option key={choice.key} value={choice.key}>{choice.label} · {choice.filename}</option>)}
+          </select>
+          <p>
+            Job Radar 只给建议，不会自动替你确认。
+            {recommendedTemplateKey ? <> 当前建议：<strong>{choiceLabel(recommendedTemplateKey)}</strong>。</> : null}
+            你最终选择的母版才会冻结成 <code>cv_base.tex</code>。
+          </p>
+        </div>
+
         <textarea
           id="jd-review"
           value={jdDraft}
@@ -207,10 +269,10 @@ export default function CvTailorClient() {
         <div className="jd-review-footer">
           <div>
             <strong>{jdDraft.trim().length.toLocaleString()} 字符</strong>
-            <span>确认后，这一版 JD 才会用于匹配并冻结进申请档案。</span>
+            <span>{selectedTemplateKey ? `已选择：${choiceLabel(selectedTemplateKey)}` : "尚未选择 CV 母版"}</span>
           </div>
-          <button type="button" onClick={confirmJdAndCreate} disabled={!jdDraft.trim()}>
-            确认此 JD 并生成申请档案
+          <button type="button" onClick={confirmJdAndCreate} disabled={!jdDraft.trim() || !selectedTemplateKey}>
+            确认母版与 JD 并生成申请档案
           </button>
         </div>
       </section>}
@@ -226,7 +288,7 @@ export default function CvTailorClient() {
         <p>{message}</p>
         {errorCode === "ARCHIVE_REPOSITORY_REQUIRED" && <p className="boundary-note">为避免泄露 JD 和定制 CV，系统不会把申请包写入公开的 Job Radar 仓库，也不会改写 CV 母版仓库。</p>}
         {application && <div className="error-actions">
-          <button type="button" onClick={() => setStage("review")}>返回检查 JD</button>
+          <button type="button" onClick={() => setStage("review")}>返回检查母版与 JD</button>
           <button type="button" className="secondary-action" onClick={retryArchive}>重试创建</button>
         </div>}
       </section>}
@@ -235,15 +297,15 @@ export default function CvTailorClient() {
         <section className="confirmed-jd-card">
           <div className="jd-review-heading">
             <div>
-              <p className="archive-eyebrow">CONFIRMED JD</p>
-              <h2>{archive.existing ? "本次确认的 JD" : "已确认并冻结的 JD"}</h2>
+              <p className="archive-eyebrow">CONFIRMED TEMPLATE + JD</p>
+              <h2>{archive.existing ? "本次确认的输入" : "已确认并冻结的输入"}</h2>
             </div>
             <span className="jd-source frozen">{archive.existing ? "已存在申请档案" : "已冻结"}</span>
           </div>
           <p className="jd-review-copy">
             {archive.existing
               ? "系统复用了此前已经冻结的申请档案，没有覆盖旧文件。下面保留你本次进入页面时确认的 JD，便于核对。"
-              : "下面就是本次匹配使用的 JD。Prompt 已生成，申请档案中的 jd_snapshot.md 也使用这一版文本。"}
+              : `本次使用 ${choiceLabel(selectedTemplateKey)}。下面就是本次匹配使用的 JD；申请档案中的 cv_base.tex 与 jd_snapshot.md 均已冻结。`}
           </p>
           <textarea readOnly value={confirmedJd} aria-label="本次确认的完整 JD" />
         </section>
@@ -252,8 +314,9 @@ export default function CvTailorClient() {
           <section className="ready-card">
             <p className="archive-eyebrow">申请档案已创建</p>
             <h2>{archive.applicationId}</h2>
-            <p>{archive.existing ? "已找到此前冻结的同一申请档案，没有重复创建。" : "完整 JD、事实母版、canonical indexes、当前行业 CV 母版和初步匹配已冻结。"}</p>
+            <p>{archive.existing ? "已找到此前冻结的同一申请档案，没有重复创建。" : "完整 JD、事实母版、canonical indexes、你明确选择的 CV 母版和初步匹配已冻结。"}</p>
             <dl>
+              <div><dt>CV 母版</dt><dd>{choiceLabel(selectedTemplateKey) || "沿用已冻结申请档案中的母版"}</dd></div>
               <div><dt>申请目录</dt><dd>{archive.archivePath}</dd></div>
               <div><dt>下一步</dt><dd>复制 Prompt 到新的 Work / Codex Chat</dd></div>
             </dl>
@@ -293,6 +356,10 @@ export default function CvTailorClient() {
       .jd-review-copy{color:#58655e;line-height:1.65;margin:5px 0 12px}
       .jd-source{display:inline-flex;align-items:center;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:850;white-space:nowrap}
       .jd-source.auto{background:#e5f2e9;color:#176341}.jd-source.manual{background:#fff1df;color:#8a5a1f}.jd-source.frozen{background:#ebe9e2;color:#536159}
+      .template-picker{display:grid;gap:7px;background:#f3f5f0;border:1px solid #d7ddd7;border-radius:13px;padding:14px 15px;margin:12px 0 14px}
+      .template-picker label{font-size:13px;font-weight:850}.template-picker label strong{color:#9a3f2d;margin-left:5px}
+      .template-picker select{width:100%;box-sizing:border-box;border:1px solid #bfc7bf;border-radius:10px;background:#fff;padding:11px 12px;color:#25332b;font:inherit}
+      .template-picker p{margin:0;color:#657067;font-size:12px;line-height:1.55}.template-picker code{font-size:11px}
       .jd-review-card textarea,.confirmed-jd-card textarea{width:100%;min-height:390px;box-sizing:border-box;border:1px solid #cbc6b8;border-radius:11px;background:#fff;color:#25332b;padding:13px;font:14px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical}
       .confirmed-jd-card textarea{min-height:260px;background:#f8f7f1}
       .jd-review-footer{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:12px}
