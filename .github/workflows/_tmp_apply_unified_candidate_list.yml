@@ -1,0 +1,35 @@
+name: Apply unified candidate list patch
+
+on:
+  push:
+    branches:
+      - ui/unify-saved-pending
+    paths:
+      - scripts/_tmp_unify_saved_pending.py
+      - .github/workflows/_tmp_apply_unified_candidate_list.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ui/unify-saved-pending
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply patch
+        run: python scripts/_tmp_unify_saved_pending.py
+      - name: Remove temporary patch machinery
+        run: rm scripts/_tmp_unify_saved_pending.py .github/workflows/_tmp_apply_unified_candidate_list.yml
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/job-radar.tsx app/pending-application-fit-scores.tsx tests/test_pending_fact_fit_score.py tests/test_unified_candidate_list.py scripts/_tmp_unify_saved_pending.py .github/workflows/_tmp_apply_unified_candidate_list.yml
+          git commit -m "Unify saved and pending into one candidate list"
+          git push origin HEAD:ui/unify-saved-pending
