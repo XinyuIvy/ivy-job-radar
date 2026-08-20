@@ -22,6 +22,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "jd_requirements.json",
             "match_packet.json",
             "fact_master_snapshot.md",
+            "cv_display_rules_snapshot.yaml",
             "canonical_project_index.jsonl",
             "canonical_fact_index.jsonl",
             "canonical_capability_index.jsonl",
@@ -46,6 +47,13 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         ]:
             self.assertIn(phrase, helper)
         self.assertIn("automatic_tex_generation_authorized: false", helper)
+
+    def test_prompt_freezes_authoritative_cv_display_rules(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        self.assertIn("master/project-evidence/CV_DISPLAY_RULES.yaml", helper)
+        self.assertIn("cv_display_rules_snapshot.yaml", helper)
+        self.assertIn("用户确认的权威 CV 展示边界", helper)
+        self.assertIn("不得因为 JD 关键词", helper)
 
     def test_prompt_uses_application_id_in_cv_filenames(self):
         helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
