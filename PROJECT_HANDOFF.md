@@ -10,6 +10,26 @@
 
 本节记录 2026-08-20 本轮直接完成的 Site 优化与紧急恢复，优先级高于下方 0.6 至 0.10 的旧 PR #101 收尾记录。
 
+#### 2026-08-20 待申请岗位隐藏与身份去重修复，生产 Site version 120
+
+用户报告很多已进入“准备材料”的岗位仍显示在“今日”，并且今日卡片与申请记录的公司/岗位名不一致。已通过生产 D1 只读数据确认：
+
+- 快手同一岗位在 jobs 中公司为 `Campus`、门户 SEO 标题被误作岗位名，在 applications 中公司为 `快手`、岗位为 `【快Star】数据科学家`。
+- 小米同一岗位在 jobs 中把 `数据科学家` 或完整岗位名误作公司，在 applications 中公司为 `小米`。
+- 这些记录的官方 URL 和稳定岗位 ID 相同，但旧 `sameLogicalJob` 先比较公司名，公司不一致时立即返回 false，导致稳定 ID 和 URL 根本没有机会生效。
+
+version 120 已修复：
+
+- 去重强度顺序改为：同来源稳定职位 ID，精确职位详情 URL，最后才是标准化公司名、岗位名和地点。
+- 两个不同稳定职位 ID 永远不得仅因同公司同标题而合并。
+- 小米 `/position/<id>/detail` URL 可以提取职位 ID。
+- indexed candidate matcher 的 stable/canonical key 不再依赖不可靠的公司显示名。
+- 新增小米、快手、米哈游、拼多多、大疆官方招聘域名映射；岗位名本身和 `Campus` 不得成为公司。
+- 已存在的错误公司字段在 `/api/jobs` 响应层按可信官方域名纠正，不批量改写 D1。
+- 保存为“准备材料”或收到 Chrome 跨窗口保存事件后，React state 立即移除同一今日岗位，不等待刷新。
+- Python 231 tests、运行时 11 tests、lint、production build、Sites artifact validation 全部通过。
+- Site source checkpoint `31b5b39`，Sites version 120 已成功发布。
+
 #### 2026-08-20 中文 CV 展示规则，生产 Site version 119
 
 本轮已把用户确认的中文 CV 展示规则写入 `XinyuIvy/CV@main` 的 `master/project-evidence/CV_DISPLAY_RULES.yaml` 和 5 个中文行业母版，并同步进 Job Radar 当前生成 Prompt 合同：
@@ -42,7 +62,7 @@ GitHub 应用代码尚未移植本修复。不得用 GitHub `main` 覆盖生产 
 #### 当前 code-of-record 分叉
 
 - GitHub `main` 当前包含本节 handoff 文档更新；应用代码仍以 `8fa66e1651fb41f55d64664c3098a34787d9a39b` 为基线；PR #101 仍为 Draft / Open，head 仍为 `56c5ed943e48726360f3587ff3553f99fd752a18`，尚未合并。
-- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 119。Site source checkpoints 包括 `d64e076`、紧急数据库恢复 `5b687bf`、手动保存识别修复 `273a987` 和中文 CV 规则合同 `5981fb3`。这些 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
+- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 120。Site source checkpoints 包括 `d64e076`、紧急数据库恢复 `5b687bf`、手动保存识别修复 `273a987`、中文 CV 规则合同 `5981fb3` 和岗位身份修复 `31b5b39`。这些 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
 - 因此，GitHub 与生产 Site 当前并非完全同源。下一个 Chat 不得用 GitHub `main` 直接覆盖 Site，也不得宣称 PR #101 已合并。正确下一步是把生产已验证的实现逐项移植或对齐到 PR #101 或新的 GitHub PR，完整 CI 通过后合并，再谨慎同步 Site。
 
 #### 已上线的 Fast Simple v2 行为
@@ -86,7 +106,7 @@ version 117 已完成以下恢复：
 #### 下一 Chat 的最短接手指令
 
 ```text
-先读取 XinyuIvy/ivy-job-radar 最新 main、PROJECT_HANDOFF.md 顶部 0.0 节、PR #101 最新状态和当前 Ivy Job Radar Site。生产 Site 已运行 version 119，但 GitHub PR #101 仍未合并，二者存在代码分叉。
+先读取 XinyuIvy/ivy-job-radar 最新 main、PROJECT_HANDOFF.md 顶部 0.0 节、PR #101 最新状态和当前 Ivy Job Radar Site。生产 Site 已运行 version 120，但 GitHub PR #101 仍未合并，二者存在代码分叉。
 
 不要用 GitHub main 直接覆盖 Site。先把 Site source checkpoints d64e076 和 5b687bf 中已验证的 Fast Simple v2、D1 marker 修复、scan_status 初始化顺序、API error UI 和永久测试逐项对齐到 GitHub PR。不得恢复 whole-body MutationObserver、全局轮询、fetch monkey-patch、保存后整表刷新、生产 seed upsert 或 PRAGMA user_version。
 
