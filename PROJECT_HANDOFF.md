@@ -10,6 +10,19 @@
 
 本节记录 2026-08-20 本轮直接完成的 Site 优化与紧急恢复，优先级高于下方 0.6 至 0.10 的旧 PR #101 收尾记录。
 
+#### 2026-08-20 中文 CV 展示规则，生产 Site version 119
+
+本轮已把用户确认的中文 CV 展示规则写入 `XinyuIvy/CV@main` 的 `master/project-evidence/CV_DISPLAY_RULES.yaml` 和 5 个中文行业母版，并同步进 Job Radar 当前生成 Prompt 合同：
+
+- 个人简介必须明确写“博士候选人”，但不得出现“范德堡大学”或 Vanderbilt University；学校只保留在教育背景。
+- 每个研究、项目、实习、工作和软件系统条目必须使用 `YYYY 年 M 月 - YYYY 年 M 月`；进行中使用 `YYYY 年 M 月 - 至今`。标准示例是 `2026 年 5 月 - 2026 年 8 月`。
+- 任一月份无法从权威材料核验时必须停止并询问用户，不得猜测或降级为只写年份。
+- 中文地点按“城市，国家”显示，例如“波士顿，美国”，不得写成“美国波士顿”。
+- 括号内英文首字母大写，标准缩写和软件、模型、包、产品、专有名词的官方大小写优先。
+- cortex 相关中文统一写“脑区皮层”“脑区皮层厚度”或“脑区皮层表面积”，不得裸写“皮层”“皮层厚度”或“皮层表面积”。
+- 历史申请包重新打开时会重新生成当前 Prompt，所以即使旧包没有新版 display-rule snapshot，也必须执行以上内嵌规则。
+- 站点合同测试、lint、运行时测试、production build 和 Sites artifact validation 全部通过。Site source checkpoint `5981fb3`，Sites version 119 已成功发布。
+
 #### 2026-08-20 手动保存字段识别修复，生产 Site version 118
 
 用户报告 Chrome 手动保存岗位时，岗位名和公司仍识别不准。本轮已在生产 Site 完成以下修复：
@@ -29,7 +42,7 @@ GitHub 应用代码尚未移植本修复。不得用 GitHub `main` 覆盖生产 
 #### 当前 code-of-record 分叉
 
 - GitHub `main` 最新已核对为 `8fa66e1651fb41f55d64664c3098a34787d9a39b`；PR #101 仍为 Draft / Open，head 仍为 `56c5ed943e48726360f3587ff3553f99fd752a18`，尚未合并。
-- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 118。Site source checkpoints 包括 `d64e076`、紧急数据库恢复 `5b687bf` 和手动保存识别修复 `273a987`。这两个 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
+- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 119。Site source checkpoints 包括 `d64e076`、紧急数据库恢复 `5b687bf`、手动保存识别修复 `273a987` 和中文 CV 规则合同 `5981fb3`。这两个 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
 - 因此，GitHub 与生产 Site 当前并非完全同源。下一个 Chat 不得用 GitHub `main` 直接覆盖 Site，也不得宣称 PR #101 已合并。正确下一步是把生产已验证的实现逐项移植或对齐到 PR #101 或新的 GitHub PR，完整 CI 通过后合并，再谨慎同步 Site。
 
 #### 已上线的 Fast Simple v2 行为
@@ -73,7 +86,7 @@ version 117 已完成以下恢复：
 #### 下一 Chat 的最短接手指令
 
 ```text
-先读取 XinyuIvy/ivy-job-radar 最新 main、PROJECT_HANDOFF.md 顶部 0.0 节、PR #101 最新状态和当前 Ivy Job Radar Site。生产 Site 已运行 version 117，但 GitHub PR #101 仍未合并，二者存在代码分叉。
+先读取 XinyuIvy/ivy-job-radar 最新 main、PROJECT_HANDOFF.md 顶部 0.0 节、PR #101 最新状态和当前 Ivy Job Radar Site。生产 Site 已运行 version 119，但 GitHub PR #101 仍未合并，二者存在代码分叉。
 
 不要用 GitHub main 直接覆盖 Site。先把 Site source checkpoints d64e076 和 5b687bf 中已验证的 Fast Simple v2、D1 marker 修复、scan_status 初始化顺序、API error UI 和永久测试逐项对齐到 GitHub PR。不得恢复 whole-body MutationObserver、全局轮询、fetch monkey-patch、保存后整表刷新、生产 seed upsert 或 PRAGMA user_version。
 
