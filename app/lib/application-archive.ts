@@ -134,19 +134,37 @@ export function buildApplicationRecord(input: {
   ].join("\n");
 }
 
-export function buildChatPrompt(archiveId: string, path: string, fullJd: string) {
+export function buildChatPrompt(
+  archiveId: string,
+  path: string,
+  fullJd: string,
+  language: ArchiveLanguage,
+  templateFile: string,
+) {
   const customizedTex = `cv_customized_${archiveId}.tex`;
   const customizedPdf = `cv_customized_${archiveId}.pdf`;
   const customizedText = `cv_customized_${archiveId}.txt`;
   const buildManifest = `cv_build_manifest_${archiveId}.json`;
   const submittedPdf = `cv_submitted_${archiveId}.pdf`;
   const confirmedFullJd = fullJd.trim();
+  const languageLabel = language === "zh" ? "中文（zh）" : "English（en）";
+  const languageDirective = language === "zh"
+    ? "最终 CV 的 Summary/个人简介、技能、经历、项目、论文/荣誉等自然语言内容必须使用中文。公司名、院校名、论文题目、方法名、软件名及必要技术术语可保留官方英文或中英并列；不得因为 JD 是英文、事实库含英文或旧版 CV 是英文而切回英文简历。"
+    : "The final CV must use English for all natural-language sections, bullets and labels. Proper nouns and official titles may retain their official spelling; do not switch to a Chinese CV because the JD or evidence contains Chinese.";
 
   return `请为申请 \`${archiveId}\` 定制定向 CV。
 
 请从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支读取目录：
 
 \`${path}/\`
+
+## 本次已确认的 CV 语言与母版（一级硬约束）
+
+- **输出语言：${languageLabel}**
+- **已确认母版：\`${templateFile}\`**
+- \`application_record.yaml\` 中的 \`language\`、\`source_versions.cv_template_path\` 与 \`cv_base.tex\` 必须与上述选择一致。
+- ${languageDirective}
+- 如果读取后发现 \`application_record.yaml\`、\`cv_base.tex\` 或母版路径与上述语言/母版不一致，立即停止并明确告诉我“冻结母版与本次选择不一致”；不得自行沿用旧母版、不得猜测语言、不得先生成另一种语言的 CV。
 
 ## 完整 JD 是本次定制的主输入
 
