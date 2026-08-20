@@ -1,0 +1,33 @@
+name: Temporary Fast Simple v2 follow-up
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/apply_fast_simple_v2_followup.py
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply follow-up patch
+        run: python tools/apply_fast_simple_v2_followup.py
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/job-radar.tsx app/api/jobs/route.ts app/application-cv-actions.tsx app/navigation-state-persistence.tsx app/pending-application-fit-scores.tsx app/globals.css
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Remove redundant requests and DOM rescans'
+          git push origin HEAD:${{ github.head_ref }}
