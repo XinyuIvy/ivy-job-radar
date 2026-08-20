@@ -353,7 +353,6 @@ const sortOptions = [
 const statuses = ["准备材料", "已申请", "一面", "二面/技术面", "终面", "Offer", "撤回", "拒绝"];
 const interviewStatuses = ["一面", "二面/技术面", "终面"];
 type ApplicationBucket = "submitted" | "interview" | "offer" | "rejected";
-type SavedBucket = "saved" | "pending";
 const emptyApplication: Application = {
   company: "",
   title: "",
@@ -559,6 +558,17 @@ function deadlineLabel(deadline: string, type: string) {
   return "JD 未公布";
 }
 
+function normalizeSavedIdentity(value: string) {
+  return value.trim().toLocaleLowerCase().replace(/&/g, "and").replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+}
+
+function savedApplicationMatchesJob(application: Application, job: Job) {
+  if (application.applicationId && job.applicationId && application.applicationId === job.applicationId) return true;
+  if (application.jobUrl && job.jobUrl && application.jobUrl === job.jobUrl) return true;
+  return normalizeCompanyName(application.company) === normalizeCompanyName(job.company)
+    && normalizeSavedIdentity(application.title) === normalizeSavedIdentity(job.title);
+}
+
 
 const JOB_PAGE_SIZE = 20;
 const COMPANY_PAGE_SIZE = 20;
@@ -593,7 +603,6 @@ export default function JobRadar() {
   const [jobQuery, setJobQuery] = useState("");
   const [saved, setSaved] = useState<number[]>([]);
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
-  const [savedBucket, setSavedBucket] = useState<SavedBucket>("saved");
   const [dailyJobs, setDailyJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsRefreshing, setJobsRefreshing] = useState(false);
@@ -634,7 +643,7 @@ export default function JobRadar() {
   const [jobPage, setJobPage] = useState(1);
   const [companyPage, setCompanyPage] = useState(1);
   const [applicationPage, setApplicationPage] = useState(1);
-  const [pendingPage, setPendingPage] = useState(1);
+  const [savedPage, setSavedPage] = useState(1);
   const [quality, setQuality] = useState<DataQuality | null>(null);
   const [qualityLoading, setQualityLoading] = useState(false);
   const [qualityAutomationRunning, setQualityAutomationRunning] = useState(false);
@@ -1173,7 +1182,7 @@ export default function JobRadar() {
           (view !== "today" || !["已过期", "疑似过期"].includes(job.status)) &&
           (track === "全部" || job.track === track) &&
           (region === "全部地区" || job.region === region) &&
-          (view !== "saved" || savedBucket !== "saved" || saved.includes(job.id)) &&
+          (view !== "saved" || saved.includes(job.id)) &&
           (!normalizedQuery || [
             job.title,
             job.company,
@@ -1197,13 +1206,13 @@ export default function JobRadar() {
         return b.score - a.score || newestFirst;
       });
     },
-    [dailyJobs, track, region, saved, savedBucket, view, jobSort, jobQuery],
+    [dailyJobs, track, region, saved, view, jobSort, jobQuery],
   );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setJobPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [track, region, jobSort, view, savedBucket, jobQuery]);
+  }, [track, region, jobSort, view, jobQuery]);
 
   const jobPageCount = Math.max(1, Math.ceil(jobs.length / JOB_PAGE_SIZE));
   const safeJobPage = Math.min(jobPage, jobPageCount);
@@ -1287,15 +1296,56 @@ export default function JobRadar() {
     return () => window.clearTimeout(timer);
   }, [applicationBucket]);
   useEffect(() => {
-    const timer = window.setTimeout(() => setPendingPage(1), 0);
+    const timer = window.setTimeout(() => setSavedPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [savedBucket]);
+  }, [track, region, jobSort, jobQuery, saved, applicationsList]);
   const applicationPageCount = Math.max(1, Math.ceil(visibleApplications.length / APPLICATION_PAGE_SIZE));
   const safeApplicationPage = Math.min(applicationPage, applicationPageCount);
   const pagedApplications = visibleApplications.slice((safeApplicationPage - 1) * APPLICATION_PAGE_SIZE, safeApplicationPage * APPLICATION_PAGE_SIZE);
-  const pendingPageCount = Math.max(1, Math.ceil(pendingApplications.length / APPLICATION_PAGE_SIZE));
-  const safePendingPage = Math.min(pendingPage, pendingPageCount);
-  const pagedPendingApplications = pendingApplications.slice((safePendingPage - 1) * APPLICATION_PAGE_SIZE, safePendingPage * APPLICATION_PAGE_SIZE);
+  const normalizedSavedQuery = jobQuery.trim().toLocaleLowerCase();
+  const filteredPendingApplications = pendingApplications.filter((application) =>
+    (track === "全部" || application.track === track)
+    && (region === "全部地区" || application.region === region)
+    && (!normalizedSavedQuery || [
+      application.title,
+      application.company,
+      application.location,
+      application.track,
+      application.source,
+    ].some((value) => String(value || "").toLocaleLowerCase().includes(normalizedSavedQuery))),
+  );
+  const savedOnlyJobs = (view === "saved" ? jobs : []).filter((job) =>
+    !pendingApplications.some((application) => savedApplicationMatchesJob(application, job)),
+  );
+  const mergedSavedItems = [
+    ...filteredPendingApplications.map((application) => {
+      const sortAt = Date.parse(application.updatedAt || application.discoveredDate || "") || 0;
+      return {
+        kind: "application" as const,
+        application,
+        sortAt,
+        checkedAt: sortAt,
+        score: application.fit * 20,
+        priority: application.priority === "P1" ? 3 : application.priority === "P2" ? 2 : 1,
+      };
+    }),
+    ...savedOnlyJobs.map((job) => ({
+      kind: "job" as const,
+      job,
+      sortAt: Date.parse(job.discoveredAt) || 0,
+      checkedAt: Date.parse(job.checkedAt) || 0,
+      score: job.score,
+      priority: job.score >= 85 ? 3 : job.score >= 70 ? 2 : 1,
+    })),
+  ].sort((a, b) => {
+    if (jobSort === "newest") return b.sortAt - a.sortAt || b.score - a.score;
+    if (jobSort === "checked") return b.checkedAt - a.checkedAt || b.score - a.score;
+    if (jobSort === "priority") return b.priority - a.priority || b.sortAt - a.sortAt;
+    return b.score - a.score || b.sortAt - a.sortAt;
+  });
+  const savedPageCount = Math.max(1, Math.ceil(mergedSavedItems.length / APPLICATION_PAGE_SIZE));
+  const safeSavedPage = Math.min(savedPage, savedPageCount);
+  const pagedSavedItems = mergedSavedItems.slice((safeSavedPage - 1) * APPLICATION_PAGE_SIZE, safeSavedPage * APPLICATION_PAGE_SIZE);
   const expirationForApplication = (application: Application) => dailyJobs.find((job) =>
     ["已过期", "疑似过期"].includes(job.status)
       && ((application.applicationId && job.applicationId === application.applicationId)
@@ -1391,7 +1441,6 @@ export default function JobRadar() {
       // reconciliation stay in the background and never block the perceived save action.
       if (savedApplication.status === "准备材料") {
         setView("saved");
-        setSavedBucket("pending");
       } else if (savedApplication.status === "撤回" || savedApplication.status === "拒绝") {
         setView("today");
       } else {
@@ -1661,12 +1710,12 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "收藏与待提交" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
           <p className="hero-copy">
             {view === "applications"
               ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
               : view === "saved"
-                ? "收藏岗位与已经建立记录但尚未提交的岗位分别管理。"
+                ? "你保存或建立申请记录但尚未投递的岗位，都在同一个列表里统一管理。"
               : view === "companies"
                 ? `公司池共 ${companyRecords.length} 条；自动汇总官网、招聘入口、岗位记录与历年公开面经。`
                 : view === "verify"
@@ -1754,13 +1803,6 @@ export default function JobRadar() {
             </div>
           )}
           <p className="history-note">状态历史从本功能启用后持续记录；旧记录以启用时的当前状态作为起点，因此旧的拒绝记录若此前进入过面试，需再次更新状态后才能完整反映历史路径。</p>
-        </section>
-      )}
-
-      {view === "saved" && (
-        <section className="stats stats-two" aria-label="收藏概览">
-          <button className={savedBucket === "saved" ? "active" : ""} onClick={() => setSavedBucket("saved")}><span>收藏</span><strong>{saved.length}</strong><em>已收藏的可申请岗位</em></button>
-          <button className={savedBucket === "pending" ? "active" : ""} onClick={() => setSavedBucket("pending")}><span>待提交申请</span><strong>{pendingApplications.length}</strong><em>已记录，尚未提交</em></button>
         </section>
       )}
 
@@ -1966,7 +2008,7 @@ export default function JobRadar() {
         <>
           <section className="toolbar">
             <div className="section-heading">
-              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? (savedBucket === "saved" ? "我的收藏" : "我的待提交申请") : `今日岗位（${jobs.length}）`}</h2></div>
+              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `我的候选岗位（${mergedSavedItems.length}）` : `今日岗位（${jobs.length}）`}</h2></div>
               <div className="job-controls">
                 <label className="job-search">
                   <span aria-hidden="true">⌕</span>
@@ -1992,36 +2034,79 @@ export default function JobRadar() {
               ))}
             </div>
           </section>
-          {view === "saved" && savedBucket === "pending" ? (
-            <section className="application-list" aria-live="polite">
-              <PaginationControls page={safePendingPage} pageCount={pendingPageCount} onPageChange={setPendingPage} label="待提交申请" />
-              {pendingApplications.length === 0 ? (
-                <div className="empty-state"><span>▤</span><h3>没有待提交申请</h3><p>加入申请追踪但尚未提交的记录会显示在这里。</p></div>
-              ) : pagedPendingApplications.map((item) => (
-                <article className="application-card" key={item.id}>
-                  <div className="application-head">
-                    <div><span className={`status status-${item.status}`}>{item.status}</span>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
-                    <span className="priority">{item.priority}</span>
-                  </div>
-                  <div className="application-details">
-                    <span><b>匹配度</b>{item.fit}/5</span>
-                    <span><b>状态</b>待提交申请</span>
-                    <span><b>Application ID</b>{item.applicationId || "未填写"}</span>
-                    <span><b>下一步</b>{item.nextAction || "未填写"}</span>
-                    <span><b>计划申请</b>{item.plannedApplicationDate || "未设置"}</span>
-                    <span><b>申请截止</b>{deadlineLabel(item.deadline, item.deadlineType)}</span>
-                  </div>
-                  {item.notes && <p className="record-note">{item.notes}</p>}
-                  <div className="record-actions">
-                    {item.jobUrl && <a href={item.jobUrl} target="_blank" rel="noreferrer">打开 JD ↗</a>}
-                    <button onClick={() => openTask(item)}>新增任务</button>
-                    <button onClick={() => setForm({ ...item })}>编辑记录</button>
-                    <button className="danger" onClick={() => deleteApplication(item.id)}>删除</button>
-                  </div>
-                </article>
-              ))}
+          {view === "saved" ? (
+            <section className="application-list unified-saved-list" aria-live="polite">
+              <PaginationControls page={safeSavedPage} pageCount={savedPageCount} onPageChange={setSavedPage} label="候选岗位" />
+              {mergedSavedItems.length === 0 ? (
+                <div className="empty-state"><span>☆</span><h3>这里还没有候选岗位</h3><p>点星标或建立申请记录后，岗位都会出现在这里。</p></div>
+              ) : pagedSavedItems.map((entry) => entry.kind === "application" ? (() => {
+                const item = entry.application;
+                return (
+                  <article className="application-card" key={`application-${item.id}`}>
+                    <div className="application-head">
+                      <div>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
+                      <span className="priority">{item.priority}</span>
+                    </div>
+                    <div className="application-details">
+                      <span><b>匹配度</b>{item.fit}/5</span>
+                      <span><b>Application ID</b>{item.applicationId || "未填写"}</span>
+                      <span><b>下一步</b>{item.nextAction || "未填写"}</span>
+                      <span><b>计划申请</b>{item.plannedApplicationDate || "未设置"}</span>
+                      <span><b>申请截止</b>{deadlineLabel(item.deadline, item.deadlineType)}</span>
+                    </div>
+                    {item.notes && <p className="record-note">{item.notes}</p>}
+                    <div className="record-actions">
+                      {item.jobUrl && <a href={item.jobUrl} target="_blank" rel="noreferrer">打开 JD ↗</a>}
+                      <button onClick={() => openTask(item)}>新增任务</button>
+                      <button onClick={() => setForm({ ...item })}>编辑记录</button>
+                      <button className="danger" onClick={() => deleteApplication(item.id)}>删除</button>
+                    </div>
+                  </article>
+                );
+              })() : (() => {
+                const job = entry.job;
+                return (
+                  <article className="job-card" key={`job-${job.id}`}>
+                    <div className="job-card-top">
+                      <div className="company-logo">{job.company.slice(2, 4)}</div>
+                      <div className="job-title">
+                        <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
+                        <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
+                        {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
+                      </div>
+                      <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => toggleSaved(job.id)} aria-label="从候选岗位移除">
+                        ★
+                      </button>
+                    </div>
+                    <div className="match-row">
+                      <div className="score"><strong>{job.score}</strong><span>{scoreLabel(job.score)}</span></div>
+                      <div className="evidence">
+                        <strong>{verificationSummary(job)}</strong>
+                        <p>{roleSummary(job)}</p>
+                        <span>学历要求：{degreeRequirement(job)} · Sponsorship：{sponsorshipLabel(job.visa)} · 截止：{deadlineLabel(job.deadline, job.deadlineType)} · 信息来源：{sourceLabel(job)}</span>
+                      </div>
+                    </div>
+                    {job.skills.length > 0 && (
+                      <div className="skills" aria-label="JD 所需技能">
+                        {job.skills.map((skill) => <span key={skill}>{skill}</span>)}
+                      </div>
+                    )}
+                    {job.description && (
+                      <details className="job-description">
+                        <summary>查看采集到的完整 JD</summary>
+                        <p>{job.description}</p>
+                      </details>
+                    )}
+                    <div className="card-actions">
+                      <a className="secondary job-link" href={job.jobUrl} target="_blank" rel="noreferrer">{sourceLabel(job) === "BOSS直聘" ? "打开 BOSS JD" : "打开官方 JD"} ↗</a>
+                      <button className="ignore-button" onClick={() => setIgnoreTarget(job)}>不再显示</button>
+                      <button className="primary" onClick={() => openFromJob(job)}>建立申请记录</button>
+                    </div>
+                  </article>
+                );
+              })())}
             </section>
-          ) : <section className={`job-list ${view === "saved" ? "saved-job-list" : ""}`} aria-live="polite">
+          ) : <section className="job-list" aria-live="polite">
             {jobsLoading ? (
               <div className="empty-state"><span>◌</span><h3>正在读取岗位</h3><p>请稍等，正在载入最新核验结果。</p></div>
             ) : jobs.length === 0 ? (
@@ -2563,7 +2648,7 @@ export default function JobRadar() {
 
       <nav className="bottom-nav" aria-label="主要导航">
         <button className={view === "today" ? "selected" : ""} onClick={() => setView("today")}><span>⌂</span>今日</button>
-        <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>收藏</button>
+        <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>候选</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
         <button className={view === "companies" ? "selected" : ""} onClick={() => setView("companies")}><span>⌕</span>公司</button>
         <button className={view === "verify" ? "selected" : ""} onClick={() => setView("verify")}><span>✓</span>核验</button>
