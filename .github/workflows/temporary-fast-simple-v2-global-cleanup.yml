@@ -1,0 +1,33 @@
+name: Temporary Fast Simple v2 global cleanup
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/apply_fast_simple_v2_global_cleanup.py
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply global cleanup
+        run: python tools/apply_fast_simple_v2_global_cleanup.py
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/layout.tsx app/pending-application-live-sync.tsx app/job-radar.tsx app/verification-queue-actions.tsx app/hard-requirement-ignore-actions.tsx app/navigation-state-persistence.tsx
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Remove obsolete global polling and DOM watchers'
+          git push origin HEAD:${{ github.head_ref }}
