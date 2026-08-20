@@ -1,8 +1,204 @@
 # Job Application / CV Knowledge Base 项目交接
 
-最后更新：2026-08-12（America/New_York）
+最后更新：2026-08-20（America/New_York）
 
+## 0. 2026-08-20 权威交接：候选列表已统一；CV 母版/语言链已修；Fast Simple v2 正在 PR #101 收尾
 
+> **本节是当前状态与 next step 的最高优先级记录。** 与下方 2026-08-12 及更早章节冲突时，以本节和 GitHub 当前状态为准。旧章节继续保留用于追溯 RAG / application archive 建设历史，但其中“archive 尚未创建”“第一次 bundle 尚未验证”“继续 RAG v2.1 / shadow mode”等表述已经过时。下一个 Chat 不得为了满足旧测试恢复已淘汰的重型轮询、整页刷新、双候选列表或无人工确认的 CV 自动生成。
+
+### 0.1 当前面向用户的稳定主流程
+
+1. 用户从 Job Radar 找到真实岗位，保存到候选池，或通过 Chrome 保存岗位。
+2. **“收藏”与“待提交申请”已经合并为一个“候选岗位”列表。** 不再维护两个用户可见 bucket / toggle；同一个逻辑岗位如果 bookmark 和 `准备材料` application 同时存在，只显示一次，application record 优先。
+3. 候选 application 可以进入“定制 CV”。Job Radar 负责冻结完整申请输入并生成 Prompt；Chat 负责独立证据审核、文本修改、TeX/PDF 迭代。内容定稿前不得写最终 TeX。
+4. 实际投递后状态进入“申请”；面试、Offer、拒绝继续由 application tracker 管理。
+5. Chrome Autofill 使用全局申请资料 + 当前 APP 最终 CV packet；项目、经历、Skills、项目链接等岗位相关内容不在 general profile 维护第二套。
+
+已合并候选列表锚点：
+
+- PR #100 `Unify saved and pending into one candidate list`
+- merge commit `6fd8a7e89f400393195a1db51b6495f2cf163a7e`
+- PR #100 后 `main` 还有 housekeeping commits；任何接手 Chat 必须重新读取实时 `main`，不要把本节 SHA 当永久 head。
+
+### 0.2 CV 母版与语言是一级权威输入
+
+2026-08-20 已修复：
+
+- **PR #95**：恢复“定制 CV”前的必选母版选择。系统可推荐行业方向，但不能静默替用户决定最终母版。
+- **PR #98**：修复母版/语言没有贯穿 archive 与 Prompt 的问题。用户选择的 `template + language` 是一级权威；`application_record.yaml`、`cv_base.tex` 与 `chat_prompt.txt` 必须一致。
+
+当前硬约束：
+
+- 选择中文母版后，Prompt 必须显式写明 `language = zh` 与具体 `*_cn.tex` 母版；最终 Summary、技能、经历、项目、论文/荣誉等自然语言必须是中文，不能因为 JD 是英文自动切回英文。
+- 选择英文母版同理。
+- 已有 archive 若尚未最终定稿且冻结母版与本次选择不同，可以按用户本次明确选择重新冻结输入。
+- 若 APP 已存在最终 customized TeX/PDF 或 submitted PDF，不得静默覆盖历史最终版；必须明确提示冲突并由用户决定 revision 路径。
+- 旧 archive 的 `chat_prompt.txt` 不能因为“已存在”就无条件复用并忽略本次 template selection。
+
+### 0.3 Application archive / PDF build 当前状态
+
+私有仓库 `XinyuIvy/job-application-archive` 已投入实际使用；下方旧章节里“archive repo 尚未创建”“第一份真实 bundle 尚未产生”均已失效。
+
+当前 build contract：
+
+- Chat 最终确认后写 `cv_customized_<APP-ID>.tex`。
+- archive Action 使用 LuaLaTeX 构建 PDF，并生成 TXT、`application_autofill_<APP-ID>.json` 与 build manifest。
+- 普通新 CV 仍严格要求 `<= 2 pages`。
+- 已明确确认是 **actual submitted version** 的真实投递快照若本来超过 2 页，不得为了通过 validator 擅自删内容；允许原样归档，并在 manifest 记录明确 page-limit exception，例如 `actual_submitted_version_confirmed`。
+- `APP-2026-16M-0032` 的“最终 TeX 有、PDF 没有”问题已定位：其 TeX 编译为 3 页，被旧 `--max-pages 2` validator 拒绝，并非简单的 Action 漏跑。修复后 PDF/TXT/autofill packet/manifest 均可落盘。
+
+### 0.4 Autofill 当前权威层级
+
+必须保持三层 source-of-truth：
+
+1. **Global Application Profile**：所有招聘网站共用的稳定资料。权威文件：`XinyuIvy/CV/master/application-forms/application-autofill-profile.md`。教育详细字段、学院、导师、研究单位、GPA/排名/研究方向等属于这一层，不是腾讯专属资料。
+2. **Site-specific override**：只保存某家招聘站独有且不能泛化的字段，例如特有事业群、调剂选项或语义特殊的下拉框。
+3. **APP-specific final CV packet**：项目、经历描述、Skills、项目顺序、项目链接、最终 PDF 等岗位相关内容全部来自当前 APP 的最终 customized CV。General profile 不得维护第二套项目介绍。
+
+项目 URL 已接入最终 CV packet parser：若最终 TeX 的 project / independent system 中有 `\href` / `\url`，packet 可以携带其链接；表单问项目链接时使用当前 APP packet。CV 里没有链接就留空，不猜。
+
+教育 Autofill 要继续按 **general capability** 做，而不是腾讯/字节单站 adapter；自定义 `div` label、教育 block 上下文、成对日期字段等应通用识别。字段语义不明确时继续留空，不猜。
+
+### 0.5 已合并的今日岗位 / 候选 / 性能修复
+
+- **PR #96**：修复手动保存并进入申请池的岗位仍出现在“今日岗位”。隐藏逻辑优先实际 stored URL，再用 logical identity 兜底；不能只依赖后期可能被 APP-ID 改变语义的 `applicationId`。
+- **PR #99 / Fast UI v1**：重数据按 tab 懒加载；扫描轮询只在需要页面运行；移除全站 1 秒 re-render；岗位/公司/申请分页；高频保存/删除改乐观更新；application duplicate lookup 不再每次全表扫描。
+- **PR #100**：收藏 + 待提交彻底合并为一个“候选岗位”池；不存在“仅收藏 / 待提交”两个用户状态。
+
+产品目标已经从“只给当前用户能用”进一步转为“以后可以给其他人使用”。UX 优先级：**第一次使用就能看懂、默认路径短、筛选简单、点击立即反馈、后台工作不阻塞前台。**
+
+### 0.6 当前稳定 main 与 PR #101 的边界
+
+截至本节写入时：
+
+- PR #100 已合并，是当前稳定候选结构的生产基线。
+- handoff 写入前 `main` 已继续有 housekeeping commits；必须实时重新读取 `main`。
+- **PR #101 仍为 Draft / Open / Not merged。Fast Simple v2 不能被描述成已完成、已合并或已部署。**
+- PR #101：`https://github.com/XinyuIvy/ivy-job-radar/pull/101`
+- branch：`ux/fast-simple-v2`
+- 当前记录 head：`56c5ed943e48726360f3587ff3553f99fd752a18`
+
+该 head 的 CI：
+
+- `PR app build`：success
+- `PR app lint`：success
+- `Test China recruitment platforms`：success
+- `PR Python tests`：**failure**
+
+所以 PR #101 现在不能 merge，也不能要求 Site 同步。
+
+### 0.7 PR #101 / Fast Simple v2 当前 branch 已实现的方向
+
+#### 用户侧简化
+
+主导航目标由 6 个入口收敛成 5 个：
+
+- 今日
+- 候选
+- 申请
+- 工具
+- 我的
+
+公司研究、岗位核验、忽略名单、Autofill、Chrome 保存、CV 知识库、筛选学习等低频/高级功能集中到“工具”，不再同时占主导航或全局浮动入口。
+
+筛选 progressive disclosure：
+
+- 搜索始终可见；
+- 地区用“全部 / 美国 / 中国”chips；
+- 方向与排序放进“筛选”；
+- 有“清除筛选”；
+- 内部 track key 不直接暴露，显示为“数据 / AI、量化、医药 / 生物统计、医疗器械、医疗 AI、咨询”等易懂标签；
+- 排序显示为“最适合我 / 最新发布 / 最近核验 / 优先岗位”。
+
+今日页增加 3 步 quick start：找岗位 → 保存到候选 → 定制 CV 后投递。扫描 dashboard 默认折叠为“更新岗位”；申请 analytics/tasks/calendar 默认收进“统计与日程”，只有用户展开才加载/轮询。
+
+#### 客户端性能
+
+- job search 使用 `useDeferredValue`。
+- jobs 使用 sessionStorage stale-while-revalidate 风格缓存，目标是先显示最近数据、后台更新。
+- `/api/jobs` 响应携带 `saved` flag，减少首屏单独读取 saved-jobs 的请求。
+- 收藏、application 保存、ignore 等继续 optimistic UI；失败才回滚/对账。
+- candidate application card 暴露 `data-application-row-id`，`ApplicationCvActions` 不再为了注入“定制 CV”读取整张 applications。
+- fact-fit 用 `IntersectionObserver`，只对接近 viewport 的卡片启动评分；DOM observer debounce。
+- `NavigationStatePersistence` 去掉 whole-body MutationObserver，改为事件驱动 + delayed restore。
+- branch layout 已移除历史全局 `JobDataCache` monkey-patch、`PendingJobVisibility` 的 5 秒 applications polling、`OptimisticDashboardActions` 的全页 observer；功能由 React state、`/api/jobs` 和显式事件承担。
+
+#### 后端性能
+
+`/api/jobs` branch 实现方向：
+
+- ignored / saved / tracked applications / jobs 查询并行；
+- tracked application 先按 stable ID / role 建索引，再做精确 logical identity，避免每个 job 对所有 applications 全扫；
+- dedup 从 O(n²) reducer 改为 map-based candidate lookup，同时必须保留“不同 stable requisition IDs 不能误合并”的边界；
+- warm worker 有极短期 visible-jobs cache，减少瞬时重复读。
+
+D1 cold-start：
+
+- `RUNTIME_SCHEMA_VERSION = "2026-08-20-fast-simple-v2"`；
+- `app_meta` 保存 schema version；
+- schema version 已匹配时只做一次 metadata lookup，不重复几十次 CREATE/PRAGMA；
+- `ensureColumn` 的 `PRAGMA table_info` 按 table 缓存；
+- 增加 applications / jobs 热路径 indexes。
+
+### 0.8 PR #101 当前 Python CI failure：必须改测试，不得恢复旧重型行为
+
+最新失败主要来自旧 regression tests 锁死了已被 v2 有意淘汰的源码实现。下一 Chat 必须读取**最新**失败日志后更新 test contracts，不能为了绿灯恢复旧设计。
+
+当前已确认的 stale families：
+
+1. `test_application_save_performance`：旧断言要求保存后 `await loadApplications()`；v2 热路径故意取消整表 reload。
+2. `test_application_cv_actions_source`：旧断言要求 component 自己 fetch applications / 识别旧按钮；v2 使用 `data-application-row-id` + `编辑记录`。
+3. `test_bookmark_capture_source`：旧断言要求 `/bookmarklet` 在 root `layout.tsx`；v2 已移到“工具”。
+4. `test_cv_knowledge_base_source`：同理，`/cv-knowledge` 已从全局浮动入口迁到“工具”。
+5. `test_job_identity_and_ignore_regressions`：旧断言锁死 O(n²) reducer 的字面源码 `sameDisplayedJob(candidate, row)`；新 route 使用 map-based dedup 与 `sameDisplayedJob(current, row)`。
+6. hard-requirement ignore 旧测试要求 `window.location.reload()`；v2 改为 `ivy-job-radar:job-ignored` 事件，避免整页刷新。
+7. navigation persistence 旧测试要求脚本扫描/改写所有外链；v2 不再用 whole-body observer 做此事，链接自身应拥有正确 target/rel。
+8. pending live sync 旧测试要求直接 DOM 注入旧“收藏与待提交”列表并在 component 内全量 reconcile；v2 只发布 `ivy-job-radar:pending-refresh`，统一候选 React view 负责对账。
+9. unified candidate tests 仍锁死旧 copy `我的候选岗位（...）`；v2 copy 是 `候选岗位（...）`。
+
+最近失败日志显示约 230 个 tests，仍有多条 stale failures。继续时以最新日志为准，不要只按本节列表盲改。
+
+### 0.9 PR #101 merge 前仍值得继续审的性能点
+
+- `VerificationQueueActions` 当前仍全局挂载；历史实现会在 observer 触发时读取 `/api/job-requests`、`/api/applications`、`/api/data-quality`。优先 view-scope 到“核验”，或改成显式事件驱动，避免普通今日/候选页承担成本。
+- `HardRequirementIgnoreActions` 仍有 MutationObserver；已 debounce，但可以继续评估是否只在 ignore modal 打开时运行。
+- `/api/jobs` 仍保留 legacy `initialJobs` / `seedInitialJobs()` 生产请求内 seed 逻辑。之前已识别为潜在冷启动写开销；确认不承担必要迁移/演示职责后再安全删除，不能未经核对硬删。
+- analytics 不应因每个 application state 变化自动整套重算；只在用户展开或明确需要时刷新。
+- 长期大数据量下继续推进 server-side pagination / 按需字段返回；当前 v1/v2 主要先降低 render 和重复请求成本。
+
+### 0.10 下一 Chat 的精确 next steps
+
+1. 重新读取 `XinyuIvy/ivy-job-radar@main`、PR #101 最新 head/diff/CI、以及本 handoff 顶部 2026-08-20 节。
+2. **不要重新启动 RAG v2.1 / shadow mode / consumer migration。** 当前任务是 Job Radar UX + 性能收尾。
+3. 先读取 PR #101 最新 Python failure log，把 stale regression assertions 改成验证新 contract；不要恢复全页 reload、5 秒 applications polling、whole-body observer、双候选列表、root 浮动工具入口、保存后整表 refresh。
+4. 再审 `VerificationQueueActions` 等仍全局运行组件，尽量 view-scope / event-drive。
+5. 核对 `/api/jobs` legacy seed 是否可安全移除。
+6. 完整 CI 要求 Python tests + app lint + app build + China platform tests 全绿。
+7. 全绿后才把 PR #101 从 Draft 标 Ready 并 merge。
+8. merge 后重新读取 `main` head；**此时**才让用户同步 Ivy Job Radar Site。
+9. PR #101 当前没有 browser-extension 改动；如果最终 diff 仍无 `browser-extension/`，不需要用户 `git pull` / Reload Chrome extension，只需要 Site sync。
+10. code merge ≠ Site deployment。没有实际 Sites 同步结果时不得宣称已上线。
+
+### 0.11 长期不能破坏的边界
+
+- Candidate 永远是一个池：bookmark + `准备材料` application 统一显示，同一岗位一次；不要重新拆成两个状态。
+- 用户选择的 CV template/language 是一级权威；Prompt、application record、base TeX 必须一致。
+- Job Radar preliminary classification 不是最终事实；Chat 独立审核完整 JD + frozen facts + canonical indexes。
+- RAG 只做 evidence 回查，retrieval score 不能当事实判定。
+- general profile 与 APP-specific final CV packet 分离；项目描述只来自最终 APP CV。
+- 未确认实际 submitted version 时不得生成 submitted PDF；已确认真实提交版本不得为了 validator 擅改内容。
+- 私有 JD / application archive 不得写入公开 Job Radar 或 CV repo。
+- 不随机制造 application bundle，不自动替用户选择母版，不无确认自动生成最终 CV。
+
+### 0.12 最短接手指令
+
+```text
+继续 XinyuIvy/ivy-job-radar 的 Fast Simple v2 UX / 性能收尾。先读取 PROJECT_HANDOFF.md 顶部 2026-08-20 权威交接、最新 main、PR #101 最新 head/diff/CI。PR #101 当前仍是 Draft/Open，不能当成已部署。
+
+先修 Python stale regression tests，使它们验证新 contract，而不是恢复旧的全页 reload、5 秒 applications polling、whole-body MutationObserver、双候选列表或 root 浮动工具入口。然后审 VerificationQueueActions 等仍全局运行的组件，并核对 legacy initialJobs seed 是否可安全移除。完整 CI（Python/lint/build/China）全绿后才 Ready + merge PR #101；merge 后再让用户同步 Site。除非最终 diff 改了 browser-extension，否则不要让用户更新 Chrome 扩展。
+```
+
+---
 
 ## 0. 2026-08-12 权威交接：人工复核版定制 CV 已接入，下一步只做第一次真实申请包验证
 
@@ -60,7 +256,7 @@ interview_brief.md
 - 分类不一致但不会影响实际 CV 时只记录；只有可能影响项目选择、顺序或表述的分歧才找用户确认，每批最多 3–5 条。
 - RAG 只在事实母版不足以确认具体数字、方法、贡献边界或争议分类时，按 evidence ID 回查相关原始片段；不得一开始通读全部论文/代码，也不得仅凭检索分数判定事实。
 - 分类完成后必须先给用户**纯文本内容方案**，在 Chat 中逐条调整 summary、skills、项目、顺序和 bullets。只有用户明确说“内容定稿”后才能创建 `cv_customized.tex`。
-- TeX 必须复制并保持 `cv_base.tex` 的 document class、packages、字体、字号、页边距、section、bullet、行距、项目间距、联系方式、日期/地点、`\\hfill` 和自定义命令。不得重新设计版式或明显缩小字体硬塞两页。
+- TeX 必须复制并保持 `cv_base.tex` 的 document class、packages、字体、字号、页边距、section、bullet、行距、项目间距、联系方式、日期/地点、`\hfill` 和自定义命令。不得重新设计版式或明显缩小字体硬塞两页。
 - JD 关键词优先；只要事实支持，尽量使用 JD 原词或自然变体。不与 JD 冲突且仍有价值的行业关键词继续保留。Transferable/Adjacent 必须保留迁移或边界语义；Unsupported 关键词不得为 ATS 强塞。
 - Job Radar 不自动修改 CV、不自动生成/发布 TeX/PDF、不改变申请状态。旧 `/api/cv-tailor/publish` 已关闭自动发布能力。
 
