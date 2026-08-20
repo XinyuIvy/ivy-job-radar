@@ -2,6 +2,7 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 let schemaInitialization: Promise<void> | null = null;
+const RUNTIME_SCHEMA_VERSION = "2026-08-20-fast-simple-v2";
 
 export async function getDb() {
   // Load the runtime binding only when an API request reaches the database.
@@ -14,6 +15,13 @@ export async function getDb() {
 
   if (!schemaInitialization) {
     schemaInitialization = (async () => {
+  // A deployed D1 database is already initialized. One metadata lookup avoids dozens
+  // of repeated CREATE/PRAGMA round trips on every new worker isolate.
+  try {
+    const current = await env.DB.prepare("SELECT value FROM app_meta WHERE key = 'schema_version' LIMIT 1").first<{ value: string }>();
+    if (current?.value === RUNTIME_SCHEMA_VERSION) return;
+  } catch {}
+
   // Runtime initialization keeps local previews and fresh deployments usable.
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS applications (
@@ -97,10 +105,17 @@ export async function getDb() {
   `).run();
 
   // Add columns introduced after the initial production database was created.
+  const knownColumns = new Map<string, Set<string>>();
   const ensureColumn = async (table: string, column: string, definition: string) => {
-    const result = await env.DB.prepare(`PRAGMA table_info(${table})`).all<{ name: string }>();
-    if (!(result.results ?? []).some((row) => row.name === column)) {
+    let columns = knownColumns.get(table);
+    if (!columns) {
+      const result = await env.DB.prepare(`PRAGMA table_info(${table})`).all<{ name: string }>();
+      columns = new Set((result.results ?? []).map((row) => row.name));
+      knownColumns.set(table, columns);
+    }
+    if (!columns.has(column)) {
       await env.DB.prepare(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`).run();
+      columns.add(column);
     }
   };
   await ensureColumn("applications", "application_id", "TEXT NOT NULL DEFAULT ''");
@@ -125,6 +140,17 @@ export async function getDb() {
   await ensureColumn("scan_status", "verified", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn("scan_status", "eligible", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn("scan_status", "progress_updated_at", "TEXT NOT NULL DEFAULT ''");
+
+  await env.DB.batch([
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS applications_status_updated_idx ON applications (status, updated_at DESC)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS applications_job_url_idx ON applications (job_url)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS applications_application_id_idx ON applications (application_id)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS jobs_status_discovered_idx ON jobs (status, discovered_at DESC)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS jobs_region_track_score_idx ON jobs (region, track, score DESC)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS jobs_application_id_idx ON jobs (application_id)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS jobs_canonical_url_idx ON jobs (canonical_url)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS jobs_checked_at_idx ON jobs (checked_at DESC)"),
+  ]);
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS application_tasks (
@@ -348,6 +374,17 @@ export async function getDb() {
       WHERE application_status_events.application_id = applications.id
     )
   `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS app_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    )
+  `).run();
+  await env.DB.prepare(`
+    INSERT INTO app_meta (key, value) VALUES ('schema_version', ?1)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).bind(RUNTIME_SCHEMA_VERSION).run();
 
     })().catch((error) => {
       schemaInitialization = null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import companyPool from "./company-pool.json";
 import companyPoolAdditions from "./company-pool-additions.json";
@@ -341,14 +341,26 @@ type ScanNotice = {
   read: boolean;
 };
 
-type View = "today" | "saved" | "applications" | "companies" | "verify" | "profile" | "ignored";
+type View = "today" | "saved" | "applications" | "tools" | "companies" | "verify" | "profile" | "ignored";
 
 const tracks = ["全部", "Technology", "Quant", "Pharma", "Medical Device", "Healthcare AI", "Consulting"];
+const trackLabels: Record<string, string> = {
+  "全部": "全部方向",
+  Technology: "数据 / AI",
+  Quant: "量化",
+  Pharma: "医药 / 生物统计",
+  "Medical Device": "医疗器械",
+  "Healthcare AI": "医疗 AI",
+  Consulting: "咨询",
+};
+function trackLabel(value: string) {
+  return trackLabels[value] || value;
+}
 const sortOptions = [
-  { value: "score", label: "匹配度最高" },
-  { value: "newest", label: "最新发现" },
+  { value: "score", label: "最适合我" },
+  { value: "newest", label: "最新发布" },
   { value: "checked", label: "最近核验" },
-  { value: "priority", label: "优先申请岗位" },
+  { value: "priority", label: "优先岗位" },
 ] as const;
 const statuses = ["准备材料", "已申请", "一面", "二面/技术面", "终面", "Offer", "撤回", "拒绝"];
 const interviewStatuses = ["一面", "二面/技术面", "终面"];
@@ -573,6 +585,28 @@ function savedApplicationMatchesJob(application: Application, job: Job) {
 const JOB_PAGE_SIZE = 20;
 const COMPANY_PAGE_SIZE = 20;
 const APPLICATION_PAGE_SIZE = 15;
+const JOB_SESSION_CACHE_KEY = "ivy-job-radar:jobs:v2";
+const JOB_SESSION_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function readJobSessionCache(): Job[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.sessionStorage.getItem(JOB_SESSION_CACHE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as { savedAt?: number; rows?: Job[] };
+    if (!parsed.savedAt || Date.now() - parsed.savedAt > JOB_SESSION_CACHE_TTL_MS || !Array.isArray(parsed.rows)) return [];
+    return parsed.rows;
+  } catch {
+    return [];
+  }
+}
+
+function writeJobSessionCache(rows: Job[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(JOB_SESSION_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), rows }));
+  } catch {}
+}
 
 function PaginationControls({
   page,
@@ -601,6 +635,10 @@ export default function JobRadar() {
   const [region, setRegion] = useState("全部地区");
   const [jobSort, setJobSort] = useState<(typeof sortOptions)[number]["value"]>("score");
   const [jobQuery, setJobQuery] = useState("");
+  const deferredJobQuery = useDeferredValue(jobQuery);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [scanPanelOpen, setScanPanelOpen] = useState(false);
+  const [applicationInsightsOpen, setApplicationInsightsOpen] = useState(false);
   const [saved, setSaved] = useState<number[]>([]);
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
   const [dailyJobs, setDailyJobs] = useState<Job[]>([]);
@@ -824,7 +862,7 @@ export default function JobRadar() {
   }, [tasks, interviews, applicationsList]);
 
   useEffect(() => {
-    if (view !== "today") return;
+    if (view !== "today" || !scanPanelOpen) return;
     const refreshStatus = () => {
       void loadScanStatus();
       void loadChinaScanStatus();
@@ -839,7 +877,7 @@ export default function JobRadar() {
       window.clearInterval(statusTimer);
       window.clearInterval(clockTimer);
     };
-  }, [view]);
+  }, [view, scanPanelOpen]);
 
   const enableBrowserNotifications = async () => {
     if (!("Notification" in window)) return;
@@ -881,10 +919,10 @@ export default function JobRadar() {
   }, [view]);
 
   useEffect(() => {
-    if (view !== "applications") return;
+    if (view !== "applications" || !applicationInsightsOpen) return;
     const timer = window.setTimeout(() => void loadAnalytics(), 0);
     return () => window.clearTimeout(timer);
-  }, [view, applicationsList]);
+  }, [view, applicationInsightsOpen]);
 
   useEffect(() => {
     if (view !== "verify") return;
@@ -960,6 +998,7 @@ export default function JobRadar() {
   };
 
   useEffect(() => {
+    if (view !== "tools" && view !== "ignored") return;
     let active = true;
     fetch("/api/ignored-jobs", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
@@ -969,7 +1008,7 @@ export default function JobRadar() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [view]);
 
   const loadProfile = async () => {
     setProfileLoading(true);
@@ -1142,11 +1181,17 @@ export default function JobRadar() {
 
   useEffect(() => {
     let active = true;
+    const cachedRows = readJobSessionCache();
+    if (cachedRows.length) {
+      setDailyJobs(cachedRows);
+      setJobsLoading(false);
+    }
     fetch("/api/jobs", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
       .then((rows) => {
-        if (active) {
+        if (active && Array.isArray(rows)) {
           setDailyJobs(rows);
+          writeJobSessionCache(rows);
           setJobsLoading(false);
         }
       })
@@ -1176,7 +1221,7 @@ export default function JobRadar() {
 
   const jobs = useMemo(
     () => {
-      const normalizedQuery = jobQuery.trim().toLowerCase();
+      const normalizedQuery = deferredJobQuery.trim().toLowerCase();
       const filtered = dailyJobs.filter(
         (job) =>
           (view !== "today" || !["已过期", "疑似过期"].includes(job.status)) &&
@@ -1206,13 +1251,13 @@ export default function JobRadar() {
         return b.score - a.score || newestFirst;
       });
     },
-    [dailyJobs, track, region, saved, view, jobSort, jobQuery],
+    [dailyJobs, track, region, saved, view, jobSort, deferredJobQuery],
   );
 
   useEffect(() => {
     const timer = window.setTimeout(() => setJobPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [track, region, jobSort, view, jobQuery]);
+  }, [track, region, jobSort, view, deferredJobQuery]);
 
   const jobPageCount = Math.max(1, Math.ceil(jobs.length / JOB_PAGE_SIZE));
   const safeJobPage = Math.min(jobPage, jobPageCount);
@@ -1298,11 +1343,11 @@ export default function JobRadar() {
   useEffect(() => {
     const timer = window.setTimeout(() => setSavedPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [track, region, jobSort, jobQuery, saved, applicationsList]);
+  }, [track, region, jobSort, deferredJobQuery, saved, applicationsList]);
   const applicationPageCount = Math.max(1, Math.ceil(visibleApplications.length / APPLICATION_PAGE_SIZE));
   const safeApplicationPage = Math.min(applicationPage, applicationPageCount);
   const pagedApplications = visibleApplications.slice((safeApplicationPage - 1) * APPLICATION_PAGE_SIZE, safeApplicationPage * APPLICATION_PAGE_SIZE);
-  const normalizedSavedQuery = jobQuery.trim().toLocaleLowerCase();
+  const normalizedSavedQuery = deferredJobQuery.trim().toLocaleLowerCase();
   const filteredPendingApplications = pendingApplications.filter((application) =>
     (track === "全部" || application.track === track)
     && (region === "全部地区" || application.region === region)
@@ -1710,12 +1755,14 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "tools" ? "求职工具" : view === "companies" ? "公司研究" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "今日岗位"}</h1>
           <p className="hero-copy">
             {view === "applications"
               ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
               : view === "saved"
-                ? "你保存或建立申请记录但尚未投递的岗位，都在同一个列表里统一管理。"
+                ? "保存感兴趣的岗位，在这里定制 CV、准备材料并开始申请。"
+              : view === "tools"
+                ? "不常用的高级功能集中在这里；日常找工作只需要今日、候选和申请三个页面。"
               : view === "companies"
                 ? `公司池共 ${companyRecords.length} 条；自动汇总官网、招聘入口、岗位记录与历年公开面经。`
                 : view === "verify"
@@ -1729,7 +1776,7 @@ export default function JobRadar() {
         </div>
         <div className="scan-status">
           <span className="pulse" />
-          <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "手动更新"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : "按需运行"}</span></div>
+          <div><strong>{view === "companies" ? "公司研究" : view === "applications" ? "申请管理" : view === "tools" ? "高级功能" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "岗位推荐"}</strong><span>{view === "companies" ? `${companyRecords.length} 家` : view === "applications" ? `${applicationsList.length} 条记录` : view === "tools" ? "按需使用" : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : `${jobs.length} 个岗位`}</span></div>
         </div>
       </section>
 
@@ -1742,6 +1789,13 @@ export default function JobRadar() {
       )}
 
       {view === "applications" && (
+        <section className="application-insights-toggle">
+          <div><strong>统计与日程</strong><span>漏斗、任务、面试和日历默认收起，让申请列表先显示。</span></div>
+          <button type="button" onClick={() => setApplicationInsightsOpen((current) => !current)}>{applicationInsightsOpen ? "收起" : "展开"}</button>
+        </section>
+      )}
+
+      {view === "applications" && applicationInsightsOpen && (
         <section className="analytics-section" aria-label="申请漏斗和来源成功率">
           <div className="section-heading analytics-heading">
             <div><p className="eyebrow">APPLICATION ANALYTICS</p><h2>申请漏斗与来源成功率</h2></div>
@@ -1806,7 +1860,7 @@ export default function JobRadar() {
         </section>
       )}
 
-      {view === "applications" && (
+      {view === "applications" && applicationInsightsOpen && (
         <section className="workflow-section" aria-label="任务与面试日程">
           <div className="section-heading">
             <div><p className="eyebrow">SCHEDULE & FOLLOW-UP</p><h2>任务与面试日程</h2></div>
@@ -1838,7 +1892,7 @@ export default function JobRadar() {
         </section>
       )}
 
-      {view === "applications" && (
+      {view === "applications" && applicationInsightsOpen && (
         <section className="workspace-section embedded-calendar" aria-label="求职活动日历">
           <div className="section-heading">
             <div><p className="eyebrow">JOB SEARCH CALENDAR</p><h2>求职活动日历</h2></div>
@@ -1858,10 +1912,17 @@ export default function JobRadar() {
       )}
 
       {view === "today" && (
+        <section className="quick-update-bar">
+          <div><strong>岗位会自动更新</strong><span>{dailyJobs[0]?.checkedAt ? `最近核验 ${new Date(dailyJobs[0].checkedAt).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}` : "打开后会自动读取最新岗位"}</span></div>
+          <button type="button" onClick={() => setScanPanelOpen((current) => !current)}>{scanPanelOpen ? "收起更新设置" : "更新岗位"}</button>
+        </section>
+      )}
+
+      {view === "today" && scanPanelOpen && (
         <section className="scan-dashboard" aria-label="岗位扫描入口">
           <div className="scan-dashboard-head">
             <div><strong>真实招聘数据</strong><p>美国来源与中国来源独立运行、独立显示进度，结果进入同一个岗位库统一去重。</p></div>
-            <button className="ignored-list-link" onClick={() => setView("ignored")}>忽略名单 {ignoredJobs.length}</button>
+            <button className="ignored-list-link" onClick={() => setView("tools")}>更多工具</button>
           </div>
           <article className="scan-lane scan-lane-us">
             <div className="scan-lane-head">
@@ -2006,33 +2067,29 @@ export default function JobRadar() {
 
       {(view === "today" || view === "saved") && (
         <>
-          <section className="toolbar">
+          <section className="toolbar simple-toolbar">
             <div className="section-heading">
-              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `我的候选岗位（${mergedSavedItems.length}）` : `今日岗位（${jobs.length}）`}</h2></div>
-              <div className="job-controls">
-                <label className="job-search">
-                  <span aria-hidden="true">⌕</span>
-                  <input
-                    type="search"
-                    value={jobQuery}
-                    onChange={(event) => setJobQuery(event.target.value)}
-                    placeholder="搜索岗位、公司或技能"
-                    aria-label="搜索岗位、公司或技能"
-                  />
-                </label>
-                <select value={jobSort} onChange={(event) => setJobSort(event.target.value as (typeof sortOptions)[number]["value"])} aria-label="岗位排序">
-                  {sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                </select>
-                <select value={region} onChange={(event) => setRegion(event.target.value)} aria-label="地区筛选">
-                  <option>全部地区</option><option>美国</option><option>中国</option>
-                </select>
+              <div><p className="eyebrow">{view === "saved" ? "MY SHORTLIST" : "RECOMMENDED JOBS"}</p><h2>{view === "saved" ? `候选岗位（${mergedSavedItems.length}）` : `推荐岗位（${jobs.length}）`}</h2></div>
+            </div>
+            <div className="simple-filter-row">
+              <label className="job-search">
+                <span aria-hidden="true">⌕</span>
+                <input type="search" value={jobQuery} onChange={(event) => setJobQuery(event.target.value)} placeholder="搜索公司、岗位或技能" aria-label="搜索公司、岗位或技能" />
+              </label>
+              <div className="region-chips" aria-label="地区">
+                {["全部地区", "美国", "中国"].map((item) => <button type="button" key={item} className={region === item ? "active" : ""} onClick={() => setRegion(item)}>{item === "全部地区" ? "全部" : item}</button>)}
               </div>
+              <button type="button" className={`filter-toggle ${filtersOpen ? "active" : ""}`} onClick={() => setFiltersOpen((current) => !current)}>
+                筛选{region !== "全部地区" || track !== "全部" || jobSort !== "score" ? " · 已设置" : ""}
+              </button>
             </div>
-            <div className="track-scroller" aria-label="行业筛选">
-              {tracks.map((item) => (
-                <button key={item} className={track === item ? "active" : ""} onClick={() => setTrack(item)}>{item}</button>
-              ))}
-            </div>
+            {filtersOpen && (
+              <div className="advanced-filters">
+                <label>方向<select value={track} onChange={(event) => setTrack(event.target.value)}>{tracks.map((item) => <option key={item} value={item}>{trackLabel(item)}</option>)}</select></label>
+                <label>排序<select value={jobSort} onChange={(event) => setJobSort(event.target.value as (typeof sortOptions)[number]["value"])}>{sortOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label>
+                <button type="button" onClick={() => { setTrack("全部"); setRegion("全部地区"); setJobSort("score"); setJobQuery(""); }}>清除筛选</button>
+              </div>
+            )}
           </section>
           {view === "saved" ? (
             <section className="application-list unified-saved-list" aria-live="polite">
@@ -2070,7 +2127,7 @@ export default function JobRadar() {
                     <div className="job-card-top">
                       <div className="company-logo">{job.company.slice(2, 4)}</div>
                       <div className="job-title">
-                        <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
+                        <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{trackLabel(job.track)}</span></div>
                         <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
                         {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
                       </div>
@@ -2116,7 +2173,7 @@ export default function JobRadar() {
                 <div className="job-card-top">
                   <div className="company-logo">{job.company.slice(2, 4)}</div>
                   <div className="job-title">
-                    <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
+                    <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{trackLabel(job.track)}</span></div>
                     <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
                     {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
                   </div>
@@ -2155,11 +2212,23 @@ export default function JobRadar() {
         </>
       )}
 
+      {view === "tools" && (
+        <section className="tools-section">
+          <div className="tool-grid">
+            <button type="button" className="tool-card" onClick={() => setView("companies")}><span>⌕</span><strong>公司研究</strong><p>查看公司官网、招聘入口和面经。</p></button>
+            <button type="button" className="tool-card" onClick={() => setView("verify")}><span>✓</span><strong>岗位核验</strong><p>手动核验链接和处理数据质量例外。</p></button>
+            <a className="tool-card" href="/autofill"><span>↯</span><strong>自动填写</strong><p>管理申请表自动填写资料。</p></a>
+            <a className="tool-card" href="/bookmarklet"><span>＋</span><strong>保存岗位按钮</strong><p>安装浏览器一键保存岗位。</p></a>
+            <button type="button" className="tool-card" onClick={() => setView("ignored")}><span>×</span><strong>忽略名单</strong><p>恢复之前不想再看到的岗位。</p></button>
+          </div>
+        </section>
+      )}
+
       {view === "ignored" && (
         <section className="tracker-section">
           <div className="section-heading">
             <div><p className="eyebrow">DO NOT SHOW AGAIN</p><h2>忽略名单</h2></div>
-            <button className="add-button" onClick={() => setView("today")}>返回今日岗位</button>
+            <button className="add-button" onClick={() => setView("tools")}>返回工具</button>
           </div>
           {ignoredJobs.length === 0 ? (
             <div className="empty-state"><span>✓</span><h3>忽略名单是空的</h3><p>在岗位卡片中点击“不再显示”即可加入。</p></div>
@@ -2650,9 +2719,8 @@ export default function JobRadar() {
         <button className={view === "today" ? "selected" : ""} onClick={() => setView("today")}><span>⌂</span>今日</button>
         <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>候选</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
-        <button className={view === "companies" ? "selected" : ""} onClick={() => setView("companies")}><span>⌕</span>公司</button>
-        <button className={view === "verify" ? "selected" : ""} onClick={() => setView("verify")}><span>✓</span>核验</button>
-        <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>个人</button>
+        <button className={["tools", "companies", "verify", "ignored"].includes(view) ? "selected" : ""} onClick={() => setView("tools")}><span>＋</span>工具</button>
+        <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>我的</button>
       </nav>
     </main>
   );
