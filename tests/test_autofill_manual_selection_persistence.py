@@ -19,10 +19,10 @@ class AutofillManualSelectionPersistenceTests(unittest.TestCase):
         self.assertIn('contextBox.dataset.matched = context?.matched ? "true" : "false"', popup)
         self.assertIn('if (context.dataset.matched === "true") return;', fallback)
 
-    def test_fill_count_is_described_as_form_controls_not_unique_fields(self):
+    def test_fill_count_is_described_as_form_controls_and_requires_review(self):
         popup = (ROOT / "browser-extension" / "popup.js").read_text(encoding="utf-8")
         self.assertIn("已写入 ${fillResult.filled} 个表单控件", popup)
-        self.assertIn("分段/折叠页面可能把部分控件放在当前不可见区域", popup)
+        self.assertIn("请逐栏检查后手动提交", popup)
 
 
 if __name__ == "__main__":
