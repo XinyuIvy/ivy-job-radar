@@ -2,9 +2,67 @@
 
 最后更新：2026-08-20（America/New_York）
 
-## 0. 2026-08-20 权威交接：候选列表已统一；CV 母版/语言链已修；Fast Simple v2 正在 PR #101 收尾
+## 0. 2026-08-20 权威交接：Fast Simple v2 已在 Site 完成并修复数据库回归；GitHub PR #101 尚未合并
 
 > **本节是当前状态与 next step 的最高优先级记录。** 与下方 2026-08-12 及更早章节冲突时，以本节和 GitHub 当前状态为准。旧章节继续保留用于追溯 RAG / application archive 建设历史，但其中“archive 尚未创建”“第一次 bundle 尚未验证”“继续 RAG v2.1 / shadow mode”等表述已经过时。下一个 Chat 不得为了满足旧测试恢复已淘汰的重型轮询、整页刷新、双候选列表或无人工确认的 CV 自动生成。
+
+### 0.0 本轮最新状态：生产 Site 已前移，但 GitHub 代码尚未追平
+
+本节记录 2026-08-20 本轮直接完成的 Site 优化与紧急恢复，优先级高于下方 0.6 至 0.10 的旧 PR #101 收尾记录。
+
+#### 当前 code-of-record 分叉
+
+- GitHub `main` 最新已核对为 `8fa66e1651fb41f55d64664c3098a34787d9a39b`；PR #101 仍为 Draft / Open，head 仍为 `56c5ed943e48726360f3587ff3553f99fd752a18`，尚未合并。
+- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 117。Site source checkpoint 为 `d64e076`，紧急数据库恢复 checkpoint 为 `5b687bf`。这两个 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
+- 因此，GitHub 与生产 Site 当前并非完全同源。下一个 Chat 不得用 GitHub `main` 直接覆盖 Site，也不得宣称 PR #101 已合并。正确下一步是把生产已验证的实现逐项移植或对齐到 PR #101 或新的 GitHub PR，完整 CI 通过后合并，再谨慎同步 Site。
+
+#### 已上线的 Fast Simple v2 行为
+
+- 主导航实际为 5 项：今日、候选、申请、个人、工具。公司与面经、岗位核验、不再推荐、Autofill、Chrome 保存岗位、CV 知识库、筛选学习均进入工具页。
+- 今日页有首次使用三步说明；岗位更新面板默认折叠，扫描状态只在用户展开面板时轮询。
+- 首屏 `/api/jobs` 直接携带 `saved`，不再额外请求 `/api/saved-jobs`。
+- 收藏、保存申请、忽略和人工核验使用 React state 的即时反馈；常见成功路径不再整表刷新。
+- 搜索使用 `useDeferredValue`；候选事实评分只对接近 viewport 的卡片运行。
+- 导航状态、Chrome 保存同步和候选评分已改为事件驱动、BroadcastChannel、storage event、IntersectionObserver 或防抖，不再用 whole-body MutationObserver 反复全页扫描。
+- layout 中历史叠加的全局 fetch monkey-patch、5 秒 applications polling 和多层 DOM 注入已清理。旧逻辑由 React state、`/api/jobs` 和显式事件承担。
+- 已删除被新权威路径取代的组件：`application-cv-actions.tsx`、`hard-requirement-ignore-actions.tsx`、`job-data-cache.tsx`、`navigation-state-persistence.tsx`、`optimistic-dashboard-actions.tsx`、`pending-application-live-sync.tsx`、`pending-job-visibility.tsx`、`verification-queue-actions.tsx`。
+- `/api/jobs` 使用索引候选匹配 tracked applications，并以 map-based O(n) candidate lookup 去重；不同 stable requisition IDs 不得误合并。
+- 生产 GET 不再反复 upsert 三条 legacy example jobs。删除 seed 写入不会删除已有 D1 rows，也不是本轮岗位暂时消失的原因。
+- D1 冷启动使用 `ivy_schema_v1` marker table 做一次 `sqlite_master` lookup；不得恢复 `PRAGMA user_version` 版本检查。
+- 初始化顺序必须先创建 `scan_status`，再对它调用 `ensureColumn`。新数据库或本地预览缺表时，反过来会在 `ALTER TABLE scan_status` 处失败。
+
+#### 2026-08-20 “所有岗位消失”生产事故
+
+发布 version 116 后，页面一度显示所有岗位为空。根因不是数据删除，也不是 O(n) 去重或 seed removal，而是新加入的 D1 `PRAGMA user_version` schema fast path 在生产中报错，导致 `/api/jobs` 和其他数据库接口返回 500。旧前端又把非 2xx 响应转成空数组，所以视觉上看起来像岗位被清空。
+
+version 117 已完成以下恢复：
+
+1. 用 `sqlite_master` + `ivy_schema_v1` marker 替代 `PRAGMA user_version`。
+2. 修正 fresh database 初始化顺序，先创建 `scan_status`，再检查增量列。
+3. 前端不再把 `/api/jobs` 失败转换为 `[]`；现在显示“岗位读取失败”，明确说明已有数据仍保留，并提供“重新读取”。
+4. 生产数据库已确认存在 `ivy_schema_v1`，证明新版初始化成功完成。
+5. 生产 `jobs` 表已只读核验超过 118 条记录，数据未被删除。
+
+验证结果：
+
+- Python tests：229 passed
+- app lint：passed
+- production build：passed
+- rendered HTML tests：2 passed
+- Sites artifact validation：passed
+- agent preview：岗位接口成功从 failure state 恢复到正常响应
+- production deployment version 117：succeeded
+- 最终 Site URL：`https://ivy-job-radar.rourou1199.chatgpt.site`
+
+#### 下一 Chat 的最短接手指令
+
+```text
+先读取 XinyuIvy/ivy-job-radar 最新 main、PROJECT_HANDOFF.md 顶部 0.0 节、PR #101 最新状态和当前 Ivy Job Radar Site。生产 Site 已运行 version 117，但 GitHub PR #101 仍未合并，二者存在代码分叉。
+
+不要用 GitHub main 直接覆盖 Site。先把 Site source checkpoints d64e076 和 5b687bf 中已验证的 Fast Simple v2、D1 marker 修复、scan_status 初始化顺序、API error UI 和永久测试逐项对齐到 GitHub PR。不得恢复 whole-body MutationObserver、全局轮询、fetch monkey-patch、保存后整表刷新、生产 seed upsert 或 PRAGMA user_version。
+
+完整 GitHub CI 全绿后再 merge，并在同步 Site 时确认 jobs 数据仍在、/api/jobs 非 500、不同 stable requisition IDs 未误合并。任何接口错误必须显示为读取失败，不能伪装成空岗位列表。
+```
 
 ### 0.1 当前面向用户的稳定主流程
 
