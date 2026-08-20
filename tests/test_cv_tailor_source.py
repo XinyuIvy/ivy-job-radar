@@ -54,6 +54,22 @@ class CvTailorSourceTests(unittest.TestCase):
         self.assertIn("定制 CV", actions)
         self.assertNotIn('href="/cv-tailor"', layout)
 
+    def test_tailor_requires_explicit_template_selection_before_archive(self):
+        client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
+        self.assertIn("请选择 CV 母版", client)
+        self.assertIn("selectedTemplateKey", client)
+        self.assertIn("recommendedTemplateKey", client)
+        self.assertIn("Job Radar 只给建议，不会自动替你确认", client)
+        self.assertIn("disabled={!jdDraft.trim() || !selectedTemplateKey}", client)
+        self.assertIn("确认母版与 JD 并生成申请档案", client)
+        self.assertIn("cv_tech_cn.tex", client)
+        self.assertIn("cv_quant_cn.tex", client)
+        self.assertIn("cv_pharma_cn.tex", client)
+        self.assertIn("cv_healthcare_consulting_cn.tex", client)
+        self.assertIn("cv_clinical_data_neuro_cn.tex", client)
+        self.assertIn("cv_tech.tex", client)
+        self.assertIn("cv_quant.tex", client)
+
 
 if __name__ == "__main__":
     unittest.main()

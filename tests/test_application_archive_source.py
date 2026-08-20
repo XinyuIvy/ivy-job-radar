@@ -126,23 +126,26 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         self.assertIn("ARCHIVE_WRITE_PERMISSION_REQUIRED", route)
         self.assertIn("请检查该凭据是否包含这个私有仓库", route)
 
-    def test_jd_can_be_supplied_or_edited_before_archive(self):
+    def test_jd_and_template_are_both_human_confirmed_before_archive(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
         self.assertIn("jdOverride?: string", route)
         self.assertIn("const jd = jdOverride || job?.description?.trim() || \"\"", route)
         self.assertIn('type Stage = "loading" | "review"', client)
         self.assertIn("确认并编辑完整 JD", client)
-        self.assertIn("确认此 JD 并生成申请档案", client)
+        self.assertIn("确认母版与 JD 并生成申请档案", client)
+        self.assertIn("selectedTemplateKey", client)
+        self.assertIn("CV_TEMPLATE_REQUIRED", client)
         self.assertIn("jdOverride: jd", client)
 
     def test_auto_read_jd_never_skips_human_review(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
         self.assertIn('setStage("review")', client)
-        self.assertIn("系统已读取到 JD。请先核对", client)
+        self.assertIn("系统已读取到 JD", client)
+        self.assertIn("再核对 JD", client)
         self.assertNotIn("void createArchive(result)", client)
         self.assertIn("只有你确认后才会生成匹配和 Prompt", client)
-        self.assertIn("已确认并冻结的 JD", client)
+        self.assertIn("已确认并冻结的输入", client)
 
     def test_contract_records_completed_repository_initialization(self):
         contract = (ROOT / "docs" / "APPLICATION_ARCHIVE_CONTRACT.md").read_text(encoding="utf-8")
