@@ -22,6 +22,7 @@ export const templateFiles: Record<ArchiveLanguage, Record<ArchiveTrack, string 
 
 export const canonicalSnapshotFiles = [
   ["master/FACT_MASTER.md", "fact_master_snapshot.md"],
+  ["master/project-evidence/CV_DISPLAY_RULES.yaml", "cv_display_rules_snapshot.yaml"],
   ["master/project-evidence/CANONICAL_PROJECT_INDEX.jsonl", "canonical_project_index.jsonl"],
   ["master/project-evidence/CANONICAL_FACT_INDEX.jsonl", "canonical_fact_index.jsonl"],
   ["master/project-evidence/CANONICAL_CAPABILITY_INDEX.jsonl", "canonical_capability_index.jsonl"],
@@ -120,6 +121,7 @@ export function buildApplicationRecord(input: {
     "  - jd_requirements.json",
     "  - match_packet.json",
     "  - fact_master_snapshot.md",
+    "  - cv_display_rules_snapshot.yaml",
     "  - canonical_project_index.jsonl",
     "  - canonical_fact_index.jsonl",
     "  - canonical_capability_index.jsonl",
@@ -161,6 +163,7 @@ ${confirmedFullJd}
 - \`jd_requirements.json\`
 - \`match_packet.json\`
 - \`fact_master_snapshot.md\`
+- \`cv_display_rules_snapshot.yaml\`
 - \`canonical_project_index.jsonl\`
 - \`canonical_fact_index.jsonl\`
 - \`canonical_capability_index.jsonl\`
@@ -170,6 +173,8 @@ ${confirmedFullJd}
 - \`cv_base.tex\`
 
 如果申请 ID、目录或任何必需文件不存在，立即停止并明确告诉我缺少什么。不要根据聊天记忆、岗位名称或相似申请猜测。
+
+\`cv_display_rules_snapshot.yaml\` 是用户确认的权威 CV 展示边界。凡是与当前语言和 CV 类型匹配的规则都必须执行；不得因为 JD 关键词、\`cv_base.tex\` 的旧措辞、版面压缩或一般写作偏好而覆盖这些规则。
 
 \`jd_snapshot.md\` 与上面内嵌的完整 JD 是岗位要求的主权威来源。\`jd_requirements.json\` 和 \`match_packet.json\` 都只是从完整 JD 派生出的结构化摘要，绝对不能替代完整 JD，也不能把分析范围限制在其中已经抽取的几条要求。不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配。必须自行从完整 JD 中识别所有职责、必需条件、优先条件、学历/经验、方法与工具、合作与沟通要求、工作授权/地点/工作方式以及其他会影响 CV 的信息；即使某项没有出现在结构化摘要里，也要纳入审核。
 
