@@ -27,7 +27,7 @@ class PendingFactFitScoreTests(unittest.TestCase):
     def test_scores_only_pending_application_cards_and_reuses_cv_analysis(self):
         component = (ROOT / "app" / "pending-application-fit-scores.tsx").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
-        self.assertIn("待提交申请", component)
+        self.assertIn("候选岗位", component)
         self.assertIn('section.application-list article.application-card', component)
         self.assertIn('/api/cv-tailor/application?applicationId=', component)
         self.assertIn('fetch("/api/cv-tailor/analyze"', component)

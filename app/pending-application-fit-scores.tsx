@@ -40,9 +40,7 @@ function normalized(value: string) {
 function pendingTabIsActive() {
   const heroTitle = Array.from(document.querySelectorAll<HTMLElement>(".hero h1"))
     .find((element) => element.offsetParent !== null);
-  if (normalized(heroTitle?.textContent || "") !== "收藏与待提交") return false;
-  return Array.from(document.querySelectorAll<HTMLButtonElement>(".stats-two button.active"))
-    .some((button) => normalized(button.textContent || "").startsWith("待提交申请"));
+  return normalized(heroTitle?.textContent || "") === "候选岗位";
 }
 
 function applicationIdFromCard(card: HTMLElement) {
