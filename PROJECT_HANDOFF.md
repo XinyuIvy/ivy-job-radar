@@ -41,7 +41,7 @@ GitHub 应用代码尚未移植本修复。不得用 GitHub `main` 覆盖生产 
 
 #### 当前 code-of-record 分叉
 
-- GitHub `main` 最新为 handoff-only commit `0c4db43995b606a9047e8a5cd092d4dd6a6258b0`；应用代码仍以此前的 `8fa66e1651fb41f55d64664c3098a34787d9a39b` 为基线；PR #101 仍为 Draft / Open，head 仍为 `56c5ed943e48726360f3587ff3553f99fd752a18`，尚未合并。
+- GitHub `main` 当前包含本节 handoff 文档更新；应用代码仍以 `8fa66e1651fb41f55d64664c3098a34787d9a39b` 为基线；PR #101 仍为 Draft / Open，head 仍为 `56c5ed943e48726360f3587ff3553f99fd752a18`，尚未合并。
 - 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 119。Site source checkpoints 包括 `d64e076`、紧急数据库恢复 `5b687bf`、手动保存识别修复 `273a987` 和中文 CV 规则合同 `5981fb3`。这些 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
 - 因此，GitHub 与生产 Site 当前并非完全同源。下一个 Chat 不得用 GitHub `main` 直接覆盖 Site，也不得宣称 PR #101 已合并。正确下一步是把生产已验证的实现逐项移植或对齐到 PR #101 或新的 GitHub PR，完整 CI 通过后合并，再谨慎同步 Site。
 
