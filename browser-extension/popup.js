@@ -80,6 +80,19 @@ async function fetchApplicationPacket(config, context) {
   return result.packet || null;
 }
 
+async function fetchGlobalProfile(config) {
+  if (!config?.siteOrigin || !config?.accessKey) return null;
+  const endpoint = new URL("/api/autofill/general-profile", config.siteOrigin);
+  const response = await fetch(endpoint, {
+    cache: "no-store",
+    headers: { "X-Ivy-Autofill-Key": config.accessKey },
+  });
+  if (response.status === 404) return null;
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(result.error || `Global autofill profile failed (${response.status}).`);
+  return result.profile || null;
+}
+
 function renderCandidates(context) {
   const candidates = Array.isArray(context?.candidates) ? context.candidates : [];
   candidateSelect.replaceChildren();
@@ -117,7 +130,7 @@ function renderContext(context) {
     showContext(
       `${app.company || "当前申请"} · ${app.title || ""}`,
       resume.available
-        ? `${app.archiveId || app.applicationId} · 最终定制 CV 已绑定；经历/项目将优先读取该 APP 的最终 CV`
+        ? `${app.archiveId || app.applicationId} · 最终定制 CV 已绑定；项目/经历来自该 APP，固定申请资料来自 global profile`
         : `${app.archiveId || app.applicationId || "尚无 APP-ID"} · ${resume.reason === "final-pdf-not-found" ? "最终 PDF 尚未生成" : "尚未建立可用最终 CV"}`,
       resume.available ? "ok" : "warn",
     );
@@ -134,7 +147,7 @@ function renderContext(context) {
     );
     return;
   }
-  showContext("没有可选的已提交申请", "仍可填写标准资料，但不会使用 application-specific 经历或 CV。", "warn");
+  showContext("没有可选的已提交申请", "仍可使用 global profile 和本地标准资料填写固定字段，但不会使用 application-specific 项目或 CV。", "warn");
 }
 
 async function refreshContext(interactive = false) {
@@ -204,15 +217,17 @@ candidateSelect.addEventListener("change", async () => {
 
 fillButton.addEventListener("click", async () => {
   fillButton.disabled = true;
-  show("正在识别当前 APP 并填写页面…");
+  show("正在读取 global profile、识别当前 APP 并填写页面…");
   try {
     const tab = await activeTab();
     if (!tab?.id || !/^https?:/i.test(tab.url || "")) return show("请先打开招聘申请页面。", "error");
     const stored = await getStored();
-    if (!stored.ivyProfile) return show("还没有申请资料。先打开“编辑资料”或从 Job Radar 导入。", "error");
+    if (!stored.ivyProfile) return show("还没有本地基础申请资料。先打开“编辑资料”或从 Job Radar 导入。", "error");
 
     let context = currentContext;
     let applicationPacket = null;
+    let generalProfile = null;
+    let globalProfileWarning = "";
     if (stored.ivyRadarConfig && await ensureRadarPermission(stored.ivyRadarConfig, true)) {
       const selectedId = Number(
         currentContext?.matched && currentContext?.application?.id
@@ -222,12 +237,18 @@ fillButton.addEventListener("click", async () => {
       context = await fetchContext(stored.ivyRadarConfig, tab.url, selectedId);
       renderContext(context);
       applicationPacket = await fetchApplicationPacket(stored.ivyRadarConfig, context);
+      try {
+        generalProfile = await fetchGlobalProfile(stored.ivyRadarConfig);
+      } catch (error) {
+        globalProfileWarning = `；global profile 暂不可用：${error.message || error}`;
+      }
     }
 
     await ensureContentScript(tab.id);
     const fillResult = await chrome.tabs.sendMessage(tab.id, {
       type: "IVY_FILL_PAGE",
       applicationPacket,
+      generalProfile,
     });
     if (!fillResult?.ok) return show(fillResult?.error || "自动填写失败。", "error");
 
@@ -241,11 +262,12 @@ fillButton.addEventListener("click", async () => {
 
     const sensitive = fillResult.skippedSensitive?.length ? "；敏感/EEO 项已跳过" : "";
     const cv = uploadResult?.uploaded ? "；已上传对应定制 CV" : context?.matched ? "；未上传 CV（最终 PDF 不可用或页面未找到 Resume 字段）" : "；未绑定 application-specific CV";
-    const appData = applicationPacket ? `；经历/项目来自 ${applicationPacket.application_id || context?.application?.archiveId || "当前 APP"} 最终 CV` : context?.matched ? "；未找到最终 CV 的结构化经历包，经历字段回退到标准资料" : "";
+    const appData = applicationPacket ? `；项目/经历来自 ${applicationPacket.application_id || context?.application?.archiveId || "当前 APP"} 最终 CV` : context?.matched ? "；未找到最终 CV 的结构化经历包" : "";
+    const globalData = generalProfile ? "；固定教育/申请字段已合并 global profile" : "";
     const unresolved = lastQuestions.length ? `；另有 ${lastQuestions.length} 个未填问题` : "";
     const fieldKinds = Array.isArray(fillResult.fields) ? fillResult.fields.length : 0;
     const fieldSummary = fieldKinds ? `（${fieldKinds} 类字段）` : "";
-    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${appData}${cv}${unresolved}${sensitive}。分段/折叠页面可能把部分控件放在当前不可见区域，请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
+    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
   } catch (error) {
     show(`自动填写失败：${error.message || error}`, "error");
   } finally {
@@ -277,9 +299,9 @@ importButton.addEventListener("click", async () => {
     if (!config?.accessKey) return show("当前 Job Radar 还没有生成扩展桥接信息。请部署最新版 Site 后刷新 /autofill。", "error");
     config.siteOrigin = result.origin || config.siteOrigin;
     const granted = await ensureRadarPermission(config, true);
-    if (!granted) return show("没有授予 Job Radar 站点权限；基础字段仍可使用，但不能自动匹配并上传定制 CV。", "warn");
+    if (!granted) return show("没有授予 Job Radar 站点权限；基础字段仍可使用，但不能读取 global profile、匹配 APP 或上传定制 CV。", "warn");
     await chrome.storage.local.set({ ivyProfile: profile, ivyRadarConfig: config });
-    show("已导入申请资料并连接 Job Radar。以后在招聘页可识别当前 APP，并从该 APP 最终定制 CV 读取经历/项目和上传 PDF。", "ok");
+    show("已导入本地基础资料并连接 Job Radar。填写时会实时合并 CV 仓库中的 global profile；项目/经历仍按当前 APP 最终 CV 读取。", "ok");
     renderContext(null);
   } catch (error) {
     show(`导入失败：${error.message || error}`, "error");
