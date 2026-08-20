@@ -163,7 +163,7 @@ ${confirmedFullJd}
 - \`jd_requirements.json\`
 - \`match_packet.json\`
 - \`fact_master_snapshot.md\`
-- \`cv_display_rules_snapshot.yaml\`
+- \`cv_display_rules_snapshot.yaml\`（较新的申请包会包含；历史申请包可能不存在）
 - \`canonical_project_index.jsonl\`
 - \`canonical_fact_index.jsonl\`
 - \`canonical_capability_index.jsonl\`
@@ -172,9 +172,30 @@ ${confirmedFullJd}
 - \`canonical_retrieval_index.jsonl\`
 - \`cv_base.tex\`
 
-如果申请 ID、目录或任何必需文件不存在，立即停止并明确告诉我缺少什么。不要根据聊天记忆、岗位名称或相似申请猜测。
+如果申请 ID、目录或除 \`cv_display_rules_snapshot.yaml\` 之外任何必需文件不存在，立即停止并明确告诉我缺少什么。历史申请包若没有 \`cv_display_rules_snapshot.yaml\`，不要因此停止；继续执行，并严格遵守下面内嵌的全局展示边界。不要根据聊天记忆、岗位名称或相似申请猜测。
 
-\`cv_display_rules_snapshot.yaml\` 是用户确认的权威 CV 展示边界。凡是与当前语言和 CV 类型匹配的规则都必须执行；不得因为 JD 关键词、\`cv_base.tex\` 的旧措辞、版面压缩或一般写作偏好而覆盖这些规则。
+### 全局 CV 展示边界
+
+以下三条是用户确认的长期硬规则，即使历史申请包尚未冻结 \`cv_display_rules_snapshot.yaml\` 也必须执行；较新的申请包若包含该文件，还必须读取其中所有与当前语言和 CV 类型匹配的其他规则。不得因为 JD 关键词、\`cv_base.tex\` 的旧措辞、版面压缩或一般写作偏好而覆盖这些规则。
+
+1. **中文个人简介禁止预计毕业日期：** 生成任何中文 CV 时，Summary / 个人简介中永远不得出现“预计 2027 年 5 月毕业”、其他预计毕业年月或其英文变体。预计毕业日期只能出现在教育背景的博士条目中。
+2. **中文教育背景固定格式：** 生成任何中文 CV 时，教育背景必须严格使用以下内容和顺序，不得自行改写院校/学位措辞、移动毕业日期或增加地点：
+
+\`\`\`latex
+\\section*{\\Large 教育背景}
+
+\\noindent\\textbf{生物统计学博士} $\\mid$ 范德堡大学（Vanderbilt University） \\hfill 预计 2027 年 5 月毕业 \\\\
+博士论文：\\emph{Reliable Biomedical Data Analysis: Semiparametric Inference for Effect Sizes and Variable Importance, and Human-Supervised Multi-Agent Workflows}
+
+\\noindent\\textbf{生物统计学硕士} $\\mid$ 耶鲁大学（Yale University） \\hfill 2023 年 \\\\
+硕士论文：\\emph{Evaluating Treatment Effects under Non-Proportional Hazards in Oncology Clinical Trials}
+
+\\noindent\\textbf{统计学学士} $\\mid$ 西南财经大学 \\hfill 2021 年
+\`\`\`
+
+3. **SQL 永远只写 SQL：** 所有中英文 CV 的技能列表中只能写 \`SQL\`。永远禁止写成 \`SQL (...)\`、\`SQL（...）\` 或在 SQL 后用括号列出 queries、joins、aggregation、查询、连接、聚合、熟练度或其他具体项。
+
+\`cv_display_rules_snapshot.yaml\` 是用户确认的权威 CV 展示边界。若目录中存在该文件，必须读取并执行其中所有适用规则；它用于补充上面三条长期硬规则，而不是削弱它们。
 
 \`jd_snapshot.md\` 与上面内嵌的完整 JD 是岗位要求的主权威来源。\`jd_requirements.json\` 和 \`match_packet.json\` 都只是从完整 JD 派生出的结构化摘要，绝对不能替代完整 JD，也不能把分析范围限制在其中已经抽取的几条要求。不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配。必须自行从完整 JD 中识别所有职责、必需条件、优先条件、学历/经验、方法与工具、合作与沟通要求、工作授权/地点/工作方式以及其他会影响 CV 的信息；即使某项没有出现在结构化摘要里，也要纳入审核。
 
