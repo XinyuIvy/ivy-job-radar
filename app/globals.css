@@ -903,3 +903,16 @@ button { color: inherit; }
 .evidence span {
   overflow-wrap: anywhere;
 }
+
+
+/* Fast UI v1: compact client-side pagination keeps large lists cheap to render. */
+.pagination {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 12px 0; padding: 6px 0; color: var(--muted); font-size: 11px;
+}
+.pagination button {
+  border: 1px solid var(--line); border-radius: 10px; background: white;
+  color: var(--green-dark); padding: 8px 12px; cursor: pointer; font-weight: 800;
+}
+.pagination button:disabled { opacity: .4; cursor: default; }
+.pagination strong { color: var(--ink); }

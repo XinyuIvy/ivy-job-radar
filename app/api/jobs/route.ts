@@ -761,8 +761,11 @@ async function dispatchGlobalScan() {
   };
 }
 
+let initialJobsSeeded = false;
+
 async function seedInitialJobs() {
   const db = await getDb();
+  if (initialJobsSeeded) return db;
   for (const job of initialJobs) {
     const canonicalUrl = canonicalizeJobUrl(job.jobUrl);
     const applicationId = extractApplicationId(job.jobUrl);
@@ -779,6 +782,7 @@ async function seedInitialJobs() {
       },
     });
   }
+  initialJobsSeeded = true;
   return db;
 }
 
