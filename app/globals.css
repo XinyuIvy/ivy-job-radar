@@ -868,7 +868,7 @@ button { color: inherit; }
     width: calc(100% - 20px);
     bottom: max(10px, env(safe-area-inset-bottom));
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     overflow-x: hidden;
     padding: 5px;
     border-radius: 17px;
