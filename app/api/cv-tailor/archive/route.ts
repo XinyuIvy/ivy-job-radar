@@ -120,6 +120,32 @@ async function existingArchiveTextFile(apiRoot: string, path: string, filename: 
   return payload.encoding === "base64" && payload.content ? decodeBase64Utf8(payload.content) : null;
 }
 
+async function archiveFileExists(apiRoot: string, path: string, filename: string, token: string) {
+  const response = await fetch(`${apiRoot}/contents/${path}/${filename}?ref=main`, {
+    cache: "no-store",
+    headers: githubHeaders(token),
+  });
+  if (response.status === 404) return false;
+  if (!response.ok) {
+    const error = new Error(`GitHub ${response.status}: ${(await response.text()).slice(0, 600)}`) as Error & { status?: number };
+    error.status = response.status;
+    throw error;
+  }
+  return true;
+}
+
+function yamlScalar(source: string, key: string) {
+  const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const raw = source.match(new RegExp(`^\\s*${escaped}:\\s*(.*?)\\s*$`, "m"))?.[1]?.trim() ?? "";
+  if (!raw) return "";
+  try {
+    const parsed = JSON.parse(raw);
+    return typeof parsed === "string" ? parsed : String(parsed ?? "");
+  } catch {
+    return raw.replace(/^['"]|['"]$/g, "");
+  }
+}
+
 function fullJdFromSnapshot(snapshot: string) {
   const firstSectionBreak = snapshot.indexOf("\n\n");
   return (firstSectionBreak >= 0 ? snapshot.slice(firstSectionBreak + 2) : snapshot).trim();
@@ -259,32 +285,127 @@ export async function POST(request: NextRequest) {
 
     const archiveId = stableArchiveId(application.company, application.id, application.applicationId);
     const path = archivePath(archiveId);
+    const templatePath = `master/template-cv/${templateFile}`;
     const existingPrompt = await existingArchiveTextFile(archiveApiRoot, path, "chat_prompt.txt", archiveToken);
+
     if (existingPrompt) {
       const existingJdSnapshot = await existingArchiveTextFile(archiveApiRoot, path, "jd_snapshot.md", archiveToken);
+      const existingApplicationRecord = await existingArchiveTextFile(archiveApiRoot, path, "application_record.yaml", archiveToken);
       if (!existingJdSnapshot) throw new Error(`Existing application archive ${archiveId} is missing jd_snapshot.md.`);
-      const currentPrompt = buildChatPrompt(archiveId, path, fullJdFromSnapshot(existingJdSnapshot));
+      if (!existingApplicationRecord) throw new Error(`Existing application archive ${archiveId} is missing application_record.yaml.`);
+
+      const existingLanguage = yamlScalar(existingApplicationRecord, "language");
+      const existingTemplatePath = yamlScalar(existingApplicationRecord, "cv_template_path");
+      const templateMatches = existingLanguage === language && existingTemplatePath === templatePath;
+
+      if (templateMatches) {
+        const frozenJd = fullJdFromSnapshot(existingJdSnapshot);
+        const currentPrompt = buildChatPrompt(archiveId, path, frozenJd, language, templateFile);
+        return NextResponse.json({
+          ok: true,
+          existing: true,
+          refrozen: false,
+          applicationId: archiveId,
+          archivePath: path,
+          language,
+          templateFile,
+          prompt: currentPrompt,
+          promptContractUpdated: existingPrompt !== currentPrompt,
+          repositoryUrl: `https://github.com/${archiveRepository}/tree/main/${path}`,
+        });
+      }
+
+      const customizedTex = `cv_customized_${archiveId}.tex`;
+      const customizedPdf = `cv_customized_${archiveId}.pdf`;
+      const submittedPdf = `cv_submitted_${archiveId}.pdf`;
+      const finalized = (await archiveFileExists(archiveApiRoot, path, customizedTex, archiveToken))
+        || (await archiveFileExists(archiveApiRoot, path, customizedPdf, archiveToken))
+        || (await archiveFileExists(archiveApiRoot, path, submittedPdf, archiveToken));
+
+      if (finalized) {
+        return NextResponse.json({
+          error: `该申请已经存在最终 CV，当前冻结母版为 ${existingTemplatePath || "未知"}（${existingLanguage || "未知语言"}），但你本次选择的是 ${templatePath}（${language}）。为避免静默覆盖已经定稿或投递的版本，系统不会自动切换母版。请为该申请创建明确的 CV revision 后再切换语言/母版。`,
+          code: "CV_TEMPLATE_CHANGE_AFTER_FINALIZATION",
+          existingLanguage,
+          existingTemplatePath,
+          selectedLanguage: language,
+          selectedTemplatePath: templatePath,
+        }, { status: 409 });
+      }
+
+      const cvMain = await githubJson<GithubRef>(`${cvApiRoot}/git/ref/heads/main`, cvToken);
+      const cvCommit = cvMain.object.sha;
+      const sourcePairs = [...canonicalSnapshotFiles, [templatePath, "cv_base.tex"] as const];
+      const sourceContents = await Promise.all(sourcePairs.map(async ([sourcePath, archiveName]) => ({
+        archiveName,
+        content: await readPrivateFile(sourcePath, cvCommit, cvToken),
+      })));
+      const capturedAt = new Date().toISOString();
+      const prompt = buildChatPrompt(archiveId, path, jd, language, templateFile);
+      const applicationRecord = buildApplicationRecord({
+        archiveId,
+        applicationRowId: application.id,
+        jobRowId: job?.id ?? null,
+        company: application.company,
+        title: application.title,
+        region: application.region,
+        location: application.location,
+        track,
+        language,
+        jobUrl: application.jobUrl,
+        source: application.source,
+        capturedAt,
+        cvCommit,
+        templatePath,
+        archivePath: path,
+      });
+      const requirements = buildRequirementPacket(analysis, archiveId, capturedAt);
+      const matchPacket = buildMatchPacket(analysis, archiveId, capturedAt);
+      const files: Record<string, string> = {
+        [`${path}/application_record.yaml`]: applicationRecord,
+        [`${path}/jd_snapshot.md`]: `# ${application.company} — ${application.title}\n\n${jd}\n`,
+        [`${path}/jd_requirements.json`]: `${JSON.stringify(requirements, null, 2)}\n`,
+        [`${path}/match_packet.json`]: `${JSON.stringify(matchPacket, null, 2)}\n`,
+        [`${path}/chat_prompt.txt`]: prompt,
+      };
+      for (const item of sourceContents) files[`${path}/${item.archiveName}`] = item.content.endsWith("\n") ? item.content : `${item.content}\n`;
+
+      const commitSha = await commitFilesAtomically({
+        apiRoot: archiveApiRoot,
+        token: archiveToken,
+        files,
+        message: `Re-freeze application bundle ${archiveId} with ${templateFile}`,
+      });
+      await db.update(applications)
+        .set({ applicationId: archiveId, resumeVersion: `${templateFile}@${cvCommit.slice(0, 12)}`, updatedAt: capturedAt })
+        .where(eq(applications.id, application.id));
+      if (job) await db.update(jobs).set({ applicationId: archiveId }).where(eq(jobs.id, job.id));
+
       return NextResponse.json({
         ok: true,
         existing: true,
+        refrozen: true,
         applicationId: archiveId,
         archivePath: path,
-        prompt: currentPrompt,
-        promptContractUpdated: existingPrompt !== currentPrompt,
+        language,
+        templateFile,
+        previousLanguage: existingLanguage,
+        previousTemplatePath: existingTemplatePath,
+        prompt,
+        commitSha,
         repositoryUrl: `https://github.com/${archiveRepository}/tree/main/${path}`,
       });
     }
 
     const cvMain = await githubJson<GithubRef>(`${cvApiRoot}/git/ref/heads/main`, cvToken);
     const cvCommit = cvMain.object.sha;
-    const templatePath = `master/template-cv/${templateFile}`;
     const sourcePairs = [...canonicalSnapshotFiles, [templatePath, "cv_base.tex"] as const];
     const sourceContents = await Promise.all(sourcePairs.map(async ([sourcePath, archiveName]) => ({
       archiveName,
       content: await readPrivateFile(sourcePath, cvCommit, cvToken),
     })));
     const capturedAt = new Date().toISOString();
-    const prompt = buildChatPrompt(archiveId, path, jd);
+    const prompt = buildChatPrompt(archiveId, path, jd, language, templateFile);
     const applicationRecord = buildApplicationRecord({
       archiveId,
       applicationRowId: application.id,
@@ -327,8 +448,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       existing: false,
+      refrozen: false,
       applicationId: archiveId,
       archivePath: path,
+      language,
+      templateFile,
       prompt,
       commitSha,
       repositoryUrl: `https://github.com/${archiveRepository}/tree/main/${path}`,
