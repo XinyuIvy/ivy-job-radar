@@ -22,6 +22,23 @@ function cardIdentity(card: HTMLElement): JobIdentityInput {
   };
 }
 
+function normalizedStoredJobUrl(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "";
+  try {
+    return new URL(raw, window.location.origin).toString();
+  } catch {
+    return raw;
+  }
+}
+
+function samePendingJob(application: ApplicationRow, identity: JobIdentityInput) {
+  const applicationUrl = normalizedStoredJobUrl(application.jobUrl);
+  const cardUrl = normalizedStoredJobUrl(identity.jobUrl);
+  if (applicationUrl && cardUrl && applicationUrl === cardUrl) return true;
+  return sameLogicalJob(application, identity);
+}
+
 export default function PendingJobVisibility() {
   useEffect(() => {
     let disposed = false;
@@ -50,7 +67,7 @@ export default function PendingJobVisibility() {
         }
 
         const identity = cardIdentity(card);
-        const shouldHide = pendingApplications.some((row) => sameLogicalJob(row, identity));
+        const shouldHide = pendingApplications.some((row) => samePendingJob(row, identity));
         if (shouldHide) {
           card.style.setProperty("display", "none", "important");
           card.setAttribute("aria-hidden", "true");
