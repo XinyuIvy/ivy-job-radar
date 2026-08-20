@@ -1,0 +1,33 @@
+name: Apply Fast UI v1
+
+on:
+  push:
+    branches:
+      - perf/fast-ui-v1
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: perf/fast-ui-v1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Apply deterministic refactor
+        run: python scripts/apply_fast_ui_v1.py
+      - name: Remove one-shot refactor helpers
+        run: rm scripts/apply_fast_ui_v1.py .github/workflows/apply-fast-ui-v1.yml
+      - name: Commit refactor
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Speed up page interactions and list rendering"
+          git push origin HEAD:perf/fast-ui-v1
