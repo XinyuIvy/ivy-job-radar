@@ -1,10 +1,9 @@
 name: Temporary handoff sync 2026-08-20
 
 on:
-  push:
-    branches: [handoff/sync-20260820]
-    paths:
-      - handoff-sync-trigger.txt
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: write
@@ -36,7 +35,7 @@ jobs:
 
 ### 0.1 三个仓库的职责边界
 
-- `XinyuIvy/CV`：长期事实母版、canonical indexes、行业中英文 TeX 母版、全站共用 Autofill profile。不要把某一岗位的最终定制 CV 当成事实母版反写进去。
+- `XinyuIvy/CV`：长期事实母版、canonical indexes、行业中英文 TeX 母版、全站共用 Autofill profile。
 - `XinyuIvy/job-application-archive`（private）：每个 `APP-...` 的冻结 JD、冻结事实快照、所选母版、Chat Prompt、最终 TeX/PDF/TXT/build manifest/application autofill packet，以及明确确认后的 submitted snapshot。
 - `XinyuIvy/ivy-job-radar`：岗位采集/筛选、候选与申请工作流、定制 CV 入口、Autofill bridge / Chrome extension 和用户界面。它不是复杂 CV 编辑器，也不应在站内自动改写最终 CV。
 
@@ -47,7 +46,6 @@ jobs:
 - 已提交 / 面试 / Offer / 拒绝仍在“申请”页按申请阶段管理。
 - 手动 Chrome 保存进入候选/待投递后，不应再重复出现在“今日岗位”。隐藏判断以实际 stored URL 优先，logical identity 为兜底。
 - Fast UI v1（PR #99）已经合并：大数据按 tab 懒加载、扫描轮询只在相关页面、分页、乐观保存/删除、application duplicate lookup 缩小候选集等。
-- `main` 在 PR #100 后只发生过 handoff/维护类提交时，不要把这些维护 commit 误解为新的产品部署版本。
 
 ### 0.3 CV 定制：母版和语言现在是一级权威输入
 
@@ -55,29 +53,28 @@ jobs:
 - PR #98（merge `181c03a286de3c124e74b21ef00bf533d0aa3888`）修复了“选中文母版却继续出英文”的根因：
   - 页面选择的 `language + templateFile` 是一级权威输入；
   - `application_record.yaml`、`cv_base.tex`、`chat_prompt.txt` 必须三者一致；
-  - Prompt 必须显式写本次输出语言和已确认母版，并要求最终自然语言内容保持该语言，不能因为 JD 为英文自行切回英文；
-  - 已存在但**还没有 final customized CV** 的旧 APP，如果本次母版选择不同，可以安全 re-freeze；
-  - 已经有 final customized TeX/PDF 或 submitted snapshot 的 APP 不得静默覆盖历史版本，必须显式提示冲突/版本处理。
-- 旧 APP 可能历史上冻结了错误语言。例如 `APP-2026-16M-0032` 曾冻结 `language=en` + `cv_tech.tex`；这类旧记录不能用来否定新母版选择逻辑。
+  - Prompt 必须显式写本次输出语言和已确认母版，并要求最终自然语言内容保持该语言；
+  - 已存在但还没有 final customized CV 的旧 APP，如果本次母版选择不同，可以安全 re-freeze；
+  - 已经有 final customized TeX/PDF 或 submitted snapshot 的 APP 不得静默覆盖历史版本。
 
 ### 0.4 Archive / PDF 构建的当前规则
 
 - Chat 在用户明确最终确认后写 `cv_customized_<APP-ID>.tex`；archive GitHub Action 用 LuaLaTeX 编译并生成 PDF、TXT、build manifest 和 `application_autofill_<APP-ID>.json`。
 - 普通新 CV 仍然以 `<= 2 pages` 为硬门槛。
-- 已经明确确认“Actual submitted version confirmed”的历史真实提交版本，如果超过 2 页，允许**原样归档**并在 manifest 记录页数例外；不能为了过 validator 擅自删改已提交内容。
+- 已经明确确认“Actual submitted version confirmed”的真实提交版本，如果超过 2 页，允许原样归档并在 manifest 记录页数例外；不能为了过 validator 擅自删改已提交内容。
 - Archive 已补缺失/过期产物恢复机制：final TeX 存在但 PDF/TXT/autofill/manifest 缺失或落后时可以自动补建。
-- `APP-2026-16M-0032` 的 3 页 final TeX 曾因此被旧 validator 拒绝；修复后 PDF/TXT/autofill/manifest 已真实落盘。不要再让用户重新定稿来“解决”这类构建问题。
+- `APP-2026-16M-0032` 的 3 页 final TeX 曾因此被旧 validator 拒绝；修复后 PDF/TXT/autofill/manifest 已真实落盘。
 
 ### 0.5 Autofill 的三层权威来源
 
 1. **Global Application Profile（所有招聘网站通用）**：`XinyuIvy/CV/master/application-forms/application-autofill-profile.md`。教育详细资料、学院、导师、研究单位、GPA/排名、研究领域等放这里；不是 Tencent-specific profile。
-2. **Site-specific override**：只放某网站特有字段（例如某站特殊下拉、事业群、调剂选项）。不要在这里维护项目描述或重复教育 master data。
+2. **Site-specific override**：只放某网站特有字段。不要在这里维护项目描述或重复教育 master data。
 3. **APP-specific final CV packet**：项目/经历名称、顺序、描述、技能、publication、项目链接和对应 final PDF 以当前 `APP-ID` 的最终 CV 为准。Global profile 不能覆盖 APP-specific 项目叙述。
 
 其他 Autofill 现状：
 - DB 中“已提交”概念对应真实存储状态 `已申请`；PR #92 已修复此前误用字符串 `已提交` 导致 0 candidates 的问题。
 - PR #93 修复手动选择 APP 后点击填写时 selected APP 丢失的问题。
-- General education Autofill 已改为跨网站通用，不按腾讯/字节硬编码；自定义 DOM 会用邻近 label / 教育 block context 识别字段，并优先用当前教育 block 已显示的学校锁定 global profile record，而不是按第几个 block 猜。
+- General education Autofill 已改为跨网站通用，不按腾讯/字节硬编码；自定义 DOM 会用邻近 label / 教育 block context 识别字段，并优先用当前教育 block 已显示的学校锁定 global profile record。
 - `学历类型` 与 `学历` 在不同网站可能不是同义词；如果 options 语义未确认，不要把本科/硕士/博士强塞进“学历类型”。
 - APP packet parser 会从最终 TeX 的 `\href` / `\url` 提取项目链接；“独立数据与 AI 系统”也按 project section 解析。CV 里没有的 URL 不要猜。
 - Chrome extension 仍然是 user-triggered、never submit、skip sensitive EEO；不会自动点击“Add another experience/project”。
@@ -86,52 +83,48 @@ jobs:
 
 - PR：`https://github.com/XinyuIvy/ivy-job-radar/pull/101`
 - branch：`ux/fast-simple-v2`
-- 当前 head：`56c5ed943e48726360f3587ff3553f99fd752a18`
+- 当前记录 head：`56c5ed943e48726360f3587ff3553f99fd752a18`；新 Chat 接手时必须重新读取最新 head。
 - 状态：**open + draft + not merged**。不要让用户同步 Site 到这个 branch/head，也不要声称已经上线。
-- build / lint / China platform smoke 已能通过；当前阻塞项是 Python regression tests。最近一次失败主要是**旧测试锁死旧 UI / 旧轮询实现**，应更新测试契约，而不是把新实现退回旧架构。
+- build / lint / China platform smoke 已能通过；当前阻塞项是 Python regression tests。最近一次失败主要是旧测试锁死旧 UI / 旧轮询实现，应更新测试契约，而不是把新实现退回旧架构。
 
 PR #101 已实现、但尚未进入 `main` 的方向：
 - 主导航收敛为 **今日 / 候选 / 申请 / 工具 / 我的** 五个入口；公司研究、核验、Autofill、Chrome 保存、CV knowledge、screening learning、忽略名单统一放到“工具”。
 - 第一次使用路径显式化：`1 找岗位 -> 2 ☆ 保存到候选 -> 3 定制 CV 后投递`。
-- 筛选简化：搜索常驻；地区变为 全部/美国/中国 chips；高级“筛选”里才放方向与排序；track 显示友好中文（如 Technology -> 数据 / AI，Pharma -> 医药 / 生物统计）；默认排序叫“最适合我”；支持一键清除筛选。
+- 筛选简化：搜索常驻；地区变为 全部/美国/中国 chips；高级“筛选”里才放方向与排序；track 显示友好中文；默认排序叫“最适合我”；支持一键清除筛选。
 - 扫描详情默认折叠，只有用户展开“更新岗位”时才开始 scan-status polling；申请 Analytics/任务/日历默认折叠在“统计与日程”下。
 - `useDeferredValue(jobQuery)` 避免每个键盘输入都同步重算大列表。
-- Job list 有 session stale-while-revalidate：先显示 5 分钟内缓存，再后台取新数据；不是为了隐藏服务器错误，而是减少白屏等待。
-- `/api/jobs` 直接返回 `saved` flag，减少一次独立 saved-jobs 初始请求；D1 查询并行；tracked-application matching 使用 stable-id / role candidate maps；display dedupe 从 O(n^2) `findIndex` 改为 map-based O(n) 路径，同时必须保留“不同 stable requisition ID 不可误合并”。
+- Job list 有 session stale-while-revalidate：先显示短期缓存，再后台取新数据。
+- `/api/jobs` 直接返回 `saved` flag；D1 查询并行；tracked-application matching 使用 stable-id / role candidate maps；display dedupe 从 O(n^2) `findIndex` 改为 map-based O(n)，同时保留“不同 stable requisition ID 不可误合并”。
 - `/api/jobs` 有很短的 warm-worker visible-list cache；mutation 时必须失效。
-- D1 `getDb()` 加 `app_meta.schema_version` fast path，避免新 worker isolate 每次重复几十个 CREATE/PRAGMA round trips；同一 table 的 PRAGMA column info 只读一次；补了 applications/jobs/saved/ignored 热路径索引。
-- Candidate fact-fit 改为 `IntersectionObserver`：卡片接近 viewport 才开始分析，避免候选页打开就同时请求所有 CV analysis；MutationObserver 只做防抖增强。
+- D1 `getDb()` 加 `app_meta.schema_version` fast path，避免新 worker isolate 每次重复几十个 CREATE/PRAGMA round trips；同一 table 的 PRAGMA column info 只读一次；补 applications/jobs/saved/ignored 热路径索引。
+- Candidate fact-fit 改为 `IntersectionObserver`：卡片接近 viewport 才开始分析。
 - `ApplicationCvActions` 不再为了给候选卡加“定制 CV”而全量请求 applications，而是直接读 React 输出的 `data-application-row-id`。
-- Navigation state persistence 移除了全页面 DOM MutationObserver，改为 click/change/input/pageshow/popstate + debounce。
-- 历史全局组件 `JobDataCache`、`PendingJobVisibility`、`OptimisticDashboardActions` 已从 layout 移除，因为对应功能已迁到 React / API 权威路径；这一步消除了旧的 5 秒整表 applications polling 和多层全 DOM observer。
-- `PendingApplicationLiveSync` 目标是只负责 BroadcastChannel/storage/focus 通知，并 dispatch `ivy-job-radar:pending-refresh`；真正的 applications refresh 由候选页 JobRadar debounce 执行。
+- Navigation state persistence 移除了全页面 DOM MutationObserver，改为事件 + debounce。
+- 历史全局 `JobDataCache`、`PendingJobVisibility`、`OptimisticDashboardActions` 已从 layout 移除，因为对应功能已迁到 React/API 权威路径；消除旧的 5 秒整表 applications polling 和多层全 DOM observer。
+- `PendingApplicationLiveSync` 目标是只负责跨标签通知并 dispatch `ivy-job-radar:pending-refresh`；真正 applications refresh 由候选页 debounce 执行。
 - Hard-requirement ignore 改为本地乐观移除 + event，不再 `window.location.reload()`。
-- Verification queue enhancement 应只在 verify view 可见时工作，并做 debounce，避免所有页面都去读 `job-requests + applications + data-quality`。
+- Verification queue enhancement 应只在 verify view 可见时工作，并做 debounce。
 - 移动端底部导航 CSS / smoke test 已迁到 5 slots。
 
-**继续 PR #101 时先做：**
-- 读取最新 Python test failure log；逐个把仍在断言旧实现的测试改成验证新权威路径。
-- 已知旧契约包括：保存后必须 `await loadApplications()`、CV actions 必须先全量 fetch applications、layout 必须存在四个 floating shortcut links、hard ignore 必须 reload、navigation persistence 必须全 DOM mutation、pending live sync 必须 DOM 插卡/读完整 applications、候选标题必须是旧文案等。
-- 不要为了让旧测试绿而重新加回这些已删除的性能负担。
-- 所有核心 CI 全绿后再把 PR #101 标为 ready、merge；merge 后才给 Site 最新 `main` SHA。
+**继续 PR #101 时先做：**读取最新 Python failure log，逐个把仍在断言旧实现的测试改成验证新权威路径；不要为了让旧测试绿而重新加回已删除的性能负担。所有核心 CI 全绿后再 ready + merge；merge 后才给 Site 最新 `main` SHA。
 
-### 0.7 面向外部用户的产品原则（接下来所有 UX 优化都按这个判断）
+### 0.7 面向外部用户的产品原则
 
 - 第一次使用的人应该只需要理解主路径：**今日 -> 候选 -> 定制 CV / 投递 -> 申请进度**。高级维护功能不要占主导航。
-- 高频点击必须优先做本地/乐观反馈；durable write / reconcile 放后台，失败再 rollback。不要保存后为了“确认”就全页 reload 或全表 refetch。
+- 高频点击优先本地/乐观反馈；durable write / reconcile 放后台，失败再 rollback。不要保存后为了“确认”就全页 reload 或全表 refetch。
 - 页面数据按 view 懒加载；不在当前 view 的定时轮询和 API 请求必须停掉。
-- 大列表必须分页/虚拟化/延迟计算；昂贵评分只在用户快看到时运行。
-- 搜索/筛选应该用用户语言，不暴露内部 track/source/schema 概念；高级筛选渐进展开，不要默认把所有控制器铺满屏幕。
-- “刷新”区分两种语义：普通 UI 数据 refresh 应快且可缓存；真正抓取新招聘数据的 scan 是显式后台工作，不要把两者混成一个阻塞按钮。
+- 大列表必须分页/延迟计算；昂贵评分只在用户快看到时运行。
+- 搜索/筛选使用用户语言，不暴露内部 track/source/schema 概念；高级筛选渐进展开。
+- 普通 UI 数据 refresh 要快且可缓存；真正抓取新招聘数据的 scan 是显式后台工作，不要把两者混成一个阻塞按钮。
 
-### 0.8 部署 / 更新规则（务必区分）
+### 0.8 部署 / 更新规则
 
-- **代码 merge != Site 已部署。** Job Radar Site 只有在用户明确让 `@Sites` 同步最新 `main` 后才算部署。
-- **Site-only change**：只需要同步 Site；不需要用户本地 `git pull` / Chrome Reload。
-- **browser-extension change**：用户本地 repo `git pull origin main` + `chrome://extensions` Reload；如果后端没改，不需要 Site sync。
+- **代码 merge != Site 已部署。** 只有用户明确让 `@Sites` 同步最新 `main` 后才算 Site 部署。
+- **Site-only change**：只需要同步 Site；不需要本地 `git pull` / Chrome Reload。
+- **browser-extension change**：本地 repo `git pull origin main` + `chrome://extensions` Reload；如果后端没改，不需要 Site sync。
 - **Site + extension 都改**：两边都做。
 - **archive-only change**：既不需要 Site sync，也不需要扩展 Reload。
-- Bookmarklet 是浏览器本地保存的 JS；bookmarklet 代码改变时需要重新安装/拖拽更新，不能假设 Site sync 会更新已有 bookmark。
+- Bookmarklet 是浏览器本地保存的 JS；bookmarklet 代码改变时需要重新安装，不能假设 Site sync 会更新已有 bookmark。
 
 ### 0.9 不要重新做的事情
 
@@ -141,13 +134,13 @@ PR #101 已实现、但尚未进入 `main` 的方向：
 - 不要覆盖已经 final/submitted 的 APP archive 历史版本。
 - 不要把 private JD / private application archive 写到 public repo。
 - 不要把站点建议母版当成最终母版；用户手动选择才是一级权威。
-- 不要因为某个网站 Autofill 字段识别失败就把全局 profile 拆成某公司专属 profile；先修通用 field/context recognition。
+- 不要因为某网站 Autofill 字段识别失败就把全局 profile 拆成公司专属 profile；先修通用 field/context recognition。
 
 ### 0.10 当前日常操作的简化心智模型
 
 `发现/手动保存真实 JD -> 候选岗位 -> 选择母版 + 确认完整 JD -> 复制 Prompt 到新 Chat -> Chat 审核事实与文字 -> 用户确认 final TeX -> archive Action 生成 PDF/TXT/autofill -> 实际投递后状态改为已申请 -> Chrome Autofill 读取当前 APP final packet + Global Profile`。
 
-在任何新 Chat 接手时，先确认当前 `main`、PR #101 最新 head/CI 和 `PROJECT_HANDOFF.md` 本节，再决定继续开发；不要依赖旧聊天里缓存的 commit SHA。
+新 Chat 接手时，先确认当前 `main`、PR #101 最新 head/CI 和 `PROJECT_HANDOFF.md` 本节，再决定继续开发；不要依赖旧聊天里缓存的 commit SHA。
 <!-- HANDOFF-2026-08-20-END -->'''
 
           if start in text and end in text:
@@ -156,8 +149,6 @@ PR #101 已实现、但尚未进入 `main` 的方向：
               match = re.search(r'\n## ', text)
               insert_at = match.start() + 1 if match else len(text)
               text = text[:insert_at] + block + '\n\n' + text[insert_at:]
-
-          # Preserve historical 2026-08-12 section, but make its status explicit if it used the same section number.
           text = text.replace('## 0. 2026-08-12', '## 0A. 2026-08-12', 1)
           path.write_text(text, encoding='utf-8')
           PY
