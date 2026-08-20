@@ -55,6 +55,41 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         self.assertIn("用户确认的权威 CV 展示边界", helper)
         self.assertIn("不得因为 JD 关键词", helper)
 
+    def test_selected_template_language_is_an_explicit_prompt_authority(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "本次已确认的 CV 语言与母版（一级硬约束）",
+            "输出语言：${languageLabel}",
+            "已确认母版：\\`${templateFile}\\`",
+            "最终 CV 的 Summary/个人简介、技能、经历、项目、论文/荣誉等自然语言内容必须使用中文",
+            "不得因为 JD 是英文",
+            "冻结母版与本次选择不一致",
+        ]:
+            self.assertIn(phrase, helper)
+        self.assertIn("language: ArchiveLanguage", helper)
+        self.assertIn("templateFile: string", helper)
+        self.assertIn("buildChatPrompt(archiveId, path, jd, language, templateFile)", route)
+        self.assertIn("buildChatPrompt(archiveId, path, frozenJd, language, templateFile)", route)
+
+    def test_existing_archive_never_silently_reuses_a_different_template(self):
+        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+        for phrase in [
+            'existingArchiveTextFile(archiveApiRoot, path, "application_record.yaml", archiveToken)',
+            'yamlScalar(existingApplicationRecord, "language")',
+            'yamlScalar(existingApplicationRecord, "cv_template_path")',
+            "const templateMatches = existingLanguage === language && existingTemplatePath === templatePath",
+            "archiveFileExists",
+            "CV_TEMPLATE_CHANGE_AFTER_FINALIZATION",
+            "Re-freeze application bundle ${archiveId} with ${templateFile}",
+            "refrozen: true",
+            "previousLanguage: existingLanguage",
+            "previousTemplatePath: existingTemplatePath",
+        ]:
+            self.assertIn(phrase, route)
+        self.assertIn("cv_customized_${archiveId}.tex", route)
+        self.assertIn("cv_submitted_${archiveId}.pdf", route)
+
     def test_prompt_uses_application_id_in_cv_filenames(self):
         helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
         self.assertIn("cv_customized_${archiveId}.tex", helper)
@@ -94,11 +129,12 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         ]:
             self.assertIn(phrase, helper)
 
-    def test_existing_archive_gets_current_operational_prompt_without_rewriting_snapshot(self):
+    def test_existing_archive_gets_current_operational_prompt_without_rewriting_matching_snapshot(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         self.assertIn("const existingPrompt = await existingArchiveTextFile", route)
         self.assertIn("jd_snapshot.md", route)
-        self.assertIn("const currentPrompt = buildChatPrompt(archiveId, path, fullJdFromSnapshot(existingJdSnapshot))", route)
+        self.assertIn("const frozenJd = fullJdFromSnapshot(existingJdSnapshot)", route)
+        self.assertIn("const currentPrompt = buildChatPrompt(archiveId, path, frozenJd, language, templateFile)", route)
         self.assertIn("prompt: currentPrompt", route)
         self.assertIn("promptContractUpdated: existingPrompt !== currentPrompt", route)
 
@@ -116,7 +152,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "完整 JD 的全部主要板块",
         ]:
             self.assertIn(phrase, helper)
-        self.assertIn("buildChatPrompt(archiveId, path, jd)", route)
+        self.assertIn("buildChatPrompt(archiveId, path, jd, language, templateFile)", route)
         self.assertIn('existingArchiveTextFile(archiveApiRoot, path, "jd_snapshot.md", archiveToken)', route)
         self.assertIn("fullJdFromSnapshot(existingJdSnapshot)", route)
 
