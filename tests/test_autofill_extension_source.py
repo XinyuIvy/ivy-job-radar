@@ -10,7 +10,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_manifest_remains_manual_trigger_only(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.3.1")
+        self.assertEqual(manifest["version"], "0.3.2")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
@@ -35,7 +35,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             self.assertIn(term, content.lower())
         self.assertIn("SENSITIVE_RE.test(text)", content)
 
-    def test_common_and_application_specific_fields_are_supported(self):
+    def test_common_global_and_application_specific_fields_are_supported(self):
         content = (EXT / "content.js").read_text(encoding="utf-8")
         for key in [
             "identity.firstName",
@@ -47,14 +47,25 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             "links.linkedin",
             "links.github",
             "education.school",
+            "education.degreeType",
             "education.degree",
+            "education.college",
             "education.major",
+            "education.advisor",
+            "education.researchUnit",
+            "education.gpa",
+            "education.gpaScale",
+            "education.rank",
+            "education.researchArea",
+            "education.thesis",
+            "education.publications",
             "employment.employer",
             "employment.title",
             "employment.description",
             "project.name",
             "project.role",
             "project.description",
+            "project.url",
             "cv.skills",
             "cv.publications",
             "eligibility.age18",
@@ -64,7 +75,10 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         ]:
             self.assertIn(key, content)
         self.assertIn("packetIsAuthoritative", content)
+        self.assertIn("globalProfileIsAuthoritative", content)
         self.assertIn('authority === "final_customized_cv_only"', content)
+        self.assertIn('schema_version === "global-application-autofill-profile-v1"', content)
+        self.assertIn("projectUrl", content)
         self.assertIn("setCombobox", content)
         self.assertIn("unresolvedQuestions", content)
 
@@ -78,14 +92,16 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("不会点击 Submit", client)
         self.assertIn("最终定制 CV", client)
 
-    def test_popup_matches_application_fetches_final_cv_packet_and_attaches_pdf(self):
+    def test_popup_fetches_global_profile_app_packet_and_final_pdf(self):
         popup = (EXT / "popup.js").read_text(encoding="utf-8")
         popup_html = (EXT / "popup.html").read_text(encoding="utf-8")
         fallback = (EXT / "manual-fallback.js").read_text(encoding="utf-8")
         self.assertIn("/api/autofill/application-context", popup)
         self.assertIn("/api/autofill/application-packet", popup)
+        self.assertIn("/api/autofill/general-profile", popup)
         self.assertIn("/api/autofill/resume", popup)
         self.assertIn("applicationPacket", popup)
+        self.assertIn("generalProfile", popup)
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
@@ -103,16 +119,18 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertNotIn("CV_GITHUB_TOKEN", popup)
         self.assertNotIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", popup)
 
-    def test_server_bridges_require_derived_key_private_archive_and_real_submitted_status(self):
+    def test_server_bridges_require_derived_key_and_use_private_sources(self):
         context_route = (ROOT / "app" / "api" / "autofill" / "application-context" / "route.ts").read_text(encoding="utf-8")
         resume_route = (ROOT / "app" / "api" / "autofill" / "resume" / "route.ts").read_text(encoding="utf-8")
         packet_route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
+        global_route = (ROOT / "app" / "api" / "autofill" / "general-profile" / "route.ts").read_text(encoding="utf-8")
         job_radar = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn('const statuses = ["准备材料", "已申请"', job_radar)
-        for source in [context_route, resume_route, packet_route]:
+        for source in [context_route, resume_route, packet_route, global_route]:
             self.assertIn("deriveBookmarkCaptureKey", source)
             self.assertIn("secureBookmarkKeyEqual", source)
             self.assertIn("x-ivy-autofill-key", source.lower())
+        for source in [context_route, resume_route, packet_route]:
             self.assertIn('AUTOFILL_APPLICATION_STATUS = "已申请"', source)
             self.assertNotIn('AUTOFILL_APPLICATION_STATUS = "已提交"', source)
             self.assertNotIn('AUTOFILL_APPLICATION_STATUS = "准备材料"', source)
@@ -132,6 +150,9 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("row.status === AUTOFILL_APPLICATION_STATUS", context_route)
         self.assertIn("application.status !== AUTOFILL_APPLICATION_STATUS", resume_route)
         self.assertIn("application.status !== AUTOFILL_APPLICATION_STATUS", packet_route)
+        self.assertIn("application-autofill-profile.md", global_route)
+        self.assertIn("global-application-autofill-profile-v1", global_route)
+        self.assertIn("CV_GITHUB_TOKEN", global_route)
 
 
 if __name__ == "__main__":
