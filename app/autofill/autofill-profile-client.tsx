@@ -38,7 +38,7 @@ const fieldGroups = [
     ["location.city", "City"], ["location.state", "State / Province"], ["location.postalCode", "ZIP / Postal code"], ["location.country", "Country"],
     ["links.linkedin", "LinkedIn"], ["links.github", "GitHub"], ["links.website", "Personal website"],
   ]],
-  ["教育信息（最终 APP CV 可覆盖）", [
+  ["旧版教育回退值（global profile 不可用时才使用）", [
     ["education.school", "School / University"], ["education.degree", "Degree"], ["education.major", "Major / Field of study"],
     ["education.graduationMonth", "Graduation month"], ["education.graduationYear", "Graduation year"],
   ]],
@@ -110,12 +110,12 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     if (accessKey) {
       window.localStorage.setItem(CONFIG_KEY, JSON.stringify({ version: 1, siteOrigin: window.location.origin, accessKey }));
     }
-    setMessage("已保存。扩展会先识别当前 APP-ID；如果该 APP 已有最终定制 CV，Education / Experience / Projects / Skills 优先读取最终 CV 的 application-specific packet，这里的教育/经历只作为回退值。");
+    setMessage("已保存本地基础资料。教育详细信息会实时读取 CV 仓库里的 global application profile；项目、经历描述、技能、项目链接和 PDF 则按当前 APP-ID 的最终定制 CV 读取。这里的教育/经历字段只保留为回退值。");
   };
 
   const copyJson = async () => {
     await navigator.clipboard.writeText(JSON.stringify(profile, null, 2));
-    setMessage("申请资料 JSON 已复制。也可以在扩展的“编辑资料”页面手动导入。");
+    setMessage("本地基础申请资料 JSON 已复制。教育详细资料不在这里维护，而在 CV 仓库的 global application profile 中维护。");
   };
 
   return <main className="profile-page">
@@ -123,8 +123,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       <header>
         <div>
           <p className="eyebrow">APPLICATION AUTOFILL · V3</p>
-          <h1>标准申请资料</h1>
-          <p>身份、地址、链接和资格问题作为跨岗位稳定资料保存在当前浏览器。对于已经定稿的申请，扩展会根据 APP-ID 从私有归档读取该岗位最终定制 CV 的结构化 Education / Experience / Projects / Skills，并优先使用那一份，而不是固定套用这里的经历。</p>
+          <h1>本地基础申请资料</h1>
+          <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。三段教育的学院、导师、研究单位、GPA、排名和研究领域会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
         </div>
         <Link href="/">返回 Job Radar</Link>
       </header>
