@@ -10,10 +10,26 @@
 
 本节记录 2026-08-20 本轮直接完成的 Site 优化与紧急恢复，优先级高于下方 0.6 至 0.10 的旧 PR #101 收尾记录。
 
+#### 2026-08-20 手动保存字段识别修复，生产 Site version 118
+
+用户报告 Chrome 手动保存岗位时，岗位名和公司仍识别不准。本轮已在生产 Site 完成以下修复：
+
+- 根因修复：公司为空时，旧服务端错误地把岗位名传入公司推断，可能把“生物统计总监”一类岗位名保存成公司。
+- 书签 v4 发送 JSON-LD、BOSS、LinkedIn、Workday、通用 ATS、H1、Open Graph 和页面标题候选，由服务端按来源可信度统一选择。
+- Workday 不再把整个 `jobPostingHeader` 容器当岗位名，只读取精确标题节点或内部标题元素。
+- BOSS、LinkedIn 等招聘平台品牌不得成为公司；无法可靠识别公司时显示“待补充公司”，不得拿岗位名凑数。
+- 保存窗口在真正写入岗位池和待提交申请前，显示可编辑的“岗位名称”和“公司”。用户确认值是最终权威，不得被 JSON-LD 或页面标题覆盖。
+- 旧书签继续兼容并进入确认窗口；重新安装后才能启用 v4 多候选采集。
+- 本轮不批量改写已有岗位、不删除历史记录、不触碰 D1 初始化。
+
+生产 Site checkpoint 为 `273a987`，Sites version 118 已成功发布。验证结果：Python 230 tests、运行时 6 tests、lint、production build、Sites artifact 全部通过。生产地址仍为 `https://ivy-job-radar.rourou1199.chatgpt.site`。
+
+GitHub 应用代码尚未移植本修复。不得用 GitHub `main` 覆盖生产 Site；应通过可审查 PR 按文件移植解析器、确认窗口和永久测试。
+
 #### 当前 code-of-record 分叉
 
 - GitHub `main` 最新已核对为 `8fa66e1651fb41f55d64664c3098a34787d9a39b`；PR #101 仍为 Draft / Open，head 仍为 `56c5ed943e48726360f3587ff3553f99fd752a18`，尚未合并。
-- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 117。Site source checkpoint 为 `d64e076`，紧急数据库恢复 checkpoint 为 `5b687bf`。这两个 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
+- 当前生产 Site 已通过 Sites checkout 完成 Fast Simple v2 的实质实现，并发布 version 118。Site source checkpoints 包括 `d64e076`、紧急数据库恢复 `5b687bf` 和手动保存识别修复 `273a987`。这两个 SHA 属于 Site source repository，不是 GitHub `XinyuIvy/ivy-job-radar` 的 commit。
 - 因此，GitHub 与生产 Site 当前并非完全同源。下一个 Chat 不得用 GitHub `main` 直接覆盖 Site，也不得宣称 PR #101 已合并。正确下一步是把生产已验证的实现逐项移植或对齐到 PR #101 或新的 GitHub PR，完整 CI 通过后合并，再谨慎同步 Site。
 
 #### 已上线的 Fast Simple v2 行为
