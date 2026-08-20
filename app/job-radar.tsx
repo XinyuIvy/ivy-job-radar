@@ -640,10 +640,11 @@ export default function JobRadar() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [scanPanelOpen, setScanPanelOpen] = useState(false);
   const [applicationInsightsOpen, setApplicationInsightsOpen] = useState(false);
-  const [saved, setSaved] = useState<number[]>([]);
+  const [initialJobCache] = useState<Job[]>(() => readJobSessionCache());
+  const [saved, setSaved] = useState<number[]>(() => initialJobCache.filter((job) => job.saved).map((job) => job.id));
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
-  const [dailyJobs, setDailyJobs] = useState<Job[]>([]);
-  const [jobsLoading, setJobsLoading] = useState(true);
+  const [dailyJobs, setDailyJobs] = useState<Job[]>(() => initialJobCache);
+  const [jobsLoading, setJobsLoading] = useState(() => initialJobCache.length === 0);
   const [jobsRefreshing, setJobsRefreshing] = useState(false);
   const [jobsMessage, setJobsMessage] = useState("");
   const [applicationsList, setApplicationsList] = useState<Application[]>([]);
@@ -1214,12 +1215,6 @@ export default function JobRadar() {
 
   useEffect(() => {
     let active = true;
-    const cachedRows = readJobSessionCache();
-    if (cachedRows.length) {
-      setDailyJobs(cachedRows);
-      setSaved(cachedRows.filter((job) => job.saved).map((job) => job.id));
-      setJobsLoading(false);
-    }
     fetch("/api/jobs", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
       .then((rows) => {
