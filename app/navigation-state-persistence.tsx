@@ -116,12 +116,14 @@ export default function NavigationStatePersistence() {
       scrollTimer = window.setTimeout(() => writeState({ scrollY: window.scrollY }), 160);
     };
 
+    const handlePageShow = () => scheduleRestore(20);
+    const handlePopState = () => scheduleRestore(20);
     document.addEventListener("change", handleChange, true);
     document.addEventListener("input", handleChange, true);
     document.addEventListener("click", handleClick, true);
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("pageshow", () => scheduleRestore(20));
-    window.addEventListener("popstate", () => scheduleRestore(20));
+    window.addEventListener("pageshow", handlePageShow);
+    window.addEventListener("popstate", handlePopState);
     scheduleRestore(20);
 
     return () => {
@@ -129,6 +131,8 @@ export default function NavigationStatePersistence() {
       document.removeEventListener("input", handleChange, true);
       document.removeEventListener("click", handleClick, true);
       window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("pageshow", handlePageShow);
+      window.removeEventListener("popstate", handlePopState);
       window.clearTimeout(restoreTimer);
       window.clearTimeout(scrollTimer);
     };

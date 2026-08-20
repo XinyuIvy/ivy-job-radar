@@ -894,11 +894,6 @@ export default function JobRadar() {
     });
   };
 
-  const loadApplications = async () => {
-    const response = await fetch("/api/applications", { cache: "no-store" });
-    if (response.ok) setApplicationsList(await response.json());
-  };
-
   const loadAnalytics = async () => {
     setAnalyticsLoading(true);
     const response = await fetch("/api/analytics", { cache: "no-store" });
@@ -918,6 +913,55 @@ export default function JobRadar() {
       active = false;
     };
   }, [view]);
+
+  useEffect(() => {
+    if (view !== "saved") return;
+    let active = true;
+    let refreshTimer = 0;
+    const refreshPending = () => {
+      window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => {
+        fetch("/api/applications", { cache: "no-store" })
+          .then((response) => response.ok ? response.json() : null)
+          .then((rows) => {
+            if (active && Array.isArray(rows)) setApplicationsList(rows);
+          });
+      }, 80);
+    };
+    window.addEventListener("ivy-job-radar:pending-refresh", refreshPending);
+    return () => {
+      active = false;
+      window.clearTimeout(refreshTimer);
+      window.removeEventListener("ivy-job-radar:pending-refresh", refreshPending);
+    };
+  }, [view]);
+
+  useEffect(() => {
+    const applyRows = (event: Event) => {
+      const rows = (event as CustomEvent<Job[]>).detail;
+      if (!Array.isArray(rows)) return;
+      setDailyJobs(rows);
+      setSaved(rows.filter((job) => job.saved).map((job) => job.id));
+      writeJobSessionCache(rows);
+    };
+    const removeIgnored = (event: Event) => {
+      const detail = (event as CustomEvent<{ company?: string; title?: string }>).detail || {};
+      const company = String(detail.company || "").trim().toLocaleLowerCase();
+      const title = String(detail.title || "").trim().toLocaleLowerCase();
+      if (!company || !title) return;
+      setDailyJobs((current) => {
+        const next = current.filter((job) => !(job.company.trim().toLocaleLowerCase() === company && job.title.trim().toLocaleLowerCase() === title));
+        writeJobSessionCache(next);
+        return next;
+      });
+    };
+    window.addEventListener("ivy-job-radar:jobs-updated", applyRows);
+    window.addEventListener("ivy-job-radar:job-ignored", removeIgnored);
+    return () => {
+      window.removeEventListener("ivy-job-radar:jobs-updated", applyRows);
+      window.removeEventListener("ivy-job-radar:job-ignored", removeIgnored);
+    };
+  }, []);
 
   useEffect(() => {
     if (view !== "applications" || !applicationInsightsOpen) return;
@@ -1216,6 +1260,7 @@ export default function JobRadar() {
       const filtered = dailyJobs.filter(
         (job) =>
           (view !== "today" || !["已过期", "疑似过期"].includes(job.status)) &&
+          (view !== "today" || !saved.includes(job.id)) &&
           (track === "全部" || job.track === track) &&
           (region === "全部地区" || job.region === region) &&
           (view !== "saved" || saved.includes(job.id)) &&
@@ -1414,6 +1459,11 @@ export default function JobRadar() {
   const toggleSaved = async (id: number) => {
     const isSaved = saved.includes(id);
     setSaved((current) => isSaved ? current.filter((item) => item !== id) : [...current, id]);
+    setDailyJobs((current) => {
+      const next = current.map((job) => job.id === id ? { ...job, saved: !isSaved } : job);
+      writeJobSessionCache(next);
+      return next;
+    });
     const response = await fetch(
       isSaved ? `/api/saved-jobs?jobId=${id}` : "/api/saved-jobs",
       {
@@ -1422,7 +1472,14 @@ export default function JobRadar() {
         body: isSaved ? undefined : JSON.stringify({ jobId: id }),
       },
     );
-    if (!response.ok) await loadSavedJobs();
+    if (!response.ok) {
+      await loadSavedJobs();
+      setDailyJobs((current) => {
+        const next = current.map((job) => job.id === id ? { ...job, saved: isSaved } : job);
+        writeJobSessionCache(next);
+        return next;
+      });
+    }
   };
 
   const openFromJob = (job: Job) => {
@@ -1672,23 +1729,31 @@ export default function JobRadar() {
 
   const ignoreJob = async (reason: string) => {
     if (!ignoreTarget) return;
+    const target = ignoreTarget;
+    const jobsSnapshot = dailyJobs;
+    const savedSnapshot = saved;
+    setIgnoreTarget(null);
     setIgnoreSaving(true);
+    setDailyJobs((current) => {
+      const next = current.filter((job) => job.id !== target.id);
+      writeJobSessionCache(next);
+      return next;
+    });
+    setSaved((current) => current.filter((id) => id !== target.id));
     const response = await fetch("/api/ignored-jobs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        company: ignoreTarget.company,
-        title: ignoreTarget.title,
-        jobUrl: ignoreTarget.jobUrl,
-        reason,
-      }),
+      body: JSON.stringify({ company: target.company, title: target.title, jobUrl: target.jobUrl, reason }),
     });
     setIgnoreSaving(false);
-    if (!response.ok) return;
-    setDailyJobs((current) => current.filter((job) => job.id !== ignoreTarget.id));
-    setSaved((current) => current.filter((id) => id !== ignoreTarget.id));
-    setIgnoreTarget(null);
-    await loadIgnoredJobs();
+    if (!response.ok) {
+      setDailyJobs(jobsSnapshot);
+      writeJobSessionCache(jobsSnapshot);
+      setSaved(savedSnapshot);
+      setIgnoreTarget(target);
+      return;
+    }
+    if (view === "ignored" || view === "tools") void loadIgnoredJobs();
   };
 
   const restoreIgnoredJob = async (id: number) => {
@@ -2215,6 +2280,8 @@ export default function JobRadar() {
             <button type="button" className="tool-card" onClick={() => setView("verify")}><span>✓</span><strong>岗位核验</strong><p>手动核验链接和处理数据质量例外。</p></button>
             <a className="tool-card" href="/autofill"><span>↯</span><strong>自动填写</strong><p>管理申请表自动填写资料。</p></a>
             <a className="tool-card" href="/bookmarklet"><span>＋</span><strong>保存岗位按钮</strong><p>安装浏览器一键保存岗位。</p></a>
+            <a className="tool-card" href="/cv-knowledge"><span>◈</span><strong>能力资料</strong><p>查看用于岗位匹配和 CV 定制的能力知识库。</p></a>
+            <a className="tool-card" href="/screening-learning"><span>◇</span><strong>筛选学习</strong><p>查看筛选规则和学习建议。</p></a>
             <button type="button" className="tool-card" onClick={() => setView("ignored")}><span>×</span><strong>忽略名单</strong><p>恢复之前不想再看到的岗位。</p></button>
           </div>
         </section>
