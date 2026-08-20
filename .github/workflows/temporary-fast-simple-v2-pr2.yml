@@ -1,0 +1,34 @@
+name: Temporary Fast Simple v2 standalone patch
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - tools/run_fast_simple_v2.txt
+      - tools/apply_fast_simple_v2.py
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - name: Apply patch once
+        run: python tools/apply_fast_simple_v2.py
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/job-radar.tsx app/api/jobs/route.ts db/index.ts app/globals.css
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'Simplify UX and accelerate hot paths'
+          git push origin HEAD:${{ github.head_ref }}
