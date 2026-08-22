@@ -99,7 +99,7 @@
   function educationIndexFromContext(el, profile) {
     const entries = Array.isArray(profile?.education) ? profile.education : [];
     let node = el;
-    for (let depth = 0; depth < 8 && node?.parentElement; depth += 1) {
+    for (let depth = 0; depth < 12 && node?.parentElement; depth += 1) {
       node = node.parentElement;
       const signature = contextSignature(node);
       const matches = entries
@@ -108,6 +108,22 @@
       if (matches.length === 1) return matches[0].index;
     }
     return -1;
+  }
+
+  function educationBlock(el) {
+    let node = el;
+    for (let depth = 0; depth < 12 && node?.parentElement; depth += 1) {
+      node = node.parentElement;
+      const signature = normalize(node.innerText || node.textContent || "");
+      const signals = [
+        /学校名称|学校|大学|school|university|institution/,
+        /(?<!类型)学历|学位|degree|qualification/,
+        /专业|major|field of study|discipline|program/,
+      ].filter((pattern) => pattern.test(signature)).length;
+      const controls = Array.from(node.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).filter(visible);
+      if (signals >= 2 && controls.includes(el) && controls.length <= 24) return node;
+    }
+    return null;
   }
 
   function groupedPeriodKey(el, labelText) {
@@ -179,12 +195,54 @@
   }
 
   function setText(el, value) {
-    if (!value || el.disabled || el.readOnly) return false;
+    if (!value || el.disabled) return false;
     const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
     const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
     if (setter) setter.call(el, value); else el.value = value;
     dispatch(el);
     return true;
+  }
+
+  function yearMonthField(el) {
+    if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return false;
+    const hint = normalize([
+      el.getAttribute?.("placeholder"),
+      el.getAttribute?.("aria-label"),
+      el.getAttribute?.("name"),
+      el.id,
+    ].filter(Boolean).join(" "));
+    return /yyyy\s*mm|yyyy.*month|年.*月/.test(hint);
+  }
+
+  function correctPeriodsBySchool(profile) {
+    const controls = Array.from(document.querySelectorAll(FORM_CONTROL_SELECTOR)).filter(visible);
+    const usedSchools = new Set();
+    let filled = 0;
+    for (const entry of profile.education || []) {
+      const variants = schoolVariants(entry);
+      const schoolField = controls.find((control) => {
+        if (usedSchools.has(control)) return false;
+        const value = normalize(control.value || control.getAttribute?.("value") || "");
+        return value && variants.some((variant) => value === variant || value.includes(variant) || variant.includes(value));
+      });
+      if (!schoolField) continue;
+      let node = schoolField.parentElement;
+      let dates = [];
+      for (let depth = 0; node && depth < 14; depth += 1, node = node.parentElement) {
+        const blockControls = Array.from(node.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).filter(visible);
+        dates = blockControls.filter(yearMonthField);
+        if (blockControls.includes(schoolField) && dates.length >= 2 && blockControls.length <= 32) break;
+        dates = [];
+        if (node === document.body) break;
+      }
+      if (dates.length < 2) continue;
+      usedSchools.add(schoolField);
+      const start = entry.start_year && entry.start_month ? `${entry.start_year}-${String(entry.start_month).padStart(2, "0")}` : "";
+      const end = entry.end_year && entry.end_month ? `${entry.end_year}-${String(entry.end_month).padStart(2, "0")}` : "";
+      if (start && setText(dates[0], start)) filled += 1;
+      if (end && setText(dates[1], end)) filled += 1;
+    }
+    return filled;
   }
 
   function setSelect(el, value) {
@@ -220,12 +278,18 @@
       return { filled: 0, fields: [] };
     }
     const controls = Array.from(document.querySelectorAll(FORM_CONTROL_SELECTOR)).filter(visible);
-    const fallbackCounters = new Map();
+    const blockAssignments = new Map();
+    let nextFallbackIndex = 0;
     let filled = 0;
     const fields = [];
 
+    const correctedPeriods = correctPeriodsBySchool(profile);
+    if (correctedPeriods) {
+      filled += correctedPeriods;
+      fields.push("education.periodBySchool");
+    }
+
     for (const el of controls) {
-      if (!empty(el)) continue;
       const labelText = nearbyLabelText(el);
       let key = inferField(labelText);
       if (!key) key = groupedPeriodKey(el, labelText);
@@ -233,13 +297,19 @@
 
       let entryIndex = educationIndexFromContext(el, profile);
       if (entryIndex < 0) {
-        const count = fallbackCounters.get(key) || 0;
-        entryIndex = count;
-        fallbackCounters.set(key, count + 1);
+        const block = educationBlock(el);
+        if (block && blockAssignments.has(block)) entryIndex = blockAssignments.get(block);
+        else {
+          entryIndex = nextFallbackIndex;
+          nextFallbackIndex += 1;
+          if (block) blockAssignments.set(block, entryIndex);
+        }
       }
       const entry = profile.education[entryIndex];
       const value = educationValue(entry, key, el, labelText);
       if (!value) continue;
+      const correctKnownPeriod = ["startDate", "endDate"].includes(key) && educationIndexFromContext(el, profile) >= 0;
+      if (!empty(el) && !correctKnownPeriod) continue;
 
       let changed = false;
       if (el instanceof HTMLSelectElement) changed = setSelect(el, value);
