@@ -1024,7 +1024,7 @@
     if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return !String(el.value || "").trim();
     const rendered = [el.getAttribute?.("aria-valuetext"), el.getAttribute?.("data-value"), el.textContent]
       .map((value) => String(value || "").trim()).find(Boolean);
-    return !rendered;
+    return !rendered || /^(?:请选择|选择|请输入|select|choose|enter)$/i.test(rendered);
   }
 
   function unresolvedQuestions() {
@@ -1046,18 +1046,42 @@
     return questions;
   }
 
+  function structuralPublicationTitleControl(el) {
+    if (!(el instanceof HTMLInputElement) || dateLikeField(el)) return false;
+    let node = el.parentElement || null;
+    for (let depth = 0; node && depth < 10; depth += 1, node = node.parentElement) {
+      if (node === document.body) break;
+      const controls = visibleControls(node);
+      if (!controls.includes(el) || controls.length < 5 || controls.length > 16) continue;
+      const dates = controls.filter(dateLikeField);
+      const textareas = controls.filter((control) => control instanceof HTMLTextAreaElement);
+      const selects = controls.filter((control) => isSelectLike(control));
+      if (!dates.length || !textareas.length || selects.length < 2) continue;
+      const titleInputs = controls.filter((control) => control instanceof HTMLInputElement && !dateLikeField(control) && !isSelectLike(control));
+      if (titleInputs[0] === el) return true;
+    }
+    return false;
+  }
+
   function isSectionIdentityControl(el, section) {
     const directText = directFieldText(el);
     const directKey = inferKey(directText);
     if (section === "education" && directKey === "education.school") return true;
     if (section === "publication" && directKey === "publication.title") return true;
+    if (section === "publication" && structuralPublicationTitleControl(el)) return true;
     if (section === "project" && directKey === "project.name") return true;
-    if (!directText) return false;
     const sectionInfo = ancestorSectionInfo(el);
     if (sectionInfo.section !== section) return false;
-    if (section === "education") return /(?:^| )(?:学校名称|学校|大学|school|university|institution)(?: |$)/.test(directText);
-    if (section === "publication") return /(?:^| )(?:题名|论文标题|文章标题|paper title|article title)(?: |$)/.test(directText);
-    return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText);
+    if (section === "education") {
+      return /(?:^| )(?:学校名称|学校|大学|school|university|institution)(?: |$)/.test(directText)
+        || semanticSectionKey(el, sectionInfo) === "education.school";
+    }
+    if (section === "publication") {
+      return /(?:^| )(?:题名|论文标题|文章标题|paper title|article title)(?: |$)/.test(directText)
+        || semanticSectionKey(el, sectionInfo) === "publication.title";
+    }
+    return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText)
+      || semanticSectionKey(el, sectionInfo) === "project.name";
   }
 
   function sectionIdentityControls(section) {

@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.9 只填写空白字段：</strong><span>页面上已经手动填写或选择的内容一律保留；手动打开三段教育后，空白部分会按博士、硕士、本科顺序整组补齐。</span></div>
-        <a href="/ivy-job-autofill-0.4.9.zip" download>下载空白字段补填版扩展</a>
+        <div><strong>扩展 0.4.10 已修复论文区块完全空白：</strong><span>即使网页没有把可见标签关联到输入框，也会根据标题、作者、日期、刊物和详情的整行结构识别；仍然只填空白字段。</span></div>
+        <a href="/ivy-job-autofill-0.4.10.zip" download>下载论文结构识别修复版扩展</a>
       </section>
 
       <form onSubmit={save}>

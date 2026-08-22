@@ -636,3 +636,40 @@ test("auto-adds publication rows and binds every field within the same contamina
   assert.equal(rows[1].date.value, "2025-02-11");
   assert.equal(rows[1].details.value, generalProfile.publications[1].details);
 });
+
+test("fills a publication card whose visible labels are not associated with its controls", async () => {
+  const body = { tagName: "BODY", textContent: "论文/期刊", innerText: "论文/期刊", parentElement: null };
+  const block = {
+    tagName: "DIV",
+    textContent: "论文名称 作者顺序 发表时间 刊物/机构 论文详情",
+    innerText: "论文名称 作者顺序 发表时间 刊物/机构 论文详情",
+    parentElement: body,
+  };
+  const title = new FakeInput({ id: "field-a91", label: "", placeholder: "请输入", parentElement: block });
+  const author = new FakeSelect({ id: "field-b82", label: "", parentElement: block, options: ["请选择", "第一作者", "第二作者", "共同作者"] });
+  const date = new FakeInput({ id: "field-c73", label: "", placeholder: "请选择日期", parentElement: block, type: "date", readOnly: true });
+  const venue = new FakeSelect({ id: "field-d64", label: "", parentElement: block, options: ["请选择", "期刊", "会议", "其他"] });
+  const details = new FakeTextarea({ id: "field-e55", label: "", placeholder: "请填写论文详情，也可填写论文链接", parentElement: block });
+  const fields = [title, author, date, venue, details];
+  block.querySelectorAll = () => fields;
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    publications: [{
+      title: "Semiparametric confidence sets for cross-sectional and longitudinal neuroimaging",
+      author_order: "First Author and Corresponding Author",
+      publication_date: "2025-10-31",
+      venue: "Imaging Neuroscience",
+      details: "提出适用于横断面与纵向神经影像的半参数效应量置信集方法。",
+    }],
+  };
+
+  const result = await runFill(fields, null, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.equal(title.value, generalProfile.publications[0].title, JSON.stringify(result));
+  assert.equal(author.value, "第一作者");
+  assert.equal(date.value, "2025-10-31");
+  assert.equal(venue.value, "期刊");
+  assert.equal(details.value, generalProfile.publications[0].details);
+});

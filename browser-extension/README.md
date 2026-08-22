@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V4.9)
+# Ivy Job Radar Application Autofill (V4.10)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -16,6 +16,7 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - V4.3 binds the first three education blocks as doctorate, master's and bachelor's entries and overwrites stale parser values as a complete block, so school, degree, major and dates cannot drift into different records.
 - V4.8 fills education inside the primary click handler instead of skipping it and waiting for a supplemental script. Three manually opened blank education cards are bound by DOM order as doctorate, master's, and bachelor's records; dates adapt to month or full-day controls.
 - V4.9 preserves every value already present on the application page and fills only genuinely blank controls across education, projects, employment, publications, awards, and other supported sections.
+- V4.10 recognizes publication cards from their title input, author and venue selectors, date control, and details textarea even when the recruiting site does not associate visible labels with those controls.
 - Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
 - Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
 - V4.7 reads each control's direct label before using section structure, so a card containing every publication/project label cannot cross-wire title, date, author, venue, role, or details fields.
