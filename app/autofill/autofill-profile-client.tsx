@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.7 已重做项目与论文自动添加：</strong><span>等待每个新行真实出现后再继续；按整行绑定标题、日期、作者与详情；论文等级没有权威依据时留空，不再误选 Level 1。</span></div>
-        <a href="/ivy-job-autofill-0.4.7.zip" download>下载项目与论文整行绑定版扩展</a>
+        <div><strong>扩展 0.4.9 只填写空白字段：</strong><span>页面上已经手动填写或选择的内容一律保留；手动打开三段教育后，空白部分会按博士、硕士、本科顺序整组补齐。</span></div>
+        <a href="/ivy-job-autofill-0.4.9.zip" download>下载空白字段补填版扩展</a>
       </section>
 
       <form onSubmit={save}>

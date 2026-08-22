@@ -144,7 +144,7 @@ test("fills paired project dates and a generic project description", async () =>
   assert.equal(name.value, "真实世界电子病历：30 天再入院风险机器学习模型");
   assert.equal(role.value, "第一作者");
   assert.equal(description.value, "构建并验证再入院风险模型。\n完成时间外验证。");
-  assert.deepEqual(new Set(result.fields), new Set(["project.startDate", "project.endDate", "project.name", "project.role", "project.description", "project.periodByName"]));
+  assert.deepEqual(new Set(result.fields), new Set(["project.startDate", "project.endDate", "project.name", "project.role", "project.description"]));
 });
 
 test("adapts a project date range to full-date controls", async () => {
@@ -198,43 +198,82 @@ test("uses the current month as the end date for an ongoing project", async () =
   assert.equal(result.ok, true);
   assert.equal(start.value, "2026-01");
   assert.equal(end.value, expectedCurrentMonth);
-  assert.equal(result.fields.includes("project.periodByName"), true);
+  assert.equal(result.fields.includes("project.endDate"), true);
 });
 
-test("leaves authoritative education to the block-level education pass", async () => {
-  const page = { tagName: "DIV", textContent: "教育背景", parentElement: null };
-  const vanderbiltBlock = { tagName: "DIV", textContent: "起止时间 学校名称 学历 专业", parentElement: page };
-  const swufeBlock = { tagName: "DIV", textContent: "起止时间 学校名称 学历 专业", parentElement: page };
-  const vStart = new FakeInput({ id: "v-start", label: "起止时间", placeholder: "YYYY-MM", parentElement: vanderbiltBlock, readOnly: true });
-  const vEnd = new FakeInput({ id: "v-end", label: "起止时间", placeholder: "YYYY-MM", parentElement: vanderbiltBlock, readOnly: true });
-  const vSchool = new FakeInput({ id: "v-school", label: "学校名称", parentElement: vanderbiltBlock });
-  const sStart = new FakeInput({ id: "s-start", label: "起止时间", placeholder: "YYYY-MM", parentElement: swufeBlock, readOnly: true });
-  const sEnd = new FakeInput({ id: "s-end", label: "起止时间", placeholder: "YYYY-MM", parentElement: swufeBlock, readOnly: true });
-  const sSchool = new FakeInput({ id: "s-school", label: "学校名称", parentElement: swufeBlock });
-  vStart.value = "2017-09";
-  vEnd.value = "2021-06";
-  vSchool.value = "范德堡大学";
-  sStart.value = "2023-08";
-  sEnd.value = "2027-05";
-  sSchool.value = "西南财经大学";
-  vanderbiltBlock.querySelectorAll = () => [vStart, vEnd, vSchool];
-  swufeBlock.querySelectorAll = () => [sStart, sEnd, sSchool];
+test("fills three completely blank education records by slot in the primary pass", async () => {
+  const page = { tagName: "DIV", textContent: "教育背景", innerText: "教育背景", parentElement: null };
+  const makeBlock = (prefix) => {
+    const block = { tagName: "DIV", textContent: "起止时间 学校名称 学院名称 专业名称 学历层次 专业成绩排名 实验室 导师 研究方向", innerText: "教育经历", parentElement: page };
+    const start = new FakeInput({ id: `${prefix}-start`, label: "起止时间", placeholder: "开始日期", parentElement: block, type: "date", readOnly: true });
+    const end = new FakeInput({ id: `${prefix}-end`, label: "起止时间", placeholder: "结束日期", parentElement: block, type: "date", readOnly: true });
+    const school = new FakeInput({ id: `${prefix}-school`, label: "学校名称", parentElement: block });
+    const college = new FakeInput({ id: `${prefix}-college`, label: "学院名称", parentElement: block });
+    const major = new FakeInput({ id: `${prefix}-major`, label: "专业名称", parentElement: block });
+    const degree = new FakeSelect({ id: `${prefix}-degree`, label: "学历层次", parentElement: block, options: ["请选择", "博士", "硕士", "本科"] });
+    const rank = new FakeSelect({ id: `${prefix}-rank`, label: "专业成绩排名", parentElement: block, options: ["请选择", "前5%", "前10%"] });
+    const unit = new FakeInput({ id: `${prefix}-unit`, label: "实验室", parentElement: block });
+    const advisor = new FakeInput({ id: `${prefix}-advisor`, label: "导师", parentElement: block });
+    const area = new FakeInput({ id: `${prefix}-area`, label: "研究方向", parentElement: block });
+    const fields = [start, end, school, college, major, degree, rank, unit, advisor, area];
+    block.querySelectorAll = () => fields;
+    return { fields, start, end, school, college, major, degree, rank, unit, advisor, area };
+  };
+  const first = makeBlock("phd");
+  const second = makeBlock("masters");
+  const third = makeBlock("bachelors");
+  const fields = [first, second, third].flatMap((record) => record.fields);
   const profile = {
     schema_version: "global-application-autofill-profile-v1",
     education: [
-      { school: "Vanderbilt University", school_zh: "范德堡大学", start_year: "2023", start_month: "08", end_year: "2027", end_month: "05" },
-      { school: "Southwestern University of Finance and Economics", school_zh: "西南财经大学", start_year: "2017", start_month: "09", end_year: "2021", end_month: "06" },
+      { school_zh: "西南财经大学", college: "统计学院", degree: "统计学学士", degree_type: "本科", major: "统计学", rank: "前5%", research_unit: "统计研究中心", advisor: "吕凤毛", start_year: "2017", start_month: "09", end_year: "2021", end_month: "06" },
+      { school_zh: "耶鲁大学", college: "公共卫生学院", degree: "生物统计学硕士", degree_type: "硕士", major: "生物统计学", rank: "前5%", research_unit: "YCAS", advisor: "Wei Wei", research_area: "Survival Analysis", start_year: "2021", start_month: "08", end_year: "2023", end_month: "05" },
+      { school_zh: "范德堡大学", college: "医学院", degree: "生物统计学博士", degree_type: "博士", major: "生物统计学", rank: "前10%", research_unit: "VUMC", advisor: "Simon Vandekar", research_area: "Semiparametric statistical inference", start_year: "2023", start_month: "08", end_year: "2027", end_month: "05" },
     ],
   };
 
-  const result = await runFill([vStart, vEnd, vSchool, sStart, sEnd, sSchool], null, profile);
+  const result = await runFill(fields, null, profile);
 
   assert.equal(result.ok, true);
-  assert.equal(vStart.value, "2017-09");
-  assert.equal(vEnd.value, "2021-06");
-  assert.equal(sStart.value, "2023-08");
-  assert.equal(sEnd.value, "2027-05");
-  assert.equal(result.fields.some((field) => field.startsWith("education.")), false);
+  assert.deepEqual([first.school.value, first.degree.value, first.major.value, first.start.value, first.end.value], ["范德堡大学", "博士", "生物统计学", "2023-08-01", "2027-05-31"]);
+  assert.deepEqual([first.college.value, first.rank.value, first.unit.value, first.advisor.value], ["医学院", "前10%", "VUMC", "Simon Vandekar"]);
+  assert.deepEqual([second.school.value, second.degree.value, second.major.value, second.start.value, second.end.value], ["耶鲁大学", "硕士", "生物统计学", "2021-08-01", "2023-05-31"]);
+  assert.deepEqual([second.college.value, second.rank.value, second.unit.value, second.advisor.value, second.area.value], ["公共卫生学院", "前5%", "YCAS", "Wei Wei", "Survival Analysis"]);
+  assert.deepEqual([third.school.value, third.degree.value, third.major.value, third.start.value, third.end.value], ["西南财经大学", "本科", "统计学", "2017-09-01", "2021-06-30"]);
+  assert.deepEqual([third.college.value, third.rank.value, third.unit.value, third.advisor.value], ["统计学院", "前5%", "统计研究中心", "吕凤毛"]);
+  assert.equal(result.fields.includes("education.recordsBySlot"), true);
+});
+
+test("preserves manually entered values and fills only blank education controls", async () => {
+  const page = { tagName: "DIV", textContent: "教育背景", innerText: "教育背景", parentElement: null };
+  const block = { tagName: "DIV", textContent: "起止时间 学校名称 学院名称 专业名称 学历层次 导师", innerText: "教育经历", parentElement: page };
+  const start = new FakeInput({ id: "manual-start", label: "起止时间", placeholder: "YYYY-MM", parentElement: block, readOnly: true });
+  const end = new FakeInput({ id: "manual-end", label: "起止时间", placeholder: "YYYY-MM", parentElement: block, readOnly: true });
+  const school = new FakeInput({ id: "manual-school", label: "学校名称", parentElement: block });
+  const college = new FakeInput({ id: "manual-college", label: "学院名称", parentElement: block });
+  const major = new FakeInput({ id: "manual-major", label: "专业名称", parentElement: block });
+  const degree = new FakeSelect({ id: "manual-degree", label: "学历层次", parentElement: block, options: ["请选择", "博士", "硕士", "本科"] });
+  const advisor = new FakeInput({ id: "manual-advisor", label: "导师", parentElement: block });
+  const fields = [start, end, school, college, major, degree, advisor];
+  block.querySelectorAll = () => fields;
+  start.value = "2024-01";
+  school.value = "我手动填写的学校";
+  advisor.value = "我手动填写的导师";
+  const profile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [{ school_zh: "范德堡大学", college: "医学院", degree_type: "博士", major: "生物统计学", advisor: "Simon Vandekar", start_year: "2023", start_month: "08", end_year: "2027", end_month: "05" }],
+  };
+
+  const result = await runFill(fields, null, profile);
+
+  assert.equal(result.ok, true);
+  assert.equal(start.value, "2024-01");
+  assert.equal(school.value, "我手动填写的学校");
+  assert.equal(advisor.value, "我手动填写的导师");
+  assert.equal(end.value, "2027-05");
+  assert.equal(college.value, "医学院");
+  assert.equal(major.value, "生物统计学");
+  assert.equal(degree.value, "博士");
 });
 
 test("fills two languages, awards, and portfolio entries from the global profile", async () => {
@@ -430,7 +469,7 @@ test("keeps awards out of work descriptions and compensates one-day date shifts"
   assert.equal(workDescription.value, "搭建可配置的双臂临床试验模拟与终点评价流程。\n结合负二项模型与 Monte Carlo 模拟开展敏感性分析。");
   assert.equal(workDescription.value.includes("Award"), false);
   assert.equal(awardDescription.value.includes("Pathbreaking Discovery Award"), true);
-  assert.equal(result.fields.includes("employment.periodByEmployer"), true);
+  assert.equal(result.fields.includes("employment.startDate"), true);
 });
 
 test("fills only explicitly confirmed identity fields including sensitive date and ethnicity", async () => {
@@ -592,7 +631,7 @@ test("auto-adds publication rows and binds every field within the same contamina
   assert.equal(rows[0].date.value, "2025-10-31");
   assert.equal(rows[0].details.value, generalProfile.publications[0].details);
   assert.equal(rows[0].details.value.includes("Statistical Methods in Medical Research"), false);
-  assert.equal(rows[0].level.value.includes("Level 1"), false);
+  assert.equal(rows[0].level.value.includes("Level 1"), true);
   assert.equal(rows[1].title.value, generalProfile.publications[1].title);
   assert.equal(rows[1].date.value, "2025-02-11");
   assert.equal(rows[1].details.value, generalProfile.publications[1].details);

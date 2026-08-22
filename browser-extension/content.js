@@ -875,8 +875,8 @@
 
   async function setPeriodDates(dates, start, end) {
     let filled = 0;
-    if (dates[0] && start && await setAdaptiveDate(dates[0], start, "start")) filled += 1;
-    if (dates[1] && end && await setAdaptiveDate(dates[1], end, "end")) filled += 1;
+    if (dates[0] && start && isEmpty(dates[0]) && await setAdaptiveDate(dates[0], start, "start")) filled += 1;
+    if (dates[1] && end && isEmpty(dates[1]) && await setAdaptiveDate(dates[1], end, "end")) filled += 1;
     return filled;
   }
 
@@ -1015,7 +1015,16 @@
       if (!el.name) return !el.checked;
       return !document.querySelector(`input[name="${CSS.escape(el.name)}"]:checked`);
     }
-    return !String(el.value || "").trim();
+    if (el instanceof HTMLSelectElement) {
+      const value = String(el.value || "").trim();
+      if (!value) return true;
+      const selected = Array.from(el.options || []).find((option) => String(option.value) === value);
+      return /^(?:请选择|选择|select|choose)/i.test(String(selected?.textContent || "").trim());
+    }
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) return !String(el.value || "").trim();
+    const rendered = [el.getAttribute?.("aria-valuetext"), el.getAttribute?.("data-value"), el.textContent]
+      .map((value) => String(value || "").trim()).find(Boolean);
+    return !rendered;
   }
 
   function unresolvedQuestions() {
@@ -1040,11 +1049,13 @@
   function isSectionIdentityControl(el, section) {
     const directText = directFieldText(el);
     const directKey = inferKey(directText);
+    if (section === "education" && directKey === "education.school") return true;
     if (section === "publication" && directKey === "publication.title") return true;
     if (section === "project" && directKey === "project.name") return true;
     if (!directText) return false;
     const sectionInfo = ancestorSectionInfo(el);
     if (sectionInfo.section !== section) return false;
+    if (section === "education") return /(?:^| )(?:学校名称|学校|大学|school|university|institution)(?: |$)/.test(directText);
     if (section === "publication") return /(?:^| )(?:题名|论文标题|文章标题|paper title|article title)(?: |$)/.test(directText);
     return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText);
   }
@@ -1058,10 +1069,11 @@
   function repeatedRecordBlock(identityField, section) {
     let node = identityField?.parentElement || null;
     let fallback = null;
+    const maximumControls = section === "education" ? 32 : 16;
     for (let depth = 0; node && depth < 12; depth += 1, node = node.parentElement) {
       if (node === document.body) break;
       const controls = visibleControls(node);
-      if (!controls.includes(identityField) || controls.length < 2 || controls.length > 16) continue;
+      if (!controls.includes(identityField) || controls.length < 2 || controls.length > maximumControls) continue;
       if (!fallback) fallback = node;
       const identityCount = controls.filter((control) => isSectionIdentityControl(control, section)).length;
       if (identityCount === 1) return node;
@@ -1109,18 +1121,8 @@
     return added;
   }
 
-  function clearNativeSelect(el) {
-    if (!(el instanceof HTMLSelectElement) || el.disabled) return false;
-    const empty = Array.from(el.options || []).find((option) => !String(option.value || "").trim() || /请选择|select|choose/i.test(String(option.textContent || "")));
-    if (!empty) return false;
-    if (el.value === empty.value) return false;
-    el.value = empty.value;
-    dispatch(el);
-    return true;
-  }
-
   async function fillMappedControl(el, key, value, aliases = []) {
-    if (!value) return false;
+    if (!value || !isEmpty(el)) return false;
     if (["project.startDate", "education.startDate", "employment.startDate"].includes(key)) return setAdaptiveDate(el, value, "start");
     if (["project.endDate", "education.endDate", "employment.endDate"].includes(key)) return setAdaptiveDate(el, value, "end");
     if (key === "publication.date" && /^\d{4}$/.test(value) && datePrecision(el) !== "year") return false;
@@ -1130,6 +1132,107 @@
     if (el instanceof HTMLInputElement && el.type === "checkbox") return false;
     if (el.getAttribute("role") === "combobox" || el.getAttribute("aria-autocomplete")) return setCombobox(el, value, aliases);
     return setText(el, value);
+  }
+
+  function pageUsesChinese() {
+    return /[\u4e00-\u9fff]/.test(String(document.body?.innerText || document.body?.textContent || "").slice(0, 5000));
+  }
+
+  function localizedProfileText(value, preferChinese = pageUsesChinese()) {
+    const text = String(value || "").trim();
+    if (!text.includes("/")) return text;
+    const parts = text.split("/").map((part) => part.trim()).filter(Boolean);
+    return preferChinese ? (parts[parts.length - 1] || text) : (parts[0] || text);
+  }
+
+  function educationDegreeAliases(entry) {
+    const source = [entry?.degree_type, entry?.degree, entry?.degree_en].map((value) => String(value || "").trim()).filter(Boolean);
+    const text = normalize(source.join(" "));
+    if (/博士|doctor|ph d/.test(text)) source.push("博士", "博士研究生", "PhD", "Doctoral degree");
+    else if (/硕士|master|m s/.test(text)) source.push("硕士", "硕士研究生", "MS", "Master's degree");
+    else if (/学士|本科|bachelor|b s/.test(text)) source.push("本科", "学士", "BS", "Bachelor's degree");
+    return [...new Set(source)];
+  }
+
+  function educationControlKey(el, block) {
+    const text = directFieldText(el);
+    const dates = visibleControls(block).filter(dateLikeField);
+    if (dateLikeField(el)) {
+      if (/入学|开始|start|from/.test(text)) return "education.startDate";
+      if (/毕业|结束|end|graduat|to/.test(text)) return "education.endDate";
+      const index = dates.indexOf(el);
+      if (index === 0) return "education.startDate";
+      if (index === 1) return "education.endDate";
+    }
+    if (/是否最高学历|最高学历|是否双学位|双学位|学习形式|培养形式|专业类别/.test(text)) return "";
+    if (/绩点满分|满分绩点|gpa scale|max(?:imum)? gpa|grade scale/.test(text)) return "education.gpaScale";
+    if (/专业成绩排名|年级排名|专业排名|成绩排名|class rank|ranking|percentile/.test(text)) return "education.rank";
+    if (/学院名称|学院|院系|department|faculty|school of|academic unit/.test(text)) return "education.college";
+    if (/学校名称|学校|大学|school|university|institution/.test(text)) return "education.school";
+    if (/学历类型|培养类型|教育类型|degree category|education type/.test(text)) return "education.degreeType";
+    if (/专业名称|所学专业|major|field of study|discipline|program/.test(text)) return "education.major";
+    if (/学历层次|学位层次|学历|学位|degree|qualification/.test(text)) return "education.degree";
+    if (/实验室|研究单位|研究中心|laboratory|\blab\b|research (?:unit|center|centre)/.test(text)) return "education.researchUnit";
+    if (/导师|advisor|adviser|supervisor|mentor/.test(text)) return "education.advisor";
+    if (/研究领域|研究方向|research (?:area|field|interest|focus)/.test(text)) return "education.researchArea";
+    if (/毕业论文|学位论文|博士论文|硕士论文|thesis|dissertation/.test(text)) return "education.thesis";
+    if (/\bgpa\b|绩点/.test(text)) return "education.gpa";
+    const inferred = inferKey(text);
+    return inferred?.startsWith("education.") ? inferred : "";
+  }
+
+  function educationRecordValue(entry, key) {
+    const startDate = normalizedYearMonth(entry?.start_year, entry?.start_month);
+    const endDate = normalizedYearMonth(entry?.end_year, entry?.end_month);
+    const chinese = pageUsesChinese();
+    const degreeAliases = educationDegreeAliases(entry);
+    const degreeValue = localizedProfileText(entry?.degree_type || entry?.degree || entry?.degree_en, chinese);
+    const schoolValue = chinese
+      ? String(entry?.school_zh || localizedProfileText(entry?.school, true)).trim()
+      : String(entry?.school || entry?.school_zh || "").trim();
+    const values = {
+      "education.school": schoolValue,
+      "education.college": localizedProfileText(entry?.college, chinese),
+      "education.degree": degreeValue,
+      "education.degreeType": localizedProfileText(entry?.degree_type, chinese),
+      "education.major": localizedProfileText(entry?.major, chinese),
+      "education.advisor": entry?.advisor,
+      "education.researchUnit": entry?.research_unit,
+      "education.gpa": entry?.gpa,
+      "education.gpaScale": entry?.gpa_scale,
+      "education.rank": entry?.rank,
+      "education.researchArea": entry?.research_area,
+      "education.thesis": entry?.thesis,
+      "education.startDate": startDate,
+      "education.endDate": endDate,
+    };
+    const aliases = key === "education.school" ? [entry?.school_zh, entry?.school]
+      : ["education.degree", "education.degreeType"].includes(key) ? degreeAliases
+        : key === "education.major" ? [entry?.major, localizedProfileText(entry?.major, !chinese)] : [];
+    return { value: String(values[key] || "").trim(), aliases: aliases.filter(Boolean).map(String) };
+  }
+
+  async function fillEducationRecords(generalProfile) {
+    if (!globalProfileIsAuthoritative(generalProfile)) return { filled: 0, fields: [] };
+    const entries = orderedEducationEntries(generalProfile.education);
+    const anchors = sectionIdentityControls("education");
+    let filled = 0;
+    const fields = [];
+    for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
+      const block = repeatedRecordBlock(anchors[index], "education");
+      if (!block) continue;
+      for (const el of visibleControls(block)) {
+        const key = educationControlKey(el, block);
+        if (!key) continue;
+        const { value, aliases } = educationRecordValue(entries[index], key);
+        if (await fillMappedControl(el, key, value, aliases)) {
+          filled += 1;
+          fields.push(key);
+        }
+      }
+    }
+    if (anchors.length) fields.push("education.recordsBySlot");
+    return { filled, fields };
   }
 
   async function fillProjectRecords(applicationPacket) {
@@ -1190,13 +1293,7 @@
         if (key === "publication.venue" && publicationLevelControl(el)) key = "publication.level";
         if (!key?.startsWith("publication.")) continue;
         const value = String(map[key] || "").trim();
-        if (key === "publication.level" && !value) {
-          if (clearNativeSelect(el)) {
-            filled += 1;
-            fields.push("publication.levelCleared");
-          }
-          continue;
-        }
+        if (key === "publication.level" && !value) continue;
         const aliases = key === "publication.authorOrder" ? authorshipAliases(value)
           : key === "publication.venue" ? publicationVenueAliases(value) : [];
         if (await fillMappedControl(el, key, value, aliases)) {
@@ -1246,10 +1343,11 @@
       }
     }
 
+    const educationRecords = await fillEducationRecords(generalProfile);
     const publicationRecords = await fillPublicationRecords(generalProfile);
     const projectRecords = await fillProjectRecords(applicationPacket);
-    filled += publicationRecords.filled + projectRecords.filled;
-    fields.push(...publicationRecords.fields, ...projectRecords.fields);
+    filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled;
+    fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields);
 
     const correctedEducationDates = globalProfileIsAuthoritative(generalProfile) ? 0 : await correctEducationPeriods(generalProfile);
     const correctedProjectDates = await correctProjectPeriods(applicationPacket);

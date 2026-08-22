@@ -6,13 +6,12 @@ EXT = ROOT / "browser-extension"
 
 
 class GeneralEducationAutofillTests(unittest.TestCase):
-    def test_popup_loads_general_education_addon(self):
+    def test_popup_uses_the_primary_education_pass_without_a_delayed_addon(self):
         popup = (EXT / "popup.html").read_text(encoding="utf-8")
-        addon = (EXT / "education-addon.js").read_text(encoding="utf-8")
-        self.assertIn('src="education-addon.js"', popup)
-        self.assertIn("IVY_FILL_GENERAL_EDUCATION", addon)
-        self.assertIn("/api/autofill/general-profile", addon)
-        self.assertIn("education-autofill.js", addon)
+        content = (EXT / "content.js").read_text(encoding="utf-8")
+        self.assertNotIn('src="education-addon.js"', popup)
+        self.assertIn("fillEducationRecords", content)
+        self.assertIn("education.recordsBySlot", content)
 
     def test_general_pass_uses_nearby_labels_and_degree_ordered_blocks(self):
         source = (EXT / "education-autofill.js").read_text(encoding="utf-8")

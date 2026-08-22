@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V4.7)
+# Ivy Job Radar Application Autofill (V4.9)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -14,6 +14,8 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - After the final customized CV is built, `job-application-archive` generates `application_autofill_<APP-ID>.json` directly from `cv_customized_<APP-ID>.tex`. The packet preserves the final CV's Education, Industry Experience, Research/Projects, Skills and Publications order and wording.
 - Education, employment, project, skills and publication form fields prefer that APP-specific packet. Project date pairs labelled as “起止时间”, project textareas labelled only as “描述”, and project fields labelled only as “角色 / Role” are recognized from their surrounding project block. Role wording such as “第一作者” or “独立开发者” is copied from the finalized packet rather than guessed from the description. The manually maintained standard profile is only a fallback when no finalized packet exists.
 - V4.3 binds the first three education blocks as doctorate, master's and bachelor's entries and overwrites stale parser values as a complete block, so school, degree, major and dates cannot drift into different records.
+- V4.8 fills education inside the primary click handler instead of skipping it and waiting for a supplemental script. Three manually opened blank education cards are bound by DOM order as doctorate, master's, and bachelor's records; dates adapt to month or full-day controls.
+- V4.9 preserves every value already present on the application page and fills only genuinely blank controls across education, projects, employment, publications, awards, and other supported sections.
 - Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
 - Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
 - V4.7 reads each control's direct label before using section structure, so a card containing every publication/project label cannot cross-wire title, date, author, venue, role, or details fields.
