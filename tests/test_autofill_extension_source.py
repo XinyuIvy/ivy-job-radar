@@ -10,7 +10,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_manifest_remains_manual_trigger_only(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.3.2")
+        self.assertEqual(manifest["version"], "0.4.1")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
@@ -66,6 +66,8 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             "project.role",
             "project.description",
             "project.url",
+            "project.startDate",
+            "project.endDate",
             "cv.skills",
             "cv.publications",
             "eligibility.age18",
@@ -81,6 +83,13 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("projectUrl", content)
         self.assertIn("setCombobox", content)
         self.assertIn("unresolvedQuestions", content)
+        self.assertIn("起止时间", content)
+        self.assertIn("ancestorSection", content)
+        self.assertIn("bulletText", content)
+        self.assertIn("entry.author_role", content)
+        self.assertIn("language.name", content)
+        self.assertIn("award.description", content)
+        self.assertIn("portfolio.description", content)
 
     def test_job_radar_profile_page_uses_local_storage_and_bridge_config(self):
         page = (ROOT / "app" / "autofill" / "page.tsx").read_text(encoding="utf-8")
@@ -105,8 +114,8 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
-        self.assertIn("AUTOFILL V3", popup_html)
-        self.assertNotIn("AUTOFILL V2", popup_html)
+        self.assertIn("AUTOFILL V4.1", popup_html)
+        self.assertNotIn("AUTOFILL V3", popup_html)
         self.assertIn("从已提交申请中手动选择", popup_html)
         self.assertIn('src="manual-fallback.js"', popup_html)
         self.assertIn('endpoint.searchParams.set("jobUrl", "")', fallback)
