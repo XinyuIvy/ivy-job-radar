@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V4.4)
+# Ivy Job Radar Application Autofill (V4.6)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -16,6 +16,11 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - V4.3 binds the first three education blocks as doctorate, master's and bachelor's entries and overwrites stale parser values as a complete block, so school, degree, major and dates cannot drift into different records.
 - Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
 - Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
+- V4.6 fills the confirmed phone, native place, ethnicity, date of birth, and WeChat fields from the global profile; sensitive fields remain blocked unless explicitly supported by a confirmed profile key.
+- When a publication section is present, V4.6 adds enough repeated rows and fills the complete global list of published, under-review, revision, and preprint records. It does not fabricate a month/day when the authority records only a year.
+- When a project section is present, V4.6 adds enough rows for the projects selected by the current APP's final customized CV packet, rather than inserting every project into every application.
+- V4.5 binds every education card to one complete doctorate, master's, or bachelor's record before writing any field; unverified full dates are cleared instead of guessed.
+- V4.5 freezes semantic section classification before writing, isolates employment descriptions from awards, and compensates one-day timezone shifts in full-date controls.
 - V4.4 handles `div`-based ARIA comboboxes without invoking native input setters on non-input elements.
 - Repeated language blocks fill only the language name (`中文 / 普通话`, `英语`). Proficiency remains manual because recruiting-site option labels vary.
 - Repeated award blocks fill the verified year, award name and description. Award attachments remain manual.

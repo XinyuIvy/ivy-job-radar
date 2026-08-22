@@ -2,7 +2,7 @@
   if (window.__ivyJobAutofillLoaded) return;
   window.__ivyJobAutofillLoaded = true;
 
-  const SENSITIVE_RE = /(race|ethnic|gender|sex(?!ual)|veteran|disability|religion|marital|sexual orientation|pronoun|date of birth|birth date|ssn|social security|demographic|eeo|equal employment|种族|族裔|性别|残障|退伍|宗教|出生日期|社会安全号)/i;
+  const SENSITIVE_RE = /(race|ethnic|gender|sex(?!ual)|veteran|disability|religion|marital|sexual orientation|pronoun|date of birth|birth date|ssn|social security|demographic|eeo|equal employment|种族|族裔|民族|性别|残障|退伍|宗教|出生日期|社会安全号)/i;
   const SUBMIT_RE = /(submit|send application|complete application|apply now|finish application|提交申请|完成申请)/i;
   const RESUME_RE = /\b(resume|résumé|cv|curriculum vitae)\b|简历/i;
   const NON_RESUME_FILE_RE = /(cover letter|portfolio|transcript|writing sample|certificate|photo|头像|成绩单|作品集)/i;
@@ -80,6 +80,8 @@
     ["identity.preferredName", /\b(preferred name|chosen name|nickname)\b/],
     ["identity.email", /\b(e mail|email address|email)\b|邮箱/],
     ["identity.phone", /\b(phone|mobile|telephone|cell)\b|手机|电话/],
+    ["identity.nativePlace", /\b(native place|place of origin|hometown)\b|籍贯/],
+    ["identity.wechat", /\b(wechat|weixin)\b|微信号|微信/],
     ["location.address2", /\b(address line 2|address 2|apt|apartment|suite|unit)\b/],
     ["location.address1", /\b(street address|address line 1|address 1|mailing address|home address)\b/],
     ["location.postalCode", /\b(zip|zip code|postal|postal code)\b|邮编/],
@@ -113,7 +115,7 @@
     ["education.graduationMonth", /\b(graduation month|graduate month|education end month)\b/],
     ["education.graduationYear", /\b(graduation year|graduate year|education end year)\b/],
 
-    ["employment.description", /\b(job description|role description|description of duties|job duties|work responsibilities)\b|工作职责|工作内容|岗位职责/],
+    ["employment.description", /\b(job description|role description|description of duties|job duties|work responsibilities)\b|工作职责|工作内容|工作描述|岗位职责/],
     ["employment.employer", /\b(current employer|employer|company name|organization name)\b|雇主|公司名称/],
     ["employment.title", /\b(current title|job title|position title|role title)\b|职位名称|职位/],
     ["employment.location", /\b(employment location|work location)\b/],
@@ -156,6 +158,12 @@
     return null;
   }
 
+  function confirmedSensitiveKey(text) {
+    if (/\b(date of birth|birth date)\b|出生日期/.test(text)) return "identity.birthDate";
+    if (/\b(ethnicity|ethnic group)\b|民族|族裔/.test(text)) return "identity.ethnicity";
+    return "";
+  }
+
   function sectionFromText(text) {
     const normalized = normalize(text);
     if (/荣誉奖励|奖励荣誉|奖项荣誉|honou?rs? awards?|awards? honou?rs?/.test(normalized)) return "award";
@@ -186,16 +194,17 @@
     let node = el?.parentElement || null;
     let fallback = null;
     for (let depth = 0; node && depth < 12; depth += 1, node = node.parentElement) {
+      if (node === document.body) break;
       const text = normalize(node.textContent || "");
-      if (text.length <= 12000) {
+      const controls = visibleControls(node);
+      if (text.length <= 12000 && controls.length >= 2 && controls.length <= 32) {
         const section = sectionFromText(text);
         if (section) {
           const info = { section, node };
           if (!fallback) fallback = info;
-          if (visibleControls(node).length >= 2) return info;
+          return info;
         }
       }
-      if (node === document.body) break;
     }
     return fallback || { section: "", node: null };
   }
@@ -255,11 +264,11 @@
     return null;
   }
 
-  function contextualKey(el, text, projectDateCounters) {
+  function contextualKey(el, text, projectDateCounters, sectionInfo = null) {
     const direct = inferKey(text);
     if (direct) return direct;
-    const sectionInfo = ancestorSectionInfo(el);
-    const section = sectionInfo.section;
+    const resolvedSectionInfo = sectionInfo || ancestorSectionInfo(el);
+    const section = resolvedSectionInfo.section;
 
     if (section === "award" && /(?:^| )描述(?: |$)|(?:^| )description(?: |$)/.test(text)) return "award.description";
     if (section === "portfolio" && /(?:^| )描述(?: |$)|(?:^| )description(?: |$)/.test(text)) return "portfolio.description";
@@ -271,7 +280,7 @@
       projectDateCounters.set(counterKey, index + 1);
       return index % 2 === 0 ? "project.startDate" : "project.endDate";
     }
-    return semanticSectionKey(el, sectionInfo);
+    return semanticSectionKey(el, resolvedSectionInfo);
   }
 
   function packetIsAuthoritative(packet) {
@@ -365,6 +374,9 @@
     const text = normalize(value);
     if (/first|第一/.test(text)) return ["第一作者", "一作", "First Author", "First-author"];
     if (/correspond|通讯/.test(text)) return ["通讯作者", "Corresponding Author"];
+    if (/second|第二/.test(text)) return ["第二作者", "共同作者", "其他作者", "Second Author", "Co-author"];
+    if (/third|第三/.test(text)) return ["第三作者", "共同作者", "其他作者", "Third Author", "Co-author"];
+    if (/fourth|第四/.test(text)) return ["第四作者", "共同作者", "其他作者", "Fourth Author", "Co-author"];
     if (/co.?author|共同作者|合著/.test(text)) return ["共同作者", "其他作者", "Co-author"];
     return [];
   }
@@ -550,7 +562,48 @@
     return { handled: true, value, aliases };
   }
 
+  function globalIdentityValue(generalProfile, key) {
+    if (!globalProfileIsAuthoritative(generalProfile) || !key.startsWith("identity.")) return { handled: false, value: "", aliases: [] };
+    const identity = generalProfile.identity || {};
+    const map = {
+      "identity.firstName": identity.first_name_en,
+      "identity.lastName": identity.last_name_en,
+      "identity.phone": identity.phone,
+      "identity.nativePlace": identity.native_place,
+      "identity.ethnicity": identity.ethnicity,
+      "identity.birthDate": identity.date_of_birth,
+      "identity.wechat": identity.wechat,
+    };
+    if (!(key in map)) return { handled: false, value: "", aliases: [] };
+    const value = String(map[key] || "").trim();
+    const aliases = key === "identity.ethnicity" && value === "汉族" ? ["汉族", "汉", "Han"] : [];
+    return { handled: true, value, aliases };
+  }
+
+  function globalPublicationValue(generalProfile, key, counters) {
+    if (!globalProfileIsAuthoritative(generalProfile) || !key.startsWith("publication.")) return { handled: false, value: "", aliases: [] };
+    const entries = Array.isArray(generalProfile.publications) ? generalProfile.publications : [];
+    if (!entries.length) return { handled: false, value: "", aliases: [] };
+    const index = nextIndex(counters, "global-publications", key);
+    const entry = publicationEntry(entries[index]);
+    const map = {
+      "publication.title": entry.title,
+      "publication.authorOrder": entry.authorOrder,
+      "publication.date": entry.date,
+      "publication.venue": entry.venue,
+      "publication.details": entry.details || entry.title,
+    };
+    const value = String(map[key] || "").trim();
+    const aliases = key === "publication.authorOrder" ? authorshipAliases(value)
+      : key === "publication.venue" ? publicationVenueAliases(value) : [];
+    return { handled: true, value, aliases };
+  }
+
   function resolveValue(profile, generalProfile, packet, key, packetCounters, globalCounters, generalEntryCounters) {
+    const identityValue = globalIdentityValue(generalProfile, key);
+    if (identityValue.handled && identityValue.value) return { value: identityValue.value, aliases: identityValue.aliases };
+    const publicationValue = globalPublicationValue(generalProfile, key, generalEntryCounters);
+    if (publicationValue.handled) return { value: publicationValue.value, aliases: publicationValue.aliases };
     if (key.startsWith("education.")) {
       const globalValue = globalEducationValue(generalProfile, key, globalCounters);
       if (globalValue.handled && globalValue.value) return { value: globalValue.value, aliases: [] };
@@ -591,7 +644,7 @@
 
   function dateParts(value) {
     const source = String(value || "").trim();
-    const match = source.match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+([0-2]?\d|3[01]))?/);
+    const match = source.match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+(3[01]|[0-2]?\d))?/);
     return match ? {
       year: match[1],
       month: match[2] ? String(match[2]).padStart(2, "0") : "",
@@ -642,6 +695,22 @@
     if (expected.month && actual.month !== expected.month) return false;
     if (expected.day && actual.day && actual.day !== expected.day) return false;
     return true;
+  }
+
+  function isoDayShift(value, delta) {
+    const parts = dateParts(value);
+    if (!parts.year || !parts.month || !parts.day) return "";
+    const shifted = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day) + delta));
+    return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}-${String(shifted.getUTCDate()).padStart(2, "0")}`;
+  }
+
+  function isoDayDifference(actual, expected) {
+    const actualParts = dateParts(actual);
+    const expectedParts = dateParts(expected);
+    if (!actualParts.day || !expectedParts.day) return null;
+    const actualMs = Date.UTC(Number(actualParts.year), Number(actualParts.month) - 1, Number(actualParts.day));
+    const expectedMs = Date.UTC(Number(expectedParts.year), Number(expectedParts.month) - 1, Number(expectedParts.day));
+    return Math.round((actualMs - expectedMs) / 86400000);
   }
 
   function frameworkInput(el, value) {
@@ -699,6 +768,21 @@
           if (wasReadOnly) el.readOnly = true;
           if (hadReadOnlyAttribute) el.setAttribute?.("readonly", "");
           return true;
+        }
+        if (/^\d{4}-\d{2}-\d{2}$/.test(candidate)) {
+          const actual = String(el.value || el.getAttribute?.("value") || "");
+          const difference = isoDayDifference(actual, candidate);
+          if (difference === -1 || difference === 1) {
+            const compensated = isoDayShift(candidate, -difference);
+            frameworkInput(el, compensated);
+            el.blur?.();
+            await new Promise((resolve) => setTimeout(resolve, 45));
+            if (dateValueAccepted(el, candidate)) {
+              if (wasReadOnly) el.readOnly = true;
+              if (hadReadOnlyAttribute) el.setAttribute?.("readonly", "");
+              return true;
+            }
+          }
         }
       }
     }
@@ -784,6 +868,23 @@
       usedFields.add(identity);
       const dates = projectDateRange(entry);
       filled += await setPeriodDates(block.dates, dates.start, dates.end);
+    }
+    return filled;
+  }
+
+  async function correctEmploymentPeriods(applicationPacket) {
+    if (!packetIsAuthoritative(applicationPacket)) return 0;
+    const usedFields = new Set();
+    let filled = 0;
+    for (const entry of Array.isArray(applicationPacket.experience) ? applicationPacket.experience : []) {
+      const identity = findIdentityField([entry?.organization, entry?.employer, entry?.company], usedFields);
+      if (!identity) continue;
+      const block = identityBlock(identity);
+      if (!block) continue;
+      usedFields.add(identity);
+      const start = normalizedYearMonth(entry?.start_year, entry?.start_month) || String(entry?.start_date || entry?.start || "").trim();
+      const end = normalizedYearMonth(entry?.end_year, entry?.end_month) || String(entry?.end_date || entry?.end || "").trim() || (entry?.current ? currentYearMonth() : "");
+      filled += await setPeriodDates(block.dates, start, end);
     }
     return filled;
   }
@@ -895,8 +996,47 @@
     return questions;
   }
 
+  function sectionIdentityControls(section) {
+    return Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="button"]), textarea, select, [role="combobox"]'))
+      .filter(visible)
+      .filter((el) => {
+        const text = fieldText(el);
+        const directKey = inferKey(text);
+        if (section === "publication" && directKey === "publication.title") return true;
+        if (section === "project" && directKey === "project.name") return true;
+        const sectionInfo = ancestorSectionInfo(el);
+        if (sectionInfo.section !== section) return false;
+        const semanticKey = semanticSectionKey(el, sectionInfo);
+        return semanticKey === (section === "publication" ? "publication.title" : "project.name");
+      });
+  }
+
+  async function ensureRepeatedRows(section, desired) {
+    if (!desired || !sectionIdentityControls(section).length) return 0;
+    let added = 0;
+    for (let attempt = 0; attempt < Math.min(desired, 20); attempt += 1) {
+      const current = sectionIdentityControls(section).length;
+      if (current >= desired) break;
+      const buttons = Array.from(document.querySelectorAll('button, [role="button"], input[type="button"]'))
+        .filter(visible)
+        .filter((button) => /^(?:\+\s*)?(?:添加|新增|add)(?:\s+publication)?$/i.test(String(button.textContent || button.value || "").trim()))
+        .filter((button) => ancestorSectionInfo(button).section === section);
+      const button = buttons[buttons.length - 1];
+      if (!button) break;
+      button.click();
+      await new Promise((resolve) => setTimeout(resolve, 120));
+      const nextCount = sectionIdentityControls(section).length;
+      if (nextCount <= current) break;
+      added += nextCount - current;
+    }
+    return added;
+  }
+
   async function fill(profile, generalProfile = null, applicationPacket = null) {
+    const addedPublicationRows = await ensureRepeatedRows("publication", Array.isArray(generalProfile?.publications) ? generalProfile.publications.length : 0);
+    const addedProjectRows = await ensureRepeatedRows("project", packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects) ? applicationPacket.projects.length : 0);
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
+    const descriptors = elements.map((el) => ({ el, text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
     let filled = 0;
     const fields = [];
     const skippedSensitive = [];
@@ -904,23 +1044,27 @@
     const globalCounters = new Map();
     const generalEntryCounters = new Map();
     const projectDateCounters = new Map();
+    if (addedPublicationRows) fields.push("publication.rowsAdded");
+    if (addedProjectRows) fields.push("project.rowsAdded");
 
-    for (const el of elements) {
-      const text = fieldText(el);
+    for (const { el, text, sectionInfo } of descriptors) {
       if (!text) continue;
-      if (SENSITIVE_RE.test(text)) {
+      const explicitSensitiveKey = SENSITIVE_RE.test(text) ? confirmedSensitiveKey(text) : "";
+      if (SENSITIVE_RE.test(text) && !explicitSensitiveKey) {
         skippedSensitive.push(text.slice(0, 120));
         continue;
       }
-      const key = contextualKey(el, text, projectDateCounters);
+      const key = explicitSensitiveKey || contextualKey(el, text, projectDateCounters, sectionInfo);
       if (!key) continue;
+      if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
       const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters);
       if (!value) continue;
 
       let changed = false;
       if (["project.startDate", "education.startDate", "employment.startDate"].includes(key)) changed = await setAdaptiveDate(el, value, "start");
       else if (["project.endDate", "education.endDate", "employment.endDate"].includes(key)) changed = await setAdaptiveDate(el, value, "end");
-      else if (["award.year", "publication.date", "application.availableStartDate"].includes(key)) changed = await setAdaptiveDate(el, value, "neutral");
+      else if (key === "publication.date" && /^\d{4}$/.test(value) && datePrecision(el) !== "year") changed = false;
+      else if (["award.year", "publication.date", "application.availableStartDate", "identity.birthDate"].includes(key)) changed = await setAdaptiveDate(el, value, "neutral");
       else if (el instanceof HTMLSelectElement) changed = setSelect(el, value, aliases);
       else if (el instanceof HTMLInputElement && el.type === "radio") changed = setRadio(el, value);
       else if (el instanceof HTMLInputElement && el.type === "checkbox") changed = false;
@@ -933,11 +1077,13 @@
       }
     }
 
-    const correctedEducationDates = await correctEducationPeriods(generalProfile);
+    const correctedEducationDates = globalProfileIsAuthoritative(generalProfile) ? 0 : await correctEducationPeriods(generalProfile);
     const correctedProjectDates = await correctProjectPeriods(applicationPacket);
+    const correctedEmploymentDates = await correctEmploymentPeriods(applicationPacket);
     if (correctedEducationDates) fields.push("education.periodBySchool");
     if (correctedProjectDates) fields.push("project.periodByName");
-    filled += correctedEducationDates + correctedProjectDates;
+    if (correctedEmploymentDates) fields.push("employment.periodByEmployer");
+    filled += correctedEducationDates + correctedProjectDates + correctedEmploymentDates;
 
     return {
       filled,

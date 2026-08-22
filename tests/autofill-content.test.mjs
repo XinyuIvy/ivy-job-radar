@@ -38,6 +38,19 @@ class FakeInput extends FakeField {
     super.value = value;
   }
 }
+class TimezoneShiftInput extends FakeInput {
+  get value() { return super.value; }
+  set value(value) {
+    const text = String(value);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      const [year, month, day] = text.split("-").map(Number);
+      const shifted = new Date(Date.UTC(year, month - 1, day - 1));
+      super.value = `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}-${String(shifted.getUTCDate()).padStart(2, "0")}`;
+      return;
+    }
+    super.value = text;
+  }
+}
 class FakeTextarea extends FakeField {}
 class FakeSelect extends FakeField {
   constructor({ options = [], ...rest }) {
@@ -53,7 +66,7 @@ class FakeCombobox extends FakeField {
   }
 }
 
-async function runFill(fields, packet, generalProfile = null) {
+async function runFill(fields, packet, generalProfile = null, buttons = []) {
   const body = { tagName: "BODY", textContent: "", innerText: "", parentElement: null };
   let listener;
   const labels = new Map(fields.map((field) => [field.id, { textContent: field.label }]));
@@ -65,6 +78,7 @@ async function runFill(fields, packet, generalProfile = null) {
       return match ? labels.get(match[1]) || null : null;
     },
     querySelectorAll(selector) {
+      if (selector.startsWith("button,")) return buttons;
       return selector.includes("input:not") ? fields : [];
     },
   };
@@ -150,8 +164,8 @@ test("adapts a project date range to full-date controls", async () => {
   const result = await runFill([start, end, name, role], packet);
 
   assert.equal(result.ok, true);
-  assert.equal(start.value, "2026-05-01");
-  assert.equal(end.value, "2026-08-31");
+  assert.equal(start.value, "2026-05-01", JSON.stringify(start.writes));
+  assert.equal(end.value, "2026-08-31", JSON.stringify(end.writes));
   assert.equal(role.value, "第一作者");
 });
 
@@ -187,7 +201,7 @@ test("uses the current month as the end date for an ongoing project", async () =
   assert.equal(result.fields.includes("project.periodByName"), true);
 });
 
-test("corrects swapped education dates by school in the primary fill flow", async () => {
+test("leaves authoritative education to the block-level education pass", async () => {
   const page = { tagName: "DIV", textContent: "教育背景", parentElement: null };
   const vanderbiltBlock = { tagName: "DIV", textContent: "起止时间 学校名称 学历 专业", parentElement: page };
   const swufeBlock = { tagName: "DIV", textContent: "起止时间 学校名称 学历 专业", parentElement: page };
@@ -216,11 +230,11 @@ test("corrects swapped education dates by school in the primary fill flow", asyn
   const result = await runFill([vStart, vEnd, vSchool, sStart, sEnd, sSchool], null, profile);
 
   assert.equal(result.ok, true);
-  assert.equal(vStart.value, "2023-08");
-  assert.equal(vEnd.value, "2027-05");
-  assert.equal(sStart.value, "2017-09");
-  assert.equal(sEnd.value, "2021-06");
-  assert.equal(result.fields.includes("education.periodBySchool"), true);
+  assert.equal(vStart.value, "2017-09");
+  assert.equal(vEnd.value, "2021-06");
+  assert.equal(sStart.value, "2023-08");
+  assert.equal(sEnd.value, "2027-05");
+  assert.equal(result.fields.some((field) => field.startsWith("education.")), false);
 });
 
 test("fills two languages, awards, and portfolio entries from the global profile", async () => {
@@ -244,6 +258,11 @@ test("fills two languages, awards, and portfolio entries from the global profile
     new FakeInput({ id: "portfolio-url-2", label: "作品链接", parentElement: portfolioBlockB }),
     new FakeTextarea({ id: "portfolio-desc-2", label: "描述", parentElement: portfolioBlockB }),
   ];
+  languageBlock.querySelectorAll = () => fields.slice(0, 2);
+  awardBlockA.querySelectorAll = () => fields.slice(2, 5);
+  awardBlockB.querySelectorAll = () => fields.slice(5, 8);
+  portfolioBlockA.querySelectorAll = () => fields.slice(8, 10);
+  portfolioBlockB.querySelectorAll = () => fields.slice(10, 12);
   const generalProfile = {
     schema_version: "global-application-autofill-profile-v1",
     education: [],
@@ -372,4 +391,141 @@ test("does not invoke an input value setter on a div-based combobox", async () =
 
   assert.equal(result.ok, true);
   assert.equal(result.error, undefined);
+});
+
+test("keeps awards out of work descriptions and compensates one-day date shifts", async () => {
+  const body = { tagName: "BODY", textContent: "工作经历 荣誉奖励", parentElement: null };
+  const workBlock = { tagName: "DIV", textContent: "实习经历 起止时间 公司名称 职位名称 工作描述", parentElement: body };
+  const awardBlock = { tagName: "DIV", textContent: "荣誉奖励 获奖时间 获奖情况", parentElement: body };
+  const start = new TimezoneShiftInput({ id: "pfizer-start", label: "起止时间", placeholder: "开始日期", parentElement: workBlock, type: "date", readOnly: true });
+  const end = new TimezoneShiftInput({ id: "pfizer-end", label: "起止时间", placeholder: "结束日期", parentElement: workBlock, type: "date", readOnly: true });
+  const employer = new FakeInput({ id: "pfizer-employer", label: "公司名称", parentElement: workBlock });
+  const title = new FakeInput({ id: "pfizer-title", label: "职位名称", parentElement: workBlock });
+  const workDescription = new FakeTextarea({ id: "pfizer-description", label: "工作描述", parentElement: workBlock });
+  const awardDate = new FakeInput({ id: "award-date-separated", label: "获奖时间", placeholder: "请选择日期", parentElement: awardBlock, type: "date", readOnly: true });
+  const awardDescription = new FakeTextarea({ id: "award-description-separated", label: "获奖情况", parentElement: awardBlock });
+  workBlock.querySelectorAll = () => [start, end, employer, title, workDescription];
+  awardBlock.querySelectorAll = () => [awardDate, awardDescription];
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-1XC-0040",
+    experience: [{
+      organization: "辉瑞（Pfizer）",
+      title: "统计实习生",
+      start_year: "2026", start_month: "05", end_year: "2026", end_month: "08",
+      bullets: ["搭建可配置的双臂临床试验模拟与终点评价流程。", "结合负二项模型与 Monte Carlo 模拟开展敏感性分析。"],
+    }],
+  };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    awards: [{ year: "2026", name: "Pathbreaking Discovery Award", description: "个人奖。" }],
+  };
+
+  const result = await runFill([start, end, employer, title, workDescription, awardDate, awardDescription], packet, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.equal(start.value, "2026-05-01");
+  assert.equal(end.value, "2026-08-31");
+  assert.equal(workDescription.value, "搭建可配置的双臂临床试验模拟与终点评价流程。\n结合负二项模型与 Monte Carlo 模拟开展敏感性分析。");
+  assert.equal(workDescription.value.includes("Award"), false);
+  assert.equal(awardDescription.value.includes("Pathbreaking Discovery Award"), true);
+  assert.equal(result.fields.includes("employment.periodByEmployer"), true);
+});
+
+test("fills only explicitly confirmed identity fields including sensitive date and ethnicity", async () => {
+  const body = { tagName: "BODY", textContent: "个人信息", parentElement: null };
+  const phone = new FakeInput({ id: "phone", label: "手机号码", parentElement: body });
+  const nativePlace = new FakeInput({ id: "native-place", label: "籍贯", parentElement: body });
+  const ethnicity = new FakeSelect({ id: "ethnicity", label: "民族", parentElement: body, options: ["请选择", "汉族", "其他"] });
+  const birthDate = new FakeInput({ id: "birth-date", label: "出生日期", placeholder: "请选择日期", parentElement: body, type: "date", readOnly: true });
+  const wechat = new FakeInput({ id: "wechat", label: "微信号", parentElement: body });
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    identity: { phone: "15840470437", native_place: "四川省成都市", ethnicity: "汉族", date_of_birth: "1999-01-11", wechat: "ivyzzzhang" },
+  };
+
+  const result = await runFill([phone, nativePlace, ethnicity, birthDate, wechat], null, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.deepEqual([phone.value, nativePlace.value, ethnicity.value, birthDate.value, wechat.value], ["15840470437", "四川省成都市", "汉族", "1999-01-11", "ivyzzzhang"]);
+});
+
+test("prefers the complete global publication list over APP-selected publications", async () => {
+  const body = { tagName: "BODY", textContent: "论文/期刊", parentElement: null };
+  const blocks = [0, 1].map((index) => {
+    const block = { tagName: "DIV", textContent: "论文/期刊 论文名称 作者顺序 发表时间 刊物/机构 论文详情", parentElement: body };
+    const title = new FakeInput({ id: `global-paper-title-${index}`, label: "论文名称", parentElement: block });
+    const author = new FakeSelect({ id: `global-paper-author-${index}`, label: "作者顺序", parentElement: block, options: ["请选择", "第一作者", "第二作者", "共同作者"] });
+    const date = new FakeInput({ id: `global-paper-date-${index}`, label: "发表时间", placeholder: "YYYY", parentElement: block });
+    const venue = new FakeSelect({ id: `global-paper-venue-${index}`, label: "刊物/机构", parentElement: block, options: ["请选择", "期刊", "会议", "其他"] });
+    const details = new FakeTextarea({ id: `global-paper-details-${index}`, label: "论文详情", parentElement: block });
+    block.querySelectorAll = () => [title, author, date, venue, details];
+    return { title, author, date, venue, details };
+  });
+  const fields = blocks.flatMap((block) => [block.title, block.author, block.date, block.venue, block.details]);
+  const packet = { authority: "final_customized_cv_only", application_id: "APP-2026-ABC-200", publications: [{ title: "APP-only paper" }] };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    publications: [
+      { title: "Published paper", author_order: "First Author", year: "2025", venue: "Imaging Neuroscience", details: "Published." },
+      { title: "Preprint paper", author_order: "Second Author", year: "2026", venue: "Psychometrika", details: "Preprint; under review." },
+    ],
+  };
+
+  const result = await runFill(fields, packet, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.equal(blocks[0].title.value, "Published paper");
+  assert.equal(blocks[1].title.value, "Preprint paper");
+  assert.equal(blocks[0].author.value, "第一作者");
+  assert.equal(blocks[1].author.value, "第二作者");
+  assert.equal(blocks[0].date.value, "2025");
+  assert.equal(blocks[1].date.value, "2026");
+});
+
+test("clicks Add inside a project section until every APP-selected project has a row", async () => {
+  const body = { tagName: "BODY", textContent: "项目经历", parentElement: null };
+  const section = { tagName: "DIV", textContent: "项目经历 项目名称 项目角色 项目描述 + 添加", parentElement: body };
+  const rows = [0, 1].map((index) => {
+    const row = { tagName: "DIV", textContent: "项目名称 项目角色 项目描述", parentElement: section };
+    const name = new FakeInput({ id: `auto-project-name-${index}`, label: "项目名称", parentElement: row });
+    const role = new FakeInput({ id: `auto-project-role-${index}`, label: "项目角色", parentElement: row });
+    const description = new FakeTextarea({ id: `auto-project-description-${index}`, label: "项目描述", parentElement: row });
+    row.querySelectorAll = () => [name, role, description];
+    return { row, name, role, description };
+  });
+  const secondControls = [rows[1].name, rows[1].role, rows[1].description];
+  for (const field of secondControls) {
+    field.offsetParent = null;
+    field.getClientRects = () => [];
+  }
+  const allFields = rows.flatMap((row) => [row.name, row.role, row.description]);
+  section.querySelectorAll = () => allFields;
+  const addButton = {
+    textContent: "+ 添加", value: "", parentElement: section, offsetParent: {},
+    getClientRects: () => [1],
+    click() {
+      for (const field of secondControls) {
+        field.offsetParent = {};
+        field.getClientRects = () => [1];
+      }
+    },
+  };
+  const packet = {
+    authority: "final_customized_cv_only", application_id: "APP-2026-ABC-201",
+    projects: [
+      { name: "岗位相关研究项目", role: "第一作者", bullets: ["研究描述。"] },
+      { name: "岗位相关应用项目", role: "独立开发者", bullets: ["应用描述。"] },
+    ],
+  };
+
+  const result = await runFill(allFields, packet, null, [addButton]);
+
+  assert.equal(result.ok, true);
+  assert.equal(rows[0].name.value, "岗位相关研究项目");
+  assert.equal(rows[1].name.value, "岗位相关应用项目");
+  assert.equal(result.fields.includes("project.rowsAdded"), true);
 });

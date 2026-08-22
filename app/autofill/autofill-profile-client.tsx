@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.4 已修复下拉控件错误：</strong><span>按板块与控件结构识别教育、项目、工作、奖项、论文、语言和作品，并安全处理非输入框形式的下拉组件。</span></div>
-        <a href="/ivy-job-autofill-0.4.4.zip" download>下载语义识别与下拉控件修复版扩展</a>
+        <div><strong>扩展 0.4.6 已修复跨板块串填并加入自动补行：</strong><span>学历整组绑定；项目按当前 APP、论文按完整权威清单自动点击“添加”；只填写已明确确认的敏感身份字段。</span></div>
+        <a href="/ivy-job-autofill-0.4.6.zip" download>下载整组绑定与确认字段版扩展</a>
       </section>
 
       <form onSubmit={save}>

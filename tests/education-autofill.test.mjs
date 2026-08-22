@@ -61,8 +61,10 @@ function educationBlock(body, prefix, school, start, end) {
   const startField = new FakeInput({ id: `${prefix}-start`, label: "起止时间", value: start, placeholder: "YYYY-MM", parentElement: period, readOnly: true });
   const endField = new FakeInput({ id: `${prefix}-end`, label: "起止时间", value: end, placeholder: "YYYY-MM", parentElement: period, readOnly: true });
   const schoolField = new FakeInput({ id: `${prefix}-school`, label: "学校名称", value: school, parentElement: block });
-  block.controls = [startField, endField, schoolField];
-  return { startField, endField, schoolField };
+  const degreeField = new FakeInput({ id: `${prefix}-degree`, label: "学历", parentElement: block });
+  const majorField = new FakeInput({ id: `${prefix}-major`, label: "专业", parentElement: block });
+  block.controls = [startField, endField, schoolField, degreeField, majorField];
+  return { startField, endField, schoolField, degreeField, majorField, block };
 }
 
 function blankEducationBlock(body, prefix) {
@@ -107,7 +109,7 @@ test("corrects prefilled education dates by the school in each block", async () 
   body.tagName = "BODY";
   const vanderbilt = educationBlock(body, "v", "范德堡大学", "2017-09", "2021-06");
   const swufe = educationBlock(body, "s", "西南财经大学", "2023-08", "2027-05");
-  const fields = [vanderbilt.startField, vanderbilt.endField, vanderbilt.schoolField, swufe.startField, swufe.endField, swufe.schoolField];
+  const fields = [vanderbilt, swufe].flatMap((item) => item.block.controls);
   body.controls = fields;
   const labels = new Map(fields.map((field) => [field.id, { textContent: field.label }]));
   let listener;
@@ -178,4 +180,39 @@ test("binds three education blocks as doctorate, masters, and bachelors", async 
   assert.equal(third.startField.value, "2017-09-01");
   assert.equal(third.endField.value, "2021-06-30");
   assert.equal(result.fields.includes("education.periodBySlot"), true);
+});
+
+test("keeps each education card internally consistent and clears unknown Yale full dates", async () => {
+  const body = new FakeNode("教育背景", null);
+  body.tagName = "BODY";
+  const first = blankEducationBlock(body, "phd");
+  const second = blankEducationBlock(body, "masters");
+  const third = blankEducationBlock(body, "bachelors");
+  second.startField.value = "2022-12-31";
+  second.endField.value = "2021-12-30";
+  for (const [prefix, card] of [["phd", first], ["masters", second], ["bachelors", third]]) {
+    const advisor = new FakeInput({ id: `${prefix}-advisor`, label: "导师", parentElement: card.block });
+    const unit = new FakeInput({ id: `${prefix}-unit`, label: "实验室", parentElement: card.block });
+    card.block.controls.push(advisor, unit);
+    card.advisor = advisor;
+    card.unit = unit;
+  }
+  const fields = [first, second, third].flatMap((item) => item.block.controls);
+  const profile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [
+      { school_zh: "耶鲁大学", degree: "生物统计学硕士", major: "生物统计学", start_year: "2021", end_year: "2023", advisor: "Wei Wei", research_unit: "YCAS" },
+      { school_zh: "西南财经大学", degree: "统计学学士", major: "统计学", start_year: "2017", start_month: "09", end_year: "2021", end_month: "06", advisor: "吕凤毛", research_unit: "统计研究中心" },
+      { school_zh: "范德堡大学", degree: "生物统计学博士", major: "生物统计学", start_year: "2023", start_month: "08", end_year: "2027", end_month: "05", advisor: "Simon Vandekar", research_unit: "VUMC" },
+    ],
+  };
+
+  const result = await runEducationFill(body, fields, profile);
+
+  assert.equal(result.ok, true);
+  assert.deepEqual([first.schoolField.value, first.advisor.value, first.unit.value], ["范德堡大学", "Simon Vandekar", "VUMC"]);
+  assert.deepEqual([second.schoolField.value, second.advisor.value, second.unit.value], ["耶鲁大学", "Wei Wei", "YCAS"]);
+  assert.equal(second.startField.value, "");
+  assert.equal(second.endField.value, "");
+  assert.deepEqual([third.schoolField.value, third.advisor.value, third.unit.value], ["西南财经大学", "吕凤毛", "统计研究中心"]);
 });

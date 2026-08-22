@@ -57,6 +57,21 @@
     return normalize(pieces.filter(Boolean).join(" "));
   }
 
+  function directLabelText(el) {
+    const pieces = [
+      el.getAttribute?.("name"), el.id, el.getAttribute?.("aria-label"),
+      el.getAttribute?.("placeholder"), el.getAttribute?.("data-testid"),
+      el.getAttribute?.("data-test-id"), el.getAttribute?.("data-automation-id"),
+    ];
+    if (el.id) {
+      const direct = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+      if (direct) pieces.push(direct.textContent);
+    }
+    const ownLabel = el.closest?.("label");
+    if (ownLabel) pieces.push(ownLabel.textContent);
+    return normalize(pieces.filter(Boolean).join(" "));
+  }
+
   function inferField(text) {
     if (!text) return "";
     const rules = [
@@ -78,18 +93,16 @@
     return rules.find(([, re]) => re.test(text))?.[0] || "";
   }
 
-  function educationBlock(el) {
-    let node = el;
-    for (let depth = 0; depth < 12 && node?.parentElement; depth += 1) {
+  function schoolAnchorBlock(anchor) {
+    let node = anchor;
+    for (let depth = 0; depth < 14 && node?.parentElement; depth += 1) {
       node = node.parentElement;
-      const signature = normalize(node.innerText || node.textContent || "");
-      const signals = [
-        /学校名称|学校|大学|school|university|institution/,
-        /(?<!类型)学历|学位|degree|qualification/,
-        /专业|major|field of study|discipline|program/,
-      ].filter((pattern) => pattern.test(signature)).length;
+      if (node === document.body) break;
       const controls = Array.from(node.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).filter(visible);
-      if (signals >= 2 && controls.includes(el) && controls.length <= 24) return node;
+      if (!controls.includes(anchor) || controls.length < 4 || controls.length > 32) continue;
+      const schools = controls.filter((control) => inferField(directLabelText(control)) === "school");
+      const educationKeys = new Set(controls.map((control) => inferField(directLabelText(control)) || inferField(nearbyLabelText(control))).filter(Boolean));
+      if (schools.length === 1 && educationKeys.size >= 3) return node;
     }
     return null;
   }
@@ -195,8 +208,9 @@
   function orderedEducationBlocks(controls) {
     const blocks = [];
     const seen = new Set();
-    for (const control of controls) {
-      const block = educationBlock(control);
+    const schoolAnchors = controls.filter((control) => inferField(directLabelText(control)) === "school");
+    for (const control of schoolAnchors) {
+      const block = schoolAnchorBlock(control);
       if (!block || seen.has(block)) continue;
       seen.add(block);
       blocks.push({ block, firstControlIndex: controls.findIndex((item) => Array.from(block.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).includes(item)) });
@@ -205,7 +219,7 @@
   }
 
   function dateParts(value) {
-    const match = String(value || "").match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+([0-2]?\d|3[01]))?/);
+    const match = String(value || "").match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+(3[01]|[0-2]?\d))?/);
     return match ? {
       year: match[1],
       month: match[2] ? String(match[2]).padStart(2, "0") : "",
@@ -237,6 +251,22 @@
     return Boolean(actual.year && actual.year === expected.year && (!expected.month || actual.month === expected.month) && (!expected.day || !actual.day || actual.day === expected.day));
   }
 
+  function isoDayShift(value, delta) {
+    const parts = dateParts(value);
+    if (!parts.year || !parts.month || !parts.day) return "";
+    const shifted = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day) + delta));
+    return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}-${String(shifted.getUTCDate()).padStart(2, "0")}`;
+  }
+
+  function isoDayDifference(actual, expected) {
+    const actualParts = dateParts(actual);
+    const expectedParts = dateParts(expected);
+    if (!actualParts.day || !expectedParts.day) return null;
+    const actualMs = Date.UTC(Number(actualParts.year), Number(actualParts.month) - 1, Number(actualParts.day));
+    const expectedMs = Date.UTC(Number(expectedParts.year), Number(expectedParts.month) - 1, Number(expectedParts.day));
+    return Math.round((actualMs - expectedMs) / 86400000);
+  }
+
   async function setAdaptiveDate(el, value, role) {
     if (!value || el.disabled) return false;
     const wasReadOnly = Boolean(el.readOnly);
@@ -259,6 +289,20 @@
           if (hadReadOnly) el.setAttribute?.("readonly", "");
           return true;
         }
+        if (/^\d{4}-\d{2}-\d{2}$/.test(candidate)) {
+          const actual = String(el.value || el.getAttribute?.("value") || "");
+          const difference = isoDayDifference(actual, candidate);
+          if (difference === -1 || difference === 1) {
+            setText(el, isoDayShift(candidate, -difference));
+            el.blur?.();
+            await new Promise((resolve) => setTimeout(resolve, 45));
+            if (acceptedDate(el, candidate)) {
+              if (wasReadOnly) el.readOnly = true;
+              if (hadReadOnly) el.setAttribute?.("readonly", "");
+              return true;
+            }
+          }
+        }
       }
     }
     if (wasReadOnly) el.readOnly = true;
@@ -274,6 +318,25 @@
     if (!match) return false;
     el.value = match.value;
     dispatch(el);
+    return true;
+  }
+
+  function clearControl(el) {
+    if (!el || el.disabled || !String(el.value || "").trim()) return false;
+    const wasReadOnly = Boolean(el.readOnly);
+    if (wasReadOnly) {
+      el.readOnly = false;
+      el.removeAttribute?.("readonly");
+    }
+    const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
+    if (setter) setter.call(el, ""); else el.value = "";
+    el.setAttribute?.("value", "");
+    dispatch(el);
+    if (wasReadOnly) {
+      el.readOnly = true;
+      el.setAttribute?.("readonly", "");
+    }
     return true;
   }
 
@@ -311,8 +374,9 @@
       const blockControls = Array.from(block.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).filter(visible);
       for (const el of blockControls) {
         if (usedControls.has(el)) continue;
+        const directText = directLabelText(el);
         const labelText = nearbyLabelText(el);
-        let key = inferField(labelText);
+        let key = inferField(directText) || inferField(labelText);
         if (!key) key = groupedPeriodKey(el, labelText);
         if (!key && dateLikeField(el)) {
           const dates = blockControls.filter(dateLikeField);
@@ -320,7 +384,14 @@
         }
         if (!key) continue;
         const value = educationValue(entry, key, el, labelText);
-        if (!value) continue;
+        if (!value) {
+          if ((key === "startDate" || key === "endDate") && clearControl(el)) {
+            usedControls.add(el);
+            filled += 1;
+            fields.push(`education.${key}.clearedUnverified`);
+          }
+          continue;
+        }
 
         let changed = false;
         if (key === "startDate") changed = await setAdaptiveDate(el, value, "start");
