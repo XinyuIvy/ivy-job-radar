@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V4.1)
+# Ivy Job Radar Application Autofill (V4.2)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -13,7 +13,7 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - Uses the matched `APP-ID` as the application-specific source key.
 - After the final customized CV is built, `job-application-archive` generates `application_autofill_<APP-ID>.json` directly from `cv_customized_<APP-ID>.tex`. The packet preserves the final CV's Education, Industry Experience, Research/Projects, Skills and Publications order and wording.
 - Education, employment, project, skills and publication form fields prefer that APP-specific packet. Project date pairs labelled as “起止时间”, project textareas labelled only as “描述”, and project fields labelled only as “角色 / Role” are recognized from their surrounding project block. Role wording such as “第一作者” or “独立开发者” is copied from the finalized packet rather than guessed from the description. The manually maintained standard profile is only a fallback when no finalized packet exists.
-- V4.1 performs a final identity-based date pass after the normal fill. Education periods are bound to the school value in the same card, project periods are bound to the project name in the same card, and read-only calendar inputs such as award year are updated programmatically.
+- V4.2 verifies project date values after writing them, retries React/Vue controlled calendar inputs, repeats the project-date pass after education updates, and uses the current year-month as the end value for ongoing projects when a form requires a concrete month.
 - Education dates are corrected by the school already present in each education block, including when a recruiting site or resume parser prefilled the wrong dates.
 - Repeated language blocks fill only the language name (`中文 / 普通话`, `英语`). Proficiency remains manual because recruiting-site option labels vary.
 - Repeated award blocks fill the verified year, award name and description. Award attachments remain manual.
