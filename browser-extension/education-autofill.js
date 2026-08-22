@@ -78,38 +78,6 @@
     return rules.find(([, re]) => re.test(text))?.[0] || "";
   }
 
-  function contextSignature(node) {
-    if (!node) return "";
-    const pieces = [node.innerText || node.textContent || ""];
-    const controls = Array.from(node.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).slice(0, 20);
-    for (const control of controls) {
-      const value = control.value || control.getAttribute?.("value") || "";
-      if (value) pieces.push(value);
-      if (control instanceof HTMLSelectElement && control.selectedIndex >= 0) pieces.push(control.options[control.selectedIndex]?.textContent || "");
-    }
-    return normalize(pieces.join(" "));
-  }
-
-  function schoolVariants(entry) {
-    return [entry?.school, entry?.school_zh]
-      .map(normalize)
-      .filter((value) => value.length >= 3);
-  }
-
-  function educationIndexFromContext(el, profile) {
-    const entries = Array.isArray(profile?.education) ? profile.education : [];
-    let node = el;
-    for (let depth = 0; depth < 12 && node?.parentElement; depth += 1) {
-      node = node.parentElement;
-      const signature = contextSignature(node);
-      const matches = entries
-        .map((entry, index) => ({ index, variants: schoolVariants(entry) }))
-        .filter(({ variants }) => variants.some((variant) => signature.includes(variant)));
-      if (matches.length === 1) return matches[0].index;
-    }
-    return -1;
-  }
-
   function educationBlock(el) {
     let node = el;
     for (let depth = 0; depth < 12 && node?.parentElement; depth += 1) {
@@ -183,11 +151,6 @@
     return String(map[key] || "").trim();
   }
 
-  function empty(el) {
-    if (el instanceof HTMLInputElement && ["radio", "checkbox"].includes(el.type)) return !el.checked;
-    return !String(el.value || "").trim();
-  }
-
   function dispatch(el) {
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.dispatchEvent(new Event("change", { bubbles: true }));
@@ -203,46 +166,104 @@
     return true;
   }
 
-  function yearMonthField(el) {
+  function dateLikeField(el) {
     if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return false;
+    if (["date", "month"].includes(String(el.type || "").toLowerCase())) return true;
     const hint = normalize([
       el.getAttribute?.("placeholder"),
       el.getAttribute?.("aria-label"),
       el.getAttribute?.("name"),
       el.id,
     ].filter(Boolean).join(" "));
-    return /yyyy\s*mm|yyyy.*month|年.*月/.test(hint);
+    return /yyyy|year|month|年|月|日期|date|开始时间|结束时间|开始日期|结束日期/.test(hint);
   }
 
-  function correctPeriodsBySchool(profile) {
-    const controls = Array.from(document.querySelectorAll(FORM_CONTROL_SELECTOR)).filter(visible);
-    const usedSchools = new Set();
-    let filled = 0;
-    for (const entry of profile.education || []) {
-      const variants = schoolVariants(entry);
-      const schoolField = controls.find((control) => {
-        if (usedSchools.has(control)) return false;
-        const value = normalize(control.value || control.getAttribute?.("value") || "");
-        return value && variants.some((variant) => value === variant || value.includes(variant) || variant.includes(value));
-      });
-      if (!schoolField) continue;
-      let node = schoolField.parentElement;
-      let dates = [];
-      for (let depth = 0; node && depth < 14; depth += 1, node = node.parentElement) {
-        const blockControls = Array.from(node.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).filter(visible);
-        dates = blockControls.filter(yearMonthField);
-        if (blockControls.includes(schoolField) && dates.length >= 2 && blockControls.length <= 32) break;
-        dates = [];
-        if (node === document.body) break;
-      }
-      if (dates.length < 2) continue;
-      usedSchools.add(schoolField);
-      const start = entry.start_year && entry.start_month ? `${entry.start_year}-${String(entry.start_month).padStart(2, "0")}` : "";
-      const end = entry.end_year && entry.end_month ? `${entry.end_year}-${String(entry.end_month).padStart(2, "0")}` : "";
-      if (start && setText(dates[0], start)) filled += 1;
-      if (end && setText(dates[1], end)) filled += 1;
+  function educationRank(entry) {
+    const text = normalize([entry?.degree_type, entry?.degree, entry?.degree_en].filter(Boolean).join(" "));
+    if (/博士|doctor|ph d/.test(text)) return 0;
+    if (/硕士|master|m s/.test(text)) return 1;
+    if (/学士|本科|bachelor|b s/.test(text)) return 2;
+    return 9;
+  }
+
+  function orderedEducationEntries(profile) {
+    return (profile.education || []).map((entry, index) => ({ entry, index }))
+      .sort((a, b) => educationRank(a.entry) - educationRank(b.entry) || a.index - b.index)
+      .map(({ entry }) => entry);
+  }
+
+  function orderedEducationBlocks(controls) {
+    const blocks = [];
+    const seen = new Set();
+    for (const control of controls) {
+      const block = educationBlock(control);
+      if (!block || seen.has(block)) continue;
+      seen.add(block);
+      blocks.push({ block, firstControlIndex: controls.findIndex((item) => Array.from(block.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).includes(item)) });
     }
-    return filled;
+    return blocks.sort((a, b) => a.firstControlIndex - b.firstControlIndex).map(({ block }) => block);
+  }
+
+  function dateParts(value) {
+    const match = String(value || "").match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+([0-2]?\d|3[01]))?/);
+    return match ? {
+      year: match[1],
+      month: match[2] ? String(match[2]).padStart(2, "0") : "",
+      day: match[3] ? String(match[3]).padStart(2, "0") : "",
+    } : { year: "", month: "", day: "" };
+  }
+
+  function lastDay(year, month) {
+    return String(new Date(Number(year), Number(month), 0).getDate()).padStart(2, "0");
+  }
+
+  function dateCandidates(el, value, role) {
+    const parts = dateParts(value);
+    if (!parts.year) return [];
+    const month = parts.month || "01";
+    const day = parts.day || (role === "end" ? lastDay(parts.year, month) : "01");
+    const raw = [el.type, el.getAttribute?.("placeholder"), el.getAttribute?.("aria-label")].filter(Boolean).join(" ").toLowerCase();
+    const dayControl = String(el.type || "").toLowerCase() === "date" || /yyyy.*mm.*dd|年月日|选择日期|开始日期|结束日期/.test(raw);
+    const monthControl = String(el.type || "").toLowerCase() === "month" || /yyyy.*mm|年月|月份/.test(raw);
+    const formats = dayControl ? [`${parts.year}-${month}-${day}`, `${parts.year}-${month}`, parts.year]
+      : monthControl ? [`${parts.year}-${month}`, `${parts.year}-${month}-${day}`, parts.year]
+        : [`${parts.year}-${month}`, `${parts.year}-${month}-${day}`, parts.year];
+    return [...new Set(formats)];
+  }
+
+  function acceptedDate(el, candidate) {
+    const actual = dateParts(el.value || el.getAttribute?.("value") || "");
+    const expected = dateParts(candidate);
+    return Boolean(actual.year && actual.year === expected.year && (!expected.month || actual.month === expected.month) && (!expected.day || !actual.day || actual.day === expected.day));
+  }
+
+  async function setAdaptiveDate(el, value, role) {
+    if (!value || el.disabled) return false;
+    const wasReadOnly = Boolean(el.readOnly);
+    const hadReadOnly = Boolean(el.hasAttribute?.("readonly"));
+    for (const candidate of dateCandidates(el, value, role)) {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        if (wasReadOnly) {
+          el.readOnly = false;
+          el.removeAttribute?.("readonly");
+        }
+        el.focus?.({ preventScroll: true });
+        setText(el, candidate);
+        if (attempt === 2) {
+          try { el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true })); } catch {}
+        }
+        el.blur?.();
+        await new Promise((resolve) => setTimeout(resolve, attempt === 2 ? 140 : 45));
+        if (acceptedDate(el, candidate)) {
+          if (wasReadOnly) el.readOnly = true;
+          if (hadReadOnly) el.setAttribute?.("readonly", "");
+          return true;
+        }
+      }
+    }
+    if (wasReadOnly) el.readOnly = true;
+    if (hadReadOnly) el.setAttribute?.("readonly", "");
+    return false;
   }
 
   function setSelect(el, value) {
@@ -278,48 +299,43 @@
       return { filled: 0, fields: [] };
     }
     const controls = Array.from(document.querySelectorAll(FORM_CONTROL_SELECTOR)).filter(visible);
-    const blockAssignments = new Map();
-    let nextFallbackIndex = 0;
     let filled = 0;
     const fields = [];
+    const entries = orderedEducationEntries(profile);
+    const blocks = orderedEducationBlocks(controls);
+    const usedControls = new Set();
 
-    const correctedPeriods = correctPeriodsBySchool(profile);
-    if (correctedPeriods) {
-      filled += correctedPeriods;
-      fields.push("education.periodBySchool");
-    }
+    for (let blockIndex = 0; blockIndex < blocks.length && blockIndex < entries.length; blockIndex += 1) {
+      const block = blocks[blockIndex];
+      const entry = entries[blockIndex];
+      const blockControls = Array.from(block.querySelectorAll?.(FORM_CONTROL_SELECTOR) || []).filter(visible);
+      for (const el of blockControls) {
+        if (usedControls.has(el)) continue;
+        const labelText = nearbyLabelText(el);
+        let key = inferField(labelText);
+        if (!key) key = groupedPeriodKey(el, labelText);
+        if (!key && dateLikeField(el)) {
+          const dates = blockControls.filter(dateLikeField);
+          key = dates.indexOf(el) === 0 ? "startDate" : dates.indexOf(el) === 1 ? "endDate" : "";
+        }
+        if (!key) continue;
+        const value = educationValue(entry, key, el, labelText);
+        if (!value) continue;
 
-    for (const el of controls) {
-      const labelText = nearbyLabelText(el);
-      let key = inferField(labelText);
-      if (!key) key = groupedPeriodKey(el, labelText);
-      if (!key) continue;
-
-      let entryIndex = educationIndexFromContext(el, profile);
-      if (entryIndex < 0) {
-        const block = educationBlock(el);
-        if (block && blockAssignments.has(block)) entryIndex = blockAssignments.get(block);
-        else {
-          entryIndex = nextFallbackIndex;
-          nextFallbackIndex += 1;
-          if (block) blockAssignments.set(block, entryIndex);
+        let changed = false;
+        if (key === "startDate") changed = await setAdaptiveDate(el, value, "start");
+        else if (key === "endDate") changed = await setAdaptiveDate(el, value, "end");
+        else if (el instanceof HTMLSelectElement) changed = setSelect(el, value);
+        else if (el.getAttribute?.("role") === "combobox" || el.getAttribute?.("aria-autocomplete")) changed = await setCombobox(el, value);
+        else if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) changed = setText(el, value);
+        if (changed) {
+          usedControls.add(el);
+          filled += 1;
+          fields.push(`education.${key}`);
         }
       }
-      const entry = profile.education[entryIndex];
-      const value = educationValue(entry, key, el, labelText);
-      if (!value) continue;
-      const correctKnownPeriod = ["startDate", "endDate"].includes(key) && educationIndexFromContext(el, profile) >= 0;
-      if (!empty(el) && !correctKnownPeriod) continue;
-
-      let changed = false;
-      if (el instanceof HTMLSelectElement) changed = setSelect(el, value);
-      else if (el.getAttribute?.("role") === "combobox" || el.getAttribute?.("aria-autocomplete")) changed = await setCombobox(el, value);
-      else if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) changed = setText(el, value);
-      if (changed) {
-        filled += 1;
-        fields.push(`education.${key}`);
-      }
     }
+    if (blocks.length) fields.push("education.periodBySlot");
     return { filled, fields: [...new Set(fields)] };
   }
 

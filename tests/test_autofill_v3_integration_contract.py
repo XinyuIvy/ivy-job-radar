@@ -12,7 +12,7 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         global_route = (ROOT / "app" / "api" / "autofill" / "general-profile" / "route.ts").read_text(encoding="utf-8")
         manifest = (ROOT / "browser-extension" / "manifest.json").read_text(encoding="utf-8")
 
-        self.assertIn('"version":"0.4.2"', manifest)
+        self.assertIn('"version":"0.4.3"', manifest)
         self.assertIn('/api/autofill/application-packet', popup)
         self.assertIn('/api/autofill/general-profile', popup)
         self.assertIn('applicationPacket', popup)
@@ -20,6 +20,13 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         self.assertIn('message.generalProfile || null', content)
         self.assertIn('message.applicationPacket || null', content)
         self.assertIn('final_customized_cv_only', content)
+        for key in [
+            'award.type', 'award.summary', 'publication.title', 'publication.authorOrder',
+            'publication.date', 'publication.venue', 'publication.details',
+        ]:
+            self.assertIn(key, content)
+        self.assertIn('sectionFromText', content)
+        self.assertIn('semanticSectionKey', content)
         self.assertIn('global-application-autofill-profile-v1', content)
         self.assertIn('application_autofill_${archiveId}.json', packet_route)
         self.assertIn('packet.application_id !== archiveId', packet_route)

@@ -20,9 +20,15 @@ class FakeField {
   get value() { return this._value; }
   set value(value) { this._value = String(value); }
   getAttribute(name) { return this.attributes.get(name) || ""; }
+  hasAttribute(name) { return this.attributes.has(name); }
+  setAttribute(name, value) { this.attributes.set(name, String(value)); }
+  removeAttribute(name) { this.attributes.delete(name); }
   getClientRects() { return [1]; }
   closest() { return null; }
   dispatchEvent() {}
+  focus() {}
+  blur() {}
+  click() {}
 }
 
 class FakeInput extends FakeField {}
@@ -112,6 +118,28 @@ test("fills paired project dates and a generic project description", async () =>
   assert.equal(role.value, "第一作者");
   assert.equal(description.value, "构建并验证再入院风险模型。\n完成时间外验证。");
   assert.deepEqual(new Set(result.fields), new Set(["project.startDate", "project.endDate", "project.name", "project.role", "project.description", "project.periodByName"]));
+});
+
+test("adapts a project date range to full-date controls", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const projectBlock = { tagName: "DIV", textContent: "项目经历 起止时间 项目名称 担任角色 项目描述", parentElement: body };
+  const start = new FakeInput({ id: "range-start", label: "起止时间", placeholder: "开始日期", parentElement: projectBlock, type: "date", readOnly: true });
+  const end = new FakeInput({ id: "range-end", label: "起止时间", placeholder: "结束日期", parentElement: projectBlock, type: "date", readOnly: true });
+  const name = new FakeInput({ id: "range-name", label: "项目名称", parentElement: projectBlock });
+  const role = new FakeInput({ id: "range-role", label: "担任角色", parentElement: projectBlock });
+  projectBlock.querySelectorAll = () => [start, end, name, role];
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-ABC-102",
+    projects: [{ name: "真实世界 EHR", role: "第一作者", start_year: "2026", start_month: "05", end_year: "2026", end_month: "08" }],
+  };
+
+  const result = await runFill([start, end, name, role], packet);
+
+  assert.equal(result.ok, true);
+  assert.equal(start.value, "2026-05-01");
+  assert.equal(end.value, "2026-08-31");
+  assert.equal(role.value, "第一作者");
 });
 
 test("uses the current month as the end date for an ongoing project", async () => {
@@ -234,4 +262,84 @@ test("fills two languages, awards, and portfolio entries from the global profile
   assert.equal(fields[9].value, "AI Usage Dashboard");
   assert.equal(fields[10].value, "https://github.com/XinyuIvy/ivy-job-radar");
   assert.equal(fields[11].value, "Ivy Job Radar");
+});
+
+test("infers award and publication fields from section structure instead of exact labels", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const awardBlock = { tagName: "DIV", textContent: "荣誉奖励 分类 日期 说明", parentElement: body };
+  const publicationBlock = { tagName: "DIV", textContent: "论文/期刊 题名 排序 日期 来源 说明", parentElement: body };
+  const awardType = new FakeSelect({ id: "award-category", label: "分类", parentElement: awardBlock, options: ["请选择", "个人奖", "团队奖", "其他"] });
+  const awardDate = new FakeInput({ id: "award-date", label: "日期", placeholder: "请选择日期", parentElement: awardBlock, type: "date", readOnly: true });
+  const awardDetails = new FakeTextarea({ id: "award-details", label: "说明", parentElement: awardBlock });
+  awardBlock.querySelectorAll = () => [awardType, awardDate, awardDetails];
+  const paperTitle = new FakeInput({ id: "paper-title", label: "题名", parentElement: publicationBlock });
+  const authorOrder = new FakeSelect({ id: "paper-order", label: "排序", parentElement: publicationBlock, options: ["请选择", "第一作者", "共同作者"] });
+  const publicationDate = new FakeInput({ id: "paper-date", label: "日期", placeholder: "请选择日期", parentElement: publicationBlock, type: "date", readOnly: true });
+  const venue = new FakeSelect({ id: "paper-source", label: "来源", parentElement: publicationBlock, options: ["请选择", "期刊", "会议", "其他"] });
+  const paperDetails = new FakeTextarea({ id: "paper-details", label: "说明", parentElement: publicationBlock });
+  publicationBlock.querySelectorAll = () => [paperTitle, authorOrder, publicationDate, venue, paperDetails];
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-ABC-103",
+    publications: [{
+      title: "Semiparametric confidence sets for cross-sectional and longitudinal neuroimaging",
+      author_order: "First Author",
+      publication_date: "2025-06",
+      venue: "Imaging Neuroscience",
+      details: "同行评议期刊论文。",
+    }],
+  };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    awards: [{ year: "2026", name: "Pathbreaking Discovery Award", description: "个人研究奖。" }],
+  };
+
+  const result = await runFill([awardType, awardDate, awardDetails, paperTitle, authorOrder, publicationDate, venue, paperDetails], packet, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.equal(awardType.value, "个人奖");
+  assert.equal(awardDate.value, "2026-01-01");
+  assert.equal(awardDetails.value, "Pathbreaking Discovery Award：个人研究奖。");
+  assert.equal(paperTitle.value, "Semiparametric confidence sets for cross-sectional and longitudinal neuroimaging");
+  assert.equal(authorOrder.value, "第一作者");
+  assert.equal(publicationDate.value, "2025-06-01");
+  assert.equal(venue.value, "期刊");
+  assert.equal(paperDetails.value, "同行评议期刊论文。");
+});
+
+test("infers an employment block from structure when labels use unfamiliar synonyms", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const workBlock = { tagName: "DIV", textContent: "工作经历 任职单位 岗位 所在地 开始日期 结束日期 主要事项", parentElement: body };
+  const employer = new FakeInput({ id: "work-org", label: "任职单位", parentElement: workBlock });
+  const title = new FakeInput({ id: "work-role", label: "岗位", parentElement: workBlock });
+  const location = new FakeInput({ id: "work-place", label: "所在地", parentElement: workBlock });
+  const start = new FakeInput({ id: "work-start", label: "开始", placeholder: "开始日期", parentElement: workBlock, type: "date", readOnly: true });
+  const end = new FakeInput({ id: "work-end", label: "结束", placeholder: "结束日期", parentElement: workBlock, type: "date", readOnly: true });
+  const description = new FakeTextarea({ id: "work-details", label: "主要事项", parentElement: workBlock });
+  workBlock.querySelectorAll = () => [employer, title, location, start, end, description];
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-ABC-104",
+    experience: [{
+      organization: "Vanderbilt University Medical Center",
+      title: "Biostatistics Intern",
+      location: "Nashville, United States",
+      start_year: "2025",
+      start_month: "05",
+      end_year: "2025",
+      end_month: "08",
+      bullets: ["支持真实世界临床研究分析。"],
+    }],
+  };
+
+  const result = await runFill([employer, title, location, start, end, description], packet);
+
+  assert.equal(result.ok, true);
+  assert.equal(employer.value, "Vanderbilt University Medical Center");
+  assert.equal(title.value, "Biostatistics Intern");
+  assert.equal(location.value, "Nashville, United States");
+  assert.equal(start.value, "2025-05-01");
+  assert.equal(end.value, "2025-08-31");
+  assert.equal(description.value, "支持真实世界临床研究分析。");
 });

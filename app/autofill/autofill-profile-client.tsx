@@ -110,7 +110,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     if (accessKey) {
       window.localStorage.setItem(CONFIG_KEY, JSON.stringify({ version: 1, siteOrigin: window.location.origin, accessKey }));
     }
-    setMessage("已保存本地基础资料。教育详细信息会实时读取 CV 仓库里的 global application profile；项目、经历描述、技能、项目链接和 PDF 则按当前 APP-ID 的最终定制 CV 读取。这里的教育/经历字段只保留为回退值。");
+    setMessage("已保存本地基础资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库里的 global application profile；申请相关项目、经历描述、技能、项目链接和 PDF 则按当前 APP-ID 的最终定制 CV 读取。这里的教育/经历字段只保留为回退值。");
   };
 
   const copyJson = async () => {
@@ -122,15 +122,20 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     <div className="profile-shell">
       <header>
         <div>
-          <p className="eyebrow">APPLICATION AUTOFILL · V3</p>
+          <p className="eyebrow">APPLICATION AUTOFILL · V4.1</p>
           <h1>本地基础申请资料</h1>
-          <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。三段教育的学院、导师、研究单位、GPA、排名和研究领域会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
+          <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
         </div>
         <Link href="/">返回 Job Radar</Link>
       </header>
 
       <section className="privacy-note">
         <strong>仍然不会自动处理：</strong> EEO、种族、性别、残障、退伍军人、宗教、出生日期、SSN 等敏感字段；不会绕过验证码，也不会点击 Submit。开放题会列为“未填问题”供你检查，不会擅自编答案。
+      </section>
+
+      <section className="extension-update">
+        <div><strong>扩展 0.4.3 已升级语义识别：</strong><span>按板块与控件结构识别教育、项目、工作、奖项、论文、语言和作品，并自适应年月或完整日期。</span></div>
+        <a href="/ivy-job-autofill-0.4.3.zip" download>下载语义识别与日期自适应版扩展</a>
       </section>
 
       <form onSubmit={save}>
@@ -169,7 +174,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     <style>{`
       .profile-page{min-height:100vh;background:#f5f2e9;color:#1f2c25;padding:28px 18px 90px}.profile-shell{max-width:980px;margin:0 auto}
       header{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}header h1{font:700 clamp(36px,6vw,58px)/1.05 Georgia,serif;margin:4px 0 8px}header p{color:#58655e;line-height:1.65;max-width:760px;margin:0}header a{color:#16794b;font-weight:800;white-space:nowrap}.eyebrow{color:#16794b!important;font-size:11px!important;font-weight:850!important;letter-spacing:.13em!important}
-      .privacy-note{margin:22px 0;background:#fff6df;border:1px solid #ead9ab;border-radius:13px;padding:13px 15px;line-height:1.55}.group{background:#fffef9;border:1px solid #ddd8ca;border-radius:17px;padding:19px;margin-top:16px}.group h2{font:700 23px Georgia,serif;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.grid label{display:grid;gap:5px}.grid span{font-size:12px;color:#5e6b63;font-weight:800}.grid input,.grid select{box-sizing:border-box;width:100%;border:1px solid #cbc7bb;border-radius:9px;padding:10px 11px;background:white;color:#1f2c25;font:inherit}.actions{display:flex;gap:10px;margin-top:18px}.actions button{border:0;border-radius:10px;padding:11px 16px;font-weight:850;background:#16794b;color:white;cursor:pointer}.actions .secondary{background:#fffef9;color:#1f2c25;border:1px solid #c9c4b7}.message{background:#e7f3eb;color:#195c3e;padding:11px 13px;border-radius:10px;line-height:1.55}@media(max-width:700px){header{display:grid}.grid{grid-template-columns:1fr}}
+      .privacy-note{margin:22px 0 12px;background:#fff6df;border:1px solid #ead9ab;border-radius:13px;padding:13px 15px;line-height:1.55}.extension-update{display:flex;align-items:center;justify-content:space-between;gap:18px;background:#e7f3eb;border:1px solid #bfdcc9;border-radius:13px;padding:13px 15px;line-height:1.5}.extension-update div{display:grid;gap:2px}.extension-update span{color:#4f6057;font-size:13px}.extension-update a{flex:none;background:#16794b;color:white;text-decoration:none;border-radius:9px;padding:9px 12px;font-size:13px;font-weight:850}.group{background:#fffef9;border:1px solid #ddd8ca;border-radius:17px;padding:19px;margin-top:16px}.group h2{font:700 23px Georgia,serif;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.grid label{display:grid;gap:5px}.grid span{font-size:12px;color:#5e6b63;font-weight:800}.grid input,.grid select{box-sizing:border-box;width:100%;border:1px solid #cbc7bb;border-radius:9px;padding:10px 11px;background:white;color:#1f2c25;font:inherit}.actions{display:flex;gap:10px;margin-top:18px}.actions button{border:0;border-radius:10px;padding:11px 16px;font-weight:850;background:#16794b;color:white;cursor:pointer}.actions .secondary{background:#fffef9;color:#1f2c25;border:1px solid #c9c4b7}.message{background:#e7f3eb;color:#195c3e;padding:11px 13px;border-radius:10px;line-height:1.55}@media(max-width:700px){header{display:grid}.extension-update{align-items:flex-start;display:grid}.extension-update a{width:max-content}.grid{grid-template-columns:1fr}}
     `}</style>
   </main>;
 }

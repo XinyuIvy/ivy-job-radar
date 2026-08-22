@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V4.2)
+# Ivy Job Radar Application Autofill (V4.3)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -13,8 +13,9 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - Uses the matched `APP-ID` as the application-specific source key.
 - After the final customized CV is built, `job-application-archive` generates `application_autofill_<APP-ID>.json` directly from `cv_customized_<APP-ID>.tex`. The packet preserves the final CV's Education, Industry Experience, Research/Projects, Skills and Publications order and wording.
 - Education, employment, project, skills and publication form fields prefer that APP-specific packet. Project date pairs labelled as “起止时间”, project textareas labelled only as “描述”, and project fields labelled only as “角色 / Role” are recognized from their surrounding project block. Role wording such as “第一作者” or “独立开发者” is copied from the finalized packet rather than guessed from the description. The manually maintained standard profile is only a fallback when no finalized packet exists.
-- V4.2 verifies project date values after writing them, retries React/Vue controlled calendar inputs, repeats the project-date pass after education updates, and uses the current year-month as the end value for ongoing projects when a form requires a concrete month.
-- Education dates are corrected by the school already present in each education block, including when a recruiting site or resume parser prefilled the wrong dates.
+- V4.3 binds the first three education blocks as doctorate, master's and bachelor's entries and overwrites stale parser values as a complete block, so school, degree, major and dates cannot drift into different records.
+- Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
+- Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
 - Repeated language blocks fill only the language name (`中文 / 普通话`, `英语`). Proficiency remains manual because recruiting-site option labels vary.
 - Repeated award blocks fill the verified year, award name and description. Award attachments remain manual.
 - Repeated portfolio blocks fill AI Usage Dashboard and Ivy Job Radar URLs plus their verified descriptions. Portfolio attachments remain manual.

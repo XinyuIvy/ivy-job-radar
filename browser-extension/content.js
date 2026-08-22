@@ -124,8 +124,10 @@
 
     ["language.proficiency", /\b(language proficiency|proficiency level|fluency)\b|精通程度|熟练程度|语言水平/],
     ["language.name", /\b(language|spoken language)\b|(?<!能)语言(?!能力)/],
+    ["award.type", /\b(award type|award category|honou?r type)\b|奖项类型|奖励类型/],
     ["award.year", /\b(award year|award date|date received)\b|获奖时间|获奖年份/],
     ["award.name", /\b(award name|award title|honou?r name)\b|获奖名称|奖项名称/],
+    ["award.summary", /\b(award details|award summary|award description)\b|获奖情况|获奖详情/],
     ["portfolio.url", /\b(portfolio link|work sample link|work url)\b|作品链接|作品网址|作品地址/],
     ["project.url", /\b(project url|project link|project website|repository url|repo url|project address)\b|项目链接|项目地址|项目网址|项目url/],
     ["project.description", /\b(project description|project summary|research description)\b|项目描述|项目简介|研究描述/],
@@ -133,6 +135,11 @@
     ["project.role", /\b(project role|research role|role in project|project contribution)\b|项目角色|项目职责/],
     ["cv.skills", /\b(technical skills|key skills|skills)\b|专业技能|技能清单/],
     ["cv.publications", /\b(selected publications|publications|publication list)\b|论文列表|代表论文/],
+    ["publication.title", /\b(publication title|paper title|article title)\b|论文名称|论文题目/],
+    ["publication.authorOrder", /\b(author order|authorship|author position)\b|作者顺序|作者位次/],
+    ["publication.date", /\b(publication date|published date|date published)\b|发表时间|发表日期/],
+    ["publication.venue", /\b(journal|venue|publisher|publication venue|institution)\b|刊物\s*机构|刊物|期刊|发表机构/],
+    ["publication.details", /\b(publication details|paper details|article details|publication url)\b|论文详情|论文链接/],
     ["eligibility.age18", /\b(at least|over)\s*18|18 years old|age of 18\b/],
     ["eligibility.workAuthorizationUS", /\b(authorized|authorised|legally authorized|legally authorised).*\b(work|employment).*\b(united states|u s|usa)\b|\bwork authorization\b/],
     ["eligibility.sponsorshipUS", /\b(sponsor|sponsorship|visa sponsorship|immigration sponsorship)\b/],
@@ -149,30 +156,110 @@
     return null;
   }
 
-  function ancestorSection(el) {
+  function sectionFromText(text) {
+    const normalized = normalize(text);
+    if (/荣誉奖励|奖励荣誉|奖项荣誉|honou?rs? awards?|awards? honou?rs?/.test(normalized)) return "award";
+    if (/论文\s*期刊|论文期刊|学术论文|发表成果|publications?|papers? journals?/.test(normalized)) return "publication";
+    if (/教育背景|教育经历|学历信息|academic background|education history|education experience/.test(normalized)) return "education";
+    if (/实习经历|工作经历|行业经历|职业经历|employment history|work experience|professional experience|internship experience/.test(normalized)) return "employment";
+    if (/项目经历|研究项目|科研项目|project experience|research projects?/.test(normalized)) return "project";
+    if (/语言能力|语言技能|language skills?|languages?/.test(normalized)) return "language";
+    if (/作品展示|作品链接|项目作品|portfolio|work samples?/.test(normalized)) return "portfolio";
+    if (/专业技能|技术技能|技能清单|technical skills?|professional skills?/.test(normalized)) return "skills";
+    const sections = [
+      ["project", [/项目名称|project name|project title/, /项目角色|project role|role in project/, /项目链接|项目地址|项目网址|project (?:url|link|website)/]],
+      ["award", [/奖项|奖励|award|honou?r/, /时间|日期|date|year/, /情况|详情|描述|名称|类型|summary|description|name|type/]],
+      ["publication", [/论文|文章|publication|paper|article/, /作者|author|authorship/, /发表|刊物|期刊|机构|journal|venue|publisher/]],
+      ["education", [/学校|大学|school|university/, /学历|学位|degree/, /专业|major|field of study/]],
+      ["employment", [/公司|雇主|单位|employer|company|organization/, /职位|岗位|title|position|role/, /职责|工作内容|duties|responsibilities|description/]],
+      ["portfolio", [/作品链接|作品网址|portfolio link|work sample link/, /作品附件|work sample attachment|portfolio attachment/]],
+      ["language", [/语言|language/, /精通程度|熟练程度|proficiency|fluency/]],
+      ["skills", [/技能|skills?/, /工具|技术|编程|software|technical|programming/]],
+    ];
+    for (const [section, patterns] of sections) {
+      if (patterns.filter((pattern) => pattern.test(normalized)).length >= 2) return section;
+    }
+    return "";
+  }
+
+  function ancestorSectionInfo(el) {
     let node = el?.parentElement || null;
+    let fallback = null;
     for (let depth = 0; node && depth < 12; depth += 1, node = node.parentElement) {
       const text = normalize(node.textContent || "");
       if (text.length <= 12000) {
-        const sections = [
-          ["project", [/项目名称|project name|project title/, /项目角色|project role|role in project/, /项目链接|项目地址|项目网址|project (?:url|link|website)/]],
-          ["award", [/获奖时间|award (?:year|date)|date received/, /获奖名称|奖项名称|award (?:name|title)/]],
-          ["portfolio", [/作品链接|作品网址|portfolio link|work sample link/, /作品附件|work sample attachment|portfolio attachment/]],
-          ["language", [/语言|language/, /精通程度|熟练程度|proficiency|fluency/]],
-        ];
-        for (const [section, patterns] of sections) {
-          if (patterns.filter((pattern) => pattern.test(text)).length >= 2) return section;
+        const section = sectionFromText(text);
+        if (section) {
+          const info = { section, node };
+          if (!fallback) fallback = info;
+          if (visibleControls(node).length >= 2) return info;
         }
       }
       if (node === document.body) break;
     }
-    return "";
+    return fallback || { section: "", node: null };
+  }
+
+  function semanticSectionKey(el, sectionInfo) {
+    const { section, node } = sectionInfo;
+    if (!section || !node) return null;
+    const isSelectLike = el instanceof HTMLSelectElement || el.getAttribute?.("role") === "combobox" || Boolean(el.getAttribute?.("aria-autocomplete"));
+    if (section === "award") {
+      if (dateLikeField(el)) return "award.year";
+      if (isSelectLike) return "award.type";
+      if (el instanceof HTMLTextAreaElement) return "award.summary";
+      return "award.name";
+    }
+    if (section === "publication") {
+      if (dateLikeField(el)) return "publication.date";
+      if (el instanceof HTMLTextAreaElement) return "publication.details";
+      if (isSelectLike) {
+        const selects = visibleControls(node).filter((control) => control instanceof HTMLSelectElement || control.getAttribute?.("role") === "combobox" || control.getAttribute?.("aria-autocomplete"));
+        return selects.indexOf(el) <= 0 ? "publication.authorOrder" : "publication.venue";
+      }
+      return "publication.title";
+    }
+    if (section === "project") {
+      const controls = visibleControls(node);
+      const dates = controls.filter(dateLikeField);
+      if (dateLikeField(el)) return dates.indexOf(el) <= 0 ? "project.startDate" : "project.endDate";
+      if (el instanceof HTMLTextAreaElement) return "project.description";
+      const raw = normalize([el.type, el.getAttribute?.("placeholder"), el.getAttribute?.("name")].filter(Boolean).join(" "));
+      if (String(el.type || "").toLowerCase() === "url" || /url|link|网址|链接/.test(raw)) return "project.url";
+      const shortText = controls.filter((control) => !dateLikeField(control) && !(control instanceof HTMLTextAreaElement));
+      return shortText.indexOf(el) <= 0 ? "project.name" : "project.role";
+    }
+    if (section === "education") {
+      const dates = visibleControls(node).filter(dateLikeField);
+      if (dateLikeField(el)) return dates.indexOf(el) <= 0 ? "education.startDate" : "education.endDate";
+      return null;
+    }
+    if (section === "employment") {
+      const controls = visibleControls(node);
+      const dates = controls.filter(dateLikeField);
+      if (dateLikeField(el)) return dates.indexOf(el) <= 0 ? "employment.startDate" : "employment.endDate";
+      if (el instanceof HTMLTextAreaElement) return "employment.description";
+      const shortText = controls.filter((control) => !dateLikeField(control) && !(control instanceof HTMLTextAreaElement));
+      const index = shortText.indexOf(el);
+      return index === 0 ? "employment.employer" : index === 1 ? "employment.title" : index === 2 ? "employment.location" : null;
+    }
+    if (section === "language") {
+      const controls = visibleControls(node).filter((control) => control instanceof HTMLSelectElement || control.getAttribute?.("role") === "combobox" || control.getAttribute?.("aria-autocomplete"));
+      return controls.indexOf(el) <= 0 ? "language.name" : "language.proficiency";
+    }
+    if (section === "portfolio") {
+      if (el instanceof HTMLTextAreaElement) return "portfolio.description";
+      return "portfolio.url";
+    }
+    if (section === "skills" && el instanceof HTMLTextAreaElement) return "cv.skills";
+    return null;
   }
 
   function contextualKey(el, text, projectDateCounters) {
     const direct = inferKey(text);
     if (direct) return direct;
-    const section = ancestorSection(el);
+    const sectionInfo = ancestorSectionInfo(el);
+    const section = sectionInfo.section;
 
     if (section === "award" && /(?:^| )描述(?: |$)|(?:^| )description(?: |$)/.test(text)) return "award.description";
     if (section === "portfolio" && /(?:^| )描述(?: |$)|(?:^| )description(?: |$)/.test(text)) return "portfolio.description";
@@ -184,7 +271,7 @@
       projectDateCounters.set(counterKey, index + 1);
       return index % 2 === 0 ? "project.startDate" : "project.endDate";
     }
-    return null;
+    return semanticSectionKey(el, sectionInfo);
   }
 
   function packetIsAuthoritative(packet) {
@@ -244,6 +331,51 @@
     return String(entry?.description || entry?.summary || "").trim();
   }
 
+  function publicationEntry(entry) {
+    if (typeof entry === "string") {
+      const citation = entry.trim();
+      const quotedTitle = citation.match(/[“\"]([^”\"]{8,})[”\"]/i)?.[1]?.trim() || "";
+      const emphasizedVenue = citation.match(/\\emph\{([^}]+)\}/i)?.[1]?.trim() || "";
+      const year = citation.match(/\b((?:19|20)\d{2})\b(?![\s\S]*\b(?:19|20)\d{2}\b)/)?.[1] || "";
+      const firstAuthor = /^(?:\\item\s*)?(?:zhang\s*,\s*x\.?|xinyu\s+zhang)\b/i.test(citation);
+      return { title: quotedTitle || citation, authorOrder: firstAuthor ? "第一作者" : "", date: year, venue: emphasizedVenue, details: citation };
+    }
+    const year = entry?.year || entry?.publication_year || entry?.published_year;
+    const month = entry?.month || entry?.publication_month || entry?.published_month;
+    const date = String(entry?.publication_date || entry?.published_at || entry?.date || "").trim()
+      || normalizedYearMonth(year, month)
+      || String(year || "").trim();
+    const details = [
+      entry?.citation,
+      entry?.details,
+      entry?.description,
+      entry?.status,
+      entry?.url,
+    ].map((value) => String(value || "").trim()).filter(Boolean);
+    return {
+      title: String(entry?.title || entry?.name || entry?.paper_title || "").trim(),
+      authorOrder: String(entry?.author_order || entry?.authorship || entry?.author_role || entry?.role || "").trim(),
+      date,
+      venue: String(entry?.venue || entry?.journal || entry?.publisher || entry?.institution || entry?.conference || "").trim(),
+      details: [...new Set(details)].join("；"),
+    };
+  }
+
+  function authorshipAliases(value) {
+    const text = normalize(value);
+    if (/first|第一/.test(text)) return ["第一作者", "一作", "First Author", "First-author"];
+    if (/correspond|通讯/.test(text)) return ["通讯作者", "Corresponding Author"];
+    if (/co.?author|共同作者|合著/.test(text)) return ["共同作者", "其他作者", "Co-author"];
+    return [];
+  }
+
+  function publicationVenueAliases(value) {
+    const text = normalize(value);
+    if (/conference|会议|symposium|workshop|congress/.test(text)) return ["会议", "学术会议", "Conference", "其他", "Other"];
+    if (/journal|期刊|neuroscience|medicine|statistics|biostat/.test(text)) return ["期刊", "学术期刊", "Journal", "其他", "Other"];
+    return ["其他", "Other"];
+  }
+
   function packetEntryValue(packet, key, counters) {
     if (!packetIsAuthoritative(packet)) return { handled: false, value: "" };
 
@@ -268,6 +400,8 @@
       const index = nextIndex(counters, "experience", key);
       const entry = entries[index];
       if (!entry) return { handled: true, value: "" };
+      const startDate = normalizedYearMonth(entry.start_year, entry.start_month) || String(entry.start_date || entry.start || "").trim();
+      const endDate = normalizedYearMonth(entry.end_year, entry.end_month) || String(entry.end_date || entry.end || "").trim() || (entry.current ? currentYearMonth() : "");
       const map = {
         "employment.employer": entry.organization,
         "employment.title": entry.title,
@@ -276,6 +410,8 @@
         "employment.startYear": entry.start_year,
         "employment.endMonth": entry.end_month,
         "employment.endYear": entry.end_year,
+        "employment.startDate": startDate,
+        "employment.endDate": endDate,
         "employment.description": Array.isArray(entry.bullets) ? entry.bullets.join("\n") : "",
       };
       return { handled: true, value: String(map[key] || "").trim() };
@@ -310,15 +446,45 @@
 
     if (key === "cv.publications") {
       const publications = Array.isArray(packet.publications) ? packet.publications : [];
-      return { handled: true, value: publications.join("\n") };
+      return { handled: true, value: publications.map((entry) => publicationEntry(entry).details || publicationEntry(entry).title).filter(Boolean).join("\n") };
+    }
+
+    if (key.startsWith("publication.")) {
+      const entries = Array.isArray(packet.publications) ? packet.publications : [];
+      const index = nextIndex(counters, "publications", key);
+      const entry = publicationEntry(entries[index]);
+      const map = {
+        "publication.title": entry.title,
+        "publication.authorOrder": entry.authorOrder,
+        "publication.date": entry.date,
+        "publication.venue": entry.venue,
+        "publication.details": entry.details || entry.title,
+      };
+      const value = String(map[key] || "").trim();
+      const aliases = key === "publication.authorOrder" ? authorshipAliases(value)
+        : key === "publication.venue" ? publicationVenueAliases(value) : [];
+      return { handled: true, value, aliases };
     }
 
     return { handled: false, value: "" };
   }
 
+  function orderedEducationEntries(entries) {
+    const rank = (entry) => {
+      const text = normalize([entry?.degree_type, entry?.degree, entry?.degree_en].filter(Boolean).join(" "));
+      if (/博士|doctor|ph d/.test(text)) return 0;
+      if (/硕士|master|m s/.test(text)) return 1;
+      if (/学士|本科|bachelor|b s/.test(text)) return 2;
+      return 9;
+    };
+    return (Array.isArray(entries) ? entries : []).map((entry, index) => ({ entry, index }))
+      .sort((a, b) => rank(a.entry) - rank(b.entry) || a.index - b.index)
+      .map(({ entry }) => entry);
+  }
+
   function globalEducationValue(generalProfile, key, counters) {
     if (!globalProfileIsAuthoritative(generalProfile) || !key.startsWith("education.")) return { handled: false, value: "" };
-    const entries = generalProfile.education;
+    const entries = orderedEducationEntries(generalProfile.education);
     const index = nextIndex(counters, "education", key);
     const entry = entries[index];
     if (!entry) return { handled: true, value: "" };
@@ -359,7 +525,7 @@
     if (!globalProfileIsAuthoritative(generalProfile)) return { handled: false, value: "", aliases: [] };
     const groups = {
       language: { entries: generalProfile.languages, fields: { name: "language", proficiency: "" } },
-      award: { entries: generalProfile.awards, fields: { year: "year", name: "name", description: "description" } },
+      award: { entries: generalProfile.awards, fields: { type: "type", year: "year", name: "name", description: "description", summary: "summary" } },
       portfolio: { entries: generalProfile.portfolio, fields: { url: "url", description: "description" } },
     };
     const [group, field] = key.split(".");
@@ -371,8 +537,17 @@
     if (!entry) return { handled: true, value: "", aliases: [] };
     const sourceKey = config.fields[field];
     if (!sourceKey) return { handled: true, value: "", aliases: [] };
-    const aliases = key === "language.name" && Array.isArray(entry.aliases) ? entry.aliases.map(String) : [];
-    return { handled: true, value: String(entry[sourceKey] || "").trim(), aliases };
+    let value = String(entry[sourceKey] || "").trim();
+    let aliases = key === "language.name" && Array.isArray(entry.aliases) ? entry.aliases.map(String) : [];
+    if (key === "award.type") {
+      const team = /team|团队|四人|group/i.test([entry.type, entry.category, entry.description].filter(Boolean).join(" "));
+      value = value || String(entry.category || (team ? "团队奖" : "个人奖")).trim();
+      aliases = team ? ["团队奖", "团队", "Team Award", "Group Award", "其他", "Other"] : ["个人奖", "个人", "Individual Award", "其他", "Other"];
+    }
+    if (key === "award.summary") {
+      value = [entry.name, entry.description].map((item) => String(item || "").trim()).filter(Boolean).join("：");
+    }
+    return { handled: true, value, aliases };
   }
 
   function resolveValue(profile, generalProfile, packet, key, packetCounters, globalCounters, generalEntryCounters) {
@@ -388,7 +563,7 @@
     const generalValue = generalEntryValue(generalProfile, key, generalEntryCounters);
     if (generalValue.handled) return { value: generalValue.value, aliases: generalValue.aliases };
     const packetValue = packetEntryValue(packet, key, packetCounters);
-    if (packetValue.handled) return { value: packetValue.value, aliases: [] };
+    if (packetValue.handled) return { value: packetValue.value, aliases: packetValue.aliases || [] };
     return { value: getProfileValue(profile, key), aliases: [] };
   }
 
@@ -408,10 +583,59 @@
     return true;
   }
 
-  function controlYearMonth(el) {
-    const source = String(el?.value || el?.getAttribute?.("value") || "");
-    const match = source.match(/((?:19|20)\d{2})\D*(0?[1-9]|1[0-2])/);
-    return match ? normalizedYearMonth(match[1], match[2]) : "";
+  function dateParts(value) {
+    const source = String(value || "").trim();
+    const match = source.match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+([0-2]?\d|3[01]))?/);
+    return match ? {
+      year: match[1],
+      month: match[2] ? String(match[2]).padStart(2, "0") : "",
+      day: match[3] ? String(match[3]).padStart(2, "0") : "",
+    } : { year: "", month: "", day: "" };
+  }
+
+  function lastDayOfMonth(year, month) {
+    if (!year || !month) return "01";
+    return String(new Date(Number(year), Number(month), 0).getDate()).padStart(2, "0");
+  }
+
+  function datePrecision(el) {
+    const type = String(el?.type || el?.getAttribute?.("type") || "").toLowerCase();
+    if (type === "month") return "month";
+    if (type === "date") return "day";
+    const raw = [el?.getAttribute?.("placeholder"), el?.getAttribute?.("aria-label"), el?.getAttribute?.("name"), el?.id]
+      .filter(Boolean).join(" ").toLowerCase();
+    if (/yyyy\s*[-/.年]\s*mm\s*[-/.月]\s*dd|年\s*月\s*日|选择日期|开始日期|结束日期|publication date|award date|date received/.test(raw)) return "day";
+    if (/yyyy\s*[-/.年]\s*mm|年\s*月|year.?month|月份/.test(raw)) return "month";
+    if (/yyyy|年份|year/.test(raw) || el?.getAttribute?.("maxlength") === "4") return "year";
+    return "auto";
+  }
+
+  function dateCandidates(el, value, role = "neutral") {
+    const parts = dateParts(value);
+    if (!parts.year) return [];
+    const month = parts.month || "01";
+    const defaultDay = role === "end" ? lastDayOfMonth(parts.year, month) : "01";
+    const day = parts.day || defaultDay;
+    const formats = {
+      year: parts.year,
+      month: `${parts.year}-${month}`,
+      day: `${parts.year}-${month}-${day}`,
+    };
+    const precision = datePrecision(el);
+    const order = precision === "day" ? ["day", "month", "year"]
+      : precision === "month" ? ["month", "day", "year"]
+        : precision === "year" ? ["year", "month", "day"]
+          : parts.day ? ["day", "month", "year"] : parts.month ? ["month", "day", "year"] : ["year", "month", "day"];
+    return [...new Set(order.map((key) => formats[key]).filter(Boolean))];
+  }
+
+  function dateValueAccepted(el, candidate) {
+    const actual = dateParts(el?.value || el?.getAttribute?.("value") || "");
+    const expected = dateParts(candidate);
+    if (!actual.year || actual.year !== expected.year) return false;
+    if (expected.month && actual.month !== expected.month) return false;
+    if (expected.day && actual.day && actual.day !== expected.day) return false;
+    return true;
   }
 
   function frameworkInput(el, value) {
@@ -439,32 +663,37 @@
     el.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
   }
 
-  async function setYearMonth(el, value) {
-    const expected = controlYearMonth({ value });
-    if (!expected || !el || el.disabled) return false;
+  async function setAdaptiveDate(el, value, role = "neutral") {
+    const candidates = dateCandidates(el, value, role);
+    if (!candidates.length || !el || el.disabled) return false;
     const wasReadOnly = Boolean(el.readOnly);
     const hadReadOnlyAttribute = Boolean(el.hasAttribute?.("readonly"));
 
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      if (wasReadOnly) {
-        el.readOnly = false;
-        el.removeAttribute?.("readonly");
-      }
-      el.focus?.({ preventScroll: true });
-      frameworkInput(el, expected);
-      if (attempt === 1 && typeof document.execCommand === "function") {
-        try {
-          el.select?.();
-          document.execCommand("insertText", false, expected);
-          dispatch(el);
-        } catch {}
-      }
-      el.blur?.();
-      await new Promise((resolve) => setTimeout(resolve, attempt === 2 ? 120 : 40));
-      if (controlYearMonth(el) === expected) {
-        if (wasReadOnly) el.readOnly = true;
-        if (hadReadOnlyAttribute) el.setAttribute?.("readonly", "");
-        return true;
+    for (const candidate of candidates) {
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        if (wasReadOnly) {
+          el.readOnly = false;
+          el.removeAttribute?.("readonly");
+        }
+        el.focus?.({ preventScroll: true });
+        frameworkInput(el, candidate);
+        if (attempt === 1 && typeof document.execCommand === "function") {
+          try {
+            el.select?.();
+            document.execCommand("insertText", false, candidate);
+            dispatch(el);
+          } catch {}
+        }
+        if (attempt === 2) {
+          try { el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", code: "Enter", bubbles: true })); } catch {}
+        }
+        el.blur?.();
+        await new Promise((resolve) => setTimeout(resolve, attempt === 2 ? 140 : 45));
+        if (dateValueAccepted(el, candidate)) {
+          if (wasReadOnly) el.readOnly = true;
+          if (hadReadOnlyAttribute) el.setAttribute?.("readonly", "");
+          return true;
+        }
       }
     }
 
@@ -478,22 +707,23 @@
       .filter(visible);
   }
 
-  function yearMonthField(el) {
+  function dateLikeField(el) {
     if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return false;
+    if (["date", "month"].includes(String(el.type || "").toLowerCase())) return true;
     const hint = normalize([
       el.getAttribute?.("placeholder"),
       el.getAttribute?.("aria-label"),
       el.getAttribute?.("name"),
       el.id,
     ].filter(Boolean).join(" "));
-    return /yyyy\s*mm|yyyy.*month|年.*月/.test(hint);
+    return /yyyy|year|month|年|月|日期|date|开始时间|结束时间|开始日期|结束日期/.test(hint);
   }
 
   function identityBlock(identityField) {
     let node = identityField?.parentElement || null;
     for (let depth = 0; node && depth < 14; depth += 1, node = node.parentElement) {
       const controls = visibleControls(node);
-      const dates = controls.filter(yearMonthField);
+      const dates = controls.filter(dateLikeField);
       if (controls.includes(identityField) && dates.length >= 2 && controls.length <= 32) return { node, dates };
       if (node === document.body) break;
     }
@@ -514,8 +744,8 @@
 
   async function setPeriodDates(dates, start, end) {
     let filled = 0;
-    if (dates[0] && start && await setYearMonth(dates[0], start)) filled += 1;
-    if (dates[1] && end && await setYearMonth(dates[1], end)) filled += 1;
+    if (dates[0] && start && await setAdaptiveDate(dates[0], start, "start")) filled += 1;
+    if (dates[1] && end && await setAdaptiveDate(dates[1], end, "end")) filled += 1;
     return filled;
   }
 
@@ -659,7 +889,7 @@
   }
 
   async function fill(profile, generalProfile = null, applicationPacket = null) {
-    const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select'));
+    const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
     let filled = 0;
     const fields = [];
     const skippedSensitive = [];
@@ -681,7 +911,9 @@
       if (!value) continue;
 
       let changed = false;
-      if (["project.startDate", "project.endDate", "education.startDate", "education.endDate"].includes(key)) changed = await setYearMonth(el, value);
+      if (["project.startDate", "education.startDate", "employment.startDate"].includes(key)) changed = await setAdaptiveDate(el, value, "start");
+      else if (["project.endDate", "education.endDate", "employment.endDate"].includes(key)) changed = await setAdaptiveDate(el, value, "end");
+      else if (["award.year", "publication.date", "application.availableStartDate"].includes(key)) changed = await setAdaptiveDate(el, value, "neutral");
       else if (el instanceof HTMLSelectElement) changed = setSelect(el, value, aliases);
       else if (el instanceof HTMLInputElement && el.type === "radio") changed = setRadio(el, value);
       else if (el instanceof HTMLInputElement && el.type === "checkbox") changed = false;

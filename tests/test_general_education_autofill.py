@@ -14,12 +14,9 @@ class GeneralEducationAutofillTests(unittest.TestCase):
         self.assertIn("/api/autofill/general-profile", addon)
         self.assertIn("education-autofill.js", addon)
 
-    def test_general_pass_uses_nearby_labels_and_school_context(self):
+    def test_general_pass_uses_nearby_labels_and_degree_ordered_blocks(self):
         source = (EXT / "education-autofill.js").read_text(encoding="utf-8")
         self.assertIn("nearbyLabelText", source)
-        self.assertIn("educationIndexFromContext", source)
-        self.assertIn("contextSignature", source)
-        self.assertIn("schoolVariants", source)
         self.assertIn("groupedPeriodKey", source)
         self.assertIn("起止时间", source)
         self.assertIn("研究单位", source)
@@ -28,6 +25,11 @@ class GeneralEducationAutofillTests(unittest.TestCase):
         self.assertIn("degree_type", source)
         self.assertIn("start_month", source)
         self.assertIn("end_month", source)
+        self.assertIn("educationBlock", source)
+        self.assertIn("orderedEducationEntries", source)
+        self.assertIn("orderedEducationBlocks", source)
+        self.assertIn("education.periodBySlot", source)
+        self.assertIn("setAdaptiveDate", source)
 
     def test_general_pass_is_not_site_specific_and_does_not_invent_dates(self):
         source = (EXT / "education-autofill.js").read_text(encoding="utf-8")
