@@ -18,6 +18,11 @@ function key(company: string, title: string) {
   return `${normalize(company)}::${normalize(title)}`;
 }
 
+function verifyViewActive() {
+  const title = document.querySelector<HTMLElement>(".hero h1")?.textContent?.trim() || "";
+  return title === "岗位核验";
+}
+
 function button(label: string, tone: "approve" | "neutral" | "danger" | "quiet") {
   const element = document.createElement("button");
   element.type = "button";
@@ -50,10 +55,14 @@ export default function VerificationQueueActions() {
     let disposed = false;
     let observer: MutationObserver | null = null;
     let scheduled = false;
+    let lastRunAt = 0;
 
     const enhance = async () => {
       scheduled = false;
-      if (disposed) return;
+      if (disposed || !verifyViewActive()) return;
+      const now = Date.now();
+      if (now - lastRunAt < 1000) return;
+      lastRunAt = now;
       const [requestResponse, applicationResponse, qualityResponse] = await Promise.all([
         fetch("/api/job-requests", { cache: "no-store" }),
         fetch("/api/applications", { cache: "no-store" }),
@@ -119,6 +128,7 @@ export default function VerificationQueueActions() {
               const approved = rows.find((row) => key(row.company || "", row.title || "") === cardKey) || { company, title, jobUrl: requestItem?.jobUrl || "" };
               try { localStorage.setItem(APPROVAL_KEY, JSON.stringify({ ...approved, sentAt: Date.now() })); } catch {}
               window.dispatchEvent(new CustomEvent("ivy-job-radar-approved", { detail: approved }));
+              window.dispatchEvent(new CustomEvent("ivy-job-radar:jobs-updated", { detail: rows }));
             });
           } else if (action === "rerun") {
             actions.dataset.manualReviewEnhanced = "false";
@@ -138,7 +148,7 @@ export default function VerificationQueueActions() {
     const schedule = () => {
       if (scheduled || disposed) return;
       scheduled = true;
-      window.setTimeout(() => void enhance(), 0);
+      window.setTimeout(() => void enhance(), 80);
     };
     schedule();
     observer = new MutationObserver(schedule);

@@ -1,4 +1,4 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, inArray, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
@@ -9,7 +9,12 @@ import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/j
 import { sameDisplayedJob } from "../../lib/job-display-identity";
 import {
   canonicalizeJobIdentityUrl,
+  extractStableJobId,
+  isPlaceholderJobTitle,
+  jobDisplayIdentityKey,
   makeDistinctStoredJobUrl,
+  normalizeJobIdentityText,
+  normalizeJobLocation,
   sameLogicalJob,
 } from "../../lib/job-identity";
 
@@ -762,6 +767,8 @@ async function dispatchGlobalScan() {
 }
 
 let initialJobsSeeded = false;
+let visibleJobsCache: { expiresAt: number; rows: unknown[] } | null = null;
+const VISIBLE_JOBS_CACHE_MS = 2000;
 
 async function seedInitialJobs() {
   const db = await getDb();
@@ -787,63 +794,104 @@ async function seedInitialJobs() {
 }
 
 export async function GET() {
+  const nowMs = Date.now();
+  if (visibleJobsCache && visibleJobsCache.expiresAt > nowMs) {
+    return NextResponse.json(visibleJobsCache.rows);
+  }
+
   const db = await seedInitialJobs();
-  const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
-  const savedIds = new Set((await db.select().from(savedJobs)).map((row) => row.jobId));
-  const hiddenApplicationStatuses = new Set([
-    "准备材料",
-    "已申请",
-    "一面",
-    "二面/技术面",
-    "终面",
-    "Offer",
-    "拒绝",
+  const hiddenStatuses = ["准备材料", "已申请", "一面", "二面/技术面", "终面", "Offer", "拒绝"];
+  const [ignoredRows, savedRows, hiddenApplications, rows] = await Promise.all([
+    db.select({ fingerprint: ignoredJobs.fingerprint }).from(ignoredJobs),
+    db.select({ jobId: savedJobs.jobId }).from(savedJobs),
+    db.select({
+      id: applications.id,
+      company: applications.company,
+      title: applications.title,
+      location: applications.location,
+      jobUrl: applications.jobUrl,
+      applicationId: applications.applicationId,
+    }).from(applications).where(inArray(applications.status, hiddenStatuses)),
+    db.select().from(jobs).orderBy(desc(jobs.discoveredAt)),
   ]);
-  const hiddenApplications = (await db.select().from(applications))
-    .filter((row) => hiddenApplicationStatuses.has(row.status));
-  const rows = await db.select().from(jobs).orderBy(desc(jobs.discoveredAt));
-  const isTrackedApplication = (row: (typeof rows)[number]) =>
-    hiddenApplications.some((application) => sameLogicalJob(row, application));
+  const ignored = new Set(ignoredRows.map((row) => row.fingerprint));
+  const savedIds = new Set(savedRows.map((row) => row.jobId));
+
+  type HiddenApplication = (typeof hiddenApplications)[number];
+  const byStableId = new Map<string, HiddenApplication[]>();
+  const byRole = new Map<string, HiddenApplication[]>();
+  const push = (map: Map<string, HiddenApplication[]>, key: string, value: HiddenApplication) => {
+    if (!key) return;
+    const bucket = map.get(key);
+    if (bucket) bucket.push(value);
+    else map.set(key, [value]);
+  };
+  const roleKey = (value: { company?: string; title?: string }) => {
+    if (!value.title || isPlaceholderJobTitle(value.title)) return "";
+    const company = normalizeJobIdentityText(value.company);
+    const title = normalizeJobIdentityText(value.title);
+    return company && title ? `${company}::${title}` : "";
+  };
+  for (const application of hiddenApplications) {
+    push(byStableId, extractStableJobId(application.jobUrl, application.applicationId), application);
+    push(byRole, roleKey(application), application);
+  }
+  const isTrackedApplication = (row: (typeof rows)[number]) => {
+    const candidates = new Set<HiddenApplication>();
+    for (const application of byStableId.get(extractStableJobId(row.jobUrl, row.applicationId)) ?? []) candidates.add(application);
+    for (const application of byRole.get(roleKey(row)) ?? []) candidates.add(application);
+    return [...candidates].some((application) => sameLogicalJob(row, application));
+  };
+  const trackedIds = new Set<number>();
+  for (const row of rows) if (isTrackedApplication(row)) trackedIds.add(row.id);
 
   const filteredRows = rows
-    .filter((row) =>
-      activeJobStatuses.has(row.status)
-      || savedIds.has(row.id)
-      || isTrackedApplication(row),
-    )
+    .filter((row) => activeJobStatuses.has(row.status) || savedIds.has(row.id) || trackedIds.has(row.id))
     .filter((row) => !ignored.has(fingerprint(row.company, row.title)))
-    .filter((row) => !activeJobStatuses.has(row.status) || !isTrackedApplication(row))
+    .filter((row) => !activeJobStatuses.has(row.status) || !trackedIds.has(row.id))
     .filter((row) => !activeJobStatuses.has(row.status) || !(row.region === "美国" && row.visa === "明确不支持"))
     .filter((row) => !activeJobStatuses.has(row.status) || !isExcludedTitle(row.title))
     .filter((row) => !activeJobStatuses.has(row.status) || row.score >= 55);
 
-  const uniqueRows = filteredRows.reduce<typeof filteredRows>((result, row) => {
-    const duplicateIndex = result.findIndex((candidate) => sameDisplayedJob(candidate, row));
-    if (duplicateIndex < 0) {
-      result.push(row);
-      return result;
+  const rank = (candidate: (typeof rows)[number]) =>
+    Number(savedIds.has(candidate.id)) * 100
+    + Number(candidate.source.includes("手动")) * 30
+    + Number(Boolean(candidate.description)) * 10
+    + Math.min(10, candidate.skills.length)
+    + Math.min(10, candidate.score / 10);
+  const uniqueRows = new Map<string, (typeof rows)[number]>();
+  const fallbackKeys = new Map<string, string>();
+  for (const row of filteredRows) {
+    const primaryKey = jobDisplayIdentityKey(row);
+    const company = normalizeJobIdentityText(row.company);
+    const title = isPlaceholderJobTitle(row.title) ? "" : normalizeJobIdentityText(row.title);
+    const location = normalizeJobLocation(row.location);
+    const fallbackKey = company && title ? `${company}::${title}::${location}` : "";
+    const existingKey = uniqueRows.has(primaryKey) ? primaryKey : (fallbackKey ? fallbackKeys.get(fallbackKey) : undefined);
+    if (existingKey) {
+      const current = uniqueRows.get(existingKey);
+      if (current && sameDisplayedJob(current, row)) {
+        if (rank(row) > rank(current)) uniqueRows.set(existingKey, row);
+        continue;
+      }
+      // Same visible title/location can still represent different requisitions when both
+      // postings expose distinct stable IDs. Keep both instead of collapsing them.
     }
+    uniqueRows.set(primaryKey, row);
+    if (fallbackKey) fallbackKeys.set(fallbackKey, primaryKey);
+  }
 
-    const current = result[duplicateIndex];
-    const rank = (candidate: typeof row) =>
-      Number(savedIds.has(candidate.id)) * 100
-      + Number(candidate.source.includes("手动")) * 30
-      + Number(Boolean(candidate.description)) * 10
-      + Math.min(10, candidate.skills.length)
-      + Math.min(10, candidate.score / 10);
-    if (rank(row) > rank(current)) result[duplicateIndex] = row;
-    return result;
-  }, []);
-
-  return NextResponse.json(
-    uniqueRows.map((row) => ({
-      ...row,
-      skills: JSON.parse(row.skills || "[]"),
-    })),
-  );
+  const responseRows = [...uniqueRows.values()].map((row) => ({
+    ...row,
+    skills: JSON.parse(row.skills || "[]"),
+    saved: savedIds.has(row.id),
+  }));
+  visibleJobsCache = { expiresAt: nowMs + VISIBLE_JOBS_CACHE_MS, rows: responseRows };
+  return NextResponse.json(responseRows);
 }
 
 export async function POST(request: NextRequest) {
+  visibleJobsCache = null;
   let body: Record<string, unknown> = {};
   try {
     body = (await request.json()) as Record<string, unknown>;
