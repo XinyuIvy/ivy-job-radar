@@ -575,6 +575,12 @@
 
   function setText(el, value) {
     if (!value || el.disabled) return false;
+    if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) {
+      if (!el.isContentEditable) return false;
+      el.textContent = value;
+      dispatch(el);
+      return true;
+    }
     if (el instanceof HTMLInputElement && el.type === "date" && /^\d{4}-\d{2}$/.test(value)) return false;
     const proto = el instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
     const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
@@ -844,7 +850,8 @@
   async function setCombobox(el, value, aliases = []) {
     if (!value || el.disabled) return false;
     el.click();
-    if (!el.readOnly) setText(el, value);
+    const editableInput = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
+    if (editableInput && !el.readOnly) setText(el, value);
     await new Promise((resolve) => setTimeout(resolve, 90));
     const candidates = candidateValues(value, aliases);
     const wanted = candidates.map(normalize);
@@ -858,7 +865,7 @@
       dispatch(el);
       return true;
     }
-    return Boolean(!el.readOnly && el.value);
+    return Boolean(editableInput && !el.readOnly && el.value);
   }
 
   function isEmpty(el) {

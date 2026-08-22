@@ -31,12 +31,25 @@ class FakeField {
   click() {}
 }
 
-class FakeInput extends FakeField {}
+class FakeInput extends FakeField {
+  get value() { return super.value; }
+  set value(value) {
+    if (!(this instanceof FakeInput)) throw new TypeError("Illegal invocation");
+    super.value = value;
+  }
+}
 class FakeTextarea extends FakeField {}
 class FakeSelect extends FakeField {
   constructor({ options = [], ...rest }) {
     super(rest);
     this.options = options.map((text) => ({ value: text, textContent: text }));
+  }
+}
+
+class FakeCombobox extends FakeField {
+  constructor(options) {
+    super(options);
+    this.attributes.set("role", "combobox");
   }
 }
 
@@ -342,4 +355,21 @@ test("infers an employment block from structure when labels use unfamiliar synon
   assert.equal(start.value, "2025-05-01");
   assert.equal(end.value, "2025-08-31");
   assert.equal(description.value, "支持真实世界临床研究分析。");
+});
+
+test("does not invoke an input value setter on a div-based combobox", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const languageBlock = { tagName: "DIV", textContent: "语言能力 语言 熟练程度", parentElement: body };
+  const combobox = new FakeCombobox({ id: "language-combobox", label: "语言", parentElement: languageBlock });
+  languageBlock.querySelectorAll = () => [combobox];
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    languages: [{ language: "中文", aliases: ["普通话", "Chinese", "Mandarin"] }],
+  };
+
+  const result = await runFill([combobox], null, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.error, undefined);
 });

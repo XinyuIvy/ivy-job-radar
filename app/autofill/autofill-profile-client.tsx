@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.3 已升级语义识别：</strong><span>按板块与控件结构识别教育、项目、工作、奖项、论文、语言和作品，并自适应年月或完整日期。</span></div>
-        <a href="/ivy-job-autofill-0.4.3.zip" download>下载语义识别与日期自适应版扩展</a>
+        <div><strong>扩展 0.4.4 已修复下拉控件错误：</strong><span>按板块与控件结构识别教育、项目、工作、奖项、论文、语言和作品，并安全处理非输入框形式的下拉组件。</span></div>
+        <a href="/ivy-job-autofill-0.4.4.zip" download>下载语义识别与下拉控件修复版扩展</a>
       </section>
 
       <form onSubmit={save}>
