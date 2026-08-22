@@ -12,7 +12,7 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         global_route = (ROOT / "app" / "api" / "autofill" / "general-profile" / "route.ts").read_text(encoding="utf-8")
         manifest = (ROOT / "browser-extension" / "manifest.json").read_text(encoding="utf-8")
 
-        self.assertIn('"version":"0.3.2"', manifest)
+        self.assertIn('"version":"0.4.1"', manifest)
         self.assertIn('/api/autofill/application-packet', popup)
         self.assertIn('/api/autofill/general-profile', popup)
         self.assertIn('applicationPacket', popup)
@@ -46,6 +46,8 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
             'project.role',
             'project.description',
             'project.url',
+            'project.startDate',
+            'project.endDate',
             'cv.skills',
             'cv.publications',
         ]:
@@ -53,7 +55,7 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         self.assertIn('globalEducationValue', content)
         self.assertIn('packetEntryValue', content)
         self.assertIn('if (key.startsWith("education."))', content)
-        self.assertIn('if (globalValue.handled && globalValue.value) return globalValue.value', content)
+        self.assertIn('if (globalValue.handled && globalValue.value) return { value: globalValue.value, aliases: [] }', content)
         self.assertIn('const packetValue = packetEntryValue(packet, key, packetCounters)', content)
 
 

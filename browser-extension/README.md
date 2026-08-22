@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V3)
+# Ivy Job Radar Application Autofill (V4.1)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -12,7 +12,12 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - Matches the current job page to the user's **待提交申请** record using exact URL, stable job ID, or canonical URL. If the page is ambiguous, it asks the user to choose instead of guessing.
 - Uses the matched `APP-ID` as the application-specific source key.
 - After the final customized CV is built, `job-application-archive` generates `application_autofill_<APP-ID>.json` directly from `cv_customized_<APP-ID>.tex`. The packet preserves the final CV's Education, Industry Experience, Research/Projects, Skills and Publications order and wording.
-- Education, employment, project, skills and publication form fields prefer that APP-specific packet. The manually maintained standard profile is only a fallback when no finalized packet exists.
+- Education, employment, project, skills and publication form fields prefer that APP-specific packet. Project date pairs labelled as “起止时间”, project textareas labelled only as “描述”, and project fields labelled only as “角色 / Role” are recognized from their surrounding project block. Role wording such as “第一作者” or “独立开发者” is copied from the finalized packet rather than guessed from the description. The manually maintained standard profile is only a fallback when no finalized packet exists.
+- V4.1 performs a final identity-based date pass after the normal fill. Education periods are bound to the school value in the same card, project periods are bound to the project name in the same card, and read-only calendar inputs such as award year are updated programmatically.
+- Education dates are corrected by the school already present in each education block, including when a recruiting site or resume parser prefilled the wrong dates.
+- Repeated language blocks fill only the language name (`中文 / 普通话`, `英语`). Proficiency remains manual because recruiting-site option labels vary.
+- Repeated award blocks fill the verified year, award name and description. Award attachments remain manual.
+- Repeated portfolio blocks fill AI Usage Dashboard and Ivy Job Radar URLs plus their verified descriptions. Portfolio attachments remain manual.
 - When the matched application already has `cv_customized_<APP-ID>.pdf` in the private archive, downloads it through an authenticated Job Radar endpoint and attaches it only to a Resume/CV file input.
 - Surfaces unresolved required/open-ended questions and lets the user copy them for review or drafting in Chat.
 
