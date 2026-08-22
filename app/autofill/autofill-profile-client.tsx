@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.10 已修复论文区块完全空白：</strong><span>即使网页没有把可见标签关联到输入框，也会根据标题、作者、日期、刊物和详情的整行结构识别；仍然只填空白字段。</span></div>
-        <a href="/ivy-job-autofill-0.4.10.zip" download>下载论文结构识别修复版扩展</a>
+        <div><strong>扩展 0.4.11 已加入全板块自动添加：</strong><span>教育、经历、项目、获奖、语言、作品、校园经历和论文会按权威资料条数点击对应板块的“添加”；论文等级只读取已核验的期刊评级，仍然只填空白字段。</span></div>
+        <a href="/ivy-job-autofill-0.4.11.zip" download>下载全板块自动添加版扩展</a>
       </section>
 
       <form onSubmit={save}>

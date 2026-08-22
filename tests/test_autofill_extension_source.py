@@ -10,7 +10,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_manifest_remains_manual_trigger_only(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.4.10")
+        self.assertEqual(manifest["version"], "0.4.11")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
@@ -62,6 +62,11 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
             "employment.employer",
             "employment.title",
             "employment.description",
+            "campus.organization",
+            "campus.role",
+            "campus.description",
+            "campus.startDate",
+            "campus.endDate",
             "project.name",
             "project.role",
             "project.description",
@@ -115,8 +120,9 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("education.recordsBySlot", content)
         self.assertIn("publicationLevelControl", content)
         self.assertIn("!isEmpty(el)", content)
-        self.assertIn("publication.rowsAdded", content)
-        self.assertIn("project.rowsAdded", content)
+        self.assertIn("`${section}.rowsAdded`", content)
+        for section in ["publication", "project", "education", "employment", "award", "language", "portfolio", "campus"]:
+            self.assertIn(f'"{section}"', content)
         self.assertIn("globalPublicationValue", content)
         self.assertIn("confirmedSensitiveKey", content)
 
@@ -148,7 +154,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
-        self.assertIn("AUTOFILL V4.10", popup_html)
+        self.assertIn("AUTOFILL V4.11", popup_html)
         self.assertNotIn("AUTOFILL V3", popup_html)
         self.assertIn("从已提交申请中手动选择", popup_html)
         self.assertIn('src="manual-fallback.js"', popup_html)

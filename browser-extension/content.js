@@ -148,6 +148,12 @@
     ["employment.endMonth", /\b(employment end month|job end month)\b/],
     ["employment.endYear", /\b(employment end year|job end year)\b/],
 
+    ["campus.description", /\b(campus experience description|activity description|extracurricular description)\b|校园经历描述|校园活动描述|活动描述|经历描述/],
+    ["campus.organization", /\b(campus organization|student organization|club name|activity organization)\b|校园组织|学生组织|社团名称|组织名称/],
+    ["campus.role", /\b(campus role|activity role|leadership role)\b|校园角色|活动角色|担任职务|职务/],
+    ["campus.startDate", /\b(campus start date|activity start date)\b|校园经历开始时间|活动开始时间/],
+    ["campus.endDate", /\b(campus end date|activity end date)\b|校园经历结束时间|活动结束时间/],
+
     ["language.proficiency", /\b(language proficiency|proficiency level|fluency)\b|精通程度|熟练程度|语言水平/],
     ["language.name", /\b(language|spoken language)\b|(?<!能)语言(?!能力)/],
     ["award.type", /\b(award type|award category|honou?r type)\b|奖项类型|奖励类型/],
@@ -193,6 +199,7 @@
     if (/荣誉奖励|奖励荣誉|奖项荣誉|honou?rs? awards?|awards? honou?rs?/.test(normalized)) return "award";
     if (/论文\s*期刊|论文期刊|学术论文|发表成果|publications?|papers? journals?/.test(normalized)) return "publication";
     if (/教育背景|教育经历|学历信息|academic background|education history|education experience/.test(normalized)) return "education";
+    if (/校园经历|校内经历|校园活动|学生工作|社团经历|社会实践|campus experience|campus activities|student activities|extracurricular activities?/.test(normalized)) return "campus";
     if (/实习经历|工作经历|行业经历|职业经历|employment history|work experience|professional experience|internship experience/.test(normalized)) return "employment";
     if (/项目经历|研究项目|科研项目|project experience|research projects?/.test(normalized)) return "project";
     if (/语言能力|语言技能|language skills?|languages?/.test(normalized)) return "language";
@@ -203,6 +210,7 @@
       ["award", [/奖项|奖励|award|honou?r/, /时间|日期|date|year/, /情况|详情|描述|名称|类型|summary|description|name|type/]],
       ["publication", [/论文|文章|publication|paper|article/, /作者|author|authorship/, /发表|刊物|期刊|机构|journal|venue|publisher/]],
       ["education", [/学校|大学|school|university/, /学历|学位|degree/, /专业|major|field of study/]],
+      ["campus", [/校园|校内|学生组织|社团|campus|student organization|extracurricular/, /职务|角色|活动|经历|role|position|activity|experience/]],
       ["employment", [/公司|雇主|单位|employer|company|organization/, /职位|岗位|title|position|role/, /职责|工作内容|duties|responsibilities|description/]],
       ["portfolio", [/作品链接|作品网址|portfolio link|work sample link/, /作品附件|work sample attachment|portfolio attachment/]],
       ["language", [/语言|language/, /精通程度|熟练程度|proficiency|fluency/]],
@@ -276,6 +284,14 @@
       const index = shortText.indexOf(el);
       return index === 0 ? "employment.employer" : index === 1 ? "employment.title" : index === 2 ? "employment.location" : null;
     }
+    if (section === "campus") {
+      const controls = visibleControls(node);
+      const dates = controls.filter(dateLikeField);
+      if (dateLikeField(el)) return dates.indexOf(el) <= 0 ? "campus.startDate" : "campus.endDate";
+      if (el instanceof HTMLTextAreaElement) return "campus.description";
+      const shortText = controls.filter((control) => !dateLikeField(control) && !(control instanceof HTMLTextAreaElement));
+      return shortText.indexOf(el) <= 0 ? "campus.organization" : "campus.role";
+    }
     if (section === "language") {
       const controls = visibleControls(node).filter((control) => control instanceof HTMLSelectElement || control.getAttribute?.("role") === "combobox" || control.getAttribute?.("aria-autocomplete"));
       return controls.indexOf(el) <= 0 ? "language.name" : "language.proficiency";
@@ -289,10 +305,16 @@
   }
 
   function contextualKey(el, text, projectDateCounters, sectionInfo = null) {
-    const direct = inferKey(text);
-    if (direct) return direct;
     const resolvedSectionInfo = sectionInfo || ancestorSectionInfo(el);
     const section = resolvedSectionInfo.section;
+    const campusNode = section === "campus" ? resolvedSectionInfo.node : nearestSectionNode(el, "campus");
+    if (campusNode && dateLikeField(el)) {
+      const dates = visibleControls(campusNode).filter(dateLikeField);
+      const index = Math.max(0, dates.indexOf(el));
+      return index % 2 === 0 ? "campus.startDate" : "campus.endDate";
+    }
+    const direct = inferKey(text);
+    if (direct) return direct;
 
     if (section === "award" && /(?:^| )描述(?: |$)|(?:^| )description(?: |$)/.test(text)) return "award.description";
     if (section === "portfolio" && /(?:^| )描述(?: |$)|(?:^| )description(?: |$)/.test(text)) return "portfolio.description";
@@ -305,6 +327,16 @@
       return index % 2 === 0 ? "project.startDate" : "project.endDate";
     }
     return semanticSectionKey(el, resolvedSectionInfo);
+  }
+
+  function nearestSectionNode(el, section) {
+    let node = el?.parentElement || null;
+    for (let depth = 0; node && depth < 12; depth += 1, node = node.parentElement) {
+      const text = normalize(node.textContent || "");
+      if (text.length <= 16000 && sectionFromText(text) === section) return node;
+      if (node === document.body) break;
+    }
+    return null;
   }
 
   function packetIsAuthoritative(packet) {
@@ -491,6 +523,23 @@
       return { handled: true, value: String(map[key] || "").trim() };
     }
 
+    if (key.startsWith("campus.")) {
+      const entries = Array.isArray(packet.campus_experiences) ? packet.campus_experiences : [];
+      const index = nextIndex(counters, "campus-experiences", key);
+      const entry = entries[index];
+      if (!entry) return { handled: true, value: "" };
+      const startDate = normalizedYearMonth(entry.start_year, entry.start_month) || String(entry.start_date || entry.start || "").trim();
+      const endDate = normalizedYearMonth(entry.end_year, entry.end_month) || String(entry.end_date || entry.end || "").trim() || (entry.current ? currentYearMonth() : "");
+      const map = {
+        "campus.organization": entry.organization || entry.name,
+        "campus.role": entry.role || entry.title || entry.position,
+        "campus.startDate": startDate,
+        "campus.endDate": endDate,
+        "campus.description": bulletText(entry),
+      };
+      return { handled: true, value: String(map[key] || "").trim() };
+    }
+
     if (key === "cv.skills") {
       const categories = Array.isArray(packet.skills) ? packet.skills : [];
       const items = categories.flatMap((category) => Array.isArray(category.items) ? category.items : []);
@@ -580,6 +629,7 @@
       language: { entries: generalProfile.languages, fields: { name: "language", proficiency: "" } },
       award: { entries: generalProfile.awards, fields: { type: "type", year: "year", name: "name", description: "description", summary: "summary" } },
       portfolio: { entries: generalProfile.portfolio, fields: { url: "url", description: "description" } },
+      campus: { entries: generalProfile.campus_experiences, fields: { organization: "organization", role: "role", description: "description", startDate: "start_date", endDate: "end_date" } },
     };
     const [group, field] = key.split(".");
     const config = groups[group];
@@ -591,6 +641,12 @@
     const sourceKey = config.fields[field];
     if (!sourceKey) return { handled: true, value: "", aliases: [] };
     let value = String(entry[sourceKey] || "").trim();
+    if (group === "campus" && field === "startDate") {
+      value = value || normalizedYearMonth(entry.start_year, entry.start_month) || String(entry.start || "").trim();
+    }
+    if (group === "campus" && field === "endDate") {
+      value = value || normalizedYearMonth(entry.end_year, entry.end_month) || String(entry.end || "").trim() || (entry.current ? currentYearMonth() : "");
+    }
     let aliases = key === "language.name" && Array.isArray(entry.aliases) ? entry.aliases.map(String) : [];
     if (key === "award.type") {
       const team = /team|团队|四人|group/i.test([entry.type, entry.category, entry.description].filter(Boolean).join(" "));
@@ -1066,22 +1122,35 @@
   function isSectionIdentityControl(el, section) {
     const directText = directFieldText(el);
     const directKey = inferKey(directText);
-    if (section === "education" && directKey === "education.school") return true;
-    if (section === "publication" && directKey === "publication.title") return true;
+    const identityKeys = {
+      education: "education.school",
+      publication: "publication.title",
+      project: "project.name",
+      employment: "employment.employer",
+      award: "award.year",
+      language: "language.name",
+      portfolio: "portfolio.url",
+      campus: "campus.organization",
+    };
+    if (identityKeys[section] && directKey === identityKeys[section]) return true;
     if (section === "publication" && structuralPublicationTitleControl(el)) return true;
-    if (section === "project" && directKey === "project.name") return true;
     const sectionInfo = ancestorSectionInfo(el);
     if (sectionInfo.section !== section) return false;
+    const semanticKey = semanticSectionKey(el, sectionInfo);
+    if (identityKeys[section] && semanticKey === identityKeys[section]) return true;
     if (section === "education") {
       return /(?:^| )(?:学校名称|学校|大学|school|university|institution)(?: |$)/.test(directText)
-        || semanticSectionKey(el, sectionInfo) === "education.school";
+        || semanticKey === "education.school";
     }
     if (section === "publication") {
       return /(?:^| )(?:题名|论文标题|文章标题|paper title|article title)(?: |$)/.test(directText)
-        || semanticSectionKey(el, sectionInfo) === "publication.title";
+        || semanticKey === "publication.title";
     }
-    return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText)
-      || semanticSectionKey(el, sectionInfo) === "project.name";
+    if (section === "project") {
+      return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText)
+        || semanticKey === "project.name";
+    }
+    return false;
   }
 
   function sectionIdentityControls(section) {
@@ -1147,8 +1216,8 @@
 
   async function fillMappedControl(el, key, value, aliases = []) {
     if (!value || !isEmpty(el)) return false;
-    if (["project.startDate", "education.startDate", "employment.startDate"].includes(key)) return setAdaptiveDate(el, value, "start");
-    if (["project.endDate", "education.endDate", "employment.endDate"].includes(key)) return setAdaptiveDate(el, value, "end");
+    if (["project.startDate", "education.startDate", "employment.startDate", "campus.startDate"].includes(key)) return setAdaptiveDate(el, value, "start");
+    if (["project.endDate", "education.endDate", "employment.endDate", "campus.endDate"].includes(key)) return setAdaptiveDate(el, value, "end");
     if (key === "publication.date" && /^\d{4}$/.test(value) && datePrecision(el) !== "year") return false;
     if (["award.year", "publication.date", "application.availableStartDate", "identity.birthDate"].includes(key)) return setAdaptiveDate(el, value, "neutral");
     if (el instanceof HTMLSelectElement) return setSelect(el, value, aliases);
@@ -1330,8 +1399,23 @@
   }
 
   async function fill(profile, generalProfile = null, applicationPacket = null) {
-    const addedPublicationRows = await ensureRepeatedRows("publication", Array.isArray(generalProfile?.publications) ? generalProfile.publications.length : 0);
-    const addedProjectRows = await ensureRepeatedRows("project", packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects) ? applicationPacket.projects.length : 0);
+    const desiredRows = {
+      publication: Array.isArray(generalProfile?.publications) ? generalProfile.publications.length : 0,
+      project: packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects) ? applicationPacket.projects.length : 0,
+      education: Array.isArray(generalProfile?.education) ? generalProfile.education.length : 0,
+      employment: packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.experience) ? applicationPacket.experience.length : 0,
+      award: Array.isArray(generalProfile?.awards) ? generalProfile.awards.length : 0,
+      language: Array.isArray(generalProfile?.languages) ? generalProfile.languages.length : 0,
+      portfolio: Array.isArray(generalProfile?.portfolio) ? generalProfile.portfolio.length : 0,
+      campus: Math.max(
+        Array.isArray(generalProfile?.campus_experiences) ? generalProfile.campus_experiences.length : 0,
+        packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.campus_experiences) ? applicationPacket.campus_experiences.length : 0,
+      ),
+    };
+    const addedRows = {};
+    for (const section of ["publication", "project", "education", "employment", "award", "language", "portfolio", "campus"]) {
+      addedRows[section] = await ensureRepeatedRows(section, desiredRows[section]);
+    }
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
     const descriptors = elements.map((el) => ({ el, directText: directFieldText(el), text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
     let filled = 0;
@@ -1341,8 +1425,9 @@
     const globalCounters = new Map();
     const generalEntryCounters = new Map();
     const projectDateCounters = new Map();
-    if (addedPublicationRows) fields.push("publication.rowsAdded");
-    if (addedProjectRows) fields.push("project.rowsAdded");
+    for (const [section, count] of Object.entries(addedRows)) {
+      if (count) fields.push(`${section}.rowsAdded`);
+    }
 
     for (const { el, directText, text, sectionInfo } of descriptors) {
       if (!text) continue;

@@ -585,7 +585,6 @@ test("auto-adds publication rows and binds every field within the same contamina
     }
     return { row, title, author, date, level, details };
   });
-  rows[0].level.value = "Level 1（如：中科院一区、CCF A、SSCI/SCI Q1）";
   const secondControls = Object.values(rows[1]).filter((value) => value instanceof FakeField);
   for (const field of secondControls) {
     field.offsetParent = null;
@@ -611,6 +610,7 @@ test("auto-adds publication rows and binds every field within the same contamina
         author_order: "First Author and Corresponding Author",
         publication_date: "2025-10-31",
         venue: "Imaging Neuroscience",
+        level: "Level 2",
         details: "构建适用于横断面与纵向神经影像的半参数效应量置信集。",
       },
       {
@@ -618,6 +618,7 @@ test("auto-adds publication rows and binds every field within the same contamina
         author_order: "First Author",
         publication_date: "2025-02-11",
         venue: "Statistical Methods in Medical Research",
+        level: "Level 1",
         details: "比较非比例风险情景下多种生存分析方法的功效、I 类错误与时间依赖偏差。",
       },
     ],
@@ -631,9 +632,10 @@ test("auto-adds publication rows and binds every field within the same contamina
   assert.equal(rows[0].date.value, "2025-10-31");
   assert.equal(rows[0].details.value, generalProfile.publications[0].details);
   assert.equal(rows[0].details.value.includes("Statistical Methods in Medical Research"), false);
-  assert.equal(rows[0].level.value.includes("Level 1"), true);
+  assert.equal(rows[0].level.value.includes("Level 2"), true);
   assert.equal(rows[1].title.value, generalProfile.publications[1].title);
   assert.equal(rows[1].date.value, "2025-02-11");
+  assert.equal(rows[1].level.value.includes("Level 1"), true);
   assert.equal(rows[1].details.value, generalProfile.publications[1].details);
 });
 
@@ -672,4 +674,145 @@ test("fills a publication card whose visible labels are not associated with its 
   assert.equal(date.value, "2025-10-31");
   assert.equal(venue.value, "期刊");
   assert.equal(details.value, generalProfile.publications[0].details);
+});
+
+test("auto-adds education rows before binding doctorate, masters, and bachelors records", async () => {
+  const body = { tagName: "BODY", textContent: "教育经历", parentElement: null };
+  const section = { tagName: "DIV", textContent: "教育经历 学校名称 学历层次 起止时间 + 添加", parentElement: body };
+  const rows = [0, 1, 2].map((index) => {
+    const row = { tagName: "DIV", textContent: "学校名称 学历层次 起止时间", parentElement: section };
+    const start = new FakeInput({ id: `education-start-${index}`, label: "起止时间", placeholder: "YYYY-MM", parentElement: row });
+    const end = new FakeInput({ id: `education-end-${index}`, label: "起止时间", placeholder: "YYYY-MM", parentElement: row });
+    const school = new FakeInput({ id: `education-school-${index}`, label: "学校名称", parentElement: row });
+    const degree = new FakeInput({ id: `education-degree-${index}`, label: "学历层次", parentElement: row });
+    row.querySelectorAll = () => [start, end, school, degree];
+    return { start, end, school, degree };
+  });
+  for (const row of rows.slice(1)) {
+    for (const field of Object.values(row)) {
+      field.offsetParent = null;
+      field.getClientRects = () => [];
+    }
+  }
+  const fields = rows.flatMap((row) => Object.values(row));
+  section.querySelectorAll = () => fields;
+  let visibleRows = 1;
+  const addButton = {
+    textContent: "+ 添加", value: "", parentElement: section, offsetParent: {}, getClientRects: () => [1],
+    click() {
+      if (visibleRows >= rows.length) return;
+      for (const field of Object.values(rows[visibleRows])) {
+        field.offsetParent = {};
+        field.getClientRects = () => [1];
+      }
+      visibleRows += 1;
+    },
+  };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [
+      { school: "Vanderbilt University", school_zh: "范德堡大学", degree: "博士研究生", start_year: "2023", start_month: "08", end_year: "2027", end_month: "05" },
+      { school: "Yale University", school_zh: "耶鲁大学", degree: "硕士研究生", start_year: "2021", start_month: "08", end_year: "2023", end_month: "05" },
+      { school: "Southwestern University of Finance and Economics", school_zh: "西南财经大学", degree: "本科", start_year: "2017", start_month: "09", end_year: "2021", end_month: "06" },
+    ],
+  };
+
+  const result = await runFill(fields, null, generalProfile, [addButton]);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.fields.includes("education.rowsAdded"), true);
+  assert.deepEqual(rows.map((row) => row.school.value), ["Vanderbilt University", "Yale University", "Southwestern University of Finance and Economics"]);
+  assert.deepEqual(rows.map((row) => row.start.value), ["2023-08", "2021-08", "2017-09"]);
+  assert.deepEqual(rows.map((row) => row.end.value), ["2027-05", "2023-05", "2021-06"]);
+});
+
+test("auto-adds award rows and preserves a manually entered award field", async () => {
+  const body = { tagName: "BODY", textContent: "荣誉奖励", parentElement: null };
+  const section = { tagName: "DIV", textContent: "荣誉奖励 获奖时间 获奖名称 获奖情况 + 添加", parentElement: body };
+  const rows = [0, 1].map((index) => {
+    const row = { tagName: "DIV", textContent: "获奖时间 获奖名称 获奖情况", parentElement: section };
+    const year = new FakeInput({ id: `award-auto-year-${index}`, label: "获奖时间", placeholder: "YYYY", parentElement: row });
+    const name = new FakeInput({ id: `award-auto-name-${index}`, label: "获奖名称", parentElement: row });
+    const summary = new FakeTextarea({ id: `award-auto-summary-${index}`, label: "获奖情况", parentElement: row });
+    row.querySelectorAll = () => [year, name, summary];
+    return { year, name, summary };
+  });
+  for (const field of Object.values(rows[1])) {
+    field.offsetParent = null;
+    field.getClientRects = () => [];
+  }
+  rows[0].name.value = "我已手动填写的奖项名称";
+  const fields = rows.flatMap((row) => Object.values(row));
+  section.querySelectorAll = () => fields;
+  const addButton = {
+    textContent: "+ 添加", value: "", parentElement: section, offsetParent: {}, getClientRects: () => [1],
+    click() {
+      for (const field of Object.values(rows[1])) {
+        field.offsetParent = {};
+        field.getClientRects = () => [1];
+      }
+    },
+  };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    awards: [
+      { year: "2026", name: "Pathbreaking Discovery Award", description: "个人奖。" },
+      { year: "2026", name: "NIH Replication Prize", description: "团队奖。" },
+    ],
+  };
+
+  const result = await runFill(fields, null, generalProfile, [addButton]);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.fields.includes("award.rowsAdded"), true);
+  assert.equal(rows[0].name.value, "我已手动填写的奖项名称");
+  assert.equal(rows[1].name.value, "NIH Replication Prize");
+  assert.deepEqual(rows.map((row) => row.year.value), ["2026", "2026"]);
+});
+
+test("auto-adds structured campus experience rows only when authoritative records exist", async () => {
+  const body = { tagName: "BODY", textContent: "校园经历", parentElement: null };
+  const section = { tagName: "DIV", textContent: "校园经历 组织名称 担任职务 起止时间 经历描述 + 添加", parentElement: body };
+  const rows = [0, 1].map((index) => {
+    const row = { tagName: "DIV", textContent: "组织名称 担任职务 起止时间 经历描述", parentElement: section };
+    const organization = new FakeInput({ id: `campus-org-${index}`, label: "组织名称", parentElement: row });
+    const role = new FakeInput({ id: `campus-role-${index}`, label: "担任职务", parentElement: row });
+    const start = new FakeInput({ id: `campus-start-${index}`, label: "起止时间", placeholder: "YYYY-MM", parentElement: row });
+    const end = new FakeInput({ id: `campus-end-${index}`, label: "起止时间", placeholder: "YYYY-MM", parentElement: row });
+    const description = new FakeTextarea({ id: `campus-description-${index}`, label: "经历描述", parentElement: row });
+    row.querySelectorAll = () => [organization, role, start, end, description];
+    return { organization, role, start, end, description };
+  });
+  for (const field of Object.values(rows[1])) {
+    field.offsetParent = null;
+    field.getClientRects = () => [];
+  }
+  const fields = rows.flatMap((row) => Object.values(row));
+  section.querySelectorAll = () => fields;
+  const addButton = {
+    textContent: "+ 添加", value: "", parentElement: section, offsetParent: {}, getClientRects: () => [1],
+    click() {
+      for (const field of Object.values(rows[1])) {
+        field.offsetParent = {};
+        field.getClientRects = () => [1];
+      }
+    },
+  };
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-ABC-202",
+    campus_experiences: [
+      { organization: "Student Organization A", role: "Chair", start_year: "2025", start_month: "01", end_year: "2025", end_month: "12", bullets: ["组织活动。"] },
+      { organization: "Student Organization B", role: "Member", start_year: "2024", start_month: "01", end_year: "2024", end_month: "12", bullets: ["参与活动。"] },
+    ],
+  };
+
+  const result = await runFill(fields, packet, null, [addButton]);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.fields.includes("campus.rowsAdded"), true);
+  assert.deepEqual(rows.map((row) => row.organization.value), ["Student Organization A", "Student Organization B"]);
+  assert.deepEqual(rows.map((row) => row.start.value), ["2025-01", "2024-01"], JSON.stringify(result));
+  assert.deepEqual(rows.map((row) => row.end.value), ["2025-12", "2024-12"]);
 });
