@@ -66,6 +66,30 @@
     return normalize(pieces.filter(Boolean).join(" "));
   }
 
+  function directFieldText(el) {
+    const pieces = [
+      el.name,
+      el.id,
+      el.getAttribute("aria-label"),
+      el.getAttribute("placeholder"),
+      el.getAttribute("data-automation-id"),
+      el.getAttribute("data-testid"),
+      el.getAttribute("data-test-id"),
+    ];
+    const labelledBy = String(el.getAttribute("aria-labelledby") || "").split(/\s+/).filter(Boolean);
+    for (const id of labelledBy) pieces.push(textFromId(id));
+    if (el.id) {
+      const direct = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+      if (direct) pieces.push(direct.textContent);
+    }
+    const wrappingLabel = el.closest?.("label");
+    if (wrappingLabel) {
+      const text = String(wrappingLabel.textContent || "").trim();
+      if (text.length <= 120) pieces.push(text);
+    }
+    return normalize(pieces.filter(Boolean).join(" "));
+  }
+
   function getProfileValue(profile, key) {
     const path = key.split(".");
     let value = profile;
@@ -291,6 +315,10 @@
     return Boolean(profile && profile.schema_version === "global-application-autofill-profile-v1" && Array.isArray(profile.education));
   }
 
+  function hasGlobalPublications(profile) {
+    return globalProfileIsAuthoritative(profile) && Array.isArray(profile.publications) && profile.publications.length > 0;
+  }
+
   function deriveMajor(degree) {
     const value = String(degree || "").trim();
     if (!value) return "";
@@ -366,6 +394,7 @@
       authorOrder: String(entry?.author_order || entry?.authorship || entry?.author_role || entry?.role || "").trim(),
       date,
       venue: String(entry?.venue || entry?.journal || entry?.publisher || entry?.institution || entry?.conference || "").trim(),
+      level: String(entry?.level || entry?.tier || entry?.journal_level || entry?.publication_level || "").trim(),
       details: [...new Set(details)].join("；"),
     };
   }
@@ -386,6 +415,18 @@
     if (/conference|会议|symposium|workshop|congress/.test(text)) return ["会议", "学术会议", "Conference", "其他", "Other"];
     if (/journal|期刊|neuroscience|medicine|statistics|biostat/.test(text)) return ["期刊", "学术期刊", "Journal", "其他", "Other"];
     return ["其他", "Other"];
+  }
+
+  function isSelectLike(el) {
+    return el instanceof HTMLSelectElement || el.getAttribute?.("role") === "combobox" || Boolean(el.getAttribute?.("aria-autocomplete"));
+  }
+
+  function publicationLevelControl(el) {
+    if (!isSelectLike(el)) return false;
+    const optionText = el instanceof HTMLSelectElement
+      ? Array.from(el.options || []).map((option) => String(option.textContent || option.value || "")).join(" ")
+      : String(el.getAttribute?.("aria-label") || "");
+    return /\blevel\s*[123]\b|中科院|ccf\s*[abc]|ssci|sci\s*q[1-4]|期刊等级|论文等级/i.test(optionText);
   }
 
   function packetEntryValue(packet, key, counters) {
@@ -644,7 +685,7 @@
 
   function dateParts(value) {
     const source = String(value || "").trim();
-    const match = source.match(/((?:19|20)\d{2})(?:\D+(0?[1-9]|1[0-2]))?(?:\D+(3[01]|[0-2]?\d))?/);
+    const match = source.match(/((?:19|20)\d{2})(?:\D+(1[0-2]|0?[1-9]))?(?:\D+(3[01]|[12]\d|0?[1-9]))?/);
     return match ? {
       year: match[1],
       month: match[2] ? String(match[2]).padStart(2, "0") : "",
@@ -996,19 +1037,56 @@
     return questions;
   }
 
+  function isSectionIdentityControl(el, section) {
+    const directText = directFieldText(el);
+    const directKey = inferKey(directText);
+    if (section === "publication" && directKey === "publication.title") return true;
+    if (section === "project" && directKey === "project.name") return true;
+    if (!directText) return false;
+    const sectionInfo = ancestorSectionInfo(el);
+    if (sectionInfo.section !== section) return false;
+    if (section === "publication") return /(?:^| )(?:题名|论文标题|文章标题|paper title|article title)(?: |$)/.test(directText);
+    return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText);
+  }
+
   function sectionIdentityControls(section) {
     return Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="button"]), textarea, select, [role="combobox"]'))
       .filter(visible)
-      .filter((el) => {
-        const text = fieldText(el);
-        const directKey = inferKey(text);
-        if (section === "publication" && directKey === "publication.title") return true;
-        if (section === "project" && directKey === "project.name") return true;
-        const sectionInfo = ancestorSectionInfo(el);
-        if (sectionInfo.section !== section) return false;
-        const semanticKey = semanticSectionKey(el, sectionInfo);
-        return semanticKey === (section === "publication" ? "publication.title" : "project.name");
-      });
+      .filter((el) => isSectionIdentityControl(el, section));
+  }
+
+  function repeatedRecordBlock(identityField, section) {
+    let node = identityField?.parentElement || null;
+    let fallback = null;
+    for (let depth = 0; node && depth < 12; depth += 1, node = node.parentElement) {
+      if (node === document.body) break;
+      const controls = visibleControls(node);
+      if (!controls.includes(identityField) || controls.length < 2 || controls.length > 16) continue;
+      if (!fallback) fallback = node;
+      const identityCount = controls.filter((control) => isSectionIdentityControl(control, section)).length;
+      if (identityCount === 1) return node;
+    }
+    return fallback;
+  }
+
+  function buttonBelongsToSection(button, section) {
+    if (ancestorSectionInfo(button).section === section) return true;
+    let node = button?.parentElement || null;
+    for (let depth = 0; node && depth < 10; depth += 1, node = node.parentElement) {
+      if (node === document.body) break;
+      const text = normalize(node.textContent || "");
+      if (text.length <= 16000 && sectionFromText(text) === section) return true;
+    }
+    return false;
+  }
+
+  async function waitForIdentityIncrease(section, previousCount) {
+    for (let attempt = 0; attempt < 16; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      const count = sectionIdentityControls(section).length;
+      if (count > previousCount) return count;
+    }
+    return previousCount;
   }
 
   async function ensureRepeatedRows(section, desired) {
@@ -1020,23 +1098,121 @@
       const buttons = Array.from(document.querySelectorAll('button, [role="button"], input[type="button"]'))
         .filter(visible)
         .filter((button) => /^(?:\+\s*)?(?:添加|新增|add)(?:\s+publication)?$/i.test(String(button.textContent || button.value || "").trim()))
-        .filter((button) => ancestorSectionInfo(button).section === section);
+        .filter((button) => buttonBelongsToSection(button, section));
       const button = buttons[buttons.length - 1];
       if (!button) break;
       button.click();
-      await new Promise((resolve) => setTimeout(resolve, 120));
-      const nextCount = sectionIdentityControls(section).length;
+      const nextCount = await waitForIdentityIncrease(section, current);
       if (nextCount <= current) break;
       added += nextCount - current;
     }
     return added;
   }
 
+  function clearNativeSelect(el) {
+    if (!(el instanceof HTMLSelectElement) || el.disabled) return false;
+    const empty = Array.from(el.options || []).find((option) => !String(option.value || "").trim() || /请选择|select|choose/i.test(String(option.textContent || "")));
+    if (!empty) return false;
+    if (el.value === empty.value) return false;
+    el.value = empty.value;
+    dispatch(el);
+    return true;
+  }
+
+  async function fillMappedControl(el, key, value, aliases = []) {
+    if (!value) return false;
+    if (["project.startDate", "education.startDate", "employment.startDate"].includes(key)) return setAdaptiveDate(el, value, "start");
+    if (["project.endDate", "education.endDate", "employment.endDate"].includes(key)) return setAdaptiveDate(el, value, "end");
+    if (key === "publication.date" && /^\d{4}$/.test(value) && datePrecision(el) !== "year") return false;
+    if (["award.year", "publication.date", "application.availableStartDate", "identity.birthDate"].includes(key)) return setAdaptiveDate(el, value, "neutral");
+    if (el instanceof HTMLSelectElement) return setSelect(el, value, aliases);
+    if (el instanceof HTMLInputElement && el.type === "radio") return setRadio(el, value);
+    if (el instanceof HTMLInputElement && el.type === "checkbox") return false;
+    if (el.getAttribute("role") === "combobox" || el.getAttribute("aria-autocomplete")) return setCombobox(el, value, aliases);
+    return setText(el, value);
+  }
+
+  async function fillProjectRecords(applicationPacket) {
+    if (!packetIsAuthoritative(applicationPacket)) return { filled: 0, fields: [] };
+    const entries = Array.isArray(applicationPacket.projects) ? applicationPacket.projects : [];
+    const anchors = sectionIdentityControls("project");
+    let filled = 0;
+    const fields = [];
+    for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
+      const entry = entries[index];
+      const block = repeatedRecordBlock(anchors[index], "project");
+      if (!block) continue;
+      const dates = projectDateRange(entry);
+      const map = {
+        "project.name": entry.name || entry.title,
+        "project.role": entry.role || entry.author_role || entry.contribution || entry.position,
+        "project.description": bulletText(entry),
+        "project.url": projectUrl(entry),
+        "project.startDate": dates.start,
+        "project.endDate": dates.end,
+      };
+      const dateCounters = new Map();
+      for (const el of visibleControls(block)) {
+        const directText = directFieldText(el);
+        const key = contextualKey(el, directText, dateCounters, { section: "project", node: block });
+        if (!key?.startsWith("project.")) continue;
+        const value = String(map[key] || "").trim();
+        if (await fillMappedControl(el, key, value)) {
+          filled += 1;
+          fields.push(key);
+        }
+      }
+    }
+    return { filled, fields };
+  }
+
+  async function fillPublicationRecords(generalProfile) {
+    if (!hasGlobalPublications(generalProfile)) return { filled: 0, fields: [] };
+    const entries = Array.isArray(generalProfile.publications) ? generalProfile.publications : [];
+    const anchors = sectionIdentityControls("publication");
+    let filled = 0;
+    const fields = [];
+    for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
+      const entry = publicationEntry(entries[index]);
+      const block = repeatedRecordBlock(anchors[index], "publication");
+      if (!block) continue;
+      const map = {
+        "publication.title": entry.title,
+        "publication.authorOrder": entry.authorOrder,
+        "publication.date": entry.date,
+        "publication.venue": entry.venue,
+        "publication.level": entry.level,
+        "publication.details": entry.details,
+      };
+      for (const el of visibleControls(block)) {
+        const directText = directFieldText(el);
+        let key = inferKey(directText) || semanticSectionKey(el, { section: "publication", node: block });
+        if (key === "publication.venue" && publicationLevelControl(el)) key = "publication.level";
+        if (!key?.startsWith("publication.")) continue;
+        const value = String(map[key] || "").trim();
+        if (key === "publication.level" && !value) {
+          if (clearNativeSelect(el)) {
+            filled += 1;
+            fields.push("publication.levelCleared");
+          }
+          continue;
+        }
+        const aliases = key === "publication.authorOrder" ? authorshipAliases(value)
+          : key === "publication.venue" ? publicationVenueAliases(value) : [];
+        if (await fillMappedControl(el, key, value, aliases)) {
+          filled += 1;
+          fields.push(key);
+        }
+      }
+    }
+    return { filled, fields };
+  }
+
   async function fill(profile, generalProfile = null, applicationPacket = null) {
     const addedPublicationRows = await ensureRepeatedRows("publication", Array.isArray(generalProfile?.publications) ? generalProfile.publications.length : 0);
     const addedProjectRows = await ensureRepeatedRows("project", packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects) ? applicationPacket.projects.length : 0);
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
-    const descriptors = elements.map((el) => ({ el, text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
+    const descriptors = elements.map((el) => ({ el, directText: directFieldText(el), text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
     let filled = 0;
     const fields = [];
     const skippedSensitive = [];
@@ -1047,35 +1223,33 @@
     if (addedPublicationRows) fields.push("publication.rowsAdded");
     if (addedProjectRows) fields.push("project.rowsAdded");
 
-    for (const { el, text, sectionInfo } of descriptors) {
+    for (const { el, directText, text, sectionInfo } of descriptors) {
       if (!text) continue;
-      const explicitSensitiveKey = SENSITIVE_RE.test(text) ? confirmedSensitiveKey(text) : "";
-      if (SENSITIVE_RE.test(text) && !explicitSensitiveKey) {
+      const keyText = directText || text;
+      const explicitSensitiveKey = SENSITIVE_RE.test(keyText) ? confirmedSensitiveKey(keyText) : "";
+      if (SENSITIVE_RE.test(keyText) && !explicitSensitiveKey) {
         skippedSensitive.push(text.slice(0, 120));
         continue;
       }
-      const key = explicitSensitiveKey || contextualKey(el, text, projectDateCounters, sectionInfo);
+      const key = explicitSensitiveKey || contextualKey(el, keyText, projectDateCounters, sectionInfo);
       if (!key) continue;
       if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
+      if (hasGlobalPublications(generalProfile) && key.startsWith("publication.")) continue;
+      if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.")) continue;
       const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters);
       if (!value) continue;
-
-      let changed = false;
-      if (["project.startDate", "education.startDate", "employment.startDate"].includes(key)) changed = await setAdaptiveDate(el, value, "start");
-      else if (["project.endDate", "education.endDate", "employment.endDate"].includes(key)) changed = await setAdaptiveDate(el, value, "end");
-      else if (key === "publication.date" && /^\d{4}$/.test(value) && datePrecision(el) !== "year") changed = false;
-      else if (["award.year", "publication.date", "application.availableStartDate", "identity.birthDate"].includes(key)) changed = await setAdaptiveDate(el, value, "neutral");
-      else if (el instanceof HTMLSelectElement) changed = setSelect(el, value, aliases);
-      else if (el instanceof HTMLInputElement && el.type === "radio") changed = setRadio(el, value);
-      else if (el instanceof HTMLInputElement && el.type === "checkbox") changed = false;
-      else if (el.getAttribute("role") === "combobox" || el.getAttribute("aria-autocomplete")) changed = await setCombobox(el, value, aliases);
-      else changed = setText(el, value);
+      const changed = await fillMappedControl(el, key, value, aliases);
 
       if (changed) {
         filled += 1;
         fields.push(key);
       }
     }
+
+    const publicationRecords = await fillPublicationRecords(generalProfile);
+    const projectRecords = await fillProjectRecords(applicationPacket);
+    filled += publicationRecords.filled + projectRecords.filled;
+    fields.push(...publicationRecords.fields, ...projectRecords.fields);
 
     const correctedEducationDates = globalProfileIsAuthoritative(generalProfile) ? 0 : await correctEducationPeriods(generalProfile);
     const correctedProjectDates = await correctProjectPeriods(applicationPacket);

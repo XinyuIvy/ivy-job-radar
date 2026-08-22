@@ -529,3 +529,71 @@ test("clicks Add inside a project section until every APP-selected project has a
   assert.equal(rows[1].name.value, "岗位相关应用项目");
   assert.equal(result.fields.includes("project.rowsAdded"), true);
 });
+
+test("auto-adds publication rows and binds every field within the same contaminated card", async () => {
+  const body = { tagName: "BODY", textContent: "论文/期刊", parentElement: null };
+  const section = { tagName: "DIV", textContent: "论文/期刊 论文名称 作者顺序 发表时间 刊物/机构 论文详情 + 添加", parentElement: body };
+  const rows = [0, 1].map((index) => {
+    const row = { tagName: "DIV", textContent: "论文名称 作者顺序 发表时间 刊物/机构 论文详情", parentElement: section };
+    const title = new FakeInput({ id: `real-paper-title-${index}`, label: "论文名称", parentElement: row });
+    const author = new FakeSelect({ id: `real-paper-author-${index}`, label: "作者顺序", parentElement: row, options: ["请选择", "第一作者", "第二作者", "共同作者"] });
+    const date = new FakeInput({ id: `real-paper-date-${index}`, label: "发表时间", placeholder: "请选择日期", parentElement: row, type: "date", readOnly: true });
+    const level = new FakeSelect({ id: `real-paper-level-${index}`, label: "刊物/机构", parentElement: row, options: ["请选择", "Level 1（如：中科院一区、CCF A、SSCI/SCI Q1）", "Level 2", "Level 3"] });
+    const details = new FakeTextarea({ id: `real-paper-details-${index}`, label: "论文详情", parentElement: row });
+    row.querySelectorAll = () => [title, author, date, level, details];
+    for (const field of [title, author, date, level, details]) {
+      field.closest = (selector) => selector.includes('[role="group"]') ? row : null;
+    }
+    return { row, title, author, date, level, details };
+  });
+  rows[0].level.value = "Level 1（如：中科院一区、CCF A、SSCI/SCI Q1）";
+  const secondControls = Object.values(rows[1]).filter((value) => value instanceof FakeField);
+  for (const field of secondControls) {
+    field.offsetParent = null;
+    field.getClientRects = () => [];
+  }
+  const allFields = rows.flatMap((row) => [row.title, row.author, row.date, row.level, row.details]);
+  section.querySelectorAll = () => allFields;
+  const addButton = {
+    textContent: "+ 添加", value: "", parentElement: section, offsetParent: {}, getClientRects: () => [1],
+    click() {
+      for (const field of secondControls) {
+        field.offsetParent = {};
+        field.getClientRects = () => [1];
+      }
+    },
+  };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    publications: [
+      {
+        title: "Semiparametric confidence sets for cross-sectional and longitudinal neuroimaging",
+        author_order: "First Author and Corresponding Author",
+        publication_date: "2025-10-31",
+        venue: "Imaging Neuroscience",
+        details: "构建适用于横断面与纵向神经影像的半参数效应量置信集。",
+      },
+      {
+        title: "Statistical considerations for evaluating treatment effect under various non-proportional hazard scenarios",
+        author_order: "First Author",
+        publication_date: "2025-02-11",
+        venue: "Statistical Methods in Medical Research",
+        details: "比较非比例风险情景下多种生存分析方法的功效、I 类错误与时间依赖偏差。",
+      },
+    ],
+  };
+
+  const result = await runFill(allFields, null, generalProfile, [addButton]);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.fields.includes("publication.rowsAdded"), true);
+  assert.equal(rows[0].title.value, generalProfile.publications[0].title);
+  assert.equal(rows[0].date.value, "2025-10-31");
+  assert.equal(rows[0].details.value, generalProfile.publications[0].details);
+  assert.equal(rows[0].details.value.includes("Statistical Methods in Medical Research"), false);
+  assert.equal(rows[0].level.value.includes("Level 1"), false);
+  assert.equal(rows[1].title.value, generalProfile.publications[1].title);
+  assert.equal(rows[1].date.value, "2025-02-11");
+  assert.equal(rows[1].details.value, generalProfile.publications[1].details);
+});

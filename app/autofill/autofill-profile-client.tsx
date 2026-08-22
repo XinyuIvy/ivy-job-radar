@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.6 已修复跨板块串填并加入自动补行：</strong><span>学历整组绑定；项目按当前 APP、论文按完整权威清单自动点击“添加”；只填写已明确确认的敏感身份字段。</span></div>
-        <a href="/ivy-job-autofill-0.4.6.zip" download>下载整组绑定与确认字段版扩展</a>
+        <div><strong>扩展 0.4.7 已重做项目与论文自动添加：</strong><span>等待每个新行真实出现后再继续；按整行绑定标题、日期、作者与详情；论文等级没有权威依据时留空，不再误选 Level 1。</span></div>
+        <a href="/ivy-job-autofill-0.4.7.zip" download>下载项目与论文整行绑定版扩展</a>
       </section>
 
       <form onSubmit={save}>
