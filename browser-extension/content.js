@@ -223,6 +223,11 @@
     return cleanYear && cleanMonth ? `${cleanYear}-${cleanMonth.padStart(2, "0")}` : "";
   }
 
+  function currentYearMonth() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  }
+
   function projectDateRange(entry) {
     const source = [entry?.date_range, entry?.date, entry?.period, entry?.dates]
       .map((value) => String(value || "").trim())
@@ -230,7 +235,7 @@
     const matches = [...source.matchAll(/((?:19|20)\d{2})\s*(?:年|[.\/-])\s*(0?[1-9]|1[0-2])\s*(?:月)?/g)];
     return {
       start: String(entry?.start_date || entry?.start || "").trim() || normalizedYearMonth(entry?.start_year, entry?.start_month) || (matches[0] ? normalizedYearMonth(matches[0][1], matches[0][2]) : ""),
-      end: String(entry?.end_date || entry?.end || "").trim() || normalizedYearMonth(entry?.end_year, entry?.end_month) || (matches[1] ? normalizedYearMonth(matches[1][1], matches[1][2]) : ""),
+      end: String(entry?.end_date || entry?.end || "").trim() || normalizedYearMonth(entry?.end_year, entry?.end_month) || (matches[1] ? normalizedYearMonth(matches[1][1], matches[1][2]) : "") || (entry?.current ? currentYearMonth() : ""),
     };
   }
 
@@ -403,6 +408,71 @@
     return true;
   }
 
+  function controlYearMonth(el) {
+    const source = String(el?.value || el?.getAttribute?.("value") || "");
+    const match = source.match(/((?:19|20)\d{2})\D*(0?[1-9]|1[0-2])/);
+    return match ? normalizedYearMonth(match[1], match[2]) : "";
+  }
+
+  function frameworkInput(el, value) {
+    const previous = String(el.value || "");
+    const ownPrototype = Object.getPrototypeOf(el);
+    const ownSetter = Object.getOwnPropertyDescriptor(ownPrototype, "value")?.set;
+    const nativeSetter = el instanceof HTMLTextAreaElement
+      ? Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value")?.set
+      : Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    const setter = ownSetter || nativeSetter;
+    const tracker = el._valueTracker;
+    if (tracker?.setValue) tracker.setValue(previous);
+    if (setter) setter.call(el, value); else el.value = value;
+    el.setAttribute?.("value", value);
+    try {
+      el.dispatchEvent(new InputEvent("input", {
+        bubbles: true,
+        composed: true,
+        data: value,
+        inputType: "insertReplacementText",
+      }));
+    } catch {
+      el.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+    }
+    el.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+  }
+
+  async function setYearMonth(el, value) {
+    const expected = controlYearMonth({ value });
+    if (!expected || !el || el.disabled) return false;
+    const wasReadOnly = Boolean(el.readOnly);
+    const hadReadOnlyAttribute = Boolean(el.hasAttribute?.("readonly"));
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      if (wasReadOnly) {
+        el.readOnly = false;
+        el.removeAttribute?.("readonly");
+      }
+      el.focus?.({ preventScroll: true });
+      frameworkInput(el, expected);
+      if (attempt === 1 && typeof document.execCommand === "function") {
+        try {
+          el.select?.();
+          document.execCommand("insertText", false, expected);
+          dispatch(el);
+        } catch {}
+      }
+      el.blur?.();
+      await new Promise((resolve) => setTimeout(resolve, attempt === 2 ? 120 : 40));
+      if (controlYearMonth(el) === expected) {
+        if (wasReadOnly) el.readOnly = true;
+        if (hadReadOnlyAttribute) el.setAttribute?.("readonly", "");
+        return true;
+      }
+    }
+
+    if (wasReadOnly) el.readOnly = true;
+    if (hadReadOnlyAttribute) el.setAttribute?.("readonly", "");
+    return false;
+  }
+
   function visibleControls(node) {
     return Array.from(node?.querySelectorAll?.('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]') || [])
       .filter(visible);
@@ -442,14 +512,14 @@
     }) || null;
   }
 
-  function setPeriodDates(dates, start, end) {
+  async function setPeriodDates(dates, start, end) {
     let filled = 0;
-    if (dates[0] && start && setText(dates[0], start)) filled += 1;
-    if (dates[1] && end && setText(dates[1], end)) filled += 1;
+    if (dates[0] && start && await setYearMonth(dates[0], start)) filled += 1;
+    if (dates[1] && end && await setYearMonth(dates[1], end)) filled += 1;
     return filled;
   }
 
-  function correctEducationPeriods(generalProfile) {
+  async function correctEducationPeriods(generalProfile) {
     if (!globalProfileIsAuthoritative(generalProfile)) return 0;
     const usedFields = new Set();
     let filled = 0;
@@ -461,12 +531,12 @@
       usedFields.add(identity);
       const start = normalizedYearMonth(entry?.start_year, entry?.start_month);
       const end = normalizedYearMonth(entry?.end_year, entry?.end_month);
-      filled += setPeriodDates(block.dates, start, end);
+      filled += await setPeriodDates(block.dates, start, end);
     }
     return filled;
   }
 
-  function correctProjectPeriods(applicationPacket) {
+  async function correctProjectPeriods(applicationPacket) {
     if (!packetIsAuthoritative(applicationPacket)) return 0;
     const usedFields = new Set();
     let filled = 0;
@@ -477,7 +547,7 @@
       if (!block) continue;
       usedFields.add(identity);
       const dates = projectDateRange(entry);
-      filled += setPeriodDates(block.dates, dates.start, dates.end);
+      filled += await setPeriodDates(block.dates, dates.start, dates.end);
     }
     return filled;
   }
@@ -611,7 +681,8 @@
       if (!value) continue;
 
       let changed = false;
-      if (el instanceof HTMLSelectElement) changed = setSelect(el, value, aliases);
+      if (["project.startDate", "project.endDate", "education.startDate", "education.endDate"].includes(key)) changed = await setYearMonth(el, value);
+      else if (el instanceof HTMLSelectElement) changed = setSelect(el, value, aliases);
       else if (el instanceof HTMLInputElement && el.type === "radio") changed = setRadio(el, value);
       else if (el instanceof HTMLInputElement && el.type === "checkbox") changed = false;
       else if (el.getAttribute("role") === "combobox" || el.getAttribute("aria-autocomplete")) changed = await setCombobox(el, value, aliases);
@@ -623,8 +694,8 @@
       }
     }
 
-    const correctedEducationDates = correctEducationPeriods(generalProfile);
-    const correctedProjectDates = correctProjectPeriods(applicationPacket);
+    const correctedEducationDates = await correctEducationPeriods(generalProfile);
+    const correctedProjectDates = await correctProjectPeriods(applicationPacket);
     if (correctedEducationDates) fields.push("education.periodBySchool");
     if (correctedProjectDates) fields.push("project.periodByName");
     filled += correctedEducationDates + correctedProjectDates;
@@ -684,10 +755,17 @@
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === "IVY_FILL_PAGE") {
       chrome.storage.local.get(["ivyProfile"], (result) => {
+        window.__ivyLastApplicationPacket = message.applicationPacket || null;
         fill(result.ivyProfile || {}, message.generalProfile || null, message.applicationPacket || null)
           .then((payload) => sendResponse({ ok: true, ...payload }))
           .catch((error) => sendResponse({ ok: false, error: String(error?.message || error) }));
       });
+      return true;
+    }
+    if (message?.type === "IVY_REFILL_PROJECT_PERIODS") {
+      correctProjectPeriods(message.applicationPacket || window.__ivyLastApplicationPacket || null)
+        .then((filled) => sendResponse({ ok: true, filled }))
+        .catch((error) => sendResponse({ ok: false, error: String(error?.message || error) }));
       return true;
     }
     if (message?.type === "IVY_UPLOAD_RESUME") {

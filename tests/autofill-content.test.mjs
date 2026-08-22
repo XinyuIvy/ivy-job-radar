@@ -114,6 +114,38 @@ test("fills paired project dates and a generic project description", async () =>
   assert.deepEqual(new Set(result.fields), new Set(["project.startDate", "project.endDate", "project.name", "project.role", "project.description", "project.periodByName"]));
 });
 
+test("uses the current month as the end date for an ongoing project", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const projectBlock = {
+    tagName: "DIV",
+    textContent: "起止时间 项目名称 项目角色 项目链接 描述",
+    parentElement: body,
+  };
+  const start = new FakeInput({ id: "ongoing-start", label: "起止时间", placeholder: "YYYY-MM", parentElement: projectBlock, readOnly: true });
+  const end = new FakeInput({ id: "ongoing-end", label: "起止时间", placeholder: "YYYY-MM", parentElement: projectBlock, readOnly: true });
+  const name = new FakeInput({ id: "ongoing-name", label: "项目名称", parentElement: projectBlock });
+  projectBlock.querySelectorAll = () => [start, end, name];
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-ABC-101",
+    projects: [{
+      name: "真实世界电子病历：30 天再入院风险机器学习模型",
+      start_year: "2026",
+      start_month: "01",
+      current: true,
+    }],
+  };
+
+  const result = await runFill([start, end, name], packet);
+  const now = new Date();
+  const expectedCurrentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  assert.equal(result.ok, true);
+  assert.equal(start.value, "2026-01");
+  assert.equal(end.value, expectedCurrentMonth);
+  assert.equal(result.fields.includes("project.periodByName"), true);
+});
+
 test("corrects swapped education dates by school in the primary fill flow", async () => {
   const page = { tagName: "DIV", textContent: "教育背景", parentElement: null };
   const vanderbiltBlock = { tagName: "DIV", textContent: "起止时间 学校名称 学历 专业", parentElement: page };
