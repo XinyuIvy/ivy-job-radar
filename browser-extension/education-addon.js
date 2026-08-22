@@ -51,9 +51,14 @@
           type: "IVY_FILL_GENERAL_EDUCATION",
           generalProfile,
         });
-        if (!result?.ok || !result.filled) return;
+        const projectResult = await chrome.tabs.sendMessage(tab.id, {
+          type: "IVY_REFILL_PROJECT_PERIODS",
+        }).catch(() => null);
+        if ((!result?.ok || !result.filled) && !projectResult?.filled) return;
         const current = String(status.textContent || "").replace(/。\s*$/, "");
-        status.textContent = `${current}；通用教育补填 ${result.filled} 个字段。`;
+        const educationText = result?.filled ? `；通用教育补填 ${result.filled} 个字段` : "";
+        const projectText = projectResult?.filled ? `；项目日期复核 ${projectResult.filled} 个字段` : "";
+        status.textContent = `${current}${educationText}${projectText}。`;
       } catch {
         // The primary autofill remains usable even if the supplemental education pass cannot run.
       }
