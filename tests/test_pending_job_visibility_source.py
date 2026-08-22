@@ -6,28 +6,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PendingJobVisibilitySourceTests(unittest.TestCase):
-    def test_pending_applications_are_hidden_from_today_by_stored_url_then_logical_identity(self):
-        component = (ROOT / "app" / "pending-job-visibility.tsx").read_text(encoding="utf-8")
+    def test_pending_visibility_is_server_authoritative_without_global_poller(self):
+        route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
 
-        self.assertIn('row.status === "准备材料"', component)
-        self.assertIn('normalizedStoredJobUrl(application.jobUrl)', component)
-        self.assertIn('normalizedStoredJobUrl(identity.jobUrl)', component)
-        self.assertIn('applicationUrl === cardUrl', component)
-        self.assertIn('sameLogicalJob(application, identity)', component)
-        self.assertIn('samePendingJob(row, identity)', component)
-        self.assertIn('a.job-link', component)
-        self.assertIn('locationParts.join("·")', component)
-        self.assertIn('card.style.setProperty("display", "none", "important")', component)
-        self.assertIn('<PendingJobVisibility />', layout)
-
-    def test_jobs_api_excludes_pending_and_submitted_jobs_by_stable_identity(self):
-        route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
-
         self.assertIn('"准备材料"', route)
-        self.assertIn('hiddenApplications.some((application) => sameLogicalJob(row, application))', route)
-        self.assertIn('!activeJobStatuses.has(row.status) || !isTrackedApplication(row)', route)
-        self.assertNotIn('appliedFingerprints', route)
+        self.assertIn('byStableId', route)
+        self.assertIn('byRole', route)
+        self.assertIn('sameLogicalJob(row, application)', route)
+        self.assertIn('trackedIds', route)
+        self.assertIn('!activeJobStatuses.has(row.status) || !trackedIds.has(row.id)', route)
+        self.assertNotIn('<PendingJobVisibility />', layout)
 
     def test_application_post_uses_logical_identity_and_migrates_legacy_generic_rows(self):
         route = (ROOT / "app" / "api" / "applications" / "route.ts").read_text(encoding="utf-8")

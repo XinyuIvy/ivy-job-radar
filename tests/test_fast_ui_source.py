@@ -5,9 +5,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class FastUiSourceTests(unittest.TestCase):
-    def test_scan_polling_is_view_scoped_and_not_every_second(self):
+    def test_scan_polling_is_view_and_panel_scoped_and_not_every_second(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
-        self.assertIn('if (view !== "today") return;', source)
+        self.assertIn('if (view !== "today" || !scanPanelOpen) return;', source)
         self.assertIn('window.setInterval(refreshStatus, 10000)', source)
         self.assertIn('window.setInterval(() => setClock(Date.now()), 5000)', source)
         self.assertNotIn('window.setInterval(() => setClock(Date.now()), 1000)', source)

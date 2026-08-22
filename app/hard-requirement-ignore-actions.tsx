@@ -2,8 +2,6 @@
 
 import { useEffect } from "react";
 
-import { removeCachedJob } from "./job-data-cache";
-
 const hardRequirementReasons = [
   "经验年限或职级不符合",
   "学历或专业要求不符合",
@@ -113,13 +111,10 @@ function enhanceDialog(dialog: HTMLElement) {
       help.textContent = "正在保存忽略原因并从岗位列表移除…";
       try {
         await submitHardRequirement(company, title, jobUrl, reason);
-        removeCachedJob(company, title);
         hideMatchingJob(card);
         help.textContent = "已保存。岗位正在从列表移除。";
+        window.dispatchEvent(new CustomEvent("ivy-job-radar:job-ignored", { detail: { company, title } }));
         closeDialog(dialog);
-
-        // Reload from the persisted server result so React state and the visible count stay in sync.
-        window.setTimeout(() => window.location.reload(), 80);
       } catch (error) {
         help.textContent = error instanceof Error ? `${error.message} 请重试。` : "保存失败，请重试。";
         setPanelBusy(panel, false);
@@ -142,13 +137,18 @@ function enhanceDialog(dialog: HTMLElement) {
 
 export default function HardRequirementIgnoreActions() {
   useEffect(() => {
+    let timer = 0;
     const scan = () => {
-      document.querySelectorAll<HTMLElement>(".ignore-dialog").forEach(enhanceDialog);
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => document.querySelectorAll<HTMLElement>(".ignore-dialog").forEach(enhanceDialog), 60);
     };
     scan();
     const observer = new MutationObserver(scan);
     observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(timer);
+    };
   }, []);
   return null;
 }
