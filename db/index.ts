@@ -358,3 +358,9 @@ export async function getDb() {
 
   return drizzle(env.DB, { schema });
 }
+
+export async function getD1() {
+  await getDb();
+  const { env } = await import("cloudflare:workers");
+  return env.DB;
+}

@@ -26,13 +26,15 @@ function applySavedVisibility() {
     const save = card.querySelector<HTMLButtonElement>(".save-button");
     const optimisticallyMoving = card.dataset.optimisticSaved === "true";
     const saved = Boolean(save?.classList.contains("saved"));
-    if (today && (saved || optimisticallyMoving)) {
-      card.style.setProperty("display", "none", "important");
-      card.setAttribute("aria-hidden", "true");
-    } else if (card.dataset.optimisticSaved === "true" && !saved) {
+    if (optimisticallyMoving && !saved) {
       delete card.dataset.optimisticSaved;
       card.style.removeProperty("display");
       card.removeAttribute("aria-hidden");
+      card.style.opacity = "";
+      card.style.transform = "";
+    } else if (today && saved) {
+      card.style.setProperty("display", "none", "important");
+      card.setAttribute("aria-hidden", "true");
     }
   });
 }

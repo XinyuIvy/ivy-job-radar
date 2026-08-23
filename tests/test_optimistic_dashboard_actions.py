@@ -11,6 +11,16 @@ class OptimisticDashboardActionsTests(unittest.TestCase):
         self.assertIn('card.style.setProperty("display", "none", "important")', source)
         self.assertIn('save?.classList.contains("saved")', source)
 
+    def test_failed_saved_job_request_restores_the_card_and_server_state(self):
+        client = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+        toggle = client[client.index("const toggleSaved"):client.index("const openFromJob")]
+        optimistic = (ROOT / "app" / "optimistic-dashboard-actions.tsx").read_text(encoding="utf-8")
+        self.assertIn("catch {", toggle)
+        self.assertIn("await loadSavedJobs()", toggle)
+        self.assertIn("optimisticallyMoving && !saved", optimistic)
+        self.assertIn("delete card.dataset.optimisticSaved", optimistic)
+        self.assertIn('card.style.removeProperty("display")', optimistic)
+
     def test_ignore_is_optimistic_with_reconciliation(self):
         source = (ROOT / "app" / "optimistic-dashboard-actions.tsx").read_text(encoding="utf-8")
         self.assertIn("optimisticIgnoreClick", source)

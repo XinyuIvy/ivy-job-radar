@@ -1378,15 +1378,19 @@ export default function JobRadar() {
   const toggleSaved = async (id: number) => {
     const isSaved = saved.includes(id);
     setSaved((current) => isSaved ? current.filter((item) => item !== id) : [...current, id]);
-    const response = await fetch(
-      isSaved ? `/api/saved-jobs?jobId=${id}` : "/api/saved-jobs",
-      {
-        method: isSaved ? "DELETE" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: isSaved ? undefined : JSON.stringify({ jobId: id }),
-      },
-    );
-    if (!response.ok) await loadSavedJobs();
+    try {
+      const response = await fetch(
+        isSaved ? `/api/saved-jobs?jobId=${id}` : "/api/saved-jobs",
+        {
+          method: isSaved ? "DELETE" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: isSaved ? undefined : JSON.stringify({ jobId: id }),
+        },
+      );
+      if (!response.ok) throw new Error(`Saved job request failed with ${response.status}`);
+    } catch {
+      await loadSavedJobs();
+    }
   };
 
   const openFromJob = (job: Job) => {
