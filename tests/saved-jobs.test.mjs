@@ -45,7 +45,7 @@ class TestD1Database {
       );
       CREATE TABLE cv_prebuild_jobs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        job_id INTEGER NOT NULL UNIQUE,
+        job_id INTEGER NOT NULL,
         application_row_id INTEGER,
         prebuild_id TEXT NOT NULL DEFAULT '',
         generation_key TEXT UNIQUE,
@@ -64,6 +64,10 @@ class TestD1Database {
         updated_at TEXT NOT NULL,
         completed_at TEXT NOT NULL DEFAULT ''
       );
+      CREATE UNIQUE INDEX cv_prebuild_jobs_generation_key_unique
+        ON cv_prebuild_jobs (generation_key);
+      CREATE UNIQUE INDEX cv_prebuild_jobs_pending_job_unique
+        ON cv_prebuild_jobs (job_id) WHERE generation_key IS NULL;
       INSERT INTO jobs (id, description, region, track) VALUES
         (1, '', '美国', 'Technology'),
         (2, 'Complete role description', '中国', 'Pharma');
@@ -86,7 +90,10 @@ const {
   saveJob,
 } = await vite.ssrLoadModule("/app/lib/saved-jobs-store.ts");
 const {
+  beginCvPrebuildGeneration,
   cancelCvPrebuildJob,
+  completeCvPrebuildBundle,
+  getLatestCvPrebuildJob,
   initializeCvPrebuildJob,
 } = await vite.ssrLoadModule("/app/lib/cv-prebuild-store.ts");
 const {
@@ -126,7 +133,7 @@ test("prebuild state blocks missing JD before configuration and stays idempotent
 
   const blockedConfiguration = await initializeCvPrebuildJob(database, 2, false, now);
   assert.equal(blockedConfiguration.status, "blocked_configuration");
-  assert.equal(blockedConfiguration.language, "zh-CN");
+  assert.equal(blockedConfiguration.language, "zh");
 
   const configured = await initializeCvPrebuildJob(
     database,
@@ -136,6 +143,97 @@ test("prebuild state blocks missing JD before configuration and stays idempotent
   );
   assert.equal(configured.status, "queued");
   assert.equal(database.sqlite.prepare("SELECT count(*) AS count FROM cv_prebuild_jobs").get().count, 2);
+});
+
+test("generation keys are idempotent and preserve stale bundle history", async () => {
+  const first = await beginCvPrebuildGeneration(database, {
+    jobId: 2,
+    prebuildId: "PRECV-2026-JOB-2-AAAAAAAA",
+    generationKey: "a".repeat(64),
+    language: "zh",
+    track: "pharma",
+    templateFile: "cv_pharma_cn.tex",
+    jdSha256: "b".repeat(64),
+    factMasterSha: "fact-a",
+    promptVersion: "cv-prebuilder-v1",
+    now: "2026-08-22T22:12:00.000Z",
+  });
+  assert.equal(first.outcome, "created");
+  assert.equal(first.row.status, "preparing_bundle");
+  await completeCvPrebuildBundle(
+    database,
+    "a".repeat(64),
+    "blocked_configuration",
+    "2026-08-22T22:13:00.000Z",
+  );
+
+  const duplicate = await beginCvPrebuildGeneration(database, {
+    jobId: 2,
+    prebuildId: "PRECV-2026-JOB-2-AAAAAAAA",
+    generationKey: "a".repeat(64),
+    language: "zh",
+    track: "pharma",
+    templateFile: "cv_pharma_cn.tex",
+    jdSha256: "b".repeat(64),
+    factMasterSha: "fact-a",
+    promptVersion: "cv-prebuilder-v1",
+    now: "2026-08-22T22:14:00.000Z",
+  });
+  assert.equal(duplicate.outcome, "existing");
+
+  const changed = await beginCvPrebuildGeneration(database, {
+    jobId: 2,
+    prebuildId: "PRECV-2026-JOB-2-BBBBBBBB",
+    generationKey: "c".repeat(64),
+    language: "zh",
+    track: "pharma",
+    templateFile: "cv_pharma_cn.tex",
+    jdSha256: "d".repeat(64),
+    factMasterSha: "fact-b",
+    promptVersion: "cv-prebuilder-v1",
+    now: "2026-08-22T22:15:00.000Z",
+  });
+  assert.equal(changed.outcome, "created");
+  const rows = database.sqlite.prepare(`
+    SELECT generation_key AS generationKey, status
+    FROM cv_prebuild_jobs
+    WHERE job_id = 2
+    ORDER BY id
+  `).all();
+  assert.deepEqual(rows.map((row) => ({ ...row })), [
+    { generationKey: "a".repeat(64), status: "stale" },
+    { generationKey: "c".repeat(64), status: "preparing_bundle" },
+  ]);
+
+  const reverted = await beginCvPrebuildGeneration(database, {
+    jobId: 2,
+    prebuildId: "PRECV-2026-JOB-2-AAAAAAAA",
+    generationKey: "a".repeat(64),
+    language: "zh",
+    track: "pharma",
+    templateFile: "cv_pharma_cn.tex",
+    jdSha256: "b".repeat(64),
+    factMasterSha: "fact-a",
+    promptVersion: "cv-prebuilder-v1",
+    now: "2026-08-22T22:16:00.000Z",
+  });
+  assert.equal(reverted.outcome, "retry");
+  assert.equal(reverted.row.status, "preparing_bundle");
+  const current = await getLatestCvPrebuildJob(database, 2);
+  assert.equal(current.generationKey, "a".repeat(64));
+  assert.equal(current.status, "preparing_bundle");
+  assert.deepEqual(
+    database.sqlite.prepare(`
+      SELECT generation_key AS generationKey, status
+      FROM cv_prebuild_jobs
+      WHERE job_id = 2
+      ORDER BY id
+    `).all().map((row) => ({ ...row })),
+    [
+      { generationKey: "a".repeat(64), status: "preparing_bundle" },
+      { generationKey: "c".repeat(64), status: "stale" },
+    ],
+  );
 });
 
 test("all Phase 1 terminal and blocked states have a visible badge", () => {
