@@ -179,3 +179,19 @@ test("diagnostics expose BM25 and the deterministic dense backend", () => {
   assert.equal(result.diagnostics.embeddingBackend, "local_subword_hash_v1");
   assert.equal(result.diagnostics.embeddingDimensions, 384);
 });
+
+test("legacy facts without industry translation remain scoreable", () => {
+  const result = runHybridRag(
+    "Experience designing multi-agent review workflows.",
+    "tech",
+    [rule("Multi-agent review", ["multi-agent review"], "AI Systems")],
+    [fact({
+      industry_translation: undefined,
+      exact_methods_tools: ["multi-agent review"],
+      retrieval_text: "Designed and implemented a multi-agent review workflow.",
+    })],
+    [],
+  );
+  assert.equal(result.matches.length, 1);
+  assert.notEqual(result.matches[0].classification, "No Evidence");
+});
