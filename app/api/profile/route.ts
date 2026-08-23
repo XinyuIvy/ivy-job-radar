@@ -11,6 +11,7 @@ import {
   profileFromGlobalAutofill,
 } from "../../lib/application-profile";
 import { fetchRepositoryGlobalAutofillProfile } from "../../lib/global-autofill-profile";
+import { applyOwnerApplicationProfileUpgrade } from "../../lib/owner-application-profile";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,14 @@ export async function GET() {
     }
     applicationProfile.identity.email ||= user.email;
   }
+  const upgraded = applyOwnerApplicationProfileUpgrade(user.email, applicationProfile);
+  applicationProfile = upgraded.profile;
+  if (row && upgraded.changed) {
+    await db.update(userProfiles).set({
+      autofillProfileJson: JSON.stringify(applicationProfile),
+      updatedAt: new Date().toISOString(),
+    }).where(eq(userProfiles.userEmail, user.email));
+  }
   return NextResponse.json(
     { userEmail: user.email, applicationProfile },
     { headers: { "Cache-Control": "no-store" } },
@@ -89,10 +98,9 @@ export async function PUT(request: Request) {
   const fullName = applicationProfile.defaultLanguage === "zh"
     ? chineseFullName || englishFullName
     : englishFullName || chineseFullName;
-  const selectedAddress = applicationProfile.defaultLanguage === "zh"
-    ? applicationProfile.addresses.china
-    : applicationProfile.addresses.us;
-  const location = [selectedAddress.city, selectedAddress.state, selectedAddress.country].filter(Boolean).join(", ");
+  const location = applicationProfile.defaultLanguage === "zh"
+    ? applicationProfile.identity.nativePlaceZh
+    : [applicationProfile.addresses.us.city, applicationProfile.addresses.us.state, applicationProfile.addresses.us.country].filter(Boolean).join(", ");
   const workAuthorization = applicationProfile.defaultLanguage === "zh"
     ? applicationProfile.eligibility.workAuthorizationChina
     : applicationProfile.eligibility.visaStatusUS || applicationProfile.eligibility.workAuthorizationUS;

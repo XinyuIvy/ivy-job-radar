@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { getDb } from "../../../../db";
 import { userProfiles } from "../../../../db/schema";
@@ -9,6 +9,7 @@ import {
   mergeFixedApplicationProfile,
   normalizeFixedApplicationProfile,
 } from "../../../lib/application-profile";
+import { applyOwnerApplicationProfileUpgrade } from "../../../lib/owner-application-profile";
 import {
   fetchRepositoryGlobalAutofillProfile,
   globalAutofillProfileSource,
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     const repositoryProfile = await fetchRepositoryGlobalAutofillProfile();
     if (!repositoryProfile) return json({ error: "Global application autofill profile is not available yet." }, 404);
     const db = await getDb();
-    const [stored] = await db.select({ json: userProfiles.autofillProfileJson })
+    const [stored] = await db.select({ email: userProfiles.userEmail, json: userProfiles.autofillProfileJson })
       .from(userProfiles)
       .orderBy(desc(userProfiles.updatedAt))
       .limit(1);
@@ -56,7 +57,14 @@ export async function GET(request: NextRequest) {
     if (stored?.json) {
       const parsed = JSON.parse(stored.json) as unknown;
       if (hasStoredFixedApplicationProfile(parsed)) {
-        profile = mergeFixedApplicationProfile(repositoryProfile, normalizeFixedApplicationProfile(parsed));
+        const upgraded = applyOwnerApplicationProfileUpgrade(stored.email, normalizeFixedApplicationProfile(parsed));
+        if (upgraded.changed) {
+          await db.update(userProfiles).set({
+            autofillProfileJson: JSON.stringify(upgraded.profile),
+            updatedAt: new Date().toISOString(),
+          }).where(eq(userProfiles.userEmail, stored.email));
+        }
+        profile = mergeFixedApplicationProfile(repositoryProfile, upgraded.profile);
       }
     }
     return json({

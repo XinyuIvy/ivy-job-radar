@@ -25,7 +25,7 @@ class ApplicationSavePerformanceTests(unittest.TestCase):
 
     def test_cold_isolates_use_one_durable_schema_version_check(self):
         source = (ROOT / "db" / "index.ts").read_text(encoding="utf-8")
-        self.assertIn("const SCHEMA_VERSION = 3", source)
+        self.assertIn("const SCHEMA_VERSION = 4", source)
         self.assertIn("const SCHEMA_MARKER", source)
         self.assertIn("SELECT name FROM sqlite_master", source)
         self.assertIn("version?.name === SCHEMA_MARKER", source)

@@ -106,6 +106,7 @@
     ["identity.email", /\b(e mail|email address|email)\b|邮箱/],
     ["identity.phone", /\b(phone|mobile|telephone|cell)\b|手机|电话/],
     ["identity.nativePlace", /\b(native place|place of origin|hometown)\b|籍贯/],
+    ["identity.birthPlace", /\b(place of birth|birthplace|birth place)\b|出生地/],
     ["identity.wechat", /\b(wechat|weixin)\b|微信号|微信/],
     ["location.address2", /\b(address line 2|address 2|apt|apartment|suite|unit)\b/],
     ["location.address1", /\b(street address|address line 1|address 1|mailing address|home address)\b|家庭住址|居住地址|通讯地址|详细地址/],
@@ -171,6 +172,10 @@
     ["publication.title", /\b(publication title|paper title|article title)\b|论文名称|论文题目/],
     ["publication.authorOrder", /\b(author order|authorship|author position)\b|作者顺序|作者位次/],
     ["publication.date", /\b(publication date|published date|date published)\b|发表时间|发表日期/],
+    ["publication.jcrQuartile", /\bjcr\s*(?:quartile|ranking|rank|分区)?\b|JCR\s*分区/i],
+    ["publication.casQuartile", /\bcas\s*(?:quartile|ranking|rank)?\b|中科院(?:期刊)?分区/i],
+    ["publication.ccfCategory", /\bccf\s*(?:category|ranking|rank|level)?\b|CCF\s*(?:等级|分类)/i],
+    ["publication.level", /\b(publication|paper|journal)\s*(?:level|ranking|rank|tier)\b|论文等级|期刊等级/],
     ["publication.venue", /\b(journal|venue|publisher|publication venue|institution)\b|刊物\s*机构|刊物|期刊|发表机构/],
     ["publication.details", /\b(publication details|paper details|article details|publication url)\b|论文详情|论文链接/],
     ["eligibility.age18", /\b(at least|over)\s*18|18 years old|age of 18\b/],
@@ -192,6 +197,7 @@
   function confirmedSensitiveKey(text) {
     if (/\b(date of birth|birth date)\b|出生日期/.test(text)) return "identity.birthDate";
     if (/\b(ethnicity|ethnic group)\b|民族|族裔/.test(text)) return "identity.ethnicity";
+    if (/\b(gender|sex)\b|性别/.test(text)) return "identity.gender";
     return "";
   }
 
@@ -401,7 +407,7 @@
     return String(entry?.description || entry?.summary || "").trim();
   }
 
-  function publicationEntry(entry) {
+  function publicationEntry(entry, profileLanguage = "") {
     if (typeof entry === "string") {
       const citation = entry.trim();
       const quotedTitle = citation.match(/[“\"]([^”\"]{8,})[”\"]/i)?.[1]?.trim() || "";
@@ -415,19 +421,28 @@
     const date = String(entry?.publication_date || entry?.published_at || entry?.date || "").trim()
       || normalizedYearMonth(year, month)
       || String(year || "").trim();
+    const useChinese = profileLanguage === "zh"
+      || (!profileLanguage && (pageUsesChinese() || /(?:^|\.)cn$/i.test(location.hostname)));
+    const localizedDescription = useChinese
+      ? entry?.description_zh || entry?.details || entry?.description || entry?.description_en
+      : entry?.description_en || entry?.details || entry?.description || entry?.description_zh;
     const details = [
       entry?.citation,
-      entry?.details,
-      entry?.description,
+      localizedDescription,
       entry?.status,
       entry?.url,
     ].map((value) => String(value || "").trim()).filter(Boolean);
     return {
       title: String(entry?.title || entry?.name || entry?.paper_title || "").trim(),
-      authorOrder: String(entry?.author_order || entry?.authorship || entry?.author_role || entry?.role || "").trim(),
+      authorOrder: String(useChinese
+        ? entry?.author_order_zh || entry?.author_order || entry?.author_order_en || entry?.authorship || entry?.author_role || entry?.role
+        : entry?.author_order_en || entry?.author_order || entry?.author_order_zh || entry?.authorship || entry?.author_role || entry?.role || "").trim(),
       date,
       venue: String(entry?.venue || entry?.journal || entry?.publisher || entry?.institution || entry?.conference || "").trim(),
-      level: String(entry?.level || entry?.tier || entry?.journal_level || entry?.publication_level || "").trim(),
+      level: String(entry?.best_verified_rank || entry?.level || entry?.tier || entry?.journal_level || entry?.publication_level || "").trim(),
+      jcrQuartile: String(entry?.jcr_quartile || "").trim(),
+      casQuartile: String(entry?.cas_quartile || "").trim(),
+      ccfCategory: String(entry?.ccf_category || "").trim(),
       details: [...new Set(details)].join("；"),
     };
   }
@@ -624,7 +639,7 @@
     return { handled: true, value: String(map[key] || "").trim() };
   }
 
-  function generalEntryValue(generalProfile, key, counters) {
+  function generalEntryValue(generalProfile, key, counters, profileLanguage = "") {
     if (!globalProfileIsAuthoritative(generalProfile)) return { handled: false, value: "", aliases: [] };
     const groups = {
       language: { entries: generalProfile.languages, fields: { name: "language", proficiency: "" } },
@@ -641,7 +656,14 @@
     if (!entry) return { handled: true, value: "", aliases: [] };
     const sourceKey = config.fields[field];
     if (!sourceKey) return { handled: true, value: "", aliases: [] };
+    const useChinese = profileLanguage === "zh"
+      || (!profileLanguage && (pageUsesChinese() || /(?:^|\.)cn$/i.test(location.hostname)));
     let value = String(entry[sourceKey] || "").trim();
+    if (group === "award" && field === "description") {
+      value = String(useChinese
+        ? entry.description_zh || entry.description || entry.description_en
+        : entry.description_en || entry.description || entry.description_zh || "").trim();
+    }
     if (group === "campus" && field === "startDate") {
       value = value || normalizedYearMonth(entry.start_year, entry.start_month) || String(entry.start || "").trim();
     }
@@ -651,11 +673,14 @@
     let aliases = key === "language.name" && Array.isArray(entry.aliases) ? entry.aliases.map(String) : [];
     if (key === "award.type") {
       const team = /team|团队|四人|group/i.test([entry.type, entry.category, entry.description].filter(Boolean).join(" "));
-      value = value || String(entry.category || (team ? "团队奖" : "个人奖")).trim();
+      value = useChinese ? (team ? "团队奖" : "个人奖") : (team ? "Team Award" : "Individual Award");
       aliases = team ? ["团队奖", "团队", "Team Award", "Group Award", "其他", "Other"] : ["个人奖", "个人", "Individual Award", "其他", "Other"];
     }
     if (key === "award.summary") {
-      value = [entry.name, entry.description].map((item) => String(item || "").trim()).filter(Boolean).join("：");
+      const description = useChinese
+        ? entry.description_zh || entry.description || entry.description_en
+        : entry.description_en || entry.description || entry.description_zh;
+      value = [entry.name, description].map((item) => String(item || "").trim()).filter(Boolean).join(useChinese ? "：" : ": ");
     }
     return { handled: true, value, aliases };
   }
@@ -674,13 +699,17 @@
       "identity.email": identity.email,
       "identity.phone": identity.phone,
       "identity.nativePlace": identity.native_place,
+      "identity.birthPlace": identity.birth_place,
+      "identity.gender": identity.gender,
       "identity.ethnicity": identity.ethnicity,
       "identity.birthDate": identity.date_of_birth,
       "identity.wechat": identity.wechat,
     };
     if (!(key in map)) return { handled: false, value: "", aliases: [] };
     const value = String(map[key] || "").trim();
-    const aliases = key === "identity.ethnicity" && value === "汉族" ? ["汉族", "汉", "Han"] : [];
+    const aliases = key === "identity.ethnicity" && /汉族|han/i.test(value) ? ["汉族", "汉", "Han", "Han Chinese"]
+      : key === "identity.gender" && /女|female|woman/i.test(value) ? ["女", "女性", "Female", "Woman"]
+      : key === "identity.gender" && /男|male|man/i.test(value) ? ["男", "男性", "Male", "Man"] : [];
     return { handled: true, value, aliases };
   }
 
@@ -708,6 +737,11 @@
       "identity.preferredName": useChina ? identity.chinesePreferredName || identity.preferredName : identity.preferredName,
       "identity.email": useChina ? identity.chineseEmail || identity.email : identity.email || identity.chineseEmail,
       "identity.phone": phone,
+      "identity.nativePlace": useChina ? identity.nativePlaceZh || identity.nativePlaceEn : identity.nativePlaceEn || identity.nativePlaceZh,
+      "identity.birthPlace": useChina ? identity.birthPlaceZh || identity.birthPlaceEn : identity.birthPlaceEn || identity.birthPlaceZh,
+      "identity.gender": useChina ? identity.genderZh || identity.genderEn : identity.genderEn || identity.genderZh,
+      "identity.ethnicity": useChina ? identity.ethnicityZh || identity.ethnicityEn : identity.ethnicityEn || identity.ethnicityZh,
+      "identity.birthDate": identity.dateOfBirth,
       "identity.wechat": identity.wechat,
       "location.address1": address.address1,
       "location.address2": address.address2,
@@ -729,7 +763,10 @@
     if (!(key in map)) return { handled: false, value: "", aliases: [] };
     const value = String(map[key] || "").trim();
     const aliases = value === "yes" ? ["Yes", "是", "愿意", "可以"]
-      : value === "no" ? ["No", "否", "不愿意", "不需要"] : [];
+      : value === "no" ? ["No", "否", "不愿意", "不需要"]
+      : key === "identity.ethnicity" && /汉族|han/i.test(value) ? ["汉族", "汉", "Han", "Han Chinese"]
+      : key === "identity.gender" && /女|female|woman/i.test(value) ? ["女", "女性", "Female", "Woman"]
+      : key === "identity.gender" && /男|male|man/i.test(value) ? ["男", "男性", "Male", "Man"] : [];
     return { handled: true, value, aliases };
   }
 
@@ -749,17 +786,21 @@
     return "";
   }
 
-  function globalPublicationValue(generalProfile, key, counters) {
+  function globalPublicationValue(generalProfile, key, counters, profileLanguage = "") {
     if (!globalProfileIsAuthoritative(generalProfile) || !key.startsWith("publication.")) return { handled: false, value: "", aliases: [] };
     const entries = Array.isArray(generalProfile.publications) ? generalProfile.publications : [];
     if (!entries.length) return { handled: false, value: "", aliases: [] };
     const index = nextIndex(counters, "global-publications", key);
-    const entry = publicationEntry(entries[index]);
+    const entry = publicationEntry(entries[index], profileLanguage);
     const map = {
       "publication.title": entry.title,
       "publication.authorOrder": entry.authorOrder,
       "publication.date": entry.date,
       "publication.venue": entry.venue,
+      "publication.level": entry.level,
+      "publication.jcrQuartile": entry.jcrQuartile,
+      "publication.casQuartile": entry.casQuartile,
+      "publication.ccfCategory": entry.ccfCategory,
       "publication.details": entry.details || entry.title,
     };
     const value = String(map[key] || "").trim();
@@ -773,7 +814,7 @@
     if (fixedValue.handled && fixedValue.value) return { value: fixedValue.value, aliases: fixedValue.aliases };
     const identityValue = globalIdentityValue(generalProfile, key);
     if (identityValue.handled && identityValue.value) return { value: identityValue.value, aliases: identityValue.aliases };
-    const publicationValue = globalPublicationValue(generalProfile, key, generalEntryCounters);
+    const publicationValue = globalPublicationValue(generalProfile, key, generalEntryCounters, profileLanguage);
     if (publicationValue.handled) return { value: publicationValue.value, aliases: publicationValue.aliases };
     if (key.startsWith("education.")) {
       const globalValue = globalEducationValue(generalProfile, key, globalCounters);
@@ -784,7 +825,7 @@
       return { value: getProfileValue(profile, key), aliases: [] };
     }
 
-    const generalValue = generalEntryValue(generalProfile, key, generalEntryCounters);
+    const generalValue = generalEntryValue(generalProfile, key, generalEntryCounters, profileLanguage);
     if (generalValue.handled) return { value: generalValue.value, aliases: generalValue.aliases };
     const packetValue = packetEntryValue(packet, key, packetCounters);
     if (packetValue.handled) return { value: packetValue.value, aliases: packetValue.aliases || [] };
@@ -1436,14 +1477,14 @@
     return { filled, fields };
   }
 
-  async function fillPublicationRecords(generalProfile) {
+  async function fillPublicationRecords(generalProfile, profileLanguage = "") {
     if (!hasGlobalPublications(generalProfile)) return { filled: 0, fields: [] };
     const entries = Array.isArray(generalProfile.publications) ? generalProfile.publications : [];
     const anchors = sectionIdentityControls("publication");
     let filled = 0;
     const fields = [];
     for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
-      const entry = publicationEntry(entries[index]);
+      const entry = publicationEntry(entries[index], profileLanguage);
       const block = repeatedRecordBlock(anchors[index], "publication");
       if (!block) continue;
       const map = {
@@ -1452,6 +1493,9 @@
         "publication.date": entry.date,
         "publication.venue": entry.venue,
         "publication.level": entry.level,
+        "publication.jcrQuartile": entry.jcrQuartile,
+        "publication.casQuartile": entry.casQuartile,
+        "publication.ccfCategory": entry.ccfCategory,
         "publication.details": entry.details,
       };
       for (const el of visibleControls(block)) {
@@ -1460,7 +1504,7 @@
         if (key === "publication.venue" && publicationLevelControl(el)) key = "publication.level";
         if (!key?.startsWith("publication.")) continue;
         const value = String(map[key] || "").trim();
-        if (key === "publication.level" && !value) continue;
+        if (["publication.level", "publication.jcrQuartile", "publication.casQuartile", "publication.ccfCategory"].includes(key) && !value) continue;
         const aliases = key === "publication.authorOrder" ? authorshipAliases(value)
           : key === "publication.venue" ? publicationVenueAliases(value) : [];
         if (await fillMappedControl(el, key, value, aliases)) {
@@ -1536,7 +1580,7 @@
     }
 
     const educationRecords = await fillEducationRecords(generalProfile);
-    const publicationRecords = await fillPublicationRecords(generalProfile);
+    const publicationRecords = await fillPublicationRecords(generalProfile, profileLanguage);
     const projectRecords = await fillProjectRecords(applicationPacket);
     filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled;
     fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields);

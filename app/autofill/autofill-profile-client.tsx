@@ -122,7 +122,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     <div className="profile-shell">
       <header>
         <div>
-          <p className="eyebrow">APPLICATION AUTOFILL · V4.13</p>
+          <p className="eyebrow">APPLICATION AUTOFILL · V4.14</p>
           <h1>本地基础申请资料</h1>
           <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
         </div>
@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.13 已支持中英文资料切换：</strong><span>填写前明确选择中文资料或 English profile；姓名、电话、邮箱和地址使用对应资料，教育、经历、项目和技能仍由 CV 资料决定。</span></div>
-        <a href="/ivy-job-autofill-0.4.13.zip" download>下载中英文资料版扩展</a>
+        <div><strong>扩展 0.4.14 已支持完整双语固定资料：</strong><span>填写前明确选择中文资料或 English profile；身份、奖项、论文说明与等级按所选语言和字段类型填写。</span></div>
+        <a href="/ivy-job-autofill-0.4.14.zip" download>下载完整双语资料版扩展</a>
       </section>
 
       <form onSubmit={save}>

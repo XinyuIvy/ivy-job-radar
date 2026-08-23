@@ -14,21 +14,27 @@ export type ApplicationAddress = {
 
 export type ApplicationAward = {
   name: string;
-  type: string;
+  type: "individual" | "team" | "";
   date: string;
   issuer: string;
-  description: string;
+  descriptionZh: string;
+  descriptionEn: string;
 };
 
 export type ApplicationPublication = {
   title: string;
-  authorOrder: string;
+  authorOrderZh: string;
+  authorOrderEn: string;
   date: string;
   venue: string;
-  level: string;
+  bestVerifiedRank: string;
+  jcrQuartile: string;
+  casQuartile: string;
+  ccfCategory: string;
   status: string;
   url: string;
-  description: string;
+  descriptionZh: string;
+  descriptionEn: string;
 };
 
 export type ApplicationLanguage = {
@@ -38,6 +44,7 @@ export type ApplicationLanguage = {
 
 export type FixedApplicationProfile = {
   version: 1;
+  dataRevision: number;
   defaultRegion: "US" | "CN";
   defaultLanguage: "en" | "zh";
   identity: {
@@ -54,6 +61,15 @@ export type FixedApplicationProfile = {
     usPhone: string;
     chinaPhone: string;
     wechat: string;
+    nativePlaceZh: string;
+    nativePlaceEn: string;
+    birthPlaceZh: string;
+    birthPlaceEn: string;
+    genderZh: string;
+    genderEn: string;
+    ethnicityZh: string;
+    ethnicityEn: string;
+    dateOfBirth: string;
   };
   addresses: {
     us: ApplicationAddress;
@@ -94,6 +110,7 @@ const emptyAddress: ApplicationAddress = {
 
 export const emptyFixedApplicationProfile: FixedApplicationProfile = {
   version: 1,
+  dataRevision: 0,
   defaultRegion: "US",
   defaultLanguage: "en",
   identity: {
@@ -110,6 +127,15 @@ export const emptyFixedApplicationProfile: FixedApplicationProfile = {
     usPhone: "",
     chinaPhone: "",
     wechat: "",
+    nativePlaceZh: "",
+    nativePlaceEn: "",
+    birthPlaceZh: "",
+    birthPlaceEn: "",
+    genderZh: "",
+    genderEn: "",
+    ethnicityZh: "",
+    ethnicityEn: "",
+    dateOfBirth: "",
   },
   addresses: {
     us: { ...emptyAddress, country: "United States" },
@@ -174,6 +200,7 @@ export function normalizeFixedApplicationProfile(value: unknown): FixedApplicati
   const application = record(source.application);
   return {
     version: 1,
+    dataRevision: Number.isFinite(Number(source.dataRevision)) ? Math.max(0, Math.trunc(Number(source.dataRevision))) : 0,
     defaultRegion: source.defaultRegion === "CN" ? "CN" : "US",
     defaultLanguage: source.defaultLanguage === "zh" || (!source.defaultLanguage && source.defaultRegion === "CN") ? "zh" : "en",
     identity: {
@@ -190,6 +217,15 @@ export function normalizeFixedApplicationProfile(value: unknown): FixedApplicati
       usPhone: text(identity.usPhone, 60),
       chinaPhone: text(identity.chinaPhone, 60),
       wechat: text(identity.wechat, 120),
+      nativePlaceZh: text(identity.nativePlaceZh || identity.nativePlace, 160),
+      nativePlaceEn: text(identity.nativePlaceEn, 160),
+      birthPlaceZh: text(identity.birthPlaceZh || identity.birthPlace, 160),
+      birthPlaceEn: text(identity.birthPlaceEn, 160),
+      genderZh: text(identity.genderZh || identity.gender, 80),
+      genderEn: text(identity.genderEn, 80),
+      ethnicityZh: text(identity.ethnicityZh || identity.ethnicity, 80),
+      ethnicityEn: text(identity.ethnicityEn, 80),
+      dateOfBirth: text(identity.dateOfBirth || identity.birthDate, 40),
     },
     addresses: {
       us: address(addresses.us, "United States"),
@@ -215,20 +251,27 @@ export function normalizeFixedApplicationProfile(value: unknown): FixedApplicati
     },
     awards: rows(source.awards, (item) => ({
       name: text(item.name, 500),
-      type: text(item.type, 160),
+      type: /team|group|团队/i.test(text(item.type || item.category, 160)) ? "team" as const
+        : /individual|个人/i.test(text(item.type || item.category, 160)) ? "individual" as const : "" as const,
       date: text(item.date, 40),
       issuer: text(item.issuer, 300),
-      description: text(item.description, 2_000),
+      descriptionZh: text(item.descriptionZh || item.description_zh || item.description, 2_000),
+      descriptionEn: text(item.descriptionEn || item.description_en, 2_000),
     })),
     publications: rows(source.publications, (item) => ({
       title: text(item.title, 1_000),
-      authorOrder: text(item.authorOrder, 160),
+      authorOrderZh: text(item.authorOrderZh || item.author_order_zh || item.authorOrder, 160),
+      authorOrderEn: text(item.authorOrderEn || item.author_order_en, 160),
       date: text(item.date, 40),
       venue: text(item.venue, 500),
-      level: text(item.level, 120),
+      bestVerifiedRank: text(item.bestVerifiedRank || item.best_verified_rank || item.level, 120),
+      jcrQuartile: text(item.jcrQuartile || item.jcr_quartile, 120),
+      casQuartile: text(item.casQuartile || item.cas_quartile, 120),
+      ccfCategory: text(item.ccfCategory || item.ccf_category, 120),
       status: text(item.status, 200),
       url: text(item.url, 1_000),
-      description: text(item.description, 3_000),
+      descriptionZh: text(item.descriptionZh || item.description_zh || item.description, 3_000),
+      descriptionEn: text(item.descriptionEn || item.description_en, 3_000),
     })),
     languages: rows(source.languages, (item) => ({
       name: text(item.name, 120),
@@ -266,6 +309,15 @@ export function profileFromGlobalAutofill(value: unknown): FixedApplicationProfi
       usPhone: identity.phone_us || identity.phone,
       chinaPhone: identity.phone_cn || identity.phone,
       wechat: identity.wechat,
+      nativePlaceZh: identity.native_place_zh || identity.native_place,
+      nativePlaceEn: identity.native_place_en,
+      birthPlaceZh: identity.birth_place_zh || identity.birth_place,
+      birthPlaceEn: identity.birth_place_en,
+      genderZh: identity.gender_zh || identity.gender,
+      genderEn: identity.gender_en,
+      ethnicityZh: identity.ethnicity_zh || identity.ethnicity,
+      ethnicityEn: identity.ethnicity_en,
+      dateOfBirth: identity.date_of_birth,
     },
     awards: (Array.isArray(source.awards) ? source.awards : []).map((award) => {
       const row = record(award);
@@ -274,20 +326,26 @@ export function profileFromGlobalAutofill(value: unknown): FixedApplicationProfi
         type: row.type || row.category,
         date: row.date || row.year,
         issuer: row.issuer,
-        description: row.description || row.summary,
+        descriptionZh: row.description_zh || row.description || row.summary,
+        descriptionEn: row.description_en,
       };
     }),
     publications: (Array.isArray(source.publications) ? source.publications : []).map((publication) => {
       const row = record(publication);
       return {
         title: row.title || row.name,
-        authorOrder: row.author_order || row.authorship,
+        authorOrderZh: row.author_order_zh || row.author_order || row.authorship,
+        authorOrderEn: row.author_order_en,
         date: row.publication_date || row.date || row.year,
         venue: row.venue || row.journal || row.publisher,
-        level: row.level || row.tier,
+        bestVerifiedRank: row.best_verified_rank || row.level || row.tier,
+        jcrQuartile: row.jcr_quartile,
+        casQuartile: row.cas_quartile,
+        ccfCategory: row.ccf_category,
         status: row.status,
         url: row.url,
-        description: row.details || row.description || row.citation,
+        descriptionZh: row.description_zh || row.details || row.description || row.citation,
+        descriptionEn: row.description_en,
       };
     }),
     languages: (Array.isArray(source.languages) ? source.languages : []).map((language) => {
@@ -309,27 +367,37 @@ export function mergeFixedApplicationProfile(
     ? fixedProfile.identity.chineseEmail || fixedProfile.identity.email
     : fixedProfile.identity.email || fixedProfile.identity.chineseEmail;
   const identity = record(globalProfile.identity);
-  const awards = fixedProfile.awards.filter((item) => item.name || item.description).map((item) => ({
+  const awards = fixedProfile.awards.filter((item) => item.name || item.descriptionZh || item.descriptionEn).map((item) => ({
     name: item.name,
     type: item.type,
     category: item.type,
     year: item.date,
     date: item.date,
     issuer: item.issuer,
-    description: item.description,
-    summary: item.description,
+    description: useChinese ? item.descriptionZh || item.descriptionEn : item.descriptionEn || item.descriptionZh,
+    description_zh: item.descriptionZh,
+    description_en: item.descriptionEn,
+    summary: useChinese ? item.descriptionZh || item.descriptionEn : item.descriptionEn || item.descriptionZh,
   }));
-  const publications = fixedProfile.publications.filter((item) => item.title || item.description).map((item) => ({
+  const publications = fixedProfile.publications.filter((item) => item.title || item.descriptionZh || item.descriptionEn).map((item) => ({
     title: item.title,
-    author_order: item.authorOrder,
+    author_order: useChinese ? item.authorOrderZh || item.authorOrderEn : item.authorOrderEn || item.authorOrderZh,
+    author_order_zh: item.authorOrderZh,
+    author_order_en: item.authorOrderEn,
     publication_date: item.date,
     date: item.date,
     venue: item.venue,
-    level: item.level,
+    level: item.bestVerifiedRank,
+    best_verified_rank: item.bestVerifiedRank,
+    jcr_quartile: item.jcrQuartile,
+    cas_quartile: item.casQuartile,
+    ccf_category: item.ccfCategory,
     status: item.status,
     url: item.url,
-    details: item.description,
-    description: item.description,
+    details: useChinese ? item.descriptionZh || item.descriptionEn : item.descriptionEn || item.descriptionZh,
+    description: useChinese ? item.descriptionZh || item.descriptionEn : item.descriptionEn || item.descriptionZh,
+    description_zh: item.descriptionZh,
+    description_en: item.descriptionEn,
   }));
   const languages = fixedProfile.languages.filter((item) => item.name).map((item) => ({
     language: item.name,
@@ -355,6 +423,19 @@ export function mergeFixedApplicationProfile(
       phone_us: fixedProfile.identity.usPhone,
       phone_cn: fixedProfile.identity.chinaPhone,
       wechat: fixedProfile.identity.wechat || identity.wechat,
+      native_place: useChinese ? fixedProfile.identity.nativePlaceZh || fixedProfile.identity.nativePlaceEn : fixedProfile.identity.nativePlaceEn || fixedProfile.identity.nativePlaceZh,
+      native_place_zh: fixedProfile.identity.nativePlaceZh,
+      native_place_en: fixedProfile.identity.nativePlaceEn,
+      birth_place: useChinese ? fixedProfile.identity.birthPlaceZh || fixedProfile.identity.birthPlaceEn : fixedProfile.identity.birthPlaceEn || fixedProfile.identity.birthPlaceZh,
+      birth_place_zh: fixedProfile.identity.birthPlaceZh,
+      birth_place_en: fixedProfile.identity.birthPlaceEn,
+      gender: useChinese ? fixedProfile.identity.genderZh || fixedProfile.identity.genderEn : fixedProfile.identity.genderEn || fixedProfile.identity.genderZh,
+      gender_zh: fixedProfile.identity.genderZh,
+      gender_en: fixedProfile.identity.genderEn,
+      ethnicity: useChinese ? fixedProfile.identity.ethnicityZh || fixedProfile.identity.ethnicityEn : fixedProfile.identity.ethnicityEn || fixedProfile.identity.ethnicityZh,
+      ethnicity_zh: fixedProfile.identity.ethnicityZh,
+      ethnicity_en: fixedProfile.identity.ethnicityEn,
+      date_of_birth: fixedProfile.identity.dateOfBirth || identity.date_of_birth,
     },
     fixed_application: fixedProfile,
     ...(awards.length ? { awards } : {}),

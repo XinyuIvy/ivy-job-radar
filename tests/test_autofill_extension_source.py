@@ -10,7 +10,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_manifest_remains_manual_trigger_only(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.4.13")
+        self.assertEqual(manifest["version"], "0.4.14")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
@@ -155,7 +155,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
-        self.assertIn("AUTOFILL V4.13", popup_html)
+        self.assertIn("AUTOFILL V4.14", popup_html)
         self.assertIn('id="profileLanguage"', popup_html)
         self.assertIn("中文资料", popup_html)
         self.assertIn("English profile", popup_html)

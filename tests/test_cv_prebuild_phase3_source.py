@@ -96,7 +96,7 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
             self.assertIn("savedJobs", source)
         self.assertIn('sqliteTable("cv_prebuild_messages"', schema)
         self.assertIn("openaiConversationId", schema)
-        self.assertIn("const SCHEMA_VERSION = 3", runtime)
+        self.assertIn("const SCHEMA_VERSION = 4", runtime)
         self.assertIn('ensureColumn("cv_prebuild_jobs", "openai_conversation_id"', runtime)
         self.assertIn("needsLegacyFailureDiagnosis", status)
         self.assertIn("failureMessage", status)

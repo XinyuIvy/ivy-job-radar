@@ -3073,23 +3073,34 @@ export default function JobRadar() {
               </article>
 
               <article className="profile-card">
-                <div className="section-heading compact"><div><p className="eyebrow">BILINGUAL ADDRESSES</p><h2>中英文申请地址</h2></div><span>按 Autofill 选择使用</span></div>
+                <div className="section-heading compact"><div><p className="eyebrow">APPLICATION LOCATION DATA</p><h2>美国地址与中文申请信息</h2></div><span>按 Autofill 语言使用</span></div>
                 <div className="profile-addresses">
-                  {(["us", "china"] as const).map((region) => {
-                    const address = profile.applicationProfile.addresses[region];
-                    const title = region === "us" ? "English profile address" : "中文资料地址";
-                    return <section className="profile-repeat-card" key={region}>
-                      <h3>{title}</h3>
-                      <div className="profile-grid">
-                        <label className="full">Address line 1<input value={address.address1} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, address1: event.target.value } })} /></label>
-                        <label className="full">Address line 2<input value={address.address2} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, address2: event.target.value } })} /></label>
-                        <label>City<input value={address.city} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, city: event.target.value } })} /></label>
-                        <label>State / Province<input value={address.state} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, state: event.target.value } })} /></label>
-                        <label>ZIP / 邮编<input value={address.postalCode} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, postalCode: event.target.value } })} /></label>
-                        <label>Country<input value={address.country} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, country: event.target.value } })} /></label>
-                      </div>
-                    </section>;
-                  })}
+                  <section className="profile-repeat-card">
+                    <h3>US mailing address</h3>
+                    <div className="profile-grid">
+                      <label className="full">Address line 1<input value={profile.applicationProfile.addresses.us.address1} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, us: { ...profile.applicationProfile.addresses.us, address1: event.target.value } })} /></label>
+                      <label className="full">Address line 2<input value={profile.applicationProfile.addresses.us.address2} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, us: { ...profile.applicationProfile.addresses.us, address2: event.target.value } })} /></label>
+                      <label>City<input value={profile.applicationProfile.addresses.us.city} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, us: { ...profile.applicationProfile.addresses.us, city: event.target.value } })} /></label>
+                      <label>State<input value={profile.applicationProfile.addresses.us.state} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, us: { ...profile.applicationProfile.addresses.us, state: event.target.value } })} /></label>
+                      <label>ZIP<input value={profile.applicationProfile.addresses.us.postalCode} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, us: { ...profile.applicationProfile.addresses.us, postalCode: event.target.value } })} /></label>
+                      <label>Country<input value={profile.applicationProfile.addresses.us.country} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, us: { ...profile.applicationProfile.addresses.us, country: event.target.value } })} /></label>
+                    </div>
+                  </section>
+                  <section className="profile-repeat-card">
+                    <h3>中文申请补充信息</h3>
+                    <p className="profile-help">中国校招通常询问籍贯、出生地和性别，不把它们当作详细邮寄地址。</p>
+                    <div className="profile-grid">
+                      <label>籍贯<input value={profile.applicationProfile.identity.nativePlaceZh} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, nativePlaceZh: event.target.value })} /></label>
+                      <label>Native place<input value={profile.applicationProfile.identity.nativePlaceEn} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, nativePlaceEn: event.target.value })} /></label>
+                      <label>出生地<input value={profile.applicationProfile.identity.birthPlaceZh} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, birthPlaceZh: event.target.value })} /></label>
+                      <label>Place of birth<input value={profile.applicationProfile.identity.birthPlaceEn} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, birthPlaceEn: event.target.value })} /></label>
+                      <label>性别<select value={profile.applicationProfile.identity.genderZh} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, genderZh: event.target.value, genderEn: event.target.value === "女" ? "Female" : event.target.value === "男" ? "Male" : "" })}><option value="">未设置</option><option value="女">女</option><option value="男">男</option></select></label>
+                      <label>Gender<input value={profile.applicationProfile.identity.genderEn} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, genderEn: event.target.value })} /></label>
+                      <label>民族<input value={profile.applicationProfile.identity.ethnicityZh} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, ethnicityZh: event.target.value })} /></label>
+                      <label>Ethnicity<input value={profile.applicationProfile.identity.ethnicityEn} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, ethnicityEn: event.target.value })} /></label>
+                      <label>出生日期<input type="date" value={profile.applicationProfile.identity.dateOfBirth} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, dateOfBirth: event.target.value })} /></label>
+                    </div>
+                  </section>
                 </div>
               </article>
 
@@ -3107,17 +3118,18 @@ export default function JobRadar() {
               </article>
 
               <article className="profile-card">
-                <div className="section-heading compact"><div><p className="eyebrow">AWARDS</p><h2>奖项</h2></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("awards", [...profile.applicationProfile.awards, { name: "", type: "", date: "", issuer: "", description: "" }])}>＋ 添加奖项</button></div>
-                <p className="profile-help">保存获奖名称、时间、颁发方和说明。Autofill 会按这里的顺序填写奖项板块。</p>
+                <div className="section-heading compact"><div><p className="eyebrow">AWARDS</p><h2>奖项</h2></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("awards", [...profile.applicationProfile.awards, { name: "", type: "", date: "", issuer: "", descriptionZh: "", descriptionEn: "" }])}>＋ 添加奖项</button></div>
+                <p className="profile-help">个人奖 / 团队奖单独保存；中英文描述按扩展中的资料语言自动选择。</p>
                 <div className="profile-repeat-list">
                   {profile.applicationProfile.awards.map((award, index) => <section className="profile-repeat-card" key={`award-${index}`}>
                     <div className="profile-repeat-head"><h3>奖项 {index + 1}</h3><button type="button" onClick={() => updateFixedProfileSection("awards", profile.applicationProfile.awards.filter((_, itemIndex) => itemIndex !== index))}>删除</button></div>
                     <div className="profile-grid">
                       <label>奖项名称<input value={award.name} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} /></label>
                       <label>获奖时间<input value={award.date} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, date: event.target.value } : item))} placeholder="YYYY 或 YYYY-MM" /></label>
-                      <label>奖项类型<input value={award.type} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, type: event.target.value } : item))} placeholder="个人奖 / 团队奖" /></label>
+                      <label>奖项类型<select value={award.type} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, type: event.target.value as "individual" | "team" | "" } : item))}><option value="">未设置</option><option value="individual">个人奖 / Individual Award</option><option value="team">团队奖 / Team Award</option></select></label>
                       <label>颁发机构<input value={award.issuer} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, issuer: event.target.value } : item))} /></label>
-                      <label className="full">奖项描述<textarea value={award.description} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
+                      <label className="full">奖项描述（中文）<textarea value={award.descriptionZh} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, descriptionZh: event.target.value } : item))} /></label>
+                      <label className="full">Award description (English)<textarea value={award.descriptionEn} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, descriptionEn: event.target.value } : item))} /></label>
                     </div>
                   </section>)}
                   {!profile.applicationProfile.awards.length && <p className="profile-empty-note">尚未添加奖项。</p>}
@@ -3125,20 +3137,25 @@ export default function JobRadar() {
               </article>
 
               <article className="profile-card">
-                <div className="section-heading compact"><div><p className="eyebrow">PUBLICATIONS</p><h2>论文与发表成果</h2></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("publications", [...profile.applicationProfile.publications, { title: "", authorOrder: "", date: "", venue: "", level: "", status: "", url: "", description: "" }])}>＋ 添加论文</button></div>
-                <p className="profile-help">论文列表属于跨岗位固定资料；岗位 CV 只决定当次简历如何取舍，不会改写这里的完整记录。</p>
+                <div className="section-heading compact"><div><p className="eyebrow">PUBLICATIONS</p><h2>论文与发表成果</h2></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("publications", [...profile.applicationProfile.publications, { title: "", authorOrderZh: "", authorOrderEn: "", date: "", venue: "", bestVerifiedRank: "", jcrQuartile: "", casQuartile: "", ccfCategory: "", status: "", url: "", descriptionZh: "", descriptionEn: "" }])}>＋ 添加论文</button></div>
+                <p className="profile-help">通用“论文等级”使用当前已核验的最佳等级；JCR、中科院和 CCF 分开保存。没有可靠依据的等级留空，不猜。</p>
                 <div className="profile-repeat-list">
                   {profile.applicationProfile.publications.map((publication, index) => <section className="profile-repeat-card" key={`publication-${index}`}>
                     <div className="profile-repeat-head"><h3>论文 {index + 1}</h3><button type="button" onClick={() => updateFixedProfileSection("publications", profile.applicationProfile.publications.filter((_, itemIndex) => itemIndex !== index))}>删除</button></div>
                     <div className="profile-grid">
                       <label className="full">论文题目<input value={publication.title} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, title: event.target.value } : item))} /></label>
-                      <label>作者顺序<input value={publication.authorOrder} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, authorOrder: event.target.value } : item))} placeholder="例如 First Author" /></label>
+                      <label>作者顺序（中文）<input value={publication.authorOrderZh} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, authorOrderZh: event.target.value } : item))} placeholder="例如 第一作者" /></label>
+                      <label>Author order (English)<input value={publication.authorOrderEn} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, authorOrderEn: event.target.value } : item))} placeholder="e.g. First Author" /></label>
                       <label>发表时间<input value={publication.date} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, date: event.target.value } : item))} placeholder="YYYY-MM" /></label>
                       <label>期刊 / 会议<input value={publication.venue} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, venue: event.target.value } : item))} /></label>
-                      <label>论文等级<input value={publication.level} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, level: event.target.value } : item))} placeholder="只填写已核验等级" /></label>
+                      <label>最佳已核验等级<input value={publication.bestVerifiedRank} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, bestVerifiedRank: event.target.value } : item))} placeholder="例如 JCR Q1" /></label>
+                      <label>JCR 分区<input value={publication.jcrQuartile} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, jcrQuartile: event.target.value } : item))} placeholder="例如 JCR Q1" /></label>
+                      <label>中科院分区<input value={publication.casQuartile} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, casQuartile: event.target.value } : item))} placeholder="未核验则留空" /></label>
+                      <label>CCF 等级<input value={publication.ccfCategory} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, ccfCategory: event.target.value } : item))} placeholder="未收录则留空" /></label>
                       <label>发表状态<input value={publication.status} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, status: event.target.value } : item))} placeholder="Published / Under review / Preprint" /></label>
                       <label>DOI / URL<input type="url" value={publication.url} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item))} /></label>
-                      <label className="full">论文说明<textarea value={publication.description} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
+                      <label className="full">论文说明（中文）<textarea value={publication.descriptionZh} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, descriptionZh: event.target.value } : item))} /></label>
+                      <label className="full">Publication description (English)<textarea value={publication.descriptionEn} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, descriptionEn: event.target.value } : item))} /></label>
                     </div>
                   </section>)}
                   {!profile.applicationProfile.publications.length && <p className="profile-empty-note">尚未添加论文。</p>}

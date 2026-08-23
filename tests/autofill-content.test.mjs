@@ -561,19 +561,24 @@ test("fills only explicitly confirmed identity fields including sensitive date a
   const body = { tagName: "BODY", textContent: "个人信息", parentElement: null };
   const phone = new FakeInput({ id: "phone", label: "手机号码", parentElement: body });
   const nativePlace = new FakeInput({ id: "native-place", label: "籍贯", parentElement: body });
+  const birthPlace = new FakeInput({ id: "birth-place", label: "出生地", parentElement: body });
+  const gender = new FakeSelect({ id: "gender", label: "性别", parentElement: body, options: ["请选择", "女", "男"] });
   const ethnicity = new FakeSelect({ id: "ethnicity", label: "民族", parentElement: body, options: ["请选择", "汉族", "其他"] });
   const birthDate = new FakeInput({ id: "birth-date", label: "出生日期", placeholder: "请选择日期", parentElement: body, type: "date", readOnly: true });
   const wechat = new FakeInput({ id: "wechat", label: "微信号", parentElement: body });
   const generalProfile = {
     schema_version: "global-application-autofill-profile-v1",
     education: [],
-    identity: { phone: "15840470437", native_place: "四川省成都市", ethnicity: "汉族", date_of_birth: "1999-01-11", wechat: "ivyzzzhang" },
+    identity: { phone: "15840470437", native_place: "四川省成都市", birth_place: "辽宁省沈阳市", gender: "女", ethnicity: "汉族", date_of_birth: "1999-01-11", wechat: "ivyzzzhang" },
   };
 
-  const result = await runFill([phone, nativePlace, ethnicity, birthDate, wechat], null, generalProfile);
+  const result = await runFill([phone, nativePlace, birthPlace, gender, ethnicity, birthDate, wechat], null, generalProfile);
 
   assert.equal(result.ok, true);
-  assert.deepEqual([phone.value, nativePlace.value, ethnicity.value, birthDate.value, wechat.value], ["15840470437", "四川省成都市", "汉族", "1999-01-11", "ivyzzzhang"]);
+  assert.deepEqual(
+    [phone.value, nativePlace.value, birthPlace.value, gender.value, ethnicity.value, birthDate.value, wechat.value],
+    ["15840470437", "四川省成都市", "辽宁省沈阳市", "女", "汉族", "1999-01-11", "ivyzzzhang"],
+  );
 });
 
 test("prefers the complete global publication list over APP-selected publications", async () => {
@@ -594,12 +599,12 @@ test("prefers the complete global publication list over APP-selected publication
     schema_version: "global-application-autofill-profile-v1",
     education: [],
     publications: [
-      { title: "Published paper", author_order: "First Author", year: "2025", venue: "Imaging Neuroscience", details: "Published." },
-      { title: "Preprint paper", author_order: "Second Author", year: "2026", venue: "Psychometrika", details: "Preprint; under review." },
+      { title: "Published paper", author_order_zh: "第一作者", author_order_en: "First Author", year: "2025", venue: "Imaging Neuroscience", best_verified_rank: "JCR Q2", jcr_quartile: "JCR Q2", description_zh: "中文论文说明。", description_en: "English paper description.", status: "Published" },
+      { title: "Preprint paper", author_order_zh: "第二作者", author_order_en: "Second Author", year: "2026", venue: "Psychometrika", best_verified_rank: "JCR Q1", jcr_quartile: "JCR Q1", description_zh: "中文预印本说明。", description_en: "English preprint description.", status: "Preprint; under review" },
     ],
   };
 
-  const result = await runFill(fields, packet, generalProfile);
+  const result = await runFill(fields, packet, generalProfile, [], "zh");
 
   assert.equal(result.ok, true);
   assert.equal(blocks[0].title.value, "Published paper");
@@ -608,6 +613,44 @@ test("prefers the complete global publication list over APP-selected publication
   assert.equal(blocks[1].author.value, "第二作者");
   assert.equal(blocks[0].date.value, "2025");
   assert.equal(blocks[1].date.value, "2026");
+  assert.equal(blocks[0].details.value.includes("中文论文说明。"), true);
+  assert.equal(blocks[0].details.value.includes("English paper description."), false);
+});
+
+test("uses bilingual publication details and separate verified ranking fields", async () => {
+  const body = { tagName: "BODY", textContent: "论文/期刊", parentElement: null };
+  const block = { tagName: "DIV", textContent: "论文/期刊 论文名称 作者顺序 发表时间 刊物/机构 论文等级 JCR 分区 中科院分区 CCF 等级 论文详情", parentElement: body };
+  const title = new FakeInput({ id: "ranked-paper-title", label: "论文名称", parentElement: block });
+  const author = new FakeSelect({ id: "ranked-paper-author", label: "作者顺序", parentElement: block, options: ["请选择", "第一作者", "第二作者"] });
+  const date = new FakeInput({ id: "ranked-paper-date", label: "发表时间", placeholder: "YYYY", parentElement: block });
+  const venue = new FakeSelect({ id: "ranked-paper-venue", label: "刊物/机构", parentElement: block, options: ["请选择", "期刊", "会议"] });
+  const bestRank = new FakeInput({ id: "ranked-paper-best", label: "论文等级", parentElement: block });
+  const jcr = new FakeInput({ id: "ranked-paper-jcr", label: "JCR 分区", parentElement: block });
+  const cas = new FakeInput({ id: "ranked-paper-cas", label: "中科院分区", parentElement: block });
+  const ccf = new FakeInput({ id: "ranked-paper-ccf", label: "CCF 等级", parentElement: block });
+  const details = new FakeTextarea({ id: "ranked-paper-details", label: "论文详情", parentElement: block });
+  const fields = [title, author, date, venue, bestRank, jcr, cas, ccf, details];
+  block.querySelectorAll = () => fields;
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    publications: [{
+      title: "Ranked paper", author_order_zh: "第一作者", author_order_en: "First Author", year: "2026", venue: "Example Journal",
+      best_verified_rank: "JCR Q1", jcr_quartile: "JCR Q1", cas_quartile: "中科院 2 区", ccf_category: "CCF B",
+      description_zh: "中文论文说明。", description_en: "English paper description.", status: "Published",
+    }],
+  };
+
+  const result = await runFill(fields, null, generalProfile, [], "zh");
+
+  assert.equal(result.ok, true);
+  assert.equal(author.value, "第一作者");
+  assert.equal(bestRank.value, "JCR Q1");
+  assert.equal(jcr.value, "JCR Q1");
+  assert.equal(cas.value, "中科院 2 区");
+  assert.equal(ccf.value, "CCF B");
+  assert.equal(details.value.includes("中文论文说明。"), true);
+  assert.equal(details.value.includes("English paper description."), false);
 });
 
 test("clicks Add inside a project section until every APP-selected project has a row", async () => {
