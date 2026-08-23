@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 let schemaInitialization: Promise<void> | null = null;
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 4;
 const SCHEMA_MARKER = `ivy_schema_v${SCHEMA_VERSION}`;
 
 export async function getDb() {
@@ -222,6 +222,14 @@ export async function getDb() {
   `).run();
 
   await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS job_fact_scores (
+      job_id INTEGER PRIMARY KEY,
+      score_json TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS cv_prebuild_jobs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       job_id INTEGER NOT NULL,
@@ -237,6 +245,18 @@ export async function getDb() {
       prompt_version TEXT NOT NULL DEFAULT '',
       agent_trigger_run_id TEXT NOT NULL DEFAULT '',
       conversation_url TEXT NOT NULL DEFAULT '',
+      openai_conversation_id TEXT NOT NULL DEFAULT '',
+      openai_response_id TEXT NOT NULL DEFAULT '',
+      openai_container_id TEXT NOT NULL DEFAULT '',
+      model TEXT NOT NULL DEFAULT '',
+      service_tier TEXT NOT NULL DEFAULT '',
+      draft_tex_key TEXT NOT NULL DEFAULT '',
+      draft_pdf_key TEXT NOT NULL DEFAULT '',
+      draft_text_key TEXT NOT NULL DEFAULT '',
+      review_key TEXT NOT NULL DEFAULT '',
+      input_tokens INTEGER NOT NULL DEFAULT 0,
+      cached_input_tokens INTEGER NOT NULL DEFAULT 0,
+      output_tokens INTEGER NOT NULL DEFAULT 0,
       attempts INTEGER NOT NULL DEFAULT 0,
       last_error TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL,
@@ -244,6 +264,19 @@ export async function getDb() {
       completed_at TEXT NOT NULL DEFAULT ''
     )
   `).run();
+
+  await ensureColumn("cv_prebuild_jobs", "openai_conversation_id", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "openai_response_id", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "openai_container_id", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "model", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "service_tier", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "draft_tex_key", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "draft_pdf_key", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "draft_text_key", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "review_key", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "input_tokens", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("cv_prebuild_jobs", "cached_input_tokens", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn("cv_prebuild_jobs", "output_tokens", "INTEGER NOT NULL DEFAULT 0");
 
   await env.DB.batch([
     env.DB.prepare(`
@@ -262,6 +295,30 @@ export async function getDb() {
       CREATE UNIQUE INDEX IF NOT EXISTS cv_prebuild_jobs_pending_job_unique
       ON cv_prebuild_jobs (job_id)
       WHERE generation_key IS NULL
+    `),
+  ]);
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS cv_prebuild_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      cv_prebuild_job_id INTEGER NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL DEFAULT '',
+      openai_response_id TEXT,
+      status TEXT NOT NULL DEFAULT 'completed',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.batch([
+    env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS cv_prebuild_messages_job_created_at_idx
+      ON cv_prebuild_messages (cv_prebuild_job_id, created_at)
+    `),
+    env.DB.prepare(`
+      CREATE UNIQUE INDEX IF NOT EXISTS cv_prebuild_messages_response_unique
+      ON cv_prebuild_messages (openai_response_id)
     `),
   ]);
 
@@ -360,10 +417,13 @@ export async function getDb() {
       target_industries TEXT NOT NULL DEFAULT '',
       professional_summary TEXT NOT NULL DEFAULT '',
       skills TEXT NOT NULL DEFAULT '[]',
+      autofill_profile_json TEXT NOT NULL DEFAULT '{}',
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     )
   `).run();
+
+  await ensureColumn("user_profiles", "autofill_profile_json", "TEXT NOT NULL DEFAULT '{}'");
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS profile_resumes (

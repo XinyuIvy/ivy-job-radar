@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 
-import { getD1 } from "../../../db";
-import { cancelCvPrebuildJob, initializeCvPrebuildJob } from "../../lib/cv-prebuild-store";
+import { getD1, getDb } from "../../../db";
+import { applications, jobs } from "../../../db/schema";
+import { cancelCvPrebuildJob } from "../../lib/cv-prebuild-store";
+import { extractCoreJobDescription } from "../../lib/job-description";
+import { scoreStoredJob } from "../../lib/job-scoring";
 import { deleteSavedJob, listSavedJobs, saveJob } from "../../lib/saved-jobs-store";
 
 export const dynamic = "force-dynamic";
@@ -9,14 +13,6 @@ export const dynamic = "force-dynamic";
 function parseJobId(value: unknown) {
   const jobId = Number(value);
   return Number.isSafeInteger(jobId) && jobId > 0 ? jobId : null;
-}
-
-async function hasCvPrebuilderConfiguration() {
-  const { env } = await import("cloudflare:workers");
-  return Boolean(
-    String(env.CV_PREBUILDER_AGENT_TRIGGER_ID ?? "").trim()
-    && String(env.CV_PREBUILDER_AGENT_ACCESS_TOKEN ?? "").trim(),
-  );
 }
 
 export async function GET() {
@@ -34,32 +30,73 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "A valid JSON body is required." }, { status: 400 });
   }
 
-  const jobId = parseJobId(body.jobId);
+  let jobId = parseJobId(body.jobId);
+  const applicationRowId = parseJobId(body.applicationRowId);
+  const now = new Date().toISOString();
+  if (!jobId && applicationRowId) {
+    const db = await getDb();
+    const [application] = await db
+      .select()
+      .from(applications)
+      .where(eq(applications.id, applicationRowId))
+      .limit(1);
+    if (!application) {
+      return NextResponse.json({ error: "Application not found." }, { status: 404 });
+    }
+    const jobUrl = application.jobUrl.trim();
+    const description = extractCoreJobDescription(application.notes).text;
+    if (!jobUrl || !description) {
+      return NextResponse.json({
+        error: "This application needs an original JD link and complete JD text before CV generation.",
+      }, { status: 409 });
+    }
+    let [linkedJob] = await db.select().from(jobs).where(eq(jobs.jobUrl, jobUrl)).limit(1);
+    if (!linkedJob) {
+      const scoring = scoreStoredJob({
+        title: application.title,
+        content: description,
+        region: application.region || "中国",
+      });
+      await db.insert(jobs).values({
+        company: application.company,
+        title: application.title,
+        location: application.location,
+        region: application.region || "中国",
+        track: application.track || "Technology",
+        score: scoring.score,
+        visa: scoring.visa,
+        evidence: "由申请记录中的网页文本提取核心 JD。",
+        description,
+        skills: "[]",
+        jobUrl,
+        canonicalUrl: jobUrl,
+        applicationId: application.applicationId,
+        source: application.source || "申请记录",
+        status: "开放",
+        deadline: application.deadline,
+        deadlineType: application.deadlineType,
+        lastSeenAt: now,
+        discoveredAt: application.createdAt || now,
+        checkedAt: now,
+      }).onConflictDoNothing();
+      [linkedJob] = await db.select().from(jobs).where(eq(jobs.jobUrl, jobUrl)).limit(1);
+    }
+    jobId = linkedJob?.id ?? null;
+  }
   if (!jobId) {
-    return NextResponse.json({ error: "A valid job id is required." }, { status: 400 });
+    return NextResponse.json({ error: "A valid job or application id is required." }, { status: 400 });
   }
 
   const database = await getD1();
-  const now = new Date().toISOString();
   const result = await saveJob(database, jobId, now);
   if (result.outcome === "missing") {
     return NextResponse.json({ error: "Job not found." }, { status: 404 });
   }
 
-  let prebuildStatus = "failed_retryable";
-  try {
-    const prebuild = await initializeCvPrebuildJob(
-      database,
-      jobId,
-      await hasCvPrebuilderConfiguration(),
-      now,
-    );
-    prebuildStatus = prebuild?.status ?? prebuildStatus;
-  } catch {
-    // Saving a job stays authoritative even when prebuild state initialization fails.
-  }
-
-  return NextResponse.json({ ...result.row, prebuildStatus }, {
+  return NextResponse.json({
+    ...result.row,
+    created: result.outcome === "created",
+  }, {
     status: result.outcome === "created" ? 201 : 200,
   });
 }

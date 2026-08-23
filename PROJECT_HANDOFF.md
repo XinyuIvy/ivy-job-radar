@@ -1,16 +1,38 @@
 # Job Application / CV Knowledge Base 项目交接
 
-最后更新：2026-08-22（America/New_York）
+最后更新：2026-08-23（America/New_York）
 
-## 最高优先级交接：Autofill 0.4.11 已发布，下一阶段接入 CV Prebuilder Workspace Agent
+## 最高优先级交接：Autofill 0.4.12 已接入申请固定资料库，CV Prebuilder 使用 Responses API
 
-> 本节是 2026-08-22 当前最高权威，覆盖下方所有仍写着“当前生产权威”“0.4.6”“尚未自动生成 CV”或其他旧 next step 的章节。旧内容只用于追溯，不得把扩展回退到旧版本，也不得重新建立另一套自动填表或 CV 定制流程。
+> 本节是 2026-08-23 当前最高权威，覆盖下方所有仍写着“Workspace Agent”“API channel”“conversation_url”“下一阶段接入 Agent”“尚未自动生成 CV”或其他旧 next step 的章节。旧内容只用于追溯，不得回退到 Workspace Agent 方案，也不得重新建立另一套自动填表或 CV 定制流程。
+
+### 最新申请固定资料架构
+
+- 原“个人资料”页已改为“申请固定资料”，删除目标岗位、目标行业、职业概述、技能清单和基础 CV 上传等重复入口。
+- D1 `user_profiles.autofill_profile_json` 保存中美电话号码、中美地址、姓名与链接、工作授权、固定选择题、奖项、论文、语言及用户自定义固定问答；`/api/profile` 只允许当前 ChatGPT 登录用户读写。
+- Autofill 的 global profile 路由会把 D1 固定资料合并到 CV 仓库的 global application profile。固定资料以网站保存值为准；教育、工作经历、项目、技能和岗位定制描述仍从 CV 事实库及当前 APP 最终 CV 读取。
+- Chrome 扩展已升级到 `0.4.12`，支持按页面地区选择中国或美国联系方式与地址，并可按高置信问题文本填写用户保存的其他固定问答；仍只填空白、不填敏感 EEO 字段、不自动提交。
+- 用户固定扩展目录仍为 `/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`，更新方式仍是 `git pull origin main`、Chrome Reload、刷新申请页。备用下载包为 `/ivy-job-autofill-0.4.12.zip`。
+
+### 0. Phase 3 当前权威架构与费用边界
+
+- 用户确认的最终交互是：新收藏岗位后自动后台生成第一版 CV；每个岗位拥有独立且长期保存的 CV Chat；生成后可直接看 PDF，并继续发送修改要求。
+- 实现使用 OpenAI Responses API background mode、durable Conversation、hosted shell 和 R2，不使用 Workspace Agent API channel。D1 保存岗位级 conversation、response、状态、token usage 和完整消息历史；R2 保存每一版 `cv_draft.tex`、`cv_draft.pdf`、`cv_draft.txt` 与 `cv_review.md`。
+- 新收藏只自动触发一次。重复收藏或重复请求复用同一 `generation_key`，不得重复产生首版费用。已有历史收藏不批量补跑，只显示“生成 CV 初稿”，由用户手动决定是否调用 API。
+- 默认模型为 `gpt-5.6-terra`，优先使用 `service_tier=flex`；若该组合在请求创建前返回 400，仅去掉 Flex 重试，不自动切换到更贵模型。
+- 打开页面、读取聊天记录、轮询进度、查看 PDF 和下载文件均不产生模型 token。只有新收藏的首版，以及用户在岗位 CV Chat 中明确点击“发送修改要求”时调用 OpenAI API。
+- ChatGPT Work / Codex 中的开发、审查和普通对话使用用户订阅能力，不得调用 Site 的 API key。`OPENAI_API_KEY` 只保存在 Site secret，禁止发送到浏览器、GitHub、日志或接口响应。
+- 首版输入文件按静态事实库、canonical indexes、母版、岗位记录、完整 JD、Prompt 的顺序发送，以便复用 prompt caching。完整 JD 仍是岗位要求的主权威，严禁编造事实。
+- Hosted shell 只负责本次 TeX/PDF 编译；container 文件必须在容器有效期内下载并写入 R2，后续对话从 R2 读取当前 TeX 和审校记录。
+- PRECV 仍是临时预览，不创建 application / APP ID，不自动提交，不写 `cv_customized_<APP-ID>` 或 `cv_submitted_<APP-ID>`。正式定稿与投递边界继续保留人工确认。
+- Phase 3 新增路由：`/api/cv-prebuild/status`、`/api/cv-prebuild/chat`、`/api/cv-prebuild/artifact`，以及岗位页面 `/cv-prebuild/<jobId>`。收藏权威入口仍是 `/api/saved-jobs`。
+- Phase 3 本地验收为 45 个 Node 测试、252 个 Python 测试、lint、production build 与 Drizzle 再生成无漂移全部通过。Site secret 中已有受保护的 `OPENAI_API_KEY`，客户端代码和接口响应均不包含 key。
 
 ### A. 当前版本与验收锚点
 
 - Ivy Job Radar 生产 Site：`https://ivy-job-radar.rourou1199.chatgpt.site`
-- Autofill 0.4.11 的生产代码锚点是 Site version 137；后续只修改 handoff 的 checkpoint 会继续增加 Site version，但不代表扩展代码再次变化。
-- Chrome 扩展版本：`0.4.11`，弹窗顶部应显示 `AUTOFILL V4.11`。
+- Autofill 0.4.11 的历史生产代码锚点是 Site version 137；当前扩展已升级到 0.4.12。
+- Chrome 扩展版本：`0.4.12`，弹窗顶部应显示 `AUTOFILL V4.12`。
 - GitHub `XinyuIvy/ivy-job-radar@main` 的 0.4.11 同步提交：`28ffa555a475625550bb94add3b4c7534ca4633f`。
 - 全局自动填表资料：`XinyuIvy/CV@main:master/application-forms/application-autofill-profile.md`。
 - 期刊评级资料写入提交：`1fdc36caa9d9bd8282388c6fa44a50fd07ee7d97`。

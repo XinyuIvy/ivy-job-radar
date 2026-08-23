@@ -21,7 +21,7 @@ class CvKnowledgeBaseSourceTests(unittest.TestCase):
         self.assertIn('fact-master-fallback', route)
 
     def test_dashboard_is_linked_from_job_radar(self):
-        layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
+        layout = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         client = (ROOT / "app" / "cv-knowledge" / "cv-knowledge-client.tsx").read_text(encoding="utf-8")
         self.assertIn('href="/cv-knowledge"', layout)
         self.assertIn('CV 知识库', layout)

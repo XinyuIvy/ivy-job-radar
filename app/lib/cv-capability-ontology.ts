@@ -135,7 +135,10 @@ export function conceptsInText(text: string) {
 
 export function requirementConceptIds(requirement: Pick<JdRequirement, "label" | "literalTerms" | "normalizedConcepts">) {
   const text = [requirement.label, ...requirement.literalTerms, ...requirement.normalizedConcepts.map((value) => value.replace(/_/g, " "))].join(" ");
-  return conceptsInText(text);
+  return [...new Set([
+    ...requirement.normalizedConcepts.filter((value) => CV_CAPABILITY_CONCEPTS.has(value)),
+    ...conceptsInText(text),
+  ])];
 }
 
 export function relationBetween(from: string, to: string) {
@@ -151,10 +154,10 @@ export const CV_JD_RULES: RequirementRule[] = [
   { label: "Information science background", category: "Education", aliases: ["information science", "信息科学", "信息类专业", "AI、信息", "信息、数学"] },
   { label: "Mathematics background", category: "Education", aliases: ["mathematics", "math background", "数学专业", "数学背景", "信息、数学", "数学、统计"] },
   { label: "Automation background", category: "Education", aliases: ["automation", "自动化专业", "自动化背景", "统计、自动化"] },
-  { label: "STEM-related field", category: "Education", aliases: ["stem", "stem field", "related stem", "相关 STEM", "相关STEM", "理工科相关专业", "理工类专业"], projectTerms: ["biostatistics", "statistics", "数学统计相关专业"] },
-  { label: "Interdisciplinary background", category: "Collaboration", aliases: ["interdisciplinary", "cross-disciplinary", "交叉学科背景", "跨学科背景", "跨学科合作"], projectTerms: ["multidisciplinary", "clinical collaboration", "neuroimaging", "统计", "医学影像", "临床合作"] },
+  { label: "STEM-related field", category: "Education", aliases: ["stem", "stem field", "related stem", "相关 STEM", "相关STEM", "理工科相关专业", "理工类专业"], projectTerms: ["biostatistics", "statistics", "数学统计相关专业"], conceptIds: ["stem_field"] },
+  { label: "Interdisciplinary background", category: "Collaboration", aliases: ["interdisciplinary", "cross-disciplinary", "交叉学科背景", "跨学科背景", "跨学科合作"], projectTerms: ["multidisciplinary", "clinical collaboration", "neuroimaging", "统计", "医学影像", "临床合作"], conceptIds: ["interdisciplinary_research"] },
   { label: "STEM research domain", category: "Domain", aliases: ["stem research", "理工类科研领域", "理工类科研", "自然科学科研", "理工科科研"], projectTerms: ["neuroimaging", "biomedical", "医学影像", "神经影像", "生物医学"] },
-  { label: "Peer-reviewed publications", category: "Communication", aliases: ["peer-reviewed", "peer reviewed", "同行评议", "高水平期刊", "高水平学术期刊", "发表论文"], projectTerms: ["published", "journal article", "正式发表", "期刊论文"] },
+  { label: "Peer-reviewed publications", category: "Communication", aliases: ["peer-reviewed", "peer reviewed", "同行评议", "高水平期刊", "高水平学术期刊", "发表论文"], projectTerms: ["published", "journal article", "正式发表", "期刊论文"], conceptIds: ["peer_reviewed_publication"] },
   { label: "Python", category: "Programming and Data", aliases: ["python"] },
   { label: "PyTorch", category: "Programming and Data", aliases: ["pytorch"] },
   { label: "Reinforcement learning", category: "Methods", aliases: ["reinforcement learning", "强化学习", "rl"] },

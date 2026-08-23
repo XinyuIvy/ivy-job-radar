@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "../../../db";
 import { dataQualityChecks, ignoredJobs, jobs, savedJobs } from "../../../db/schema";
 import { bookmarkFingerprint } from "../../lib/bookmark-capture";
+import { scoreStoredJob } from "../../lib/job-scoring";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,15 @@ export async function POST(request: NextRequest) {
   const now = new Date().toISOString();
 
   if (action === "approve") {
+    const scoring = scoreStoredJob({
+      title: job.title,
+      content: job.description || job.evidence,
+      region: job.region,
+    });
     await db.update(jobs).set({
       status: "开放",
-      score: Math.max(job.score, 100),
+      score: scoring.score,
+      visa: scoring.visa,
       evidence: job.evidence
         ? `${job.evidence}；自动质检无法确认，由你人工复核后通过。`
         : "自动质检无法确认，由你人工复核后通过。",

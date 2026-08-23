@@ -147,6 +147,20 @@ async function readPrivateFile(path: string, token: string) {
   return decodeBase64Utf8(payload.content);
 }
 
+const PRIVATE_FILE_CACHE_TTL_MS = 5 * 60 * 1000;
+const privateFileCache = new Map<string, { expiresAt: number; promise: Promise<string> }>();
+
+function readPrivateFileCached(path: string, token: string) {
+  const cached = privateFileCache.get(path);
+  if (cached && cached.expiresAt > Date.now()) return cached.promise;
+  const promise = readPrivateFile(path, token).catch((error) => {
+    privateFileCache.delete(path);
+    throw error;
+  });
+  privateFileCache.set(path, { expiresAt: Date.now() + PRIVATE_FILE_CACHE_TTL_MS, promise });
+  return promise;
+}
+
 function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrack): SupportEvidence | null {
   if (candidate.classification === "No Evidence") return null;
   const fact = candidate.fact;
@@ -377,15 +391,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const [template, factIndexJsonl, statusAddendumJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl, conferenceIndexJsonl] = await Promise.all([
-      readPrivateFile(`master/template-cv/${templateFile}`, token),
-      readPrivateFile("master/project-evidence/FACT_INDEX.jsonl", token),
-      readPrivateFile("master/project-evidence/FACT_INDEX_STATUS_ADDENDUM.jsonl", token),
-      readPrivateFile("master/project-evidence/CONCEPT_EDGES.jsonl", token),
-      readPrivateFile("master/project-evidence/CREDENTIAL_INDEX.jsonl", token),
-      readPrivateFile("master/project-evidence/COURSEWORK_INDEX.jsonl", token),
-      readPrivateFile("master/project-evidence/PROFILE_INDEX.jsonl", token),
-      readPrivateFile("master/project-evidence/LITERATURE_INDEX.jsonl", token),
-      readPrivateFile("master/project-evidence/CONFERENCE_INDEX.jsonl", token),
+      readPrivateFileCached(`master/template-cv/${templateFile}`, token),
+      readPrivateFileCached("master/project-evidence/FACT_INDEX.jsonl", token),
+      readPrivateFileCached("master/project-evidence/FACT_INDEX_STATUS_ADDENDUM.jsonl", token),
+      readPrivateFileCached("master/project-evidence/CONCEPT_EDGES.jsonl", token),
+      readPrivateFileCached("master/project-evidence/CREDENTIAL_INDEX.jsonl", token),
+      readPrivateFileCached("master/project-evidence/COURSEWORK_INDEX.jsonl", token),
+      readPrivateFileCached("master/project-evidence/PROFILE_INDEX.jsonl", token),
+      readPrivateFileCached("master/project-evidence/LITERATURE_INDEX.jsonl", token),
+      readPrivateFileCached("master/project-evidence/CONFERENCE_INDEX.jsonl", token),
     ]);
 
     const unifiedFactIndex = [

@@ -13,6 +13,9 @@ class CvPrebuildPhase2SourceTests(unittest.TestCase):
         self.assertIn('code: "JOB_NOT_SAVED"', route)
         self.assertIn('code: "JD_REQUIRED"', route)
         self.assertIn("activeJobStatuses.has(job.status)", route)
+        self.assertIn("extractCoreJobDescription(job.description).text", route)
+        self.assertIn("body.templateTrack", route)
+        self.assertIn("recommendCvPrebuildTemplate(jobInput, selectedTrack, selectedLanguage)", route)
 
     def test_bundle_freezes_one_cv_commit_and_does_not_create_an_application(self):
         route = (ROOT / "app" / "api" / "cv-prebuild" / "prepare" / "route.ts").read_text(encoding="utf-8")
@@ -38,10 +41,15 @@ class CvPrebuildPhase2SourceTests(unittest.TestCase):
             self.assertIn(field, bundle)
         self.assertIn("ON CONFLICT(generation_key) DO NOTHING", (ROOT / "app" / "lib" / "cv-prebuild-store.ts").read_text(encoding="utf-8"))
 
-    def test_phase_two_never_calls_an_agent_or_exposes_a_private_bundle_url(self):
+    def test_phase_three_starts_the_responses_prebuilder_without_exposing_private_ids(self):
         route = (ROOT / "app" / "api" / "cv-prebuild" / "prepare" / "route.ts").read_text(encoding="utf-8")
+        helper = (ROOT / "app" / "lib" / "openai-cv-prebuilder.ts").read_text(encoding="utf-8")
         self.assertNotIn("api.openai.com", route)
+        self.assertIn("startInitialCvResponse", route)
+        self.assertIn("/v1/responses", helper)
+        self.assertIn('background: true', helper)
         self.assertNotIn("conversation_url", route)
+        self.assertNotIn("openaiResponseId:", route)
         self.assertNotIn("repositoryUrl", route)
         self.assertNotIn("bundlePath:", route)
 

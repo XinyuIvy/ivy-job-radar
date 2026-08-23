@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../../db";
 import { applications, jobs } from "../../../../db/schema";
+import { extractCoreJobDescription } from "../../../lib/job-description";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
     region: application.region,
     location: application.location,
     jobUrl: application.jobUrl,
-    jd: job?.description || "",
+    jd: extractCoreJobDescription(job?.description || "").text,
     resumeVersion: application.resumeVersion,
     applicationStatus: application.status,
   });

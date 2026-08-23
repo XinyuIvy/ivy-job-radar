@@ -100,8 +100,13 @@ function linkedFactIds(text: string, entityId: string, facts: FactIndexRecord[],
   if (entityId) facts.filter((fact) => fact.project_id === entityId).forEach((fact) => result.add(fact.fact_id));
   for (const record of structured) {
     const needles = [record.verified_fact, record.field ?? "", record.course ?? "", record.skill ?? "", record.title ?? "", record.institution ?? ""].filter(Boolean);
+    const normalizedText = normalized(text);
+    const exactContainment = needles.some((needle) => {
+      const normalizedNeedle = normalized(needle);
+      return normalizedNeedle.length >= 8 && (normalizedText.includes(normalizedNeedle) || normalizedNeedle.includes(normalizedText));
+    });
     const best = Math.max(...needles.map((needle) => similarity(text, needle)), 0);
-    if (best >= 0.58) result.add(record.fact_id);
+    if (exactContainment || best >= 0.58) result.add(record.fact_id);
   }
   return [...result];
 }

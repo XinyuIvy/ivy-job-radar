@@ -58,6 +58,18 @@ class TestD1Database {
         prompt_version TEXT NOT NULL DEFAULT '',
         agent_trigger_run_id TEXT NOT NULL DEFAULT '',
         conversation_url TEXT NOT NULL DEFAULT '',
+        openai_conversation_id TEXT NOT NULL DEFAULT '',
+        openai_response_id TEXT NOT NULL DEFAULT '',
+        openai_container_id TEXT NOT NULL DEFAULT '',
+        model TEXT NOT NULL DEFAULT '',
+        service_tier TEXT NOT NULL DEFAULT '',
+        draft_tex_key TEXT NOT NULL DEFAULT '',
+        draft_pdf_key TEXT NOT NULL DEFAULT '',
+        draft_text_key TEXT NOT NULL DEFAULT '',
+        review_key TEXT NOT NULL DEFAULT '',
+        input_tokens INTEGER NOT NULL DEFAULT 0,
+        cached_input_tokens INTEGER NOT NULL DEFAULT 0,
+        output_tokens INTEGER NOT NULL DEFAULT 0,
         attempts INTEGER NOT NULL DEFAULT 0,
         last_error TEXT NOT NULL DEFAULT '',
         created_at TEXT NOT NULL,
@@ -68,6 +80,18 @@ class TestD1Database {
         ON cv_prebuild_jobs (generation_key);
       CREATE UNIQUE INDEX cv_prebuild_jobs_pending_job_unique
         ON cv_prebuild_jobs (job_id) WHERE generation_key IS NULL;
+      CREATE TABLE cv_prebuild_messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        cv_prebuild_job_id INTEGER NOT NULL,
+        role TEXT NOT NULL,
+        content TEXT NOT NULL DEFAULT '',
+        openai_response_id TEXT,
+        status TEXT NOT NULL DEFAULT 'completed',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE UNIQUE INDEX cv_prebuild_messages_response_unique
+        ON cv_prebuild_messages (openai_response_id);
       INSERT INTO jobs (id, description, region, track) VALUES
         (1, '', '美国', 'Technology'),
         (2, 'Complete role description', '中国', 'Pharma');
@@ -93,8 +117,12 @@ const {
   beginCvPrebuildGeneration,
   cancelCvPrebuildJob,
   completeCvPrebuildBundle,
+  completeAssistantMessage,
+  ensurePendingAssistantMessage,
   getLatestCvPrebuildJob,
   initializeCvPrebuildJob,
+  listCvPrebuildMessages,
+  startCvPrebuildRun,
 } = await vite.ssrLoadModule("/app/lib/cv-prebuild-store.ts");
 const {
   cvPrebuildStatusView,
@@ -246,6 +274,24 @@ test("all Phase 1 terminal and blocked states have a visible badge", () => {
   ]) {
     assert.match(cvPrebuildStatusView(status).label, /^CV 预生成：/);
   }
+});
+
+test("Phase 3 stores one durable conversation and ordered messages per job", async () => {
+  const row = await startCvPrebuildRun(database, "a".repeat(64), {
+    conversationId: "conv_123",
+    responseId: "resp_123",
+    model: "gpt-5.6-terra",
+    serviceTier: "flex",
+    now: "2026-08-22T22:17:00.000Z",
+  });
+  await ensurePendingAssistantMessage(database, row.id, "resp_123", "2026-08-22T22:17:00.000Z");
+  await completeAssistantMessage(database, "resp_123", "Draft ready", "2026-08-22T22:18:00.000Z");
+  const messages = await listCvPrebuildMessages(database, row.id);
+  assert.equal(row.openaiConversationId, "conv_123");
+  assert.equal(row.openaiResponseId, "resp_123");
+  assert.deepEqual(messages.map((message) => ({ role: message.role, content: message.content, status: message.status })), [
+    { role: "assistant", content: "Draft ready", status: "completed" },
+  ]);
 });
 
 test("deleting a saved job persists and repeated deletion is safe", async () => {

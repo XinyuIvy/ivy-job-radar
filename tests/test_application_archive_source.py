@@ -48,12 +48,87 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             self.assertIn(phrase, helper)
         self.assertIn("automatic_tex_generation_authorized: false", helper)
 
+    def test_prompt_runs_role_aligned_internal_review_before_one_confirmation(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "一次任务内部连续完成的多轮审校协议",
+            "岗位角色画像与学术权重判断",
+            "研究/学术产出导向",
+            "应用/业务交付导向",
+            "角色画像对齐后的风格重写",
+            "只有完成岗位角色画像和风格对齐后，才进行中文语言审校",
+            "完成后只等待我进行一次最终确认",
+        ]:
+            self.assertIn(phrase, helper)
+
+    def test_prompt_selects_publications_by_role_and_preserves_nine_presentations(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "论文和学术材料不得机械地每份 CV 都放同样数量",
+            "高水平论文、科研能力、论文写作、文献复现、学术影响力",
+            "在审、返修或预印本不得写成已发表论文",
+            "以第一作者身份在九个学术会议作报告",
+            "不得把九个改写成七个或其他数量",
+        ]:
+            self.assertIn(phrase, helper)
+
+    def test_prompt_structures_industry_research_and_applied_work(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "禁止把所有经历和项目塞进一个“项目经历”或“代表性项目”section",
+            "行业经历或实习经历必须独立成节",
+            "研究型项目必须单独成节",
+            "应用型项目必须单独成节",
+            "至少要把研究型项目与应用型项目分成两个不同的项目 section",
+            "行业/实习经历另设独立 section",
+            "每个项目只能出现一次",
+            "仍被平铺在同一 section，直接判定为不合格",
+        ]:
+            self.assertIn(phrase, helper)
+
+    def test_prompt_compiles_and_checks_pdf_page_count_and_density(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "本地 TeX、PDF 页数与页面密度验证",
+            "pdfinfo",
+            "实际 PDF 页数",
+            "尽量接近但不挤满 2 页",
+            "不超过 2 个物理页面",
+            "不要把 1.5 页当成理想目标",
+            "不得加入弱相关内容机械凑页数",
+            "只写年份即视为不合格",
+        ]:
+            self.assertIn(phrase, helper)
+
     def test_prompt_freezes_authoritative_cv_display_rules(self):
         helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
         self.assertIn("master/project-evidence/CV_DISPLAY_RULES.yaml", helper)
         self.assertIn("cv_display_rules_snapshot.yaml", helper)
         self.assertIn("用户确认的权威 CV 展示边界", helper)
         self.assertIn("不得因为 JD 关键词", helper)
+
+    def test_prompt_embeds_current_chinese_cv_display_contract(self):
+        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        for phrase in [
+            "Summary / 个人简介必须明确写出“博士候选人”",
+            "个人简介中不得出现“范德堡大学”或 Vanderbilt University",
+            "学校只保留在教育背景中",
+            "YYYY 年 M 月 - YYYY 年 M 月",
+            "2026 年 5 月 - 2026 年 8 月",
+            "YYYY 年 M 月 - 至今",
+            "若事实材料无法核验任一月份，必须停止并向我确认",
+            "波士顿，美国",
+            r"禁止写成 \`美国波士顿\`",
+            "括号内英文首字母大写",
+            "脑区皮层厚度",
+            "不得单独写“皮层”",
+        ]:
+            self.assertIn(phrase, helper)
+        for forbidden in [
+            "以下三条是用户确认的长期硬规则",
+            "用于补充上面三条长期硬规则",
+        ]:
+            self.assertNotIn(forbidden, helper)
 
     def test_selected_template_language_is_an_explicit_prompt_authority(self):
         helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
@@ -148,7 +223,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "${confirmedFullJd}",
             "如果 GitHub/connector 返回内容被截断，继续分段读取直到 EOF",
             "绝对不能替代完整 JD",
-            "不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配",
+            r"不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配",
             "完整 JD 的全部主要板块",
         ]:
             self.assertIn(phrase, helper)
@@ -166,7 +241,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
         route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
         self.assertIn("jdOverride?: string", route)
-        self.assertIn("const jd = jdOverride || job?.description?.trim() || \"\"", route)
+        self.assertIn('const jd = jdOverride || extractCoreJobDescription(job?.description || "").text', route)
         self.assertIn('type Stage = "loading" | "review"', client)
         self.assertIn("确认并编辑完整 JD", client)
         self.assertIn("确认母版与 JD 并生成申请档案", client)

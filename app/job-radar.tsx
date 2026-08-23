@@ -1,15 +1,36 @@
 "use client";
 
-import { FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import companyPool from "./company-pool.json";
 import companyPoolAdditions from "./company-pool-additions.json";
 import { companyCollectionMode, companySourceSearchUrl, findCompanySource } from "./lib/company-sources";
-import { cvPrebuildStatusView, type CvPrebuildStatus } from "./lib/cv-prebuild-status";
+import {
+  cvPrebuildStatusView,
+  cvPrebuildSummaryBucket,
+  type CvPrebuildStatus,
+} from "./lib/cv-prebuild-status";
+import {
+  CV_GENERATION_RULES_MAX_LENGTH,
+  DEFAULT_CV_GENERATION_RULES,
+} from "./lib/cv-generation-rules";
+import {
+  emptyFixedApplicationProfile,
+  type FixedApplicationProfile,
+} from "./lib/application-profile";
 import { sameLogicalJob } from "./lib/job-identity";
-import PendingApplicationFitScores from "./pending-application-fit-scores";
+import CandidateFactFitScores from "./pending-application-fit-scores";
 
 const completeCompanyPool = [...companyPool, ...companyPoolAdditions];
+const activeCvPrebuildStatuses = new Set<CvPrebuildStatus>([
+  "preparing_bundle",
+  "agent_queued",
+  "agent_running",
+]);
+const MAX_AUTOMATIC_CV_ATTEMPTS = 2;
+const CV_GENERATION_RULES_STORAGE_KEY = "ivy-job-radar:cv-generation-rules:v1";
+const CV_TEMPLATE_LANGUAGE_STORAGE_KEY = "ivy-job-radar:cv-template-language:v1";
+const PENDING_CV_FAVORITES_STORAGE_KEY = "ivy-job-radar:pending-cv-favorites:v1";
 
 type Job = {
   id: number;
@@ -34,7 +55,18 @@ type Job = {
   checkedAt: string;
   saved?: boolean;
   cvPrebuildStatus?: CvPrebuildStatus | null;
+  cvPrebuildError?: string;
+  cvPrebuildUpdatedAt?: string;
+  cvPrebuildAttempts?: number;
 };
+
+function canAutomaticallyRetryCv(job: Job) {
+  if (job.cvPrebuildStatus !== "failed_retryable") return false;
+  const attempts = job.cvPrebuildAttempts ?? 0;
+  if (attempts < 1 || attempts >= MAX_AUTOMATIC_CV_ATTEMPTS) return false;
+  return job.cvPrebuildError === "OPENAI_FAILED"
+    || /server_is_overloaded|rate_limit_exceeded|server_error/i.test(job.cvPrebuildError ?? "");
+}
 
 function CvPrebuildStatusBadge({ status }: { status?: CvPrebuildStatus | null }) {
   const view = cvPrebuildStatusView(status);
@@ -70,6 +102,42 @@ type Application = {
   notes: string;
   updatedAt?: string;
 };
+
+type CvTemplateLanguage = "zh" | "en";
+type CvTemplateTrack = "tech" | "quant" | "consulting" | "pharma" | "clinical_neuro";
+
+const cvTemplateTrackOptions: Array<{ value: CvTemplateTrack; label: string }> = [
+  { value: "tech", label: "Tech / Data Science / Applied ML" },
+  { value: "quant", label: "Quantitative Research" },
+  { value: "consulting", label: "Consulting" },
+  { value: "pharma", label: "Healthcare / Pharma / Biostatistics" },
+  { value: "clinical_neuro", label: "Clinical Data / Neuro / Medical Device" },
+];
+
+const cvTemplateFiles: Record<CvTemplateLanguage, Record<CvTemplateTrack, string>> = {
+  zh: {
+    tech: "cv_tech_cn.tex",
+    quant: "cv_quant_cn.tex",
+    consulting: "cv_healthcare_consulting_cn.tex",
+    pharma: "cv_pharma_cn.tex",
+    clinical_neuro: "cv_clinical_data_neuro_cn.tex",
+  },
+  en: {
+    tech: "cv_tech.tex",
+    quant: "cv_quant.tex",
+    consulting: "cv_healthcare_consulting.tex",
+    pharma: "cv_pharma.tex",
+    clinical_neuro: "cv_pharma.tex",
+  },
+};
+
+function recommendCvTemplateTrack(input: Pick<Job | Application, "title" | "track">): CvTemplateTrack {
+  const signal = `${input.track} ${input.title}`.toLocaleLowerCase();
+  if (/quant|量化|定量|systematic/.test(signal)) return "quant";
+  if (/consult|咨询|strategy|战略/.test(signal)) return "consulting";
+  if (/pharma|biostat|clinical|epidemi|rwe|heor|healthcare|medical|neuro|brain|医药|医疗|生物统计|临床|流行病|神经|脑科学/.test(signal)) return "pharma";
+  return "tech";
+}
 
 type ApplicationTask = {
   id?: number;
@@ -268,25 +336,7 @@ type ChinaScanControl = {
 
 type UserProfile = {
   userEmail: string;
-  fullName: string;
-  location: string;
-  workAuthorization: string;
-  sponsorshipNeed: string;
-  education: string;
-  targetRoles: string;
-  targetIndustries: string;
-  professionalSummary: string;
-  skills: string[];
-};
-
-type ProfileResume = {
-  id: string;
-  label: string;
-  filename: string;
-  contentType: string;
-  size: number;
-  createdAt: string;
-  updatedAt: string;
+  applicationProfile: FixedApplicationProfile;
 };
 
 type ApplicationAnalytics = {
@@ -375,6 +425,7 @@ const NAVIGATION_STORAGE_KEY = "ivy-job-radar:navigation-state:v2";
 const PENDING_CHANNEL_NAME = "ivy-job-radar-updates";
 const PENDING_STORAGE_KEY = "ivy-job-radar:last-pending-created";
 type ApplicationBucket = "submitted" | "interview" | "offer" | "rejected";
+type CandidateBucket = "favorites" | "pending";
 const emptyApplication: Application = {
   company: "",
   title: "",
@@ -413,15 +464,7 @@ const emptyRequest: JobRequest = {
 
 const emptyProfile: UserProfile = {
   userEmail: "",
-  fullName: "",
-  location: "",
-  workAuthorization: "",
-  sponsorshipNeed: "",
-  education: "",
-  targetRoles: "",
-  targetIndustries: "",
-  professionalSummary: "",
-  skills: [],
+  applicationProfile: emptyFixedApplicationProfile,
 };
 
 const emptyContact: Contact = {
@@ -453,6 +496,17 @@ function sameCompany(left: string, right: string) {
   const a = normalizeCompanyName(left);
   const b = normalizeCompanyName(right);
   return Boolean(a && b && (a === b || a.includes(b) || b.includes(a)));
+}
+
+function groupJobsByCompany(rows: Job[]) {
+  const groups = new Map<string, Job[]>();
+  for (const row of rows) {
+    const key = normalizeCompanyName(row.company) || row.company.toLocaleLowerCase().trim();
+    const group = groups.get(key);
+    if (group) group.push(row);
+    else groups.set(key, [row]);
+  }
+  return [...groups.values()].flat();
 }
 
 function experienceSearchUrl(item: InterviewExperience) {
@@ -569,11 +623,6 @@ function formatDuration(totalSeconds: number) {
     : `${minutes}分 ${String(seconds).padStart(2, "0")}秒`;
 }
 
-function formatFileSize(bytes: number) {
-  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 function deadlineLabel(deadline: string, type: string) {
   if (type === "rolling") return "滚动招聘，建议尽早申请";
   if (deadline) return deadline;
@@ -589,6 +638,26 @@ function savedApplicationMatchesJob(application: Application, job: Job) {
   if (application.jobUrl && job.jobUrl && application.jobUrl === job.jobUrl) return true;
   return normalizeCompanyName(application.company) === normalizeCompanyName(job.company)
     && normalizeSavedIdentity(application.title) === normalizeSavedIdentity(job.title);
+}
+
+function applicationHidesFavorite(application: Application, job: Job) {
+  return application.status !== "收藏" && savedApplicationMatchesJob(application, job);
+}
+
+function applicationHidesToday(application: Application, job: Job) {
+  return !["撤回", "拒绝"].includes(application.status) && savedApplicationMatchesJob(application, job);
+}
+
+function updatePendingCvFavorite(jobId: number, pending: boolean) {
+  try {
+    const current = JSON.parse(window.localStorage.getItem(PENDING_CV_FAVORITES_STORAGE_KEY) || "[]") as unknown[];
+    const ids = new Set(current.map(Number).filter(Number.isSafeInteger));
+    if (pending) ids.add(jobId);
+    else ids.delete(jobId);
+    window.localStorage.setItem(PENDING_CV_FAVORITES_STORAGE_KEY, JSON.stringify([...ids]));
+  } catch {
+    // Recovery remains available from the server-side recent-job heuristic.
+  }
 }
 
 
@@ -625,8 +694,22 @@ export default function JobRadar() {
   const [jobQuery, setJobQuery] = useState("");
   const deferredJobQuery = useDeferredValue(jobQuery);
   const [saved, setSaved] = useState<number[]>([]);
+  const [cvGenerationRules, setCvGenerationRules] = useState(DEFAULT_CV_GENERATION_RULES);
+  const [cvRulesOpen, setCvRulesOpen] = useState(false);
+  const [cvAutomationNotice, setCvAutomationNotice] = useState("");
+  const [cvRecoveryCandidates, setCvRecoveryCandidates] = useState<Job[]>([]);
+  const [cvRecoverySelected, setCvRecoverySelected] = useState<number[]>([]);
+  const [cvRecoveryRunning, setCvRecoveryRunning] = useState(false);
+  const [candidateBucket, setCandidateBucket] = useState<CandidateBucket>("favorites");
+  const [candidateMovingId, setCandidateMovingId] = useState<number | null>(null);
+  const [pendingCvSelection, setPendingCvSelection] = useState<{
+    job: Job;
+    language: CvTemplateLanguage;
+    track: CvTemplateTrack;
+  } | null>(null);
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
   const [dailyJobs, setDailyJobs] = useState<Job[]>([]);
+  const [cvTasks, setCvTasks] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState("");
   const [jobsReloadToken, setJobsReloadToken] = useState(0);
@@ -658,17 +741,17 @@ export default function JobRadar() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
-  const [skillDraft, setSkillDraft] = useState("");
-  const [profileResumes, setProfileResumes] = useState<ProfileResume[]>([]);
-  const [resumeLabel, setResumeLabel] = useState("");
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeUploading, setResumeUploading] = useState(false);
-  const [resumeInputKey, setResumeInputKey] = useState(0);
   const [analytics, setAnalytics] = useState<ApplicationAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
   const [jobPage, setJobPage] = useState(1);
   const [companyPage, setCompanyPage] = useState(1);
   const [applicationPage, setApplicationPage] = useState(1);
+  useEffect(() => {
+    const storedRules = window.localStorage.getItem(CV_GENERATION_RULES_STORAGE_KEY)?.trim();
+    if (!storedRules) return;
+    const timer = window.setTimeout(() => setCvGenerationRules(storedRules), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   const [savedPage, setSavedPage] = useState(1);
   const [quality, setQuality] = useState<DataQuality | null>(null);
   const [qualityLoading, setQualityLoading] = useState(false);
@@ -692,6 +775,8 @@ export default function JobRadar() {
   const [scanPanelOpen, setScanPanelOpen] = useState(false);
   const [hardRequirementOpen, setHardRequirementOpen] = useState(false);
   const navigationReady = useRef(false);
+  const automaticQueueRef = useRef<Set<number>>(new Set());
+  const automaticCvJobRef = useRef<number | null>(null);
   const scrollByView = useRef<Partial<Record<View, number>>>({});
 
   useEffect(() => {
@@ -701,6 +786,7 @@ export default function JobRadar() {
       region?: string;
       jobSort?: (typeof sortOptions)[number]["value"];
       jobQuery?: string;
+      candidateBucket?: CandidateBucket;
       applicationBucket?: ApplicationBucket;
       jobPage?: number;
       companyPage?: number;
@@ -719,6 +805,7 @@ export default function JobRadar() {
       if (stored.region) setRegion(stored.region);
       if (stored.jobSort) setJobSort(stored.jobSort);
       if (typeof stored.jobQuery === "string") setJobQuery(stored.jobQuery);
+      if (stored.candidateBucket) setCandidateBucket(stored.candidateBucket);
       if (stored.applicationBucket) setApplicationBucket(stored.applicationBucket);
       if (stored.jobPage) setJobPage(stored.jobPage);
       if (stored.companyPage) setCompanyPage(stored.companyPage);
@@ -738,6 +825,7 @@ export default function JobRadar() {
       region,
       jobSort,
       jobQuery,
+      candidateBucket,
       applicationBucket,
       jobPage,
       companyPage,
@@ -745,7 +833,7 @@ export default function JobRadar() {
       savedPage,
       scrollByView: scrollByView.current,
     }));
-  }, [view, track, region, jobSort, jobQuery, applicationBucket, jobPage, companyPage, applicationPage, savedPage]);
+  }, [view, track, region, jobSort, jobQuery, candidateBucket, applicationBucket, jobPage, companyPage, applicationPage, savedPage]);
 
   useEffect(() => {
     let scrollTimer = 0;
@@ -1080,15 +1168,9 @@ export default function JobRadar() {
   const loadProfile = async () => {
     setProfileLoading(true);
     setProfileMessage("");
-    const [profileResponse, resumesResponse] = await Promise.all([
-      fetch("/api/profile", { cache: "no-store" }),
-      fetch("/api/profile/resumes", { cache: "no-store" }),
-    ]);
+    const profileResponse = await fetch("/api/profile", { cache: "no-store" });
     if (profileResponse.ok) setProfile(await profileResponse.json());
-    if (resumesResponse.ok) setProfileResumes(await resumesResponse.json());
-    if (!profileResponse.ok || !resumesResponse.ok) {
-      setProfileMessage("个人资料读取失败，请重新登录后再试。");
-    }
+    if (!profileResponse.ok) setProfileMessage("申请固定资料读取失败，请重新登录后再试。");
     setProfileLoading(false);
   };
 
@@ -1113,53 +1195,17 @@ export default function JobRadar() {
       return;
     }
     setProfile(await response.json());
-    setProfileMessage("个人资料和技能清单已保存。");
+    setProfileMessage("申请固定资料已保存，Autofill 下次运行时会自动读取最新版。");
   };
 
-  const addSkill = () => {
-    const skill = skillDraft.trim();
-    if (!skill) return;
+  const updateFixedProfileSection = <K extends keyof FixedApplicationProfile,>(
+    key: K,
+    value: FixedApplicationProfile[K],
+  ) => {
     setProfile((current) => ({
       ...current,
-      skills: current.skills.some((item) => item.toLowerCase() === skill.toLowerCase())
-        ? current.skills
-        : [...current.skills, skill],
+      applicationProfile: { ...current.applicationProfile, [key]: value },
     }));
-    setSkillDraft("");
-  };
-
-  const uploadResume = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!resumeFile || !resumeLabel.trim()) return;
-    setResumeUploading(true);
-    setProfileMessage("");
-    const body = new FormData();
-    body.set("label", resumeLabel.trim());
-    body.set("file", resumeFile);
-    const response = await fetch("/api/profile/resumes", { method: "POST", body });
-    setResumeUploading(false);
-    if (!response.ok) {
-      const result = await response.json().catch(() => ({}));
-      setProfileMessage(result.error || "CV 上传失败，请稍后重试。");
-      return;
-    }
-    setResumeLabel("");
-    setResumeFile(null);
-    setResumeInputKey((current) => current + 1);
-    setProfileMessage("基础 CV 已安全保存。");
-    const resumesResponse = await fetch("/api/profile/resumes", { cache: "no-store" });
-    if (resumesResponse.ok) setProfileResumes(await resumesResponse.json());
-  };
-
-  const deleteResume = async (resume: ProfileResume) => {
-    if (!window.confirm(`确定删除“${resume.label}”吗？`)) return;
-    const response = await fetch(`/api/profile/resumes?id=${encodeURIComponent(resume.id)}`, { method: "DELETE" });
-    if (!response.ok) {
-      setProfileMessage("CV 删除失败，请稍后重试。");
-      return;
-    }
-    setProfileResumes((current) => current.filter((item) => item.id !== resume.id));
-    setProfileMessage("基础 CV 已删除。");
   };
 
   const refreshJobs = async () => {
@@ -1270,6 +1316,118 @@ export default function JobRadar() {
     };
   }, [jobsReloadToken]);
 
+  useEffect(() => {
+    let active = true;
+    fetch("/api/cv-prebuild/recovery", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : [])
+      .then((rows: Job[]) => {
+        if (!active) return;
+        let pendingIds: number[] = [];
+        try {
+          pendingIds = (JSON.parse(window.localStorage.getItem(PENDING_CV_FAVORITES_STORAGE_KEY) || "[]") as unknown[])
+            .map(Number)
+            .filter(Number.isSafeInteger);
+        } catch {}
+        const ordered = [...rows].sort((left, right) =>
+          Number(pendingIds.includes(right.id)) - Number(pendingIds.includes(left.id)) || right.id - left.id);
+        setCvRecoveryCandidates(ordered);
+        setCvRecoverySelected(ordered.map((job) => job.id));
+      });
+    return () => {
+      active = false;
+    };
+  }, [jobsReloadToken]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/cv-prebuild/tasks", { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`CV task request failed with ${response.status}`);
+        return response.json();
+      })
+      .then((rows: Job[]) => {
+        if (active) setCvTasks(rows);
+      })
+      .catch(() => {
+        if (active) setCvTasks([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [jobsReloadToken]);
+
+  const activeCvJobKey = useMemo(() => {
+    const jobIds = new Set<number>();
+    for (const job of cvTasks) {
+      if (job.cvPrebuildStatus && activeCvPrebuildStatuses.has(job.cvPrebuildStatus)) {
+        jobIds.add(job.id);
+      }
+    }
+    return [...jobIds].sort((left, right) => left - right).join(",");
+  }, [cvTasks]);
+
+  useEffect(() => {
+    if (view !== "saved" || !activeCvJobKey) return;
+    const jobIds = activeCvJobKey.split(",").map(Number).filter(Number.isSafeInteger);
+    let active = true;
+    const refreshCvStatuses = async () => {
+      const results = await Promise.all(jobIds.map(async (jobId) => {
+        try {
+          const response = await fetch(`/api/cv-prebuild/status?jobId=${jobId}`, { cache: "no-store" });
+          if (!response.ok) return null;
+          const payload = await response.json() as {
+            prebuild?: { status?: CvPrebuildStatus; errorCode?: string; attempts?: number } | null;
+          };
+          return payload.prebuild?.status
+            ? {
+              jobId,
+              status: payload.prebuild.status,
+              errorCode: payload.prebuild.errorCode ?? "",
+              attempts: payload.prebuild.attempts ?? 0,
+            }
+            : null;
+        } catch {
+          return null;
+        }
+      }));
+      if (!active) return;
+      const statusByJobId = new Map(results.filter((result): result is {
+        jobId: number;
+        status: CvPrebuildStatus;
+        errorCode: string;
+        attempts: number;
+      } => Boolean(result))
+        .map((result) => [result.jobId, result.status]));
+      if (!statusByJobId.size) return;
+      setDailyJobs((current) => current.map((job) => {
+        const status = statusByJobId.get(job.id);
+        return status && status !== job.cvPrebuildStatus ? { ...job, cvPrebuildStatus: status } : job;
+      }));
+      setCvTasks((current) => current.map((job) => {
+        const result = results.find((item) => item?.jobId === job.id);
+        return result && (
+          result.status !== job.cvPrebuildStatus
+          || result.errorCode !== job.cvPrebuildError
+          || result.attempts !== job.cvPrebuildAttempts
+        )
+          ? {
+            ...job,
+            cvPrebuildStatus: result.status,
+            cvPrebuildError: result.errorCode,
+            cvPrebuildAttempts: result.attempts,
+          }
+          : job;
+      }));
+    };
+    const initialTimer = window.setTimeout(() => void refreshCvStatuses(), 0);
+    const statusTimer = window.setInterval(() => void refreshCvStatuses(), 5000);
+    return () => {
+      active = false;
+      window.clearTimeout(initialTimer);
+      window.clearInterval(statusTimer);
+    };
+  }, [view, activeCvJobKey]);
+
   const loadRequests = async () => {
     const response = await fetch("/api/job-requests", { cache: "no-store" });
     if (response.ok) setRequests(await response.json());
@@ -1293,7 +1451,12 @@ export default function JobRadar() {
       const normalizedQuery = deferredJobQuery.trim().toLowerCase();
       const filtered = dailyJobs.filter(
         (job) =>
-          (view !== "today" || !["已过期", "疑似过期"].includes(job.status)) &&
+          (view !== "today" || (
+            !["已过期", "疑似过期"].includes(job.status)
+            && !job.saved
+            && !saved.includes(job.id)
+            && !applicationsList.some((application) => applicationHidesToday(application, job))
+          )) &&
           (track === "全部" || job.track === track) &&
           (region === "全部地区" || job.region === region) &&
           (view !== "saved" || saved.includes(job.id)) &&
@@ -1320,7 +1483,7 @@ export default function JobRadar() {
         return b.score - a.score || newestFirst;
       });
     },
-    [dailyJobs, track, region, saved, view, jobSort, deferredJobQuery],
+    [dailyJobs, track, region, saved, applicationsList, view, jobSort, deferredJobQuery],
   );
 
   useEffect(() => {
@@ -1412,54 +1575,44 @@ export default function JobRadar() {
   useEffect(() => {
     const timer = window.setTimeout(() => setSavedPage(1), 0);
     return () => window.clearTimeout(timer);
-  }, [track, region, jobSort, jobQuery, saved, applicationsList]);
+  }, [saved, applicationsList, candidateBucket]);
   const applicationPageCount = Math.max(1, Math.ceil(visibleApplications.length / APPLICATION_PAGE_SIZE));
   const safeApplicationPage = Math.min(applicationPage, applicationPageCount);
   const pagedApplications = visibleApplications.slice((safeApplicationPage - 1) * APPLICATION_PAGE_SIZE, safeApplicationPage * APPLICATION_PAGE_SIZE);
-  const normalizedSavedQuery = deferredJobQuery.trim().toLocaleLowerCase();
-  const filteredPendingApplications = pendingApplications.filter((application) =>
-    (track === "全部" || application.track === track)
-    && (region === "全部地区" || application.region === region)
-    && (!normalizedSavedQuery || [
-      application.title,
-      application.company,
-      application.location,
-      application.track,
-      application.source,
-    ].some((value) => String(value || "").toLocaleLowerCase().includes(normalizedSavedQuery))),
+  const allFavoriteJobs = dailyJobs.filter((job) =>
+    saved.includes(job.id)
+    && !applicationsList.some((application) => applicationHidesFavorite(application, job)),
   );
-  const savedOnlyJobs = (view === "saved" ? jobs : []).filter((job) =>
-    !pendingApplications.some((application) => savedApplicationMatchesJob(application, job)),
-  );
-  const mergedSavedItems = [
-    ...filteredPendingApplications.map((application) => {
-      const sortAt = Date.parse(application.updatedAt || application.discoveredDate || "") || 0;
-      return {
-        kind: "application" as const,
-        application,
-        sortAt,
-        checkedAt: sortAt,
-        score: application.fit * 20,
-        priority: application.priority === "P1" ? 3 : application.priority === "P2" ? 2 : 1,
-      };
-    }),
-    ...savedOnlyJobs.map((job) => ({
-      kind: "job" as const,
-      job,
-      sortAt: Date.parse(job.discoveredAt) || 0,
-      checkedAt: Date.parse(job.checkedAt) || 0,
-      score: job.score,
-      priority: job.score >= 85 ? 3 : job.score >= 70 ? 2 : 1,
-    })),
-  ].sort((a, b) => {
-    if (jobSort === "newest") return b.sortAt - a.sortAt || b.score - a.score;
-    if (jobSort === "checked") return b.checkedAt - a.checkedAt || b.score - a.score;
-    if (jobSort === "priority") return b.priority - a.priority || b.sortAt - a.sortAt;
-    return b.score - a.score || b.sortAt - a.sortAt;
+  const savedOnlyJobs = view === "saved" ? allFavoriteJobs : [];
+  const pendingCvJobs = pendingApplications.flatMap((application) => {
+    const job = cvTasks.find((candidate) => savedApplicationMatchesJob(application, candidate))
+      ?? dailyJobs.find((candidate) => saved.includes(candidate.id) && savedApplicationMatchesJob(application, candidate));
+    return job ? [{ application, job }] : [];
   });
-  const savedPageCount = Math.max(1, Math.ceil(mergedSavedItems.length / APPLICATION_PAGE_SIZE));
+  const cvTaskJobs = pendingCvJobs
+    .map(({ job }) => job)
+    .filter((job, index, rows) => Boolean(job.cvPrebuildStatus) && rows.findIndex((candidate) => candidate.id === job.id) === index)
+    .sort((left, right) => {
+      const priority = { running: 4, queued: 3, ready: 2, needs_action: 1 };
+      const leftBucket = cvPrebuildSummaryBucket(left.cvPrebuildStatus);
+      const rightBucket = cvPrebuildSummaryBucket(right.cvPrebuildStatus);
+      return priority[rightBucket] - priority[leftBucket]
+        || (Date.parse(right.discoveredAt) || 0) - (Date.parse(left.discoveredAt) || 0);
+    });
+  const cvTaskSummary = cvTaskJobs.reduce((summary, job) => {
+    summary[cvPrebuildSummaryBucket(job.cvPrebuildStatus)] += 1;
+    return summary;
+  }, { queued: 0, running: 0, ready: 0, needs_action: 0 });
+  const candidateRows = candidateBucket === "favorites"
+    ? groupJobsByCompany(savedOnlyJobs).map((job) => ({ kind: "job" as const, job }))
+    : pendingApplications.map((application) => ({
+      kind: "application" as const,
+      application,
+      job: pendingCvJobs.find((row) => row.application.id === application.id)?.job,
+    }));
+  const savedPageCount = Math.max(1, Math.ceil(candidateRows.length / APPLICATION_PAGE_SIZE));
   const safeSavedPage = Math.min(savedPage, savedPageCount);
-  const pagedSavedItems = mergedSavedItems.slice((safeSavedPage - 1) * APPLICATION_PAGE_SIZE, safeSavedPage * APPLICATION_PAGE_SIZE);
+  const pagedCandidateRows = candidateRows.slice((safeSavedPage - 1) * APPLICATION_PAGE_SIZE, safeSavedPage * APPLICATION_PAGE_SIZE);
   useEffect(() => {
     if (view !== "saved") return;
     const frame = window.requestAnimationFrame(() => {
@@ -1467,13 +1620,6 @@ export default function JobRadar() {
     });
     return () => window.cancelAnimationFrame(frame);
   }, [view, safeSavedPage, applicationsList, saved]);
-  const expirationForApplication = (application: Application) => dailyJobs.find((job) =>
-    ["已过期", "疑似过期"].includes(job.status)
-      && ((application.applicationId && job.applicationId === application.applicationId)
-        || (application.jobUrl && job.jobUrl === application.jobUrl)
-        || (job.company.trim().toLowerCase() === application.company.trim().toLowerCase()
-          && job.title.trim().toLowerCase() === application.title.trim().toLowerCase())),
-  );
   const applicationById = new Map(applicationsList.filter((item) => item.id).map((item) => [item.id as number, item]));
   const pendingTasks = tasks
     .filter((task) => task.status === "pending")
@@ -1496,10 +1642,97 @@ export default function JobRadar() {
     ...contacts.filter((item) => item.nextFollowUpAt).map((item) => ({ date: item.nextFollowUpAt, type: "联系人跟进", title: `${item.name} · ${item.company}`, tone: "blue" })),
   ].filter((item) => item.date.startsWith(calendarMonth)).sort((a, b) => a.date.localeCompare(b.date));
 
+  const startCvPrebuild = useCallback(async (
+    id: number,
+    templateTrack?: CvTemplateTrack,
+    generationRules?: string,
+  ): Promise<{ status: CvPrebuildStatus; error?: string }> => {
+    setDailyJobs((current) => current.map((job) => job.id === id
+      ? { ...job, cvPrebuildStatus: "preparing_bundle" }
+      : job));
+    setCvTasks((current) => current.map((job) => job.id === id
+      ? { ...job, cvPrebuildStatus: "preparing_bundle", cvPrebuildError: "" }
+      : job));
+    try {
+      const response = await fetch("/api/cv-prebuild/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: id,
+          ...(templateTrack ? { templateTrack } : {}),
+          ...(generationRules ? { generationRules } : {}),
+        }),
+        keepalive: true,
+      });
+      const payload = await response.json() as { status?: CvPrebuildStatus; error?: string };
+      const status: CvPrebuildStatus = response.ok
+        ? payload.status ?? "agent_queued"
+        : response.status === 503 ? "blocked_configuration" : "failed_retryable";
+      setDailyJobs((current) => current.map((job) => job.id === id
+        ? { ...job, cvPrebuildStatus: status }
+        : job));
+      setCvTasks((current) => current.map((job) => job.id === id
+        ? { ...job, cvPrebuildStatus: status }
+        : job));
+      return response.ok
+        ? { status }
+        : {
+          status,
+          error: response.status === 503
+            ? "API 配置未完成，请检查设置后重试。"
+            : payload.error || "CV 初稿启动失败，请重试。",
+        };
+    } catch {
+      setDailyJobs((current) => current.map((job) => job.id === id
+        ? { ...job, cvPrebuildStatus: "failed_retryable" }
+        : job));
+      setCvTasks((current) => current.map((job) => job.id === id
+        ? { ...job, cvPrebuildStatus: "failed_retryable" }
+        : job));
+      return { status: "failed_retryable", error: "网络连接失败，请重试。" };
+    }
+  }, []);
+
+  const restoreCvFavorites = async () => {
+    if (!cvRecoverySelected.length || cvRecoveryRunning) return;
+    const selectedJobs = cvRecoveryCandidates.filter((job) => cvRecoverySelected.includes(job.id));
+    setCvRecoveryRunning(true);
+    setCvAutomationNotice(`正在恢复 ${selectedJobs.length} 个收藏，不调用生成 API…`);
+    const restored: number[] = [];
+    const failures: string[] = [];
+    for (const job of selectedJobs) {
+      try {
+        const response = await fetch("/api/saved-jobs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jobId: job.id }),
+        });
+        const payload = await response.json() as { created?: boolean; error?: string };
+        if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+        restored.push(job.id);
+        updatePendingCvFavorite(job.id, false);
+      } catch (error) {
+        failures.push(`${job.title}：${error instanceof Error ? error.message : "恢复失败"}`);
+      }
+    }
+    setCvRecoveryCandidates((current) => current.filter((job) => !restored.includes(job.id)));
+    setCvRecoverySelected((current) => current.filter((id) => !restored.includes(id)));
+    setJobsReloadToken((value) => value + 1);
+    setCvAutomationNotice(failures.length
+      ? `已恢复 ${restored.length} 个；${failures.length} 个失败：${failures.join("；")}`
+      : `已恢复 ${restored.length} 个收藏，没有调用生成 API。`);
+    setCvRecoveryRunning(false);
+  };
+
   const toggleSaved = async (id: number) => {
     const isSaved = saved.includes(id);
-    setSaved((current) => isSaved ? current.filter((item) => item !== id) : [...current, id]);
+    const savedSnapshot = saved;
+    setSaved((current) => isSaved
+      ? current.filter((item) => item !== id)
+      : current.includes(id) ? current : [...current, id]);
     setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: !isSaved } : job));
+    setCvAutomationNotice(isSaved ? "正在取消收藏…" : "正在保存到收藏…");
+    if (!isSaved) updatePendingCvFavorite(id, true);
     try {
       const response = await fetch(
         isSaved ? `/api/saved-jobs?jobId=${id}` : "/api/saved-jobs",
@@ -1510,17 +1743,169 @@ export default function JobRadar() {
         },
       );
       if (!response.ok) throw new Error(`Saved job request failed with ${response.status}`);
-      if (!isSaved) {
-        const payload = await response.json() as { prebuildStatus?: CvPrebuildStatus };
-        setDailyJobs((current) => current.map((job) => job.id === id
-          ? { ...job, cvPrebuildStatus: payload.prebuildStatus ?? job.cvPrebuildStatus }
-          : job));
+      if (isSaved) {
+        setCvTasks((current) => current.filter((job) => job.id !== id));
+        setCvAutomationNotice("已取消收藏。");
+      } else {
+        await response.json() as { created?: boolean };
+        updatePendingCvFavorite(id, false);
+        setCvAutomationNotice("已加入收藏。进入待申请后才会自动生成 CV。");
       }
+      setJobsReloadToken((value) => value + 1);
     } catch {
-      setSaved((current) => isSaved ? [...current, id] : current.filter((item) => item !== id));
+      setSaved(savedSnapshot);
       setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: isSaved } : job));
+      if (!isSaved) updatePendingCvFavorite(id, false);
+      setCvAutomationNotice(isSaved
+        ? "取消收藏失败，后台记录没有变化。"
+        : "收藏失败，后台记录没有变化，请稍后重试。");
     }
   };
+
+  const openPendingCvSelection = (job: Job) => {
+    let language: CvTemplateLanguage = "zh";
+    try {
+      if (window.localStorage.getItem(CV_TEMPLATE_LANGUAGE_STORAGE_KEY) === "en") language = "en";
+    } catch {}
+    setPendingCvSelection({ job, language, track: recommendCvTemplateTrack(job) });
+  };
+
+  const moveFavoriteToPending = async (
+    job: Job,
+    language: CvTemplateLanguage,
+    templateTrack: CvTemplateTrack,
+  ) => {
+    if (candidateMovingId) return;
+    setCandidateMovingId(job.id);
+    setCvAutomationNotice(`正在把 ${job.title} 移入待申请并创建 CV 任务…`);
+    try {
+      const applicationDraft: Application = {
+        ...emptyApplication,
+        company: job.company,
+        title: job.title,
+        region: job.region,
+        location: job.location,
+        track: job.track,
+        jobUrl: job.jobUrl,
+        applicationId: job.applicationId,
+        source: job.source,
+        fit: Math.max(1, Math.min(5, Math.round(job.score / 20))),
+        interest: algorithmInterest(job),
+        priority: algorithmPriority(job.score),
+        deadline: job.deadline || "",
+        deadlineType: job.deadlineType || "unknown",
+        deadlineSource: job.deadline || job.deadlineType === "rolling" ? "automatic" : "unknown",
+        workAuthorization: job.region === "美国" ? `Sponsorship：${job.visa}` : "中国工作资格",
+        notes: job.evidence,
+      };
+      const applicationResponse = await fetch("/api/applications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(applicationDraft),
+      });
+      let application = await applicationResponse.json() as Application & { error?: string };
+      if (!applicationResponse.ok || !application.id) {
+        throw new Error(application.error || "待申请记录创建失败。");
+      }
+      if (application.status === "收藏") {
+        const activationResponse = await fetch("/api/applications", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: application.id,
+            status: "准备材料",
+            nextAction: "准备申请材料",
+          }),
+        });
+        const activated = await activationResponse.json() as Application & { error?: string };
+        if (!activationResponse.ok || !activated.id) {
+          throw new Error(activated.error || "待申请记录恢复失败。");
+        }
+        application = activated;
+      }
+      setApplicationsList((current) => [
+        application,
+        ...current.filter((item) => item.id !== application.id),
+      ]);
+
+      const queueResponse = await fetch("/api/cv-prebuild/queue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: job.id,
+          applicationRowId: application.id,
+          language,
+          templateTrack,
+        }),
+      });
+      const queued = await queueResponse.json() as { status?: CvPrebuildStatus; error?: string };
+      if (!queueResponse.ok) throw new Error(queued.error || "CV 任务排队失败。");
+      const status = queued.status ?? "queued";
+      setCvTasks((current) => [
+        { ...job, saved: true, cvPrebuildStatus: status, cvPrebuildError: "" },
+        ...current.filter((item) => item.id !== job.id),
+      ]);
+      setCandidateBucket("pending");
+      window.localStorage.setItem(CV_TEMPLATE_LANGUAGE_STORAGE_KEY, language);
+      setPendingCvSelection(null);
+      setCvAutomationNotice(status === "ready"
+        ? "已进入待申请，现有 CV 初稿可以继续调整。"
+        : "已进入待申请，CV 初稿已自动排队。任务会在后台按顺序生成。");
+      setJobsReloadToken((value) => value + 1);
+    } catch (error) {
+      setCvAutomationNotice(error instanceof Error ? error.message : "进入待申请失败，请稍后重试。");
+    } finally {
+      setCandidateMovingId(null);
+    }
+  };
+
+  const nextQueuedCvJobId = pendingCvJobs.find(({ job }) => job.cvPrebuildStatus === "queued")?.job.id;
+  const pendingQueueCandidate = pendingCvJobs.find(({ job }) =>
+    !job.cvPrebuildStatus
+    || ["stale", "cancelled"].includes(job.cvPrebuildStatus)
+    || canAutomaticallyRetryCv(job));
+  const cvGenerationActive = cvTasks.some((job) => activeCvPrebuildStatuses.has(job.cvPrebuildStatus ?? "queued"));
+  useEffect(() => {
+    if (view !== "saved" || !pendingQueueCandidate?.application.id) return;
+    const jobId = pendingQueueCandidate.job.id;
+    if (automaticQueueRef.current.has(jobId)) return;
+    automaticQueueRef.current.add(jobId);
+    void fetch("/api/cv-prebuild/queue", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId, applicationRowId: pendingQueueCandidate.application.id }),
+    }).then(async (response) => {
+      const payload = await response.json() as { status?: CvPrebuildStatus };
+      if (!response.ok || !payload.status) return;
+      setCvTasks((current) => [
+        { ...pendingQueueCandidate.job, cvPrebuildStatus: payload.status, cvPrebuildError: "" },
+        ...current.filter((job) => job.id !== jobId),
+      ]);
+      setJobsReloadToken((value) => value + 1);
+    }).catch(() => {
+      automaticQueueRef.current.delete(jobId);
+    });
+  }, [pendingQueueCandidate, view]);
+  useEffect(() => {
+    if (view !== "saved" || !nextQueuedCvJobId || cvGenerationActive) return;
+    if (automaticCvJobRef.current === nextQueuedCvJobId) return;
+    const queuedJob = cvTasks.find((job) => job.id === nextQueuedCvJobId)
+      ?? dailyJobs.find((job) => job.id === nextQueuedCvJobId);
+    if (!queuedJob) return;
+    automaticCvJobRef.current = queuedJob.id;
+    const timer = window.setTimeout(() => {
+      void startCvPrebuild(
+        queuedJob.id,
+        undefined,
+        cvGenerationRules.trim() || DEFAULT_CV_GENERATION_RULES,
+      ).finally(() => {
+        automaticCvJobRef.current = null;
+        automaticQueueRef.current.delete(queuedJob.id);
+        setJobsReloadToken((value) => value + 1);
+      });
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [cvGenerationActive, cvGenerationRules, cvTasks, dailyJobs, nextQueuedCvJobId, startCvPrebuild, view]);
 
   const openFromJob = (job: Job) => {
     setForm({
@@ -1599,29 +1984,8 @@ export default function JobRadar() {
     }
   };
 
-  const deleteApplication = async (id?: number) => {
-    if (!id || !window.confirm("确定删除这条申请记录吗？")) return;
-    const snapshot = applicationsList;
-    setApplicationsList((current) => current.filter((item) => item.id !== id));
-    const response = await fetch(`/api/applications?id=${id}`, { method: "DELETE" });
-    if (!response.ok) setApplicationsList(snapshot);
-    else if (view === "applications") void loadAnalytics();
-  };
-
   const updateForm = (patch: Partial<Application>) => {
     setForm((current) => (current ? { ...current, ...patch } : current));
-  };
-
-  const openTask = (application: Application, task?: ApplicationTask) => {
-    if (!application.id) return;
-    setTaskForm(task ?? {
-      applicationId: application.id,
-      title: "准备并提交申请",
-      dueDate: application.plannedApplicationDate || application.deadline || "",
-      reminderDate: application.plannedApplicationDate || application.deadline || "",
-      status: "pending",
-      source: "manual",
-    });
   };
 
   const saveTask = async (event: FormEvent) => {
@@ -1883,7 +2247,7 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "申请固定资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
           <p className="hero-copy">
             {view === "applications"
               ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
@@ -1894,7 +2258,7 @@ export default function JobRadar() {
                 : view === "verify"
                   ? "提交岗位、查看统一核验队列，并在同一页监控自动数据质检。"
                   : view === "profile"
-                    ? "集中维护个人信息、标准技能清单和用于定制申请材料的基础 CV。"
+                    ? "集中维护每份申请都会重复使用的联系方式、地址、固定问答、奖项和论文。"
                   : view === "tools"
                     ? "低频管理、核验和申请辅助功能都集中在这里，主流程保持简单。"
                   : view === "ignored"
@@ -1920,6 +2284,17 @@ export default function JobRadar() {
           <div><span>1</span><strong>看今日岗位</strong><p>先用搜索和筛选缩小范围。</p></div>
           <div><span>2</span><strong>星标进候选</strong><p>值得研究的岗位先集中保存。</p></div>
           <div><span>3</span><strong>建立申请记录</strong><p>准备、投递和面试都在申请页跟进。</p></div>
+        </section>
+      )}
+
+      {view === "saved" && (
+        <section className="stats stats-two candidate-stage-tabs" role="tablist" aria-label="候选岗位分类">
+          <button type="button" role="tab" aria-selected={candidateBucket === "favorites"} className={candidateBucket === "favorites" ? "active" : ""} onClick={() => setCandidateBucket("favorites")}>
+            <span>收藏</span><strong>{allFavoriteJobs.length}</strong><em>只保存岗位，不调用 CV API</em>
+          </button>
+          <button type="button" role="tab" aria-selected={candidateBucket === "pending"} className={candidateBucket === "pending" ? "active" : ""} onClick={() => setCandidateBucket("pending")}>
+            <span>待申请</span><strong>{pendingApplications.length}</strong><em>生成中 {cvTaskSummary.queued + cvTaskSummary.running} · 已生成 {cvTaskSummary.ready} · 需处理 {cvTaskSummary.needs_action}</em>
+          </button>
         </section>
       )}
 
@@ -2212,8 +2587,8 @@ export default function JobRadar() {
         <>
           <section className="toolbar">
             <div className="section-heading">
-              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `我的候选岗位（${mergedSavedItems.length}）` : `今日岗位（${jobs.length}）`}</h2></div>
-              <div className="job-controls">
+              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `候选岗位（${allFavoriteJobs.length + pendingApplications.length}）` : `今日岗位（${jobs.length}）`}</h2></div>
+              {view === "today" && <div className="job-controls">
                 <label className="job-search">
                   <span aria-hidden="true">⌕</span>
                   <input
@@ -2230,88 +2605,103 @@ export default function JobRadar() {
                 <select value={region} onChange={(event) => setRegion(event.target.value)} aria-label="地区筛选">
                   <option>全部地区</option><option>美国</option><option>中国</option>
                 </select>
-              </div>
+              </div>}
             </div>
-            <div className="track-scroller" aria-label="行业筛选">
+            {view === "today" && <div className="track-scroller" aria-label="行业筛选">
               {tracks.map((item) => (
                 <button key={item} className={track === item ? "active" : ""} onClick={() => setTrack(item)}>{item}</button>
               ))}
-            </div>
+            </div>}
           </section>
           {view === "saved" ? (
-            <section className="application-list unified-saved-list" aria-live="polite">
-              <PaginationControls page={safeSavedPage} pageCount={savedPageCount} onPageChange={setSavedPage} label="候选岗位" />
-              {mergedSavedItems.length === 0 ? (
-                <div className="empty-state"><span>☆</span><h3>这里还没有候选岗位</h3><p>点星标或建立申请记录后，岗位都会出现在这里。</p></div>
-              ) : pagedSavedItems.map((entry) => entry.kind === "application" ? (() => {
-                const item = entry.application;
-                return (
-                  <article className="application-card" key={`application-${item.id}`}>
-                    <div className="application-head">
-                      <div>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
-                      <span className="priority">{item.priority}</span>
-                    </div>
-                    <div className="application-details">
-                      <span><b>匹配度</b>{item.fit}/5</span>
-                      <span><b>Application ID</b>{item.applicationId || "未填写"}</span>
-                      <span><b>下一步</b>{item.nextAction || "未填写"}</span>
-                      <span><b>计划申请</b>{item.plannedApplicationDate || "未设置"}</span>
-                      <span><b>申请截止</b>{deadlineLabel(item.deadline, item.deadlineType)}</span>
-                    </div>
-                    {item.notes && <p className="record-note">{item.notes}</p>}
-                    <div className="record-actions">
-                      {item.jobUrl && <a href={item.jobUrl} target="_blank" rel="noreferrer">打开 JD ↗</a>}
-                      {item.id && <a data-cv-tailor-action="true" href={`/cv-tailor?applicationId=${item.id}`}>定制 CV</a>}
-                      <button onClick={() => openTask(item)}>新增任务</button>
-                      <button onClick={() => setForm({ ...item })}>编辑记录</button>
-                      <button className="danger" onClick={() => deleteApplication(item.id)}>删除</button>
-                    </div>
-                  </article>
-                );
-              })() : (() => {
-                const job = entry.job;
-                return (
-                  <article className="job-card" key={`job-${job.id}`}>
-                    <div className="job-card-top">
-                      <div className="company-logo">{job.company.slice(2, 4)}</div>
-                      <div className="job-title">
-                        <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
-                        <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
-                        {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
-                        <CvPrebuildStatusBadge status={job.cvPrebuildStatus} />
+            <>
+            <section className="candidate-workspace" aria-live="polite">
+              <div className="section-heading candidate-list-heading">
+                <div>
+                  <p className="eyebrow">{candidateBucket === "favorites" ? "FAVORITES" : "PENDING APPLICATIONS"}</p>
+                  <h2>{candidateBucket === "favorites" ? "我的收藏" : "待申请岗位"}（{candidateRows.length}）</h2>
+                </div>
+              </div>
+              {cvAutomationNotice && <p className="cv-automation-notice" role="status">{cvAutomationNotice}</p>}
+              {cvRecoveryCandidates.length > 0 && candidateBucket === "favorites" && (
+                <section className="cv-recovery-panel" aria-labelledby="cv-recovery-title">
+                  <div>
+                    <strong id="cv-recovery-title">找回刚才未写入后台的收藏</strong>
+                    <span>恢复后只会进入收藏，不会调用 CV API。</span>
+                  </div>
+                  <div className="cv-recovery-list compact">
+                    {cvRecoveryCandidates.map((job) => (
+                      <label key={`cv-recovery-${job.id}`}>
+                        <input
+                          type="checkbox"
+                          checked={cvRecoverySelected.includes(job.id)}
+                          onChange={(event) => setCvRecoverySelected((current) => event.target.checked
+                            ? [...new Set([...current, job.id])]
+                            : current.filter((id) => id !== job.id))}
+                        />
+                        <span><strong>{job.title}</strong><small>{job.company}</small></span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="cv-recovery-actions">
+                    <button type="button" className="primary" disabled={cvRecoveryRunning || !cvRecoverySelected.length} onClick={() => void restoreCvFavorites()}>
+                      {cvRecoveryRunning ? "正在恢复…" : `恢复到收藏（${cvRecoverySelected.length}）`}
+                    </button>
+                  </div>
+                </section>
+              )}
+              {candidateRows.length === 0 ? (
+                <div className="empty-state">
+                  <span>{candidateBucket === "favorites" ? "☆" : "✓"}</span>
+                  <h3>{candidateBucket === "favorites" ? "收藏还是空的" : "还没有待申请岗位"}</h3>
+                  <p>{candidateBucket === "favorites" ? "在今日岗位点星标，岗位会先保存到这里。" : "从收藏中点击“进入待申请”，系统会自动生成第一版 CV。"}</p>
+                </div>
+              ) : (
+                <div className="compact-candidate-list">
+                  <PaginationControls page={safeSavedPage} pageCount={savedPageCount} onPageChange={setSavedPage} label={candidateBucket === "favorites" ? "收藏" : "待申请"} />
+                  <div className={`compact-candidate-header ${candidateBucket}`} aria-hidden="true">
+                    <span>公司</span><span>岗位</span><span>{candidateBucket === "favorites" ? "事实库匹配" : "CV 进度"}</span><span>{candidateBucket === "favorites" ? "操作" : "更新时间"}</span>
+                  </div>
+                  {pagedCandidateRows.map((entry) => entry.kind === "job" ? (
+                    <article className="compact-candidate-row favorites" key={`favorite-${entry.job.id}`}>
+                      <a className="compact-candidate-main" href={`/jobs/${entry.job.id}`} aria-label={`查看 ${entry.job.company} ${entry.job.title} 详情`}>
+                        <strong title={entry.job.company}>{entry.job.company}</strong>
+                        <span title={entry.job.title}>{entry.job.title}</span>
+                        <span className="fact-fit-inline fact-fit-loading" data-fact-fit-job={entry.job.id}>事实库评分中…</span>
+                      </a>
+                      <div className="compact-candidate-actions">
+                        <button type="button" onClick={() => void toggleSaved(entry.job.id)}>取消收藏</button>
+                        <button type="button" className="primary" disabled={candidateMovingId === entry.job.id} onClick={() => openPendingCvSelection(entry.job)}>
+                          {candidateMovingId === entry.job.id ? "正在进入…" : "进入待申请"}
+                        </button>
                       </div>
-                      <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => toggleSaved(job.id)} aria-label="从候选岗位移除">
-                        ★
-                      </button>
-                    </div>
-                    <div className="match-row">
-                      <div className="score"><strong>{job.score}</strong><span>{scoreLabel(job.score)}</span></div>
-                      <div className="evidence">
-                        <strong>{verificationSummary(job)}</strong>
-                        <p>{roleSummary(job)}</p>
-                        <span>学历要求：{degreeRequirement(job)} · Sponsorship：{sponsorshipLabel(job.visa)} · 截止：{deadlineLabel(job.deadline, job.deadlineType)} · 信息来源：{sourceLabel(job)}</span>
-                      </div>
-                    </div>
-                    {job.skills.length > 0 && (
-                      <div className="skills" aria-label="JD 所需技能">
-                        {job.skills.map((skill) => <span key={skill}>{skill}</span>)}
-                      </div>
-                    )}
-                    {job.description && (
-                      <details className="job-description">
-                        <summary>查看采集到的完整 JD</summary>
-                        <p>{job.description}</p>
-                      </details>
-                    )}
-                    <div className="card-actions">
-                      <a className="secondary job-link" href={job.jobUrl} target="_blank" rel="noreferrer">{sourceLabel(job) === "BOSS直聘" ? "打开 BOSS JD" : "打开官方 JD"} ↗</a>
-                      <button className="ignore-button" onClick={() => setIgnoreTarget(job)}>不再显示</button>
-                      <button className="primary" onClick={() => openFromJob(job)}>建立申请记录</button>
-                    </div>
-                  </article>
-                );
-              })())}
+                    </article>
+                  ) : (
+                    <a className="compact-candidate-row pending" href={`/applications/${entry.application.id}`} key={`pending-${entry.application.id}`}>
+                      <strong title={entry.application.company}>{entry.application.company}</strong>
+                      <span title={entry.application.title}>{entry.application.title}</span>
+                      <span className="compact-candidate-status">
+                        {entry.job?.cvPrebuildStatus
+                          ? <CvPrebuildStatusBadge status={entry.job.cvPrebuildStatus} />
+                          : <span className="cv-prebuild-badge neutral">等待建立任务</span>}
+                      </span>
+                      <time dateTime={entry.job?.cvPrebuildUpdatedAt || entry.application.updatedAt || undefined}>
+                        {entry.job?.cvPrebuildUpdatedAt
+                          ? new Date(entry.job.cvPrebuildUpdatedAt).toLocaleString("zh-CN")
+                          : entry.application.updatedAt
+                            ? new Date(entry.application.updatedAt).toLocaleDateString("zh-CN")
+                            : "刚刚"}
+                      </time>
+                    </a>
+                  ))}
+                </div>
+              )}
+              <div className="candidate-automation-note">
+                <p>收藏不会调用 API。进入待申请时先确认中文/英文和 CV 模板，再按顺序生成 CV，避免多个任务同时触发限流。</p>
+                <button type="button" onClick={() => setCvRulesOpen(true)}>调整自动生成规则</button>
+              </div>
             </section>
+            </>
           ) : <section className="job-list" aria-live="polite">
             {jobsLoading ? (
               <div className="empty-state"><span>◌</span><h3>正在读取岗位</h3><p>请稍等，正在载入最新核验结果。</p></div>
@@ -2331,9 +2721,8 @@ export default function JobRadar() {
                     <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
                     <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
                     {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
-                    {saved.includes(job.id) && <CvPrebuildStatusBadge status={job.cvPrebuildStatus} />}
                   </div>
-                  <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => toggleSaved(job.id)} aria-label={saved.includes(job.id) ? "取消收藏" : "收藏岗位"}>
+                  <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => void toggleSaved(job.id)} aria-label={saved.includes(job.id) ? "取消收藏" : "收藏岗位"}>
                     {saved.includes(job.id) ? "★" : "☆"}
                   </button>
                 </div>
@@ -2416,11 +2805,11 @@ export default function JobRadar() {
                 <span role="columnheader">申请日期</span>
               </div>
               {pagedApplications.map((item) => (
-                <div className="compact-application-row" role="row" key={item.id}>
+                <a className="compact-application-row" role="row" href={`/applications/${item.id}`} key={item.id} aria-label={`查看 ${item.company} ${item.title} 申请详情`}>
                   <strong role="cell" title={item.company}>{item.company}</strong>
                   <span role="cell" title={item.title}>{item.title}</span>
                   <time role="cell" dateTime={item.appliedDate || undefined}>{item.appliedDate || "未记录"}</time>
-                </div>
+                </a>
               ))}
             </div>
           )}
@@ -2635,91 +3024,132 @@ export default function JobRadar() {
           {profileLoading ? (
             <div className="empty-state"><span>◌</span><h3>正在读取个人资料</h3><p>请稍等。</p></div>
           ) : (
-            <>
-              <form className="profile-form" onSubmit={saveProfile}>
-                <article className="profile-card">
-                  <div className="section-heading compact">
-                    <div><p className="eyebrow">PERSONAL INFORMATION</p><h2>基本信息</h2></div>
-                    <span>私有</span>
-                  </div>
-                  <div className="profile-grid">
-                    <label>姓名<input value={profile.fullName} onChange={(event) => setProfile({ ...profile, fullName: event.target.value })} placeholder="例如 Xinyu Zhang" /></label>
-                    <label>登录邮箱<input value={profile.userEmail} disabled /></label>
-                    <label>所在地<input value={profile.location} onChange={(event) => setProfile({ ...profile, location: event.target.value })} placeholder="城市、州或国家" /></label>
-                    <label>工作授权<input value={profile.workAuthorization} onChange={(event) => setProfile({ ...profile, workAuthorization: event.target.value })} placeholder="例如 F-1 OPT" /></label>
-                    <label className="full">Sponsorship 需求<input value={profile.sponsorshipNeed} onChange={(event) => setProfile({ ...profile, sponsorshipNeed: event.target.value })} placeholder="例如美国岗位需要长期 sponsorship" /></label>
-                    <label className="full">教育背景<textarea value={profile.education} onChange={(event) => setProfile({ ...profile, education: event.target.value })} placeholder="学位、专业、学校和预计毕业时间" /></label>
-                    <label className="full">目标岗位<input value={profile.targetRoles} onChange={(event) => setProfile({ ...profile, targetRoles: event.target.value })} placeholder="例如 Biostatistician、Data Scientist、Quantitative Researcher" /></label>
-                    <label className="full">目标行业<input value={profile.targetIndustries} onChange={(event) => setProfile({ ...profile, targetIndustries: event.target.value })} placeholder="例如 Pharma、Healthcare AI、Technology" /></label>
-                    <label className="full">职业概述<textarea value={profile.professionalSummary} onChange={(event) => setProfile({ ...profile, professionalSummary: event.target.value })} placeholder="用几句话概括研究背景、方法优势和职业方向" /></label>
-                  </div>
-                </article>
-
-                <article className="profile-card">
-                  <div className="section-heading compact">
-                    <div><p className="eyebrow">CANONICAL SKILLS PROFILE</p><h2>标准技能清单</h2></div>
-                    <span>{profile.skills.length} 项</span>
-                  </div>
-                  <p className="profile-help">这里保存的技能将作为岗位匹配和未来调整 CV 的统一基准。请只添加你能够用经历、项目或论文证明的技能。</p>
-                  <div className="skill-editor">
-                    <input
-                      value={skillDraft}
-                      onChange={(event) => setSkillDraft(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          event.preventDefault();
-                          addSkill();
-                        }
-                      }}
-                      placeholder="输入一项技能，例如 Survival Analysis"
-                    />
-                    <button type="button" onClick={addSkill}>添加技能</button>
-                  </div>
-                  {profile.skills.length > 0 ? (
-                    <div className="profile-skills" aria-label="个人技能清单">
-                      {profile.skills.map((skill) => (
-                        <span key={skill}>{skill}<button type="button" aria-label={`删除 ${skill}`} onClick={() => setProfile({ ...profile, skills: profile.skills.filter((item) => item !== skill) })}>×</button></span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="profile-empty-note">尚未添加技能。保存后，评分器会使用这份清单计算技能重合度。</p>
-                  )}
-                </article>
-
-                <div className="profile-save-row">
-                  <p>{profileMessage || "个人资料只保存在受保护的账户数据中。"}</p>
-                  <button disabled={profileSaving}>{profileSaving ? "保存中…" : "保存个人资料"}</button>
-                </div>
-              </form>
-
-              <article className="profile-card resume-card">
-                <div className="section-heading compact">
-                  <div><p className="eyebrow">BASELINE CVS</p><h2>基础 CV</h2></div>
-                  <span>{profileResumes.length} 份</span>
-                </div>
-                <p className="profile-help">上传通用版或不同方向的基础 CV。支持 PDF、DOC、DOCX，单个文件不超过 10 MB。</p>
-                <form className="resume-upload" onSubmit={uploadResume}>
-                  <label>版本名称<input value={resumeLabel} onChange={(event) => setResumeLabel(event.target.value)} placeholder="例如 Pharma Biostatistics" /></label>
-                  <label>选择文件<input key={resumeInputKey} type="file" accept=".pdf,.doc,.docx" onChange={(event) => setResumeFile(event.target.files?.[0] ?? null)} /></label>
-                  <button disabled={resumeUploading || !resumeFile || !resumeLabel.trim()}>{resumeUploading ? "上传中…" : "上传基础 CV"}</button>
-                </form>
-                {profileResumes.length > 0 ? (
-                  <div className="resume-list">
-                    {profileResumes.map((resume) => (
-                      <div className="resume-item" key={resume.id}>
-                        <div><strong>{resume.label}</strong><span>{resume.filename} · {formatFileSize(resume.size)}</span></div>
-                        <div>
-                          <a href={`/api/profile/resumes?id=${encodeURIComponent(resume.id)}`}>下载</a>
-                          <button onClick={() => void deleteResume(resume)}>删除</button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="profile-empty-note">尚未上传基础 CV。</p>
-                )}
+            <form className="profile-form" onSubmit={saveProfile}>
+              <article className="profile-card profile-source-note">
+                <div><p className="eyebrow">APPLICATION DATA AUTHORITY</p><h2>固定资料和 CV 各管一部分</h2></div>
+                <p>这里保存所有申请都会重复使用的资料。教育、工作经历、项目、技能和岗位定制描述不在这里重复维护，Autofill 会继续从 CV 事实库和当前岗位的最终 CV 读取。</p>
               </article>
-            </>
+
+              <article className="profile-card">
+                <div className="section-heading compact">
+                  <div><p className="eyebrow">IDENTITY & CONTACT</p><h2>身份与联系方式</h2></div>
+                  <span>私有</span>
+                </div>
+                <div className="profile-grid">
+                  <label>First name<input value={profile.applicationProfile.identity.firstName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, firstName: event.target.value })} /></label>
+                  <label>Middle name<input value={profile.applicationProfile.identity.middleName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, middleName: event.target.value })} /></label>
+                  <label>Last name<input value={profile.applicationProfile.identity.lastName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, lastName: event.target.value })} /></label>
+                  <label>Preferred name<input value={profile.applicationProfile.identity.preferredName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, preferredName: event.target.value })} /></label>
+                  <label>申请邮箱<input type="email" value={profile.applicationProfile.identity.email} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, email: event.target.value })} /></label>
+                  <label>登录邮箱<input value={profile.userEmail} disabled /></label>
+                  <label>美国电话号码<input value={profile.applicationProfile.identity.usPhone} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, usPhone: event.target.value })} placeholder="例如 +1 615 555 0123" /></label>
+                  <label>中国电话号码<input value={profile.applicationProfile.identity.chinaPhone} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chinaPhone: event.target.value })} placeholder="例如 +86 138 0000 0000" /></label>
+                  <label>微信号<input value={profile.applicationProfile.identity.wechat} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, wechat: event.target.value })} /></label>
+                  <label>默认申请地区<select value={profile.applicationProfile.defaultRegion} onChange={(event) => updateFixedProfileSection("defaultRegion", event.target.value as "US" | "CN")}><option value="US">美国</option><option value="CN">中国</option></select></label>
+                  <label>LinkedIn<input type="url" value={profile.applicationProfile.links.linkedin} onChange={(event) => updateFixedProfileSection("links", { ...profile.applicationProfile.links, linkedin: event.target.value })} /></label>
+                  <label>GitHub<input type="url" value={profile.applicationProfile.links.github} onChange={(event) => updateFixedProfileSection("links", { ...profile.applicationProfile.links, github: event.target.value })} /></label>
+                  <label className="full">个人网站<input type="url" value={profile.applicationProfile.links.website} onChange={(event) => updateFixedProfileSection("links", { ...profile.applicationProfile.links, website: event.target.value })} /></label>
+                </div>
+              </article>
+
+              <article className="profile-card">
+                <div className="section-heading compact"><div><p className="eyebrow">ADDRESSES</p><h2>中美地址</h2></div><span>Autofill 按页面地区选择</span></div>
+                <div className="profile-addresses">
+                  {(["us", "china"] as const).map((region) => {
+                    const address = profile.applicationProfile.addresses[region];
+                    const title = region === "us" ? "美国地址" : "中国地址";
+                    return <section className="profile-repeat-card" key={region}>
+                      <h3>{title}</h3>
+                      <div className="profile-grid">
+                        <label className="full">Address line 1<input value={address.address1} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, address1: event.target.value } })} /></label>
+                        <label className="full">Address line 2<input value={address.address2} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, address2: event.target.value } })} /></label>
+                        <label>City<input value={address.city} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, city: event.target.value } })} /></label>
+                        <label>State / Province<input value={address.state} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, state: event.target.value } })} /></label>
+                        <label>ZIP / 邮编<input value={address.postalCode} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, postalCode: event.target.value } })} /></label>
+                        <label>Country<input value={address.country} onChange={(event) => updateFixedProfileSection("addresses", { ...profile.applicationProfile.addresses, [region]: { ...address, country: event.target.value } })} /></label>
+                      </div>
+                    </section>;
+                  })}
+                </div>
+              </article>
+
+              <article className="profile-card">
+                <div className="section-heading compact"><div><p className="eyebrow">ELIGIBILITY</p><h2>工作授权与固定选择题</h2></div><span>不会自动提交</span></div>
+                <div className="profile-grid">
+                  {([
+                    ["age18", "已满 18 岁"], ["workAuthorizationUS", "有美国工作授权"], ["sponsorshipUS", "现在或未来需要美国 Sponsorship"],
+                    ["workAuthorizationChina", "有中国工作授权"], ["relocation", "愿意搬迁"], ["remoteWork", "可接受远程工作"],
+                  ] as const).map(([key, label]) => <label key={key}>{label}<select value={profile.applicationProfile.eligibility[key]} onChange={(event) => updateFixedProfileSection("eligibility", { ...profile.applicationProfile.eligibility, [key]: event.target.value })}><option value="">未设置</option><option value="yes">Yes</option><option value="no">No</option></select></label>)}
+                  <label>美国签证 / 身份状态<input value={profile.applicationProfile.eligibility.visaStatusUS} onChange={(event) => updateFixedProfileSection("eligibility", { ...profile.applicationProfile.eligibility, visaStatusUS: event.target.value })} placeholder="例如 F-1 OPT" /></label>
+                  <label>最早入职时间<input value={profile.applicationProfile.application.availableStartDate} onChange={(event) => updateFixedProfileSection("application", { ...profile.applicationProfile.application, availableStartDate: event.target.value })} placeholder="例如 2027-06-01 或 Two weeks after offer" /></label>
+                  <label className="full">How did you hear about us?<input value={profile.applicationProfile.application.hearAboutUs} onChange={(event) => updateFixedProfileSection("application", { ...profile.applicationProfile.application, hearAboutUs: event.target.value })} /></label>
+                </div>
+              </article>
+
+              <article className="profile-card">
+                <div className="section-heading compact"><div><p className="eyebrow">AWARDS</p><h2>奖项</h2></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("awards", [...profile.applicationProfile.awards, { name: "", type: "", date: "", issuer: "", description: "" }])}>＋ 添加奖项</button></div>
+                <p className="profile-help">保存获奖名称、时间、颁发方和说明。Autofill 会按这里的顺序填写奖项板块。</p>
+                <div className="profile-repeat-list">
+                  {profile.applicationProfile.awards.map((award, index) => <section className="profile-repeat-card" key={`award-${index}`}>
+                    <div className="profile-repeat-head"><h3>奖项 {index + 1}</h3><button type="button" onClick={() => updateFixedProfileSection("awards", profile.applicationProfile.awards.filter((_, itemIndex) => itemIndex !== index))}>删除</button></div>
+                    <div className="profile-grid">
+                      <label>奖项名称<input value={award.name} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} /></label>
+                      <label>获奖时间<input value={award.date} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, date: event.target.value } : item))} placeholder="YYYY 或 YYYY-MM" /></label>
+                      <label>奖项类型<input value={award.type} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, type: event.target.value } : item))} placeholder="个人奖 / 团队奖" /></label>
+                      <label>颁发机构<input value={award.issuer} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, issuer: event.target.value } : item))} /></label>
+                      <label className="full">奖项描述<textarea value={award.description} onChange={(event) => updateFixedProfileSection("awards", profile.applicationProfile.awards.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
+                    </div>
+                  </section>)}
+                  {!profile.applicationProfile.awards.length && <p className="profile-empty-note">尚未添加奖项。</p>}
+                </div>
+              </article>
+
+              <article className="profile-card">
+                <div className="section-heading compact"><div><p className="eyebrow">PUBLICATIONS</p><h2>论文与发表成果</h2></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("publications", [...profile.applicationProfile.publications, { title: "", authorOrder: "", date: "", venue: "", level: "", status: "", url: "", description: "" }])}>＋ 添加论文</button></div>
+                <p className="profile-help">论文列表属于跨岗位固定资料；岗位 CV 只决定当次简历如何取舍，不会改写这里的完整记录。</p>
+                <div className="profile-repeat-list">
+                  {profile.applicationProfile.publications.map((publication, index) => <section className="profile-repeat-card" key={`publication-${index}`}>
+                    <div className="profile-repeat-head"><h3>论文 {index + 1}</h3><button type="button" onClick={() => updateFixedProfileSection("publications", profile.applicationProfile.publications.filter((_, itemIndex) => itemIndex !== index))}>删除</button></div>
+                    <div className="profile-grid">
+                      <label className="full">论文题目<input value={publication.title} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, title: event.target.value } : item))} /></label>
+                      <label>作者顺序<input value={publication.authorOrder} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, authorOrder: event.target.value } : item))} placeholder="例如 First Author" /></label>
+                      <label>发表时间<input value={publication.date} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, date: event.target.value } : item))} placeholder="YYYY-MM" /></label>
+                      <label>期刊 / 会议<input value={publication.venue} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, venue: event.target.value } : item))} /></label>
+                      <label>论文等级<input value={publication.level} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, level: event.target.value } : item))} placeholder="只填写已核验等级" /></label>
+                      <label>发表状态<input value={publication.status} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, status: event.target.value } : item))} placeholder="Published / Under review / Preprint" /></label>
+                      <label>DOI / URL<input type="url" value={publication.url} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, url: event.target.value } : item))} /></label>
+                      <label className="full">论文说明<textarea value={publication.description} onChange={(event) => updateFixedProfileSection("publications", profile.applicationProfile.publications.map((item, itemIndex) => itemIndex === index ? { ...item, description: event.target.value } : item))} /></label>
+                    </div>
+                  </section>)}
+                  {!profile.applicationProfile.publications.length && <p className="profile-empty-note">尚未添加论文。</p>}
+                </div>
+              </article>
+
+              <article className="profile-card">
+                <div className="section-heading compact"><div><p className="eyebrow">OTHER FIXED DATA</p><h2>语言与其他固定问答</h2></div></div>
+                <div className="profile-repeat-block">
+                  <div className="profile-repeat-title"><h3>语言</h3><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("languages", [...profile.applicationProfile.languages, { name: "", proficiency: "" }])}>＋ 添加语言</button></div>
+                  {profile.applicationProfile.languages.map((language, index) => <div className="profile-inline-row" key={`language-${index}`}>
+                    <input aria-label={`语言 ${index + 1}`} value={language.name} onChange={(event) => updateFixedProfileSection("languages", profile.applicationProfile.languages.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item))} placeholder="语言，例如 English" />
+                    <input aria-label={`熟练程度 ${index + 1}`} value={language.proficiency} onChange={(event) => updateFixedProfileSection("languages", profile.applicationProfile.languages.map((item, itemIndex) => itemIndex === index ? { ...item, proficiency: event.target.value } : item))} placeholder="熟练程度" />
+                    <button type="button" onClick={() => updateFixedProfileSection("languages", profile.applicationProfile.languages.filter((_, itemIndex) => itemIndex !== index))}>删除</button>
+                  </div>)}
+                </div>
+                <div className="profile-repeat-block">
+                  <div className="profile-repeat-title"><div><h3>其他固定问答</h3><p>适合保存“是否愿意出差”等稳定答案；岗位动机、开放题和薪资期望不要放这里。</p></div><button type="button" className="profile-add-button" onClick={() => updateFixedProfileSection("fixedAnswers", [...profile.applicationProfile.fixedAnswers, { question: "", answer: "" }])}>＋ 添加问答</button></div>
+                  {profile.applicationProfile.fixedAnswers.map((answer, index) => <div className="profile-fixed-answer" key={`answer-${index}`}>
+                    <input aria-label={`固定问题 ${index + 1}`} value={answer.question} onChange={(event) => updateFixedProfileSection("fixedAnswers", profile.applicationProfile.fixedAnswers.map((item, itemIndex) => itemIndex === index ? { ...item, question: event.target.value } : item))} placeholder="申请表问题" />
+                    <textarea aria-label={`固定答案 ${index + 1}`} value={answer.answer} onChange={(event) => updateFixedProfileSection("fixedAnswers", profile.applicationProfile.fixedAnswers.map((item, itemIndex) => itemIndex === index ? { ...item, answer: event.target.value } : item))} placeholder="固定答案" />
+                    <button type="button" onClick={() => updateFixedProfileSection("fixedAnswers", profile.applicationProfile.fixedAnswers.filter((_, itemIndex) => itemIndex !== index))}>删除</button>
+                  </div>)}
+                </div>
+              </article>
+
+              <div className="profile-save-row">
+                <p>{profileMessage || "资料保存在受保护的账户数据库中；Autofill 不会填写敏感 EEO 字段，也不会自动提交。"}</p>
+                <button disabled={profileSaving}>{profileSaving ? "保存中…" : "保存固定资料"}</button>
+              </div>
+            </form>
           )}
         </section>
       )}
@@ -2762,6 +3192,100 @@ export default function JobRadar() {
             {message && <p className="form-error">{message}</p>}
             <div className="form-actions"><button type="button" onClick={() => setForm(null)}>取消</button><button className="primary" disabled={saving}>{saving ? "保存中…" : "保存记录"}</button></div>
           </form>
+        </div>
+      )}
+
+      {pendingCvSelection && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && !candidateMovingId && setPendingCvSelection(null)}>
+          <section className="cv-template-dialog" role="dialog" aria-modal="true" aria-labelledby="pending-cv-selection-title">
+            <div className="form-head">
+              <div><p className="eyebrow">CV PREBUILD</p><h2 id="pending-cv-selection-title">选择生成语言和 CV 模板</h2></div>
+              <button type="button" disabled={Boolean(candidateMovingId)} onClick={() => setPendingCvSelection(null)} aria-label="关闭">×</button>
+            </div>
+            <p className="cv-template-note">
+              {pendingCvSelection.job.company} · {pendingCvSelection.job.title}。确认后才会进入待申请并调用 API 生成第一版 CV。
+            </p>
+            <div className="form-grid">
+              <label>
+                CV 语言
+                <select
+                  value={pendingCvSelection.language}
+                  onChange={(event) => setPendingCvSelection((current) => current
+                    ? { ...current, language: event.target.value as CvTemplateLanguage }
+                    : current)}
+                >
+                  <option value="zh">中文</option>
+                  <option value="en">English</option>
+                </select>
+              </label>
+              <label>
+                CV 模板
+                <select
+                  value={pendingCvSelection.track}
+                  onChange={(event) => setPendingCvSelection((current) => current
+                    ? { ...current, track: event.target.value as CvTemplateTrack }
+                    : current)}
+                >
+                  {cvTemplateTrackOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <p className="cv-template-language">
+              将使用：{pendingCvSelection.language === "zh" ? "中文" : "English"} · {cvTemplateFiles[pendingCvSelection.language][pendingCvSelection.track]}
+            </p>
+            <div className="form-actions">
+              <button type="button" disabled={Boolean(candidateMovingId)} onClick={() => setPendingCvSelection(null)}>取消</button>
+              <button
+                type="button"
+                className="primary"
+                disabled={Boolean(candidateMovingId)}
+                onClick={() => void moveFavoriteToPending(
+                  pendingCvSelection.job,
+                  pendingCvSelection.language,
+                  pendingCvSelection.track,
+                )}
+              >
+                {candidateMovingId ? "正在进入并排队…" : "确认并进入待申请"}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {cvRulesOpen && (
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setCvRulesOpen(false)}>
+          <section className="cv-template-dialog" role="dialog" aria-modal="true" aria-labelledby="cv-rules-title">
+            <div className="form-head">
+              <div><p className="eyebrow">CV AUTOMATION</p><h2 id="cv-rules-title">自动生成规则</h2></div>
+              <button type="button" onClick={() => setCvRulesOpen(false)} aria-label="关闭">×</button>
+            </div>
+            <p className="cv-template-note">进入待申请时会先选择中文/英文和 Tech、Quant、Consulting、Healthcare 等模板。下面的规则会用于之后进入待申请的岗位。</p>
+            <div className="cv-generation-rules">
+              <div>
+                <label htmlFor="automatic-cv-generation-rules">岗位画像、取舍和改写要求</label>
+                <button type="button" onClick={() => setCvGenerationRules(DEFAULT_CV_GENERATION_RULES)}>恢复默认</button>
+              </div>
+              <textarea
+                id="automatic-cv-generation-rules"
+                value={cvGenerationRules}
+                onChange={(event) => setCvGenerationRules(event.target.value)}
+                maxLength={CV_GENERATION_RULES_MAX_LENGTH}
+              />
+              <small>保存规则本身不会调用 API。事实边界、禁止编造和禁止自动提交始终保留。</small>
+            </div>
+            <div className="form-actions">
+              <button type="button" onClick={() => setCvRulesOpen(false)}>取消</button>
+              <button type="button" className="primary" onClick={() => {
+                const rules = cvGenerationRules.trim() || DEFAULT_CV_GENERATION_RULES;
+                setCvGenerationRules(rules);
+                window.localStorage.setItem(CV_GENERATION_RULES_STORAGE_KEY, rules);
+                setCvRulesOpen(false);
+                setCvAutomationNotice("自动生成规则已保存，将用于之后进入待申请的岗位。");
+              }}>保存规则</button>
+            </div>
+          </section>
         </div>
       )}
 
@@ -2869,12 +3393,12 @@ export default function JobRadar() {
         </div>
       )}
 
-      <PendingApplicationFitScores />
+      <CandidateFactFitScores />
       <nav className="bottom-nav" aria-label="主要导航">
         <button className={view === "today" ? "selected" : ""} onClick={() => setView("today")}><span>⌂</span>今日</button>
         <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>候选</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
-        <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>个人</button>
+        <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>资料</button>
         <button className={["tools", "companies", "verify", "ignored"].includes(view) ? "selected" : ""} onClick={() => setView("tools")}><span>•••</span>工具</button>
       </nav>
     </main>

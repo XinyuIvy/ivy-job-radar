@@ -159,6 +159,54 @@ test("Biostatistics education snippet covers Statistics through narrower_than", 
   assert.equal(match.matches[0]?.relationPath.relationType, "narrower_than");
 });
 
+test("realistic Chinese CV snippets cover STEM field and interdisciplinary background", () => {
+  const credentials = [{
+    record_type: "education_credential",
+    fact_id: "EDU-VU-PHD-BIOSTAT",
+    verified_fact: "Enrolled in a Graduate Doctoral Degree program with Biostatistics major at Vanderbilt University.",
+    evidence_strength: "high",
+    source_tier: "primary_record",
+    source: "transcript",
+    evidence_location: "Biostatistics Major",
+    claim_boundary: "PhD is in progress.",
+    cv_eligible: true,
+    match_class: "credential_direct",
+    institution: "Vanderbilt University",
+    degree_level: "PhD",
+    degree_status: "candidate / in progress",
+    field: "Biostatistics",
+    normalized_concepts: ["biostatistics"],
+    retrieval_text: "Vanderbilt PhD candidate in Biostatistics",
+  }];
+  const latex = String.raw`\section*{\Large 个人简介}
+范德堡大学生物统计学博士候选人。
+\section*{\Large 教育背景}
+\noindent\textbf{生物统计学博士} $\mid$ 范德堡大学 \hfill 预计 2027 年毕业 \\
+\section*{\Large 代表性研究}
+\noindent\textbf{神经影像统计研究}
+\begin{itemize}
+\item 基于神经影像数据开展统计建模与生物医学研究。
+\end{itemize}
+`;
+  const snippets = buildCvTemplateIndex(latex, "cv_tech_cn.tex", [], credentials);
+  const stemRequirement = {
+    requirementId: "JD-R-STEM", label: "STEM-related field", category: "Education",
+    sourceText: "统计及相关 STEM 专业博士", literalTerms: ["相关 STEM"],
+    normalizedConcepts: ["stem_field"], evidenceTerms: ["biostatistics"], hardRequirement: true,
+    importance: "high", scopes: [], namedTool: false,
+  };
+  const interdisciplinaryRequirement = {
+    requirementId: "JD-R-INTER", label: "Interdisciplinary background", category: "Collaboration",
+    sourceText: "交叉学科博士", literalTerms: ["交叉学科"],
+    normalizedConcepts: ["interdisciplinary_research"], evidenceTerms: ["neuroimaging"],
+    hardRequirement: true, importance: "high", scopes: [], namedTool: false,
+  };
+  assert.equal(searchCvTemplate(stemRequirement, snippets, true, "Credential Direct").covered, true);
+  const interdisciplinary = searchCvTemplate(interdisciplinaryRequirement, snippets, true, "Direct");
+  assert.equal(interdisciplinary.covered, true);
+  assert.equal(interdisciplinary.matches[0]?.relationPath.relationType, "evidence_for");
+});
+
 test("published journal snippet can evidence peer-reviewed publication but under-review status cannot", () => {
   const requirement = {
     requirementId: "JD-R002",
@@ -183,4 +231,16 @@ test("published journal snippet can evidence peer-reviewed publication but under
   const candidates = matchStructuredEvidence(requirement, [published, review]);
   assert.ok(candidates.some((item) => item.record.fact_id === "PUB-SC-2025"));
   assert.ok(!candidates.some((item) => item.record.fact_id === "PUB-REVIEW"));
+  const latex = String.raw`\section*{\Large 部分论文与荣誉}
+\begin{itemize}
+\item Zhang, X. “Semiparametric confidence sets for cross-sectional and longitudinal neuroimaging.” \emph{Imaging Neuroscience}, 2025。
+\item Zhang, X. “Under review paper.” 正在审稿。
+\end{itemize}
+`;
+  const snippets = buildCvTemplateIndex(latex, "cv_tech_cn.tex", [], [published, review]);
+  const templateMatch = searchCvTemplate(requirement, snippets, true, "Direct");
+  assert.equal(templateMatch.covered, true);
+  assert.equal(templateMatch.matches[0]?.relationPath.relationType, "evidence_for");
+  assert.ok(templateMatch.matches[0]?.snippet.factIds.includes("PUB-SC-2025"));
+  assert.ok(!templateMatch.matches.some((item) => item.snippet.factIds.includes("PUB-REVIEW")));
 });

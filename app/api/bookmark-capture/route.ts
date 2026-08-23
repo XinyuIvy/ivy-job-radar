@@ -10,23 +10,44 @@ import {
   canonicalizeBookmarkJobUrl,
   cleanBookmarkText,
   deriveBookmarkCaptureKey,
-  inferBookmarkCompany,
   inferBookmarkRegion,
   inferBookmarkSkills,
   inferBookmarkTrack,
+  resolveBookmarkCaptureFields,
   safeBookmarkJobUrl,
   secureBookmarkKeyEqual,
 } from "../../lib/bookmark-capture";
+import { extractCoreJobDescription } from "../../lib/job-description";
 import {
   deriveAmbiguousCaptureId,
   isPlaceholderJobTitle,
   makeDistinctStoredJobUrl,
   sameLogicalJob,
 } from "../../lib/job-identity";
+import { scoreStoredJob } from "../../lib/job-scoring";
+import { isBaiduTalentJobUrl, parseBaiduTalentJobHtml } from "../../lib/baidu-job-page";
 
 export const dynamic = "force-dynamic";
 
 type CaptureBody = Record<string, unknown>;
+
+async function resolveBaiduTalentPage(jobUrl: string) {
+  if (!isBaiduTalentJobUrl(jobUrl)) return null;
+  try {
+    const response = await fetch(jobUrl, {
+      headers: {
+        Accept: "text/html,application/xhtml+xml",
+        "User-Agent": "Mozilla/5.0 (compatible; IvyJobRadar/1.0; +https://ivy-job-radar.rourou1199.chatgpt.site)",
+      },
+      redirect: "follow",
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!response.ok) return null;
+    return parseBaiduTalentJobHtml(await response.text());
+  } catch {
+    return null;
+  }
+}
 
 function htmlEscape(value: unknown) {
   return cleanBookmarkText(value, 4_000)
@@ -105,7 +126,13 @@ export async function POST(request: NextRequest) {
   const { env } = await import("cloudflare:workers");
   const expectedKey = await deriveBookmarkCaptureKey(cleanBookmarkText(env.IVY_JOB_RADAR_SYNC_TOKEN));
   const providedKey = cleanBookmarkText(body.key, 200);
-  if (!expectedKey || !secureBookmarkKeyEqual(expectedKey, providedKey)) {
+  const configuredMaintenanceToken = cleanBookmarkText(env.CV_MAINTENANCE_TOKEN, 500);
+  const providedMaintenanceToken = cleanBookmarkText(request.headers.get("x-cv-maintenance-token"), 500);
+  const maintenanceAuthorized = Boolean(
+    configuredMaintenanceToken
+    && secureBookmarkKeyEqual(configuredMaintenanceToken, providedMaintenanceToken),
+  );
+  if (!maintenanceAuthorized && (!expectedKey || !secureBookmarkKeyEqual(expectedKey, providedKey))) {
     return wantsJson(request)
       ? NextResponse.json({ error: "Invalid bookmark capture key." }, { status: 401 })
       : resultPage({ ok: false, title: "书签需要重新安装", detail: "此 Chrome 书签已失效。请回到 Ivy Job Radar 重新拖动安装按钮。", status: 401 });
@@ -120,12 +147,24 @@ export async function POST(request: NextRequest) {
       : resultPage({ ok: false, title: "保存失败", detail: "当前页面不是可保存的公开 HTTP(S) 招聘链接。", status: 400 });
   }
 
+  const baiduPage = await resolveBaiduTalentPage(rawJobUrl);
   const sourcePageTitle = cleanBookmarkText(body.sourcePageTitle, 500);
-  const title = cleanBookmarkText(body.title, 500) || sourcePageTitle || "待补充职位名称";
-  const company = inferBookmarkCompany(body.company, rawJobUrl, title);
-  const location = cleanBookmarkText(body.location, 500);
-  const description = cleanBookmarkText(body.description, 50_000);
-  const suppliedApplicationId = cleanBookmarkText(body.applicationId, 500);
+  const resolvedFields = resolveBookmarkCaptureFields({
+    title: body.title,
+    company: body.company,
+    titleCandidates: body.titleCandidates,
+    companyCandidates: body.companyCandidates,
+    sourcePageTitle,
+    jobUrl: rawJobUrl,
+    confirmedFields: body.confirmedFields,
+  });
+  const title = baiduPage?.title || resolvedFields.title;
+  const company = baiduPage?.company || resolvedFields.company;
+  const location = baiduPage?.location || cleanBookmarkText(body.location, 500);
+  const rawDescription = baiduPage?.description || cleanBookmarkText(body.description, 80_000);
+  const descriptionExtraction = extractCoreJobDescription(rawDescription);
+  const description = descriptionExtraction.text;
+  const suppliedApplicationId = baiduPage?.applicationId || cleanBookmarkText(body.applicationId, 500);
   const captureId = cleanBookmarkText(body.captureId, 200);
   const applicationId = suppliedApplicationId || (isPlaceholderJobTitle(title)
     ? deriveAmbiguousCaptureId({
@@ -139,6 +178,19 @@ export async function POST(request: NextRequest) {
   const region = inferBookmarkRegion(rawJobUrl, location, cleanBookmarkText(body.addressCountry, 200));
   const track = inferBookmarkTrack(title, description);
   const skills = inferBookmarkSkills(title, description);
+  const scoring = scoreStoredJob({ title, content: description, region });
+  if (body.previewOnly === true) {
+    return NextResponse.json({
+      ok: true,
+      preview: true,
+      company,
+      title,
+      location,
+      applicationId,
+      description,
+      descriptionExtraction: descriptionExtraction.method,
+    });
+  }
   const now = new Date().toISOString();
   const evidence = isPlaceholderJobTitle(title)
     ? "你通过 Chrome 书签手动加入；页面只暴露了招聘门户标题，系统用完整 JD 内容生成独立岗位身份。"
@@ -188,8 +240,8 @@ export async function POST(request: NextRequest) {
       location: location || existing.location,
       region,
       track,
-      score: Math.max(existing.score, 100),
-      visa: region === "中国" ? "不适用" : existing.visa || "JD 未明确",
+      score: scoring.score,
+      visa: scoring.visa,
       evidence,
       description: description.length >= existing.description.length ? description : existing.description,
       skills: skills.length ? JSON.stringify(skills) : existing.skills,
@@ -210,8 +262,8 @@ export async function POST(request: NextRequest) {
       location,
       region,
       track,
-      score: 100,
-      visa: region === "中国" ? "不适用" : "JD 未明确",
+      score: scoring.score,
+      visa: scoring.visa,
       evidence,
       description,
       skills: JSON.stringify(skills),
@@ -239,6 +291,8 @@ export async function POST(request: NextRequest) {
     canonicalUrl,
     applicationId,
     status: BOOKMARK_CAPTURE_STATUS,
+    description,
+    descriptionExtraction: descriptionExtraction.method,
   };
   if (wantsJson(request)) return NextResponse.json(result, { status: created ? 201 : 200 });
   return resultPage({

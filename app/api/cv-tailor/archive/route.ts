@@ -15,6 +15,7 @@ import {
   type ArchiveLanguage,
   type ArchiveTrack,
 } from "../../../lib/application-archive";
+import { extractCoreJobDescription } from "../../../lib/job-description";
 
 export const dynamic = "force-dynamic";
 
@@ -280,7 +281,7 @@ export async function POST(request: NextRequest) {
     const job = allJobs.find((row) => application.jobUrl && row.jobUrl === application.jobUrl)
       ?? allJobs.find((row) => row.company === application.company && row.title === application.title)
       ?? null;
-    const jd = jdOverride || job?.description?.trim() || "";
+    const jd = jdOverride || extractCoreJobDescription(job?.description || "").text;
     if (!jd) return NextResponse.json({ error: "该申请没有完整 JD，不能创建申请档案。", code: "JD_REQUIRED" }, { status: 400 });
 
     const archiveId = stableArchiveId(application.company, application.id, application.applicationId);

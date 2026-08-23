@@ -11,7 +11,9 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
         self.assertIn('"gh_jid"', helper)
         self.assertIn('"currentjobid"', helper)
         self.assertIn('"requisitionid"', helper)
-        self.assertIn("if (leftId && rightId) return leftId === rightId", helper)
+        self.assertIn("Strong posting identity outranks unreliable scraped display fields", helper)
+        self.assertIn("if (leftId === rightId)", helper)
+        self.assertIn("if (sameCanonical) return true", helper)
         tracking_block = helper.split("const TRACKING_QUERY_KEYS", 1)[1].split("]);", 1)[0]
         self.assertNotIn('"gh_jid"', tracking_block)
         self.assertNotIn('"jobid"', tracking_block)
@@ -40,7 +42,7 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
         self.assertIn("sameLogicalJob", display)
         self.assertIn("extractStableJobId", display)
         self.assertIn("if (leftId && rightId) return false", display)
-        self.assertIn("sameDisplayedJob(candidate, row)", jobs_route)
+        self.assertIn("sameDisplayedJob(result[index], row)", jobs_route)
         self.assertIn("sameLogicalJob(row, incomingIdentity)", jobs_route)
 
     def test_all_ingestion_paths_use_stable_identity(self):
@@ -70,22 +72,24 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
 
     def test_bookmarklet_prefers_job_specific_title_and_id_fields(self):
         source = (ROOT / "app" / "bookmarklet" / "bookmarklet-installer.tsx").read_text(encoding="utf-8")
-        title_line = next(line for line in source.splitlines() if line.startswith("const title="))
-        self.assertLess(title_line.index('[data-testid*="job-title"]'), title_line.index("'h1'"))
-        self.assertIn('data-automation-id="jobPostingHeader"', title_line)
+        candidates_line = next(line for line in source.splitlines() if line.startswith("const titleCandidates="))
+        self.assertLess(candidates_line.index('[data-testid*="job-title"]'), candidates_line.index('candidate("h1"'))
+        self.assertIn('data-automation-id="jobPostingTitle"', candidates_line)
+        self.assertIn('data-automation-id="jobPostingHeader"] h2', candidates_line)
+        self.assertNotIn("'[data-automation-id=\"jobPostingHeader\"]'", candidates_line)
         self.assertIn('params.get("currentJobId")', source)
         self.assertIn('params.get("postingId")', source)
         self.assertIn('params.get("vacancyId")', source)
 
-    def test_hard_requirement_ignore_waits_for_persistence_then_reloads(self):
-        source = (ROOT / "app" / "hard-requirement-ignore-actions.tsx").read_text(encoding="utf-8")
-        self.assertIn("await submitHardRequirement(company, title, jobUrl, reason)", source)
-        self.assertIn("jobUrl,", source)
-        self.assertIn("window.location.reload()", source)
-        self.assertIn("正在保存忽略原因并从岗位列表移除", source)
+    def test_hard_requirement_ignore_updates_react_state_after_persistence(self):
+        source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+        self.assertIn("const response = await fetch(\"/api/ignored-jobs\"", source)
+        self.assertIn("jobUrl: ignoreTarget.jobUrl", source)
+        self.assertIn("setDailyJobs((current) => current.filter", source)
+        self.assertNotIn("window.location.reload()", source)
         self.assertLess(
-            source.index("await submitHardRequirement(company, title, jobUrl, reason)"),
-            source.index("closeDialog(dialog)"),
+            source.index("const response = await fetch(\"/api/ignored-jobs\"", source.index("const ignoreJob")),
+            source.index("setDailyJobs((current) => current.filter", source.index("const ignoreJob")),
         )
 
 

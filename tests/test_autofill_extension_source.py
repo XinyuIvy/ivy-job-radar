@@ -10,7 +10,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_manifest_remains_manual_trigger_only(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.4.11")
+        self.assertEqual(manifest["version"], "0.4.12")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
@@ -154,7 +154,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
-        self.assertIn("AUTOFILL V4.11", popup_html)
+        self.assertIn("AUTOFILL V4.12", popup_html)
         self.assertNotIn("AUTOFILL V3", popup_html)
         self.assertIn("从已提交申请中手动选择", popup_html)
         self.assertIn('src="manual-fallback.js"', popup_html)
@@ -173,6 +173,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         resume_route = (ROOT / "app" / "api" / "autofill" / "resume" / "route.ts").read_text(encoding="utf-8")
         packet_route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
         global_route = (ROOT / "app" / "api" / "autofill" / "general-profile" / "route.ts").read_text(encoding="utf-8")
+        global_source = (ROOT / "app" / "lib" / "global-autofill-profile.ts").read_text(encoding="utf-8")
         job_radar = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn('const statuses = ["准备材料", "已申请"', job_radar)
         for source in [context_route, resume_route, packet_route, global_route]:
@@ -199,9 +200,10 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("row.status === AUTOFILL_APPLICATION_STATUS", context_route)
         self.assertIn("application.status !== AUTOFILL_APPLICATION_STATUS", resume_route)
         self.assertIn("application.status !== AUTOFILL_APPLICATION_STATUS", packet_route)
-        self.assertIn("application-autofill-profile.md", global_route)
-        self.assertIn("global-application-autofill-profile-v1", global_route)
-        self.assertIn("CV_GITHUB_TOKEN", global_route)
+        self.assertIn("fetchRepositoryGlobalAutofillProfile", global_route)
+        self.assertIn("application-autofill-profile.md", global_source)
+        self.assertIn("global-application-autofill-profile-v1", global_source)
+        self.assertIn("CV_GITHUB_TOKEN", global_source)
 
 
 if __name__ == "__main__":

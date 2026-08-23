@@ -8,88 +8,50 @@ import {
   type FitMatchInput,
 } from "./lib/application-fit-score";
 
-type ApplicationPrefill = {
-  applicationId: number;
+type JobPrefill = {
+  jobId: number;
   track: string;
   language: "en" | "zh";
   jd: string;
-  resumeVersion?: string;
 };
 
 type AnalysisResponse = {
   matches?: FitMatchInput[];
   error?: string;
-  code?: string;
 };
 
 type CacheEntry = {
-  version: 1;
-  fingerprint: string;
-  calculatedAt: number;
+  version: 2;
   score: ApplicationFactFitScore;
 };
 
-const CACHE_PREFIX = "ivy-job-radar:fact-fit:v1:";
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const CACHE_PREFIX = "ivy-job-radar:fact-fit-job:v2:";
 const MAX_CONCURRENT = 2;
 
-function normalized(value: string) {
-  return value.replace(/\s+/g, " ").trim();
+function cacheKey(jobId: number) {
+  return `${CACHE_PREFIX}${jobId}`;
 }
 
-function pendingTabIsActive() {
-  const heroTitle = Array.from(document.querySelectorAll<HTMLElement>(".hero h1"))
-    .find((element) => element.offsetParent !== null);
-  return normalized(heroTitle?.textContent || "") === "候选岗位";
-}
-
-function applicationIdFromCard(card: HTMLElement) {
-  const link = card.querySelector<HTMLAnchorElement>('a[data-cv-tailor-action="true"], a[href^="/cv-tailor?applicationId="]');
-  if (!link) return null;
+function readCache(jobId: number) {
   try {
-    const url = new URL(link.href, window.location.origin);
-    const id = Number(url.searchParams.get("applicationId"));
-    return Number.isInteger(id) && id > 0 ? id : null;
-  } catch {
-    return null;
-  }
-}
-
-function hashText(value: string) {
-  let hash = 2166136261;
-  for (const character of value) {
-    hash ^= character.codePointAt(0) ?? 0;
-    hash = Math.imul(hash, 16777619);
-  }
-  return (hash >>> 0).toString(36);
-}
-
-function cacheKey(applicationId: number) {
-  return `${CACHE_PREFIX}${applicationId}`;
-}
-
-function readCache(applicationId: number, fingerprint: string) {
-  try {
-    const raw = localStorage.getItem(cacheKey(applicationId));
+    const raw = localStorage.getItem(cacheKey(jobId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as CacheEntry;
-    if (parsed.version !== 1 || parsed.fingerprint !== fingerprint) return null;
-    if (!parsed.calculatedAt || Date.now() - parsed.calculatedAt > CACHE_TTL_MS) return null;
-    return parsed.score;
+    return parsed.version === 2 && parsed.score ? parsed.score : null;
   } catch {
     return null;
   }
 }
 
-function writeCache(applicationId: number, fingerprint: string, score: ApplicationFactFitScore) {
+function writeCache(jobId: number, score: ApplicationFactFitScore) {
   try {
-    const value: CacheEntry = { version: 1, fingerprint, calculatedAt: Date.now(), score };
-    localStorage.setItem(cacheKey(applicationId), JSON.stringify(value));
+    const value: CacheEntry = { version: 2, score };
+    localStorage.setItem(cacheKey(jobId), JSON.stringify(value));
   } catch {}
 }
 
-function clearCache(applicationId: number) {
-  try { localStorage.removeItem(cacheKey(applicationId)); } catch {}
+function clearCache(jobId: number) {
+  try { localStorage.removeItem(cacheKey(jobId)); } catch {}
 }
 
 function scoreTone(score: number) {
@@ -98,252 +60,199 @@ function scoreTone(score: number) {
   return "low";
 }
 
-function metric(label: string, value: number, inverse = false) {
-  const item = document.createElement("div");
-  item.className = "fact-fit-metric";
-  const name = document.createElement("span");
-  name.textContent = label;
-  const strong = document.createElement("strong");
-  strong.textContent = `${value}`;
-  if (inverse) strong.title = "数值越低越好";
-  item.append(name, strong);
-  return item;
+function scoreTitle(score: ApplicationFactFitScore) {
+  const lines = [
+    `事实覆盖 ${score.evidenceCoverage}`,
+    `Direct ${score.directCoverage}`,
+    `可迁移 ${score.transferableCoverage}`,
+    `当前 CV ${score.cvCoverage}`,
+    `Gap 风险 ${score.gapRisk}`,
+  ];
+  if (score.topMatches.length) lines.push(`最强命中：${score.topMatches.join("、")}`);
+  if (score.gaps.length) lines.push(`主要缺口：${score.gaps.join("、")}`);
+  return lines.join("。");
 }
 
-function tag(label: string, value: number) {
-  const span = document.createElement("span");
-  span.textContent = `${label} ${value}`;
-  return span;
+function renderLoading(element: HTMLElement) {
+  element.className = "fact-fit-inline fact-fit-loading";
+  element.textContent = "事实库评分中…";
+  element.title = "正在使用 Fact Master Match 读取事实库评分。";
 }
 
-function labeledLine(label: string, values: string[]) {
-  const line = document.createElement("p");
-  const bold = document.createElement("b");
-  bold.textContent = label;
-  line.append(bold, document.createTextNode(values.join(" · ")));
-  return line;
+function renderScore(element: HTMLElement, score: ApplicationFactFitScore) {
+  element.className = `fact-fit-inline fact-fit-${scoreTone(score.score)}`;
+  element.textContent = `${score.score} · ${score.label} · 重新评分`;
+  element.title = `${scoreTitle(score)}。点击这里重新评分。`;
+  element.dataset.factFitState = "ready";
 }
 
-function renderScore(panel: HTMLElement, applicationId: number, score: ApplicationFactFitScore, refresh: () => void) {
-  panel.replaceChildren();
-  panel.dataset.factFitState = "ready";
-  panel.className = `fact-fit-panel fact-fit-${scoreTone(score.score)}`;
-
-  const head = document.createElement("div");
-  head.className = "fact-fit-head";
-  const title = document.createElement("div");
-  const eyebrow = document.createElement("span");
-  eyebrow.className = "fact-fit-eyebrow";
-  eyebrow.textContent = "FACT MASTER MATCH";
-  const heading = document.createElement("strong");
-  heading.textContent = `事实库匹配 ${score.score} · ${score.label}`;
-  title.append(eyebrow, heading);
-  const refreshButton = document.createElement("button");
-  refreshButton.type = "button";
-  refreshButton.textContent = "重新评分";
-  refreshButton.addEventListener("click", () => {
-    clearCache(applicationId);
-    refresh();
-  });
-  head.append(title, refreshButton);
-
-  const metrics = document.createElement("div");
-  metrics.className = "fact-fit-metrics";
-  metrics.append(
-    metric("事实覆盖", score.evidenceCoverage),
-    metric("Direct 覆盖", score.directCoverage),
-    metric("可迁移覆盖", score.transferableCoverage),
-    metric("当前 CV 覆盖", score.cvCoverage),
-    metric("Gap 风险", score.gapRisk, true),
-  );
-
-  const details = document.createElement("details");
-  details.className = "fact-fit-details";
-  const summary = document.createElement("summary");
-  summary.textContent = "查看细分匹配";
-  const counts = document.createElement("div");
-  counts.className = "fact-fit-tags";
-  counts.append(
-    tag("Direct", score.counts.direct),
-    tag("Transferable", score.counts.transferable),
-    tag("Coursework", score.counts.coursework),
-    tag("Adjacent", score.counts.adjacent),
-    tag("Unsupported", score.counts.unsupported),
-  );
-  details.append(summary, counts);
-
-  if (score.topMatches.length) details.append(labeledLine("最强命中：", score.topMatches));
-  if (score.gaps.length) details.append(labeledLine("主要缺口：", score.gaps));
-
-  const note = document.createElement("p");
-  note.className = "fact-fit-note";
-  note.textContent = "基于完整 JD 与 CV 私有事实库 / capability ontology 的初步匹配；Direct、Transferable、Adjacent 边界沿用定制 CV 分析规则。";
-  details.append(note);
-
-  panel.append(head, metrics, details);
-}
-
-function renderPending(panel: HTMLElement) {
-  panel.className = "fact-fit-panel fact-fit-loading";
-  panel.dataset.factFitState = "loading";
-  panel.innerHTML = '<div class="fact-fit-head"><div><span class="fact-fit-eyebrow">FACT MASTER MATCH</span><strong>正在匹配事实库…</strong></div></div><p class="fact-fit-note">首次评分会读取完整 JD 和私有 CV 事实索引；结果会缓存 24 小时。</p>';
-}
-
-function renderMissingJd(panel: HTMLElement, applicationId: number) {
-  panel.className = "fact-fit-panel fact-fit-low";
-  panel.dataset.factFitState = "missing-jd";
-  panel.innerHTML = `<div class="fact-fit-head"><div><span class="fact-fit-eyebrow">FACT MASTER MATCH</span><strong>待补完整 JD</strong></div><a href="/cv-tailor?applicationId=${applicationId}">补 JD ↗</a></div><p class="fact-fit-note">没有完整 JD 时不生成匹配分，避免用职位名称猜测。</p>`;
-}
-
-function renderError(panel: HTMLElement, message: string, retry: () => void) {
-  panel.className = "fact-fit-panel fact-fit-low";
-  panel.dataset.factFitState = "error";
-  panel.replaceChildren();
-  const head = document.createElement("div");
-  head.className = "fact-fit-head";
-  const title = document.createElement("div");
-  const eyebrow = document.createElement("span");
-  eyebrow.className = "fact-fit-eyebrow";
-  eyebrow.textContent = "FACT MASTER MATCH";
-  const strong = document.createElement("strong");
-  strong.textContent = "评分暂时失败";
-  title.append(eyebrow, strong);
-  const button = document.createElement("button");
-  button.type = "button";
-  button.textContent = "重试";
-  button.addEventListener("click", retry);
-  head.append(title, button);
-  const note = document.createElement("p");
-  note.className = "fact-fit-note";
-  note.textContent = message;
-  panel.append(head, note);
-}
-
-function hideLegacyFit(card: HTMLElement) {
-  const rows = Array.from(card.querySelectorAll<HTMLElement>(".application-details > span"));
-  const legacy = rows.find((row) => normalized(row.querySelector("b")?.textContent || "") === "匹配度");
-  if (legacy) legacy.style.setProperty("display", "none", "important");
+function renderMessage(element: HTMLElement, message: string, tone: "missing" | "error") {
+  element.className = `fact-fit-inline fact-fit-${tone}`;
+  element.textContent = tone === "missing" ? "待补完 JD" : "评分失败";
+  element.title = message;
+  element.dataset.factFitState = tone;
 }
 
 function installStyles() {
-  if (document.getElementById("ivy-fact-fit-style")) return;
+  if (document.getElementById("candidate-fact-fit-styles")) return;
   const style = document.createElement("style");
-  style.id = "ivy-fact-fit-style";
+  style.id = "candidate-fact-fit-styles";
   style.textContent = `
-    .fact-fit-panel{margin:16px 0 4px;padding:16px;border:1px solid #d8dfda;border-radius:16px;background:#f8faf8;color:#23312a}
-    .fact-fit-high{border-color:#b9d9c8;background:#f2f8f4}.fact-fit-medium{border-color:#d9d3b8;background:#fbfaf3}.fact-fit-low{border-color:#e3c8c2;background:#fdf7f5}
-    .fact-fit-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.fact-fit-head>div{display:grid;gap:3px}.fact-fit-eyebrow{font-size:10px;letter-spacing:.12em;font-weight:850;color:#617269}.fact-fit-head strong{font-size:17px;color:#155e46}
-    .fact-fit-head button,.fact-fit-head a{border:0;background:transparent;color:#53635a;font:700 12px/1.2 inherit;text-decoration:none;cursor:pointer;padding:2px 0}
-    .fact-fit-metrics{display:grid;grid-template-columns:repeat(5,minmax(80px,1fr));gap:8px;margin-top:13px}.fact-fit-metric{display:grid;gap:3px;padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.76)}.fact-fit-metric span{font-size:11px;color:#6b776f}.fact-fit-metric strong{font-size:17px}
-    .fact-fit-details{margin-top:12px}.fact-fit-details summary{cursor:pointer;font-size:12px;font-weight:800;color:#526159}.fact-fit-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.fact-fit-tags span{border-radius:999px;background:#eef2ef;padding:5px 8px;font-size:11px}.fact-fit-details p{font-size:12px;line-height:1.6;color:#5c6961;margin:7px 0}.fact-fit-note{font-size:11px!important;line-height:1.55!important;color:#6b776f!important;margin:8px 0 0!important}
-    @media(max-width:760px){.fact-fit-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.fact-fit-metric:last-child{grid-column:1/-1}}
+    .fact-fit-inline { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .fact-fit-inline[data-fact-fit-state="ready"] { cursor: pointer; }
+    .fact-fit-high { color: #155942; }
+    .fact-fit-medium { color: #8a5c0d; }
+    .fact-fit-low, .fact-fit-error { color: #a34135; }
+    .fact-fit-loading, .fact-fit-missing { color: #718077; font-weight: 600; }
   `;
   document.head.append(style);
 }
 
-export default function PendingApplicationFitScores() {
+export default function CandidateFactFitScores() {
   useEffect(() => {
+    installStyles();
     let disposed = false;
-    let active = 0;
-    const queue: Array<() => Promise<void>> = [];
+    let activeCount = 0;
+    const queued = new Set<number>();
     const running = new Set<number>();
+    const queue: Array<() => Promise<void>> = [];
 
     const pump = () => {
       if (disposed) return;
-      while (active < MAX_CONCURRENT && queue.length) {
+      while (activeCount < MAX_CONCURRENT && queue.length) {
         const task = queue.shift();
         if (!task) break;
-        active += 1;
+        activeCount += 1;
         void task().finally(() => {
-          active -= 1;
+          activeCount -= 1;
           pump();
         });
       }
     };
 
-    const scoreApplication = async (applicationId: number, panel: HTMLElement, force = false) => {
-      if (running.has(applicationId) && !force) return;
-      running.add(applicationId);
-      renderPending(panel);
+    const scoreJob = async (jobId: number, element: HTMLElement, force = false) => {
+      if (running.has(jobId)) return;
+      running.add(jobId);
+      renderLoading(element);
       try {
-        const applicationResponse = await fetch(`/api/cv-tailor/application?applicationId=${applicationId}`, { cache: "no-store" });
-        const application = await applicationResponse.json() as ApplicationPrefill & { error?: string };
-        if (!applicationResponse.ok) throw new Error(application.error || "无法读取申请信息。");
-        const jd = String(application.jd || "").trim();
-        if (!jd) {
-          renderMissingJd(panel, applicationId);
-          return;
-        }
-
-        const fingerprint = hashText([
-          application.track,
-          application.language,
-          application.resumeVersion || "",
-          jd,
-        ].join("\u0000"));
         if (!force) {
-          const cached = readCache(applicationId, fingerprint);
-          if (cached) {
-            renderScore(panel, applicationId, cached, () => void scoreApplication(applicationId, panel, true));
+          const localScore = readCache(jobId);
+          if (localScore) {
+            renderScore(element, localScore);
             return;
           }
+          const storedResponse = await fetch(`/api/cv-tailor/job-score?jobId=${jobId}`, { cache: "no-store" });
+          if (storedResponse.ok) {
+            const stored = await storedResponse.json() as { score?: ApplicationFactFitScore | null };
+            if (stored.score) {
+              writeCache(jobId, stored.score);
+              renderScore(element, stored.score);
+              return;
+            }
+          }
+        }
+
+        const jobResponse = await fetch(`/api/cv-tailor/job?jobId=${jobId}`, { cache: "no-store" });
+        const job = await jobResponse.json() as JobPrefill & { error?: string };
+        if (!jobResponse.ok) throw new Error(job.error || "无法读取岗位信息。");
+        const jd = String(job.jd || "").trim();
+        if (!jd) {
+          renderMessage(element, "该岗位没有可用的完整 JD，暂时无法使用事实库评分。", "missing");
+          return;
         }
 
         const analysisResponse = await fetch("/api/cv-tailor/analyze", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ track: application.track, language: application.language, jd }),
+          body: JSON.stringify({ track: job.track, language: job.language, jd }),
         });
         const analysis = await analysisResponse.json() as AnalysisResponse;
         if (!analysisResponse.ok) throw new Error(analysis.error || "事实库匹配失败。");
         const score = calculateApplicationFactFit(Array.isArray(analysis.matches) ? analysis.matches : []);
-        writeCache(applicationId, fingerprint, score);
-        renderScore(panel, applicationId, score, () => void scoreApplication(applicationId, panel, true));
+        writeCache(jobId, score);
+        renderScore(element, score);
+        void fetch("/api/cv-tailor/job-score", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jobId, score }),
+          keepalive: true,
+        });
       } catch (error) {
-        renderError(panel, error instanceof Error ? error.message : "事实库匹配失败。", () => void scoreApplication(applicationId, panel, true));
+        renderMessage(
+          element,
+          error instanceof Error ? error.message : "事实库匹配失败。",
+          "error",
+        );
       } finally {
-        running.delete(applicationId);
+        running.delete(jobId);
       }
     };
 
-    const enqueue = (applicationId: number, panel: HTMLElement) => {
-      if (panel.dataset.factFitQueued === "true") return;
-      panel.dataset.factFitQueued = "true";
-      queue.push(() => scoreApplication(applicationId, panel));
+    const enqueue = (jobId: number, element: HTMLElement, force = false) => {
+      if (queued.has(jobId) || (!force && element.dataset.factFitState === "ready")) return;
+      queued.add(jobId);
+      queue.push(async () => {
+        try {
+          await scoreJob(jobId, element, force);
+        } finally {
+          queued.delete(jobId);
+        }
+      });
       pump();
     };
 
+    const viewportObserver = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const element = entry.target as HTMLElement;
+        const jobId = Number(element.dataset.factFitJob);
+        if (Number.isSafeInteger(jobId) && jobId > 0) enqueue(jobId, element);
+        viewportObserver.unobserve(element);
+      }
+    }, { rootMargin: "600px" });
+
     const enhance = () => {
-      if (disposed || !pendingTabIsActive()) return;
-      installStyles();
-      const cards = Array.from(document.querySelectorAll<HTMLElement>("section.application-list article.application-card"));
-      for (const card of cards) {
-        const applicationId = applicationIdFromCard(card);
-        if (!applicationId) continue;
-        hideLegacyFit(card);
-        let panel = card.querySelector<HTMLElement>(`:scope > [data-fact-fit-application="${applicationId}"]`);
-        if (!panel) {
-          panel = document.createElement("section");
-          panel.dataset.factFitApplication = String(applicationId);
-          const note = card.querySelector<HTMLElement>(":scope > .record-note");
-          if (note) card.insertBefore(panel, note);
-          else card.append(panel);
+      if (disposed) return;
+      for (const element of document.querySelectorAll<HTMLElement>("[data-fact-fit-job]")) {
+        if (element.dataset.factFitObserved === "true") continue;
+        element.dataset.factFitObserved = "true";
+        const jobId = Number(element.dataset.factFitJob);
+        const cached = Number.isSafeInteger(jobId) ? readCache(jobId) : null;
+        if (cached) {
+          renderScore(element, cached);
+          continue;
         }
-        enqueue(applicationId, panel);
+        renderLoading(element);
+        viewportObserver.observe(element);
       }
     };
 
+    const refreshScore = (event: MouseEvent) => {
+      const target = event.target instanceof Element
+        ? event.target.closest<HTMLElement>("[data-fact-fit-job]")
+        : null;
+      if (!target || target.dataset.factFitState !== "ready") return;
+      const jobId = Number(target.dataset.factFitJob);
+      if (!Number.isSafeInteger(jobId) || jobId <= 0) return;
+      event.preventDefault();
+      event.stopPropagation();
+      clearCache(jobId);
+      target.dataset.factFitState = "refreshing";
+      enqueue(jobId, target, true);
+    };
+
     enhance();
-    const observer = new MutationObserver(enhance);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class", "href"] });
-    const focus = () => enhance();
-    window.addEventListener("focus", focus);
+    document.addEventListener("click", refreshScore, true);
+    window.addEventListener("ivy-job-radar-candidate-rendered", enhance);
+    window.addEventListener("focus", enhance);
 
     return () => {
       disposed = true;
       queue.length = 0;
-      observer.disconnect();
-      window.removeEventListener("focus", focus);
+      viewportObserver.disconnect();
+      document.removeEventListener("click", refreshScore, true);
+      window.removeEventListener("ivy-job-radar-candidate-rendered", enhance);
+      window.removeEventListener("focus", enhance);
     };
   }, []);
 

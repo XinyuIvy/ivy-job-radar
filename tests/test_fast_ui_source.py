@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class FastUiSourceTests(unittest.TestCase):
     def test_scan_polling_is_view_scoped_and_not_every_second(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
-        self.assertIn('if (view !== "today") return;', source)
+        self.assertIn('if (view !== "today" || !scanPanelOpen) return;', source)
         self.assertIn('window.setInterval(refreshStatus, 10000)', source)
         self.assertIn('window.setInterval(() => setClock(Date.now()), 5000)', source)
         self.assertNotIn('window.setInterval(() => setClock(Date.now()), 1000)', source)
@@ -31,7 +31,8 @@ class FastUiSourceTests(unittest.TestCase):
     def test_common_mutations_are_optimistic(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn('setForm(null);\n    try {', source)
-        self.assertIn('const snapshot = applicationsList;', source)
+        self.assertIn('const savedSnapshot = saved;', source)
+        self.assertLess(source.index('setSaved((current)', source.index('const toggleSaved')), source.index('await fetch(', source.index('const toggleSaved')))
         self.assertIn('setTasks((current) => current.map', source)
 
     def test_application_save_does_not_scan_full_table(self):
@@ -40,11 +41,22 @@ class FastUiSourceTests(unittest.TestCase):
         self.assertIn('.where(candidateCondition)', route)
         self.assertNotIn('const rows = await db.select().from(applications);', route)
 
-    def test_jobs_seed_is_warm_worker_cached(self):
+    def test_jobs_get_does_not_write_legacy_seed_rows(self):
         route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn('let initialJobsSeeded = false;', route)
-        self.assertIn('if (initialJobsSeeded) return db;', route)
-        self.assertIn('initialJobsSeeded = true;', route)
+        self.assertNotIn('initialJobs', route)
+        self.assertNotIn('seedInitialJobs', route)
+        self.assertIn('export async function GET()', route)
+        self.assertIn('const db = await getDb();', route)
+
+    def test_jobs_response_carries_saved_state_and_uses_indexed_deduplication(self):
+        route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
+        client = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+        self.assertIn('saved: savedIds.has(row.id)', route)
+        self.assertIn('deduplicateDisplayedJobs', route)
+        self.assertIn('buildTrackedApplicationMatcher', route)
+        self.assertNotIn('result.findIndex((candidate) => sameDisplayedJob', route)
+        self.assertIn('setSaved(rows.filter((row) => row.saved).map((row) => row.id))', client)
+        self.assertNotIn('fetch("/api/saved-jobs", { cache: "no-store" })', client)
 
 
 if __name__ == "__main__":

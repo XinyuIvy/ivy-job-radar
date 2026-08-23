@@ -131,6 +131,12 @@ export const savedJobs = sqliteTable("saved_jobs", {
   createdAt: text("created_at").notNull(),
 });
 
+export const jobFactScores = sqliteTable("job_fact_scores", {
+  jobId: integer("job_id").primaryKey(),
+  scoreJson: text("score_json").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
 export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   jobId: integer("job_id").notNull(),
@@ -146,6 +152,18 @@ export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
   promptVersion: text("prompt_version").notNull().default(""),
   agentTriggerRunId: text("agent_trigger_run_id").notNull().default(""),
   conversationUrl: text("conversation_url").notNull().default(""),
+  openaiConversationId: text("openai_conversation_id").notNull().default(""),
+  openaiResponseId: text("openai_response_id").notNull().default(""),
+  openaiContainerId: text("openai_container_id").notNull().default(""),
+  model: text("model").notNull().default(""),
+  serviceTier: text("service_tier").notNull().default(""),
+  draftTexKey: text("draft_tex_key").notNull().default(""),
+  draftPdfKey: text("draft_pdf_key").notNull().default(""),
+  draftTextKey: text("draft_text_key").notNull().default(""),
+  reviewKey: text("review_key").notNull().default(""),
+  inputTokens: integer("input_tokens").notNull().default(0),
+  cachedInputTokens: integer("cached_input_tokens").notNull().default(0),
+  outputTokens: integer("output_tokens").notNull().default(0),
   attempts: integer("attempts").notNull().default(0),
   lastError: text("last_error").notNull().default(""),
   createdAt: text("created_at").notNull(),
@@ -158,6 +176,20 @@ export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
   uniqueIndex("cv_prebuild_jobs_pending_job_unique")
     .on(table.jobId)
     .where(sql`${table.generationKey} IS NULL`),
+]);
+
+export const cvPrebuildMessages = sqliteTable("cv_prebuild_messages", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  cvPrebuildJobId: integer("cv_prebuild_job_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull().default(""),
+  openaiResponseId: text("openai_response_id"),
+  status: text("status").notNull().default("completed"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [
+  index("cv_prebuild_messages_job_created_at_idx").on(table.cvPrebuildJobId, table.createdAt),
+  uniqueIndex("cv_prebuild_messages_response_unique").on(table.openaiResponseId),
 ]);
 
 export const dataQualityChecks = sqliteTable("data_quality_checks", {
@@ -272,6 +304,7 @@ export const userProfiles = sqliteTable("user_profiles", {
   targetIndustries: text("target_industries").notNull().default(""),
   professionalSummary: text("professional_summary").notNull().default(""),
   skills: text("skills").notNull().default("[]"),
+  autofillProfileJson: text("autofill_profile_json").notNull().default("{}"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

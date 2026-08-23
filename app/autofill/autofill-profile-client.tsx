@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.11 已加入全板块自动添加：</strong><span>教育、经历、项目、获奖、语言、作品、校园经历和论文会按权威资料条数点击对应板块的“添加”；论文等级只读取已核验的期刊评级，仍然只填空白字段。</span></div>
-        <a href="/ivy-job-autofill-0.4.11.zip" download>下载全板块自动添加版扩展</a>
+        <div><strong>扩展 0.4.12 已接入申请固定资料库：</strong><span>联系方式、地址、固定问答、奖项和论文会读取 Job Radar 最新保存值；教育、经历、项目和技能仍由 CV 资料决定。</span></div>
+        <a href="/ivy-job-autofill-0.4.12.zip" download>下载固定资料库版扩展</a>
       </section>
 
       <form onSubmit={save}>

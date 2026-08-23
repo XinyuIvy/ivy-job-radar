@@ -46,13 +46,11 @@ class CvTailorSourceTests(unittest.TestCase):
         self.assertNotIn("CV_GITHUB_TOKEN", route)
         self.assertNotIn('/pulls', route)
 
-    def test_workspace_is_linked_from_pending_application_actions(self):
-        layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
-        actions = (ROOT / "app" / "application-cv-actions.tsx").read_text(encoding="utf-8")
-        self.assertIn("<ApplicationCvActions />", layout)
-        self.assertIn("/cv-tailor?applicationId=", actions)
-        self.assertIn("定制 CV", actions)
-        self.assertNotIn('href="/cv-tailor"', layout)
+    def test_manual_workspace_remains_linked_from_pending_application_actions(self):
+        actions = (ROOT / "app" / "applications" / "[applicationId]" / "page.tsx").read_text(encoding="utf-8")
+        self.assertIn('href={`/cv-tailor?applicationId=${application.id}`}', actions)
+        self.assertIn("手动定制 CV", actions)
+        self.assertIn("打开 CV Chat", actions)
 
     def test_tailor_requires_explicit_template_selection_before_archive(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")

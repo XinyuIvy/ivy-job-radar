@@ -16,11 +16,11 @@ class CvPrebuildPhase1SourceTests(unittest.TestCase):
         self.assertIn('CREATE TABLE `cv_prebuild_jobs`', migration)
         self.assertNotIn('ALTER TABLE `scan_status`', migration)
 
-    def test_saved_job_route_only_initializes_state_and_never_calls_an_agent(self):
+    def test_saved_job_route_only_persists_the_favorite(self):
         route = (ROOT / "app" / "api" / "saved-jobs" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("initializeCvPrebuildJob", route)
         self.assertIn("cancelCvPrebuildJob", route)
-        self.assertIn('let prebuildStatus = "failed_retryable"', route)
+        self.assertNotIn("initializeCvPrebuildJob", route)
+        self.assertNotIn("prebuildStatus", route)
         self.assertNotIn("fetch(", route)
         self.assertNotIn("api.openai.com", route)
 

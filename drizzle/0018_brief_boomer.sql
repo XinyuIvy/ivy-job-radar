@@ -1,0 +1,1 @@
+ALTER TABLE `user_profiles` ADD `autofill_profile_json` text DEFAULT '{}' NOT NULL;

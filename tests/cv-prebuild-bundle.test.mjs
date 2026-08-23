@@ -46,6 +46,14 @@ test("temporary template selection follows region and job track", () => {
     recommendCvPrebuildTemplate({ ...job, region: "美国", track: "Medical Device" }).templateFile,
     "cv_pharma.tex",
   );
+  assert.equal(
+    recommendCvPrebuildTemplate(job, "tech").templateFile,
+    "cv_tech_cn.tex",
+  );
+  assert.equal(
+    recommendCvPrebuildTemplate({ ...job, region: "美国" }, "consulting", "zh").templateFile,
+    "cv_healthcare_consulting_cn.tex",
+  );
 });
 
 test("generation key is stable and changes with every frozen authority", async () => {
@@ -54,6 +62,7 @@ test("generation key is stable and changes with every frozen authority", async (
     jd: "Complete JD",
     cvCommit: "1".repeat(40),
     factMasterSha: "2".repeat(40),
+    generationRules: "Six explicit review rounds",
     promptVersion: "cv-prebuilder-v1",
     date: new Date("2026-08-22T12:00:00Z"),
   };
@@ -67,6 +76,9 @@ test("generation key is stable and changes with every frozen authority", async (
     { ...base, cvCommit: "3".repeat(40) },
     { ...base, factMasterSha: "4".repeat(40) },
     { ...base, promptVersion: "cv-prebuilder-v2" },
+    { ...base, generationRules: "Different review rules" },
+    { ...base, templateTrack: "quant" },
+    { ...base, templateLanguage: "en" },
   ]) {
     assert.notEqual((await createCvPrebuildIdentity(changed)).generationKey, first.generationKey);
   }
@@ -78,6 +90,7 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
     jd: "Complete JD",
     cvCommit: "1".repeat(40),
     factMasterSha: "2".repeat(40),
+    generationRules: "Prioritize direct evidence and rewrite every supported bullet.",
     date: new Date("2026-08-22T12:00:00Z"),
   });
   const sourceNames = [
@@ -96,6 +109,7 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
     job,
     identity,
     jd: "Complete JD",
+    generationRules: "Prioritize direct evidence and rewrite every supported bullet.",
     capturedAt: "2026-08-22T12:00:00.000Z",
     sources,
   });
@@ -116,6 +130,7 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
   assert.match(record, /application_row_id: null/);
   assert.match(record, new RegExp(`cv_commit: "${identity.cvCommit}"`));
   assert.match(prompt, /LuaLaTeX/);
-  assert.match(prompt, /以第一作者身份在九个学术会议作报告/);
+  assert.match(prompt, /BEGIN USER-EDITABLE CV GENERATION RULES/);
+  assert.match(prompt, /Prioritize direct evidence and rewrite every supported bullet/);
   assert.match(prompt, /禁止创建 application\/APP ID/);
 });

@@ -10,9 +10,10 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         content = (ROOT / "browser-extension" / "content.js").read_text(encoding="utf-8")
         packet_route = (ROOT / "app" / "api" / "autofill" / "application-packet" / "route.ts").read_text(encoding="utf-8")
         global_route = (ROOT / "app" / "api" / "autofill" / "general-profile" / "route.ts").read_text(encoding="utf-8")
+        global_source = (ROOT / "app" / "lib" / "global-autofill-profile.ts").read_text(encoding="utf-8")
         manifest = (ROOT / "browser-extension" / "manifest.json").read_text(encoding="utf-8")
 
-        self.assertIn('"version":"0.4.11"', manifest)
+        self.assertIn('"version":"0.4.12"', manifest)
         self.assertIn('/api/autofill/application-packet', popup)
         self.assertIn('/api/autofill/general-profile', popup)
         self.assertIn('applicationPacket', popup)
@@ -30,7 +31,8 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         self.assertIn('global-application-autofill-profile-v1', content)
         self.assertIn('application_autofill_${archiveId}.json', packet_route)
         self.assertIn('packet.application_id !== archiveId', packet_route)
-        self.assertIn('application-autofill-profile.md', global_route)
+        self.assertIn('fetchRepositoryGlobalAutofillProfile', global_route)
+        self.assertIn('application-autofill-profile.md', global_source)
 
     def test_global_education_and_app_specific_cv_sections_have_separate_authorities(self):
         content = (ROOT / "browser-extension" / "content.js").read_text(encoding="utf-8")

@@ -222,7 +222,7 @@ fillButton.addEventListener("click", async () => {
     const tab = await activeTab();
     if (!tab?.id || !/^https?:/i.test(tab.url || "")) return show("请先打开招聘申请页面。", "error");
     const stored = await getStored();
-    if (!stored.ivyProfile) return show("还没有本地基础申请资料。先打开“编辑资料”或从 Job Radar 导入。", "error");
+    if (!stored.ivyProfile && !stored.ivyRadarConfig) return show("还没有连接 Job Radar。请先在 /autofill 页面导入连接。", "error");
 
     let context = currentContext;
     let applicationPacket = null;
@@ -293,15 +293,14 @@ importButton.addEventListener("click", async () => {
         origin: location.origin,
       }),
     });
-    if (!result?.profile) return show("当前页面没有保存的 Job Radar 申请资料。请先在 /autofill 点“保存资料”。", "error");
-    const profile = JSON.parse(result.profile);
+    const profile = result?.profile ? JSON.parse(result.profile) : {};
     const config = result.config ? JSON.parse(result.config) : null;
     if (!config?.accessKey) return show("当前 Job Radar 还没有生成扩展桥接信息。请部署最新版 Site 后刷新 /autofill。", "error");
     config.siteOrigin = result.origin || config.siteOrigin;
     const granted = await ensureRadarPermission(config, true);
     if (!granted) return show("没有授予 Job Radar 站点权限；基础字段仍可使用，但不能读取 global profile、匹配 APP 或上传定制 CV。", "warn");
     await chrome.storage.local.set({ ivyProfile: profile, ivyRadarConfig: config });
-    show("已导入本地基础资料并连接 Job Radar。填写时会实时合并 CV 仓库中的 global profile；项目/经历仍按当前 APP 最终 CV 读取。", "ok");
+    show("已连接 Job Radar。填写时会实时读取网站里的申请固定资料；教育和经历仍按 CV 事实库及当前 APP 最终 CV 读取。", "ok");
     renderContext(null);
   } catch (error) {
     show(`导入失败：${error.message || error}`, "error");

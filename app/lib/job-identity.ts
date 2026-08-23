@@ -100,6 +100,11 @@ function safeUrl(raw: unknown) {
   }
 }
 
+function jobUrlOrigin(raw: unknown) {
+  const url = safeUrl(raw);
+  return url ? url.hostname.toLowerCase().replace(/^www\./, "") : "";
+}
+
 function normalizeIdentifier(value: unknown) {
   return String(value ?? "")
     .normalize("NFKC")
@@ -132,6 +137,7 @@ export function extractStableJobId(rawUrl: unknown, suppliedApplicationId: unkno
 
   const decodedPath = decodeURIComponent(url.pathname);
   const pathPatterns = [
+    /\/(?:positions?|postings?)\/([a-z]*\d[a-z0-9_-]{2,}|[0-9a-f]{8}-[0-9a-f-]{20,})\/(?:detail|details?)\/?$/i,
     /\/(?:jobs?|positions?|postings?|openings?|vacancies?)\/(?:[^/?#]+\/)*([a-z]*\d[a-z0-9_-]{2,}|[0-9a-f]{8}-[0-9a-f-]{20,})\/?$/i,
     /\/view\/([a-z]*\d[a-z0-9_-]{2,})\/?$/i,
     /\/([0-9a-f]{8}-[0-9a-f-]{20,})\/?$/i,
@@ -176,18 +182,13 @@ function sameLocation(left: unknown, right: unknown) {
 }
 
 export function sameLogicalJob(left: JobIdentityInput, right: JobIdentityInput) {
-  const leftCompany = normalizeJobIdentityText(left.company);
-  const rightCompany = normalizeJobIdentityText(right.company);
-  if (leftCompany && rightCompany && leftCompany !== rightCompany) return false;
-
   const leftId = extractStableJobId(left.jobUrl, left.applicationId);
   const rightId = extractStableJobId(right.jobUrl, right.applicationId);
-  if (leftId && rightId) return leftId === rightId;
-
   const leftCanonical = canonicalizeJobIdentityUrl(left.canonicalUrl || left.jobUrl);
   const rightCanonical = canonicalizeJobIdentityUrl(right.canonicalUrl || right.jobUrl);
   const leftTitle = normalizeJobIdentityText(left.title);
   const rightTitle = normalizeJobIdentityText(right.title);
+  const sameCanonical = Boolean(leftCanonical && rightCanonical && leftCanonical === rightCanonical);
   const usableTitles = Boolean(
     leftTitle
     && rightTitle
@@ -195,10 +196,23 @@ export function sameLogicalJob(left: JobIdentityInput, right: JobIdentityInput) 
     && !isPlaceholderJobTitle(right.title),
   );
 
-  if (leftId || rightId) {
-    return Boolean(usableTitles && leftCanonical && leftCanonical === rightCanonical && leftTitle === rightTitle);
+  // Strong posting identity outranks unreliable scraped display fields.
+  if (leftId && rightId) {
+    if (leftId === rightId) {
+      const leftOrigin = jobUrlOrigin(left.canonicalUrl || left.jobUrl);
+      const rightOrigin = jobUrlOrigin(right.canonicalUrl || right.jobUrl);
+      return !(leftOrigin && rightOrigin && leftOrigin !== rightOrigin);
+    }
+    if (sameCanonical) return true;
+    return false;
   }
-  if (usableTitles && leftCanonical && leftCanonical === rightCanonical && leftTitle === rightTitle) return true;
+
+  if (usableTitles && sameCanonical && leftTitle === rightTitle) return true;
+
+  const leftCompany = normalizeJobIdentityText(left.company);
+  const rightCompany = normalizeJobIdentityText(right.company);
+  if (leftCompany && rightCompany && leftCompany !== rightCompany) return false;
+  if (leftId || rightId) return false;
   return Boolean(usableTitles && leftCompany && leftCompany === rightCompany && leftTitle === rightTitle && sameLocation(left.location, right.location));
 }
 

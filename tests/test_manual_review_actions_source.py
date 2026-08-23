@@ -19,15 +19,16 @@ class ManualReviewActionsSourceTests(unittest.TestCase):
         self.assertIn('db.delete(jobs)', route)
 
     def test_verification_queue_exposes_all_user_actions(self):
-        client = (ROOT / "app" / "verification-queue-actions.tsx").read_text(encoding="utf-8")
+        client = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
 
-        self.assertIn('status !== "需复核"', client)
+        self.assertIn('item.status === "需复核"', client)
         self.assertIn('人工通过', client)
         self.assertIn('不再推荐', client)
         self.assertIn('重新核验', client)
         self.assertIn('仅删除记录', client)
-        self.assertIn('VerificationQueueActions', layout)
+        self.assertIn('resolveManualReview', client)
+        self.assertNotIn('VerificationQueueActions', layout)
         self.assertNotIn('href="/manual-review"', layout)
 
 

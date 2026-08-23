@@ -147,6 +147,39 @@ test("fills paired project dates and a generic project description", async () =>
   assert.deepEqual(new Set(result.fields), new Set(["project.startDate", "project.endDate", "project.name", "project.role", "project.description"]));
 });
 
+test("uses the saved fixed application profile for China contact data and custom stable answers", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const phone = new FakeInput({ id: "fixed-phone", label: "手机号码", parentElement: body });
+  const email = new FakeInput({ id: "fixed-email", label: "邮箱", parentElement: body });
+  const address = new FakeInput({ id: "fixed-address", label: "家庭住址", parentElement: body });
+  const city = new FakeInput({ id: "fixed-city", label: "城市", parentElement: body });
+  const travel = new FakeInput({ id: "fixed-travel", label: "Are you willing to travel up to 20 percent?", parentElement: body });
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    fixed_application: {
+      defaultRegion: "US",
+      identity: { email: "ivy@example.com", usPhone: "+1 615 555 0100", chinaPhone: "+86 138 0000 0000" },
+      addresses: {
+        us: { address1: "100 West End Ave", city: "Nashville", state: "TN", postalCode: "37203", country: "United States" },
+        china: { address1: "人民南路一段 1 号", city: "成都", state: "四川", postalCode: "610000", country: "中国" },
+      },
+      links: {}, eligibility: {}, application: {},
+      fixedAnswers: [{ question: "Are you willing to travel up to 20 percent?", answer: "Yes" }],
+    },
+  };
+
+  const result = await runFill([phone, email, address, city, travel], null, generalProfile);
+
+  assert.equal(result.ok, true);
+  assert.equal(phone.value, "+86 138 0000 0000");
+  assert.equal(email.value, "ivy@example.com");
+  assert.equal(address.value, "人民南路一段 1 号");
+  assert.equal(city.value, "成都");
+  assert.equal(travel.value, "Yes");
+  assert.equal(result.fields.includes("fixed.answer"), true);
+});
+
 test("adapts a project date range to full-date controls", async () => {
   const body = { tagName: "BODY", textContent: "", parentElement: null };
   const projectBlock = { tagName: "DIV", textContent: "项目经历 起止时间 项目名称 担任角色 项目描述", parentElement: body };

@@ -6,8 +6,9 @@ import {
   type ArchiveLanguage,
   type ArchiveTrack,
 } from "./application-archive";
+import { normalizeCvGenerationRules } from "./cv-generation-rules";
 
-export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v1";
+export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v4-bounded-agent-context";
 
 export type CvPrebuildSourceFile = {
   text: string;
@@ -39,6 +40,7 @@ export type CvPrebuildIdentity = CvPrebuildTemplateSelection & {
   bundlePath: string;
   generationKey: string;
   jdSha256: string;
+  generationRulesSha256: string;
   jobIdentitySha256: string;
   cvCommit: string;
   factMasterSha: string;
@@ -63,14 +65,20 @@ export async function sha256Hex(value: string) {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-export function recommendCvPrebuildTemplate(job: Pick<CvPrebuildJobInput, "region" | "track" | "title">): CvPrebuildTemplateSelection {
-  const language: ArchiveLanguage = job.region === "中国" ? "zh" : "en";
+export function recommendCvPrebuildTemplate(
+  job: Pick<CvPrebuildJobInput, "region" | "track" | "title">,
+  preferredTrack?: ArchiveTrack,
+  preferredLanguage?: ArchiveLanguage,
+): CvPrebuildTemplateSelection {
+  const language: ArchiveLanguage = preferredLanguage ?? (job.region === "中国" ? "zh" : "en");
   const signal = `${job.track} ${job.title}`.toLocaleLowerCase();
-  let track: ArchiveTrack = "tech";
-  if (/quant|量化|定量/.test(signal)) track = "quant";
-  else if (/consult|咨询/.test(signal)) track = "consulting";
-  else if (/neuro|brain|神经|脑科学|medical device|医疗器械/.test(signal)) track = "clinical_neuro";
-  else if (/pharma|biostat|clinical|epidemi|rwe|heor|医药|生物统计|临床|流行病/.test(signal)) track = "pharma";
+  let track: ArchiveTrack = preferredTrack ?? "tech";
+  if (!preferredTrack) {
+    if (/quant|量化|定量/.test(signal)) track = "quant";
+    else if (/consult|咨询/.test(signal)) track = "consulting";
+    else if (/neuro|brain|神经|脑科学|medical device|医疗器械/.test(signal)) track = "clinical_neuro";
+    else if (/pharma|biostat|clinical|epidemi|rwe|heor|healthcare|medical|医药|医疗|生物统计|临床|流行病/.test(signal)) track = "pharma";
+  }
 
   if (!templateFiles[language][track]) {
     track = track === "clinical_neuro" ? "pharma" : "tech";
@@ -90,10 +98,13 @@ export async function createCvPrebuildIdentity(input: {
   jd: string;
   cvCommit: string;
   factMasterSha: string;
+  templateTrack?: ArchiveTrack;
+  templateLanguage?: ArchiveLanguage;
+  generationRules?: string;
   promptVersion?: string;
   date?: Date;
 }) {
-  const selection = recommendCvPrebuildTemplate(input.job);
+  const selection = recommendCvPrebuildTemplate(input.job, input.templateTrack, input.templateLanguage);
   const promptVersion = input.promptVersion ?? CV_PREBUILD_PROMPT_VERSION;
   const stableJobIdentity = JSON.stringify({
     jobRowId: input.job.id,
@@ -102,9 +113,11 @@ export async function createCvPrebuildIdentity(input: {
     company: normalizeIdentityText(input.job.company),
     title: normalizeIdentityText(input.job.title),
   });
-  const [jobIdentitySha256, jdSha256] = await Promise.all([
+  const generationRules = normalizeCvGenerationRules(input.generationRules);
+  const [jobIdentitySha256, jdSha256, generationRulesSha256] = await Promise.all([
     sha256Hex(stableJobIdentity),
     sha256Hex(input.jd.trim()),
+    sha256Hex(generationRules),
   ]);
   const generationKey = await sha256Hex(JSON.stringify({
     schemaVersion: "prebuild-generation-v1",
@@ -113,6 +126,7 @@ export async function createCvPrebuildIdentity(input: {
     templateFile: selection.templateFile,
     cvCommit: input.cvCommit,
     factMasterSha: input.factMasterSha,
+    generationRulesSha256,
     promptVersion,
   }));
   const year = newYorkYear(input.date);
@@ -123,6 +137,7 @@ export async function createCvPrebuildIdentity(input: {
     bundlePath: `prebuilds/${year}/${prebuildId}`,
     generationKey,
     jdSha256,
+    generationRulesSha256,
     jobIdentitySha256,
     cvCommit: input.cvCommit,
     factMasterSha: input.factMasterSha,
@@ -160,6 +175,7 @@ export function buildCvPrebuildJobRecord(input: {
     `  cv_template_path: ${yamlString(input.identity.templatePath)}`,
     `  job_identity_sha256: ${yamlString(input.identity.jobIdentitySha256)}`,
     `  jd_sha256: ${yamlString(input.identity.jdSha256)}`,
+    `  generation_rules_sha256: ${yamlString(input.identity.generationRulesSha256)}`,
     `  fact_master_sha: ${yamlString(input.identity.factMasterSha)}`,
     `  prompt_version: ${yamlString(input.identity.promptVersion)}`,
     "authorization:",
@@ -189,25 +205,26 @@ export function buildCvPrebuildJobRecord(input: {
 export function buildCvPrebuildPrompt(input: {
   identity: CvPrebuildIdentity;
   jd: string;
+  generationRules: string;
 }) {
   const languageLabel = input.identity.language === "zh" ? "中文（zh）" : "English（en）";
   return `请为临时任务 \`${input.identity.prebuildId}\` 预生成一份接近定稿、但尚未获得用户最终确认的定向 CV。
 
-从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支完整读取目录 \`${input.identity.bundlePath}/\`。必须逐一读取 \`job_record.yaml\`、完整 \`jd_snapshot.md\`、事实母版、展示规则、全部 canonical indexes、\`cv_base.tex\` 和本文件；任何必需文件缺失或截断时立即停止。
+Job Radar 已从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支冻结完整目录 \`${input.identity.bundlePath}/\`。完整事实材料保留在该归档中；本次 Responses API 附件包含完整 JD、CV 母版、展示规则和一个按 JD 确定性筛选的事实及 canonical 索引切片。必须逐一读取已附加文件和 \`agent_context_manifest.md\`；不得把未附加的事实当成已验证证据。
 
 本次冻结语言为 **${languageLabel}**，临时推荐母版为 **\`${input.identity.templateFile}\`**，CV 来源 commit 为 \`${input.identity.cvCommit}\`。这些文件必须来自同一冻结版本，不得改读 CV 仓库的更新 main，也不得自行切换语言或母版。
 
-完整 JD 是岗位要求的主权威：
+完整 JD 是岗位要求的主权威，必须从 \`jd_snapshot.md\` 读取，不得只依赖职位名或索引摘要。
 
------ BEGIN CONFIRMED FULL JD -----
-${input.jd.trim()}
------ END CONFIRMED FULL JD -----
+以下是用户在启动前可编辑的本次生成规则。必须逐轮执行并把每轮判断与实际改动写入 \`cv_review.md\`。这些规则可以控制岗位画像、内容取舍、改写程度和风格，但不能覆盖冻结事实、禁止编造、固定语言与模板，以及禁止自动提交等边界。
 
-执行一次任务内的连续审校：先建立岗位角色画像并判断研究/学术产出、应用/业务交付或混合导向；再根据完整 JD 选择经历、项目、论文和关键词；随后逐项对照事实母版与 canonical indexes 核验事实和贡献边界；最后才进行风格与中文/英文语言审校。行业或实习经历必须独立成节，研究型项目与应用型项目至少分成两个不同 section，每个项目只出现一次。只要包含学术传播或综合成果，必须写“以第一作者身份在九个学术会议作报告”。所有研究、项目、实习、工作和软件系统必须精确到开始年月与结束年月；缺月时停止并询问，不得猜测。
+----- BEGIN USER-EDITABLE CV GENERATION RULES -----
+${input.generationRules.trim()}
+----- END USER-EDITABLE CV GENERATION RULES -----
 
-中文个人简介写“博士候选人”，不写大学名或预计毕业时间；SQL 只写 \`SQL\`，不得加入 TypeScript 或 React；中文地点使用“城市，国家”；必要括注英文首字母大写；脑区皮层必须写清楚。不得为贴合 JD 编造事实、改变论文状态或扩大贡献。
+不得为贴合 JD 编造事实、改变论文状态或扩大贡献。规则与事实发生冲突时，以事实母版和 canonical indexes 为准，并在审校记录中说明冲突。
 
-在 Agent 的本地临时工作区创建 TeX 和 PDF，用 LuaLaTeX 编译并用 \`pdfinfo\` 与文本提取检查：不超过两个物理页面，内容尽量接近但不挤满两页，不缩小字体或破坏母版间距硬塞，也不添加弱相关内容凑页。交付岗位画像、项目/论文取舍、关键词覆盖、完整临时 CV、实际 PDF 页数和可打开的临时 PDF，然后等待用户确认。
+在 hosted shell 的 \`/mnt/data\` 创建 TeX、PDF、纯文本和审校记录，用 LuaLaTeX 编译并用 \`pdfinfo\` 与文本提取检查：不超过两个物理页面，内容尽量接近但不挤满两页，不缩小字体或破坏母版间距硬塞，也不添加弱相关内容凑页。交付岗位画像、项目/论文取舍、关键词覆盖、完整临时 CV、实际 PDF 页数和可打开的临时 PDF，然后在这个岗位自己的持久 CV Chat 中等待用户确认。
 
 这是 PRECV 临时预览。禁止创建 application/APP ID，禁止修改申请状态，禁止自动提交，禁止写入任何 \`cv_customized_<APP-ID>\` 或 \`cv_submitted_<APP-ID>\` 文件，禁止把临时 TeX/PDF 写回任何仓库。只有用户以后明确进入正式申请和最终确认流程时，才能按正式 APP bundle 的边界继续。
 `;
@@ -217,6 +234,7 @@ export function buildCvPrebuildBundleFiles(input: {
   job: CvPrebuildJobInput;
   identity: CvPrebuildIdentity;
   jd: string;
+  generationRules: string;
   capturedAt: string;
   sources: Record<string, CvPrebuildSourceFile>;
 }) {

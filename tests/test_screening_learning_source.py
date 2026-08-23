@@ -31,11 +31,11 @@ class ScreeningLearningSourceTests(unittest.TestCase):
         self.assertIn("POST as importJobs", learned)
 
     def test_verification_queue_has_four_embedded_actions(self):
-        enhancer = (ROOT / "app/verification-queue-actions.tsx").read_text(encoding="utf-8")
-        self.assertIn('status !== "需复核"', enhancer)
+        enhancer = (ROOT / "app/job-radar.tsx").read_text(encoding="utf-8")
+        self.assertIn('item.status === "需复核"', enhancer)
         for label in ("人工通过", "重新核验", "不再推荐", "仅删除记录"):
             self.assertIn(label, enhancer)
-        self.assertIn("/api/manual-review", enhancer)
+        self.assertIn('"/api/manual-review"', enhancer)
 
     def test_generic_scientist_queries_are_included(self):
         config = (ROOT / "config/us_search_queries.json").read_text(encoding="utf-8")

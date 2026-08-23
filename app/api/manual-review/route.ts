@@ -15,6 +15,7 @@ import {
   makeDistinctStoredJobUrl,
   sameLogicalJob,
 } from "../../lib/job-identity";
+import { scoreStoredJob } from "../../lib/job-scoring";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,7 @@ export async function POST(request: NextRequest) {
   const region = inferBookmarkRegion(canonicalUrl, "", "");
   const track = inferBookmarkTrack(title, description);
   const skills = inferBookmarkSkills(title, description);
+  const scoring = scoreStoredJob({ title, content: description, region });
   const incomingIdentity = {
     company: inferredCompany,
     title,
@@ -117,8 +119,8 @@ export async function POST(request: NextRequest) {
       title,
       region,
       track,
-      score: Math.max(existing.score, 100),
-      visa: region === "中国" ? "不适用" : existing.visa || "JD 未明确",
+      score: scoring.score,
+      visa: scoring.visa,
       evidence: "核验未能自动确认，由你人工检查原 JD 后直接通过。",
       description: description || existing.description,
       skills: skills.length ? JSON.stringify(skills) : existing.skills,
@@ -139,8 +141,8 @@ export async function POST(request: NextRequest) {
       location: "",
       region,
       track,
-      score: 100,
-      visa: region === "中国" ? "不适用" : "JD 未明确",
+      score: scoring.score,
+      visa: scoring.visa,
       evidence: "核验未能自动确认，由你人工检查原 JD 后直接通过。",
       description,
       skills: JSON.stringify(skills),

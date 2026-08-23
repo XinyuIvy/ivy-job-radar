@@ -7,25 +7,34 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class PendingJobVisibilitySourceTests(unittest.TestCase):
     def test_pending_applications_are_hidden_from_today_by_stored_url_then_logical_identity(self):
-        component = (ROOT / "app" / "pending-job-visibility.tsx").read_text(encoding="utf-8")
+        component = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
 
-        self.assertIn('row.status === "准备材料"', component)
-        self.assertIn('normalizedStoredJobUrl(application.jobUrl)', component)
-        self.assertIn('normalizedStoredJobUrl(identity.jobUrl)', component)
-        self.assertIn('applicationUrl === cardUrl', component)
-        self.assertIn('sameLogicalJob(application, identity)', component)
-        self.assertIn('samePendingJob(row, identity)', component)
-        self.assertIn('a.job-link', component)
-        self.assertIn('locationParts.join("·")', component)
-        self.assertIn('card.style.setProperty("display", "none", "important")', component)
-        self.assertIn('<PendingJobVisibility />', layout)
+        self.assertIn('"准备材料"', component)
+        self.assertIn('buildTrackedApplicationMatcher', component)
+        self.assertIn('sameLogicalJob(job, candidate)', component)
+        self.assertIn('!activeJobStatuses.has(row.status) || !isTrackedApplication(row)', component)
+        self.assertIn('Strong posting identity outranks unreliable scraped display fields', (ROOT / "app" / "lib" / "job-identity.ts").read_text(encoding="utf-8"))
+        self.assertIn('setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, application)))', (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8"))
+        self.assertNotIn('<PendingJobVisibility />', layout)
+
+    def test_today_view_excludes_favorites_and_pending_applications(self):
+        source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+
+        self.assertIn('function applicationHidesToday(application: Application, job: Job)', source)
+        self.assertIn('&& !job.saved', source)
+        self.assertIn('&& !saved.includes(job.id)', source)
+        self.assertIn(
+            '&& !applicationsList.some((application) => applicationHidesToday(application, job))',
+            source,
+        )
+        self.assertIn('[dailyJobs, track, region, saved, applicationsList, view, jobSort, deferredJobQuery]', source)
 
     def test_jobs_api_excludes_pending_and_submitted_jobs_by_stable_identity(self):
         route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
 
         self.assertIn('"准备材料"', route)
-        self.assertIn('hiddenApplications.some((application) => sameLogicalJob(row, application))', route)
+        self.assertIn('const isTrackedApplication = buildTrackedApplicationMatcher(hiddenApplications)', route)
         self.assertIn('!activeJobStatuses.has(row.status) || !isTrackedApplication(row)', route)
         self.assertNotIn('appliedFingerprints', route)
 

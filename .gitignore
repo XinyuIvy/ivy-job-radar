@@ -21,7 +21,7 @@ coverage/
 outputs/
 work/
 resumes/
-applications/
+/applications/
 
 # Local files
 .DS_Store

@@ -107,7 +107,7 @@
     ["identity.nativePlace", /\b(native place|place of origin|hometown)\b|籍贯/],
     ["identity.wechat", /\b(wechat|weixin)\b|微信号|微信/],
     ["location.address2", /\b(address line 2|address 2|apt|apartment|suite|unit)\b/],
-    ["location.address1", /\b(street address|address line 1|address 1|mailing address|home address)\b/],
+    ["location.address1", /\b(street address|address line 1|address 1|mailing address|home address)\b|家庭住址|居住地址|通讯地址|详细地址/],
     ["location.postalCode", /\b(zip|zip code|postal|postal code)\b|邮编/],
     ["location.city", /\b(city|town)\b|城市/],
     ["location.state", /\b(state|province|region)\b|州|省份/],
@@ -664,7 +664,10 @@
     const identity = generalProfile.identity || {};
     const map = {
       "identity.firstName": identity.first_name_en,
+      "identity.middleName": identity.middle_name_en,
       "identity.lastName": identity.last_name_en,
+      "identity.preferredName": identity.preferred_name,
+      "identity.email": identity.email,
       "identity.phone": identity.phone,
       "identity.nativePlace": identity.native_place,
       "identity.ethnicity": identity.ethnicity,
@@ -675,6 +678,65 @@
     const value = String(map[key] || "").trim();
     const aliases = key === "identity.ethnicity" && value === "汉族" ? ["汉族", "汉", "Han"] : [];
     return { handled: true, value, aliases };
+  }
+
+  function fixedApplicationValue(generalProfile, key) {
+    const fixed = generalProfile?.fixed_application;
+    if (!fixed || typeof fixed !== "object") return { handled: false, value: "", aliases: [] };
+    const useChina = pageUsesChinese() || /(?:^|\.)cn$/i.test(location.hostname)
+      ? true
+      : fixed.defaultRegion === "CN";
+    const identity = fixed.identity || {};
+    const address = useChina ? fixed.addresses?.china || {} : fixed.addresses?.us || {};
+    const phone = useChina
+      ? identity.chinaPhone || identity.usPhone
+      : identity.usPhone || identity.chinaPhone;
+    const map = {
+      "identity.firstName": identity.firstName,
+      "identity.middleName": identity.middleName,
+      "identity.lastName": identity.lastName,
+      "identity.preferredName": identity.preferredName,
+      "identity.email": identity.email,
+      "identity.phone": phone,
+      "identity.wechat": identity.wechat,
+      "location.address1": address.address1,
+      "location.address2": address.address2,
+      "location.city": address.city,
+      "location.state": address.state,
+      "location.postalCode": address.postalCode,
+      "location.country": address.country,
+      "links.linkedin": fixed.links?.linkedin,
+      "links.github": fixed.links?.github,
+      "links.website": fixed.links?.website,
+      "eligibility.age18": fixed.eligibility?.age18,
+      "eligibility.workAuthorizationUS": useChina ? fixed.eligibility?.workAuthorizationChina : fixed.eligibility?.workAuthorizationUS,
+      "eligibility.sponsorshipUS": fixed.eligibility?.sponsorshipUS,
+      "eligibility.relocation": fixed.eligibility?.relocation,
+      "eligibility.remoteWork": fixed.eligibility?.remoteWork,
+      "application.availableStartDate": fixed.application?.availableStartDate,
+      "application.hearAboutUs": fixed.application?.hearAboutUs,
+    };
+    if (!(key in map)) return { handled: false, value: "", aliases: [] };
+    const value = String(map[key] || "").trim();
+    const aliases = value === "yes" ? ["Yes", "是", "愿意", "可以"]
+      : value === "no" ? ["No", "否", "不愿意", "不需要"] : [];
+    return { handled: true, value, aliases };
+  }
+
+  function fixedAnswerForField(generalProfile, text) {
+    const entries = generalProfile?.fixed_application?.fixedAnswers;
+    if (!Array.isArray(entries) || !text || SENSITIVE_RE.test(text)) return "";
+    const field = normalize(text).replace(/\b(required|optional)\b|必填|选填/g, "").trim();
+    if (!field) return "";
+    for (const entry of entries) {
+      const question = normalize(entry?.question).replace(/\b(required|optional)\b|必填|选填/g, "").trim();
+      const answer = String(entry?.answer || "").trim();
+      if (!question || !answer) continue;
+      if (field === question || (question.length >= 8 && (field.includes(question) || question.includes(field)))) return answer;
+      const tokens = question.split(" ").filter((token) => token.length >= 3);
+      if (tokens.length >= 3 && tokens.filter((token) => field.includes(token)).length / tokens.length >= 0.8) return answer;
+    }
+    return "";
   }
 
   function globalPublicationValue(generalProfile, key, counters) {
@@ -697,6 +759,8 @@
   }
 
   function resolveValue(profile, generalProfile, packet, key, packetCounters, globalCounters, generalEntryCounters) {
+    const fixedValue = fixedApplicationValue(generalProfile, key);
+    if (fixedValue.handled && fixedValue.value) return { value: fixedValue.value, aliases: fixedValue.aliases };
     const identityValue = globalIdentityValue(generalProfile, key);
     if (identityValue.handled && identityValue.value) return { value: identityValue.value, aliases: identityValue.aliases };
     const publicationValue = globalPublicationValue(generalProfile, key, generalEntryCounters);
@@ -1438,7 +1502,16 @@
         continue;
       }
       const key = explicitSensitiveKey || contextualKey(el, keyText, projectDateCounters, sectionInfo);
-      if (!key) continue;
+      const fixedAnswer = key ? "" : fixedAnswerForField(generalProfile, keyText);
+      if (!key && !fixedAnswer) continue;
+      if (!key && fixedAnswer) {
+        const changed = await fillMappedControl(el, "fixed.answer", fixedAnswer, []);
+        if (changed) {
+          filled += 1;
+          fields.push("fixed.answer");
+        }
+        continue;
+      }
       if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
       if (hasGlobalPublications(generalProfile) && key.startsWith("publication.")) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.")) continue;
