@@ -17,6 +17,13 @@
 - 发布前验收：32 个前端/运行时测试、235 个 Python 测试、lint 与生产 build 全部通过。
 - 用户固定扩展目录：`/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`。以后继续使用 `git pull origin main`、Chrome Reload、刷新申请页，不要求反复下载 ZIP。
 
+#### A.1 2026-08-22 最新站点修复
+
+- CV Prebuilder Phase 0 已完成：`/api/saved-jobs` 现在有 D1 权威持久化、POST/DELETE 幂等与失败回滚，代码锚点为 Site commit `a61f38e`。下一 Chat 不得重复实现 Phase 0，应从 Phase 1 的 `cv_prebuild_jobs` 状态层开始。
+- 候选岗位的事实库评分与定制 CV 曾共同报错 `Cannot read properties of undefined (reading 'tech')`。根因是 NeuroStat 等旧事实记录没有 `industry_translation`，Hybrid RAG 与 CV analyze 却直接读取对应 track。现在缺失行业翻译时回退到 `no_evidence` 翻译层，仍使用真实方法、BM25、embedding、concept graph 和事实边界完成评分，不丢弃该事实，也不让整份分析失败。
+- 申请列表已经改成高密度三列单行清单，每条只显示公司、岗位和申请日期；备注、匹配度、Application ID、下一步、跟进日期、截止日期和行内操作按钮不再显示。标题显示当前 bucket 的记录数量。
+- 本轮代码锚点为 Site version 141 / commit `780fbfa`。验收包括 240 个 Python 测试、9 个 Hybrid RAG 定向测试、lint 和 production build。单独用 Node 24 扫描全部 `tests/*.test.mjs` 时，历史 `cv-tailor-alibaba.test.mjs` 仍因 extensionless import 报 `ERR_MODULE_NOT_FOUND`；项目正式测试脚本不包含这条直接扫描方式，本轮相关 Hybrid RAG 测试全部通过。
+
 ### B. 自动填表已经做到哪里
 
 #### B.1 只补空白，不改用户已填内容
@@ -82,7 +89,7 @@
 2. 自定义下拉框若页面不暴露可匹配 option 文本，扩展可能无法可靠选中；此时保留空白由用户手动选择，不得点击相似但未经确认的级别。
 3. 只有年份而网页要求完整日期的论文，在没有已核实月份时保持空白，不生成伪造的 1 月 1 日。
 4. 校园经历目前只有识别、重复行和结构化数据接口；没有权威 `campus_experiences` 数据时不会生成内容。
-5. 前端收藏按钮当前调用 `/api/saved-jobs`，但最新 checkout 中没有找到对应的 `app/api/saved-jobs/route.ts`。收藏动作存在乐观 UI，缺少可作为昂贵后台任务触发器的权威服务器路由。接入 Agent 前必须先修复这一点并加入持久化回归测试。
+5. `/api/saved-jobs` 的服务器 route、D1 持久化和幂等回归已经在 Phase 0 完成。接入 Agent 时复用该权威收藏事件，不得恢复仅乐观 UI、刷新即丢失的旧行为。
 6. 不要把自动填表和 CV 预生成混在同一个浏览器扩展任务中。自动填表继续由扩展负责；CV 预生成由 Job Radar 服务端与 Workspace Agent 负责。
 
 ### D. 当前 CV Tailor 为什么仍要等待
@@ -239,12 +246,11 @@ cancelled
 
 ### L. 下一 Chat 的实施顺序
 
-#### Phase 0：先修收藏的权威持久化
+#### Phase 0：已完成，保留为回归边界
 
-- 核对最新 GitHub main 与 Site checkout 是否仍缺少 `/api/saved-jobs` route。
-- 若确实缺失，先实现 POST/DELETE/GET、D1 持久化、幂等和删除边界。
-- 补充测试：收藏刷新后仍存在、取消收藏后消失、重复收藏不重复插入、失败时前端回滚。
-- 先发布这个独立修复，确认收藏可作为后台任务触发器。
+- `/api/saved-jobs` POST/DELETE/GET、D1 持久化、幂等、删除边界和前端失败回滚已经完成并发布。
+- 后续修改必须继续通过：收藏刷新后仍存在、取消收藏后消失、重复收藏不重复插入、失败时前端回滚。
+- 下一实施阶段直接进入 Phase 1，不再重复核对或重写该 route。
 
 #### Phase 1：只搭建 prebuild 状态层
 
@@ -304,7 +310,7 @@ cancelled
 
 任务一：保留并验证 Autofill 0.4.11。不得回退为逐个关键词识别，不得覆盖用户已经手动填写的字段。自动添加支持教育、工作/实习、当前 APP 项目、完整论文、奖励、语言、作品和有权威数据的校园经历。低置信字段与无法核实的期刊等级/日期继续留空。
 
-任务二：按 Phase 0 开始 CV Prebuilder Agent。先核对 `/api/saved-jobs` 是否确实缺少服务器 route；若缺失，先实现收藏的权威 D1 持久化与幂等测试，不要直接接 Agent。随后新增 `cv_prebuild_jobs` 状态层和 PRECV bundle，再创建/发布 Workspace Agent，最后接 trigger 和状态轮询。
+任务二：按 Phase 1 开始 CV Prebuilder Agent。Phase 0 的 `/api/saved-jobs` 权威 D1 持久化与幂等测试已经完成，不要重复实现。先新增 `cv_prebuild_jobs` 状态层，再建立 PRECV bundle、创建/发布 Workspace Agent，最后接 trigger 和状态轮询。
 
 用户要求收藏岗位后立即后台生成临时 CV。临时 Agent 必须执行完整 JD/事实审核、岗位角色画像、项目与论文取舍、事实复核、风格对齐、中文语言审校、年月检查、LuaLaTeX 两页密度检查和最终回归。行业/实习、研究型项目、应用型项目必须分节；学术传播写九个第一作者会议报告；所有项目精确到年月；目标接近但不挤满两页。
 
