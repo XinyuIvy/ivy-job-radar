@@ -19,7 +19,10 @@
 
 #### A.1 2026-08-22 最新站点修复
 
-- CV Prebuilder Phase 0 已完成：`/api/saved-jobs` 现在有 D1 权威持久化、POST/DELETE 幂等与失败回滚，代码锚点为 Site commit `a61f38e`。下一 Chat 不得重复实现 Phase 0，应从 Phase 1 的 `cv_prebuild_jobs` 状态层开始。
+- CV Prebuilder Phase 1 已完成：新增 `cv_prebuild_jobs` D1 状态表、安全 migration、收藏状态初始化/取消和候选岗位 badge。代码锚点为 Site version 143 / commit `9f37143`，GitHub `main` 同步提交为 `ba0f5614bbab7749b6bfc83e02aa05a676375c1f`。本阶段没有调用 Agent、没有创建 PRECV bundle、没有自动生成或提交 CV。下一 Chat 必须从 Phase 2 的 PRECV bundle 开始，不得重复 Phase 0–1。
+- Phase 1 对已有收藏做了安全回填：没有完整 JD 的岗位显示 `blocked_missing_jd`，有完整 JD 但尚未配置 Agent 的岗位显示 `blocked_configuration`；取消收藏会标记 `cancelled`。UI 已覆盖 queued、准备 bundle、Agent 排队/运行、ready、stale、可重试/终止失败和 cancelled badge，供后续阶段直接复用。
+- Phase 1 验收为 37 个 Node 测试、243 个 Python 测试、lint、production build、Drizzle 再生成和“旧库已含 scan_status 新列”的 migration 模拟全部通过。Drizzle 历史 `0010_snapshot.json` 缺少末尾 `}` 的已有错误也已修复；`0013` migration 明确不重复 ALTER `scan_status`，避免再次触发数据库冷启动失败。
+- CV Prebuilder Phase 0 已完成：`/api/saved-jobs` 现在有 D1 权威持久化、POST/DELETE 幂等与失败回滚，代码锚点为 Site commit `a61f38e`。后续不得重复实现 Phase 0。
 - 候选岗位的事实库评分与定制 CV 曾共同报错 `Cannot read properties of undefined (reading 'tech')`。根因是 NeuroStat 等旧事实记录没有 `industry_translation`，Hybrid RAG 与 CV analyze 却直接读取对应 track。现在缺失行业翻译时回退到 `no_evidence` 翻译层，仍使用真实方法、BM25、embedding、concept graph 和事实边界完成评分，不丢弃该事实，也不让整份分析失败。
 - 申请列表已经改成高密度三列单行清单，每条只显示公司、岗位和申请日期；备注、匹配度、Application ID、下一步、跟进日期、截止日期和行内操作按钮不再显示。标题显示当前 bucket 的记录数量。
 - 本轮代码锚点为 Site version 141 / commit `780fbfa`。验收包括 240 个 Python 测试、9 个 Hybrid RAG 定向测试、lint 和 production build。单独用 Node 24 扫描全部 `tests/*.test.mjs` 时，历史 `cv-tailor-alibaba.test.mjs` 仍因 extensionless import 报 `ERR_MODULE_NOT_FOUND`；项目正式测试脚本不包含这条直接扫描方式，本轮相关 Hybrid RAG 测试全部通过。
@@ -252,12 +255,13 @@ cancelled
 - 后续修改必须继续通过：收藏刷新后仍存在、取消收藏后消失、重复收藏不重复插入、失败时前端回滚。
 - 下一实施阶段直接进入 Phase 1，不再重复核对或重写该 route。
 
-#### Phase 1：只搭建 prebuild 状态层
+#### Phase 1：已完成，保留为状态层回归边界
 
-- 新增 D1 migration 与 `cv_prebuild_jobs` schema。
-- 收藏卡片显示状态 badge，但此阶段不调用 Agent。
-- 增加配置缺失、JD 缺失、stale 和失败状态。
-- 验证新增 schema 不得重复 version 116 的数据库冷启动错误；使用现有 `ivy_schema_v1` 安全迁移路径。
+- `cv_prebuild_jobs` schema、D1 migration、已有收藏回填、收藏/取消状态写入和卡片 badge 已完成并发布。
+- 收藏接口仍先保存权威收藏；prebuild 状态初始化失败不会回滚收藏，也没有任何 Workspace Agent / OpenAI API 调用。
+- 配置缺失、JD 缺失、stale、失败、cancelled、排队、运行和 ready 状态均有稳定枚举与可见 badge。
+- `ivy_schema_v1` 冷启动标记保持不变；新 migration 不重复添加已有 `scan_status` 列。
+- 后续修改必须保留 Phase 0–1 回归：收藏持久化与幂等、缺 JD/缺配置仍保存成功、取消任务状态、状态 badge 和无 Agent 调用。
 
 #### Phase 2：建立 prebuild bundle
 
@@ -310,7 +314,7 @@ cancelled
 
 任务一：保留并验证 Autofill 0.4.11。不得回退为逐个关键词识别，不得覆盖用户已经手动填写的字段。自动添加支持教育、工作/实习、当前 APP 项目、完整论文、奖励、语言、作品和有权威数据的校园经历。低置信字段与无法核实的期刊等级/日期继续留空。
 
-任务二：按 Phase 1 开始 CV Prebuilder Agent。Phase 0 的 `/api/saved-jobs` 权威 D1 持久化与幂等测试已经完成，不要重复实现。先新增 `cv_prebuild_jobs` 状态层，再建立 PRECV bundle、创建/发布 Workspace Agent，最后接 trigger 和状态轮询。
+任务二：按 Phase 2 继续 CV Prebuilder Agent。Phase 0 的收藏权威持久化和 Phase 1 的 `cv_prebuild_jobs` 状态层都已经完成，不要重复实现。下一步只建立 PRECV bundle、稳定 `generation_key` 和临时母版选择，仍不调用 Agent；之后再创建/发布 Workspace Agent，最后接 trigger 和状态轮询。
 
 用户要求收藏岗位后立即后台生成临时 CV。临时 Agent 必须执行完整 JD/事实审核、岗位角色画像、项目与论文取舍、事实复核、风格对齐、中文语言审校、年月检查、LuaLaTeX 两页密度检查和最终回归。行业/实习、研究型项目、应用型项目必须分节；学术传播写九个第一作者会议报告；所有项目精确到年月；目标接近但不挤满两页。
 
