@@ -1,4 +1,4 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, or, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
@@ -838,10 +838,18 @@ export async function GET() {
   const db = await getDb();
   const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
   const savedIds = new Set((await db.select().from(savedJobs)).map((row) => row.jobId));
-  const cvPrebuildStatusByJob = new Map(
-    (await db.select({ jobId: cvPrebuildJobs.jobId, status: cvPrebuildJobs.status }).from(cvPrebuildJobs))
-      .map((row) => [row.jobId, row.status]),
-  );
+  const cvPrebuildStatusByJob = new Map<number, string>();
+  const cvPrebuildRows = await db
+    .select({ jobId: cvPrebuildJobs.jobId, status: cvPrebuildJobs.status })
+    .from(cvPrebuildJobs)
+    .orderBy(
+      sql`CASE WHEN ${cvPrebuildJobs.status} = 'stale' THEN 1 ELSE 0 END`,
+      desc(cvPrebuildJobs.updatedAt),
+      desc(cvPrebuildJobs.id),
+    );
+  for (const row of cvPrebuildRows) {
+    if (!cvPrebuildStatusByJob.has(row.jobId)) cvPrebuildStatusByJob.set(row.jobId, row.status);
+  }
   const hiddenApplicationStatuses = new Set([
     "准备材料",
     "已申请",
