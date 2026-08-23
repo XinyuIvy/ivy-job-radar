@@ -1,10 +1,12 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import companyPool from "./company-pool.json";
 import companyPoolAdditions from "./company-pool-additions.json";
 import { companyCollectionMode, companySourceSearchUrl, findCompanySource } from "./lib/company-sources";
+import { sameLogicalJob } from "./lib/job-identity";
+import PendingApplicationFitScores from "./pending-application-fit-scores";
 
 const completeCompanyPool = [...companyPool, ...companyPoolAdditions];
 
@@ -29,6 +31,7 @@ type Job = {
   expirationReason?: string;
   discoveredAt: string;
   checkedAt: string;
+  saved?: boolean;
 };
 
 type Application = {
@@ -341,7 +344,7 @@ type ScanNotice = {
   read: boolean;
 };
 
-type View = "today" | "saved" | "applications" | "companies" | "verify" | "profile" | "ignored";
+type View = "today" | "saved" | "applications" | "profile" | "tools" | "companies" | "verify" | "ignored";
 
 const tracks = ["全部", "Technology", "Quant", "Pharma", "Medical Device", "Healthcare AI", "Consulting"];
 const sortOptions = [
@@ -352,6 +355,17 @@ const sortOptions = [
 ] as const;
 const statuses = ["准备材料", "已申请", "一面", "二面/技术面", "终面", "Offer", "撤回", "拒绝"];
 const interviewStatuses = ["一面", "二面/技术面", "终面"];
+const hardRequirementReasons = [
+  "经验年限或职级不符合",
+  "学历或专业要求不符合",
+  "工作授权或 sponsorship 不符合",
+  "地点或工作方式不符合",
+  "必备技能、证书或语言不符合",
+  "其他硬性条件不符合",
+];
+const NAVIGATION_STORAGE_KEY = "ivy-job-radar:navigation-state:v2";
+const PENDING_CHANNEL_NAME = "ivy-job-radar-updates";
+const PENDING_STORAGE_KEY = "ivy-job-radar:last-pending-created";
 type ApplicationBucket = "submitted" | "interview" | "offer" | "rejected";
 const emptyApplication: Application = {
   company: "",
@@ -601,14 +615,18 @@ export default function JobRadar() {
   const [region, setRegion] = useState("全部地区");
   const [jobSort, setJobSort] = useState<(typeof sortOptions)[number]["value"]>("score");
   const [jobQuery, setJobQuery] = useState("");
+  const deferredJobQuery = useDeferredValue(jobQuery);
   const [saved, setSaved] = useState<number[]>([]);
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
   const [dailyJobs, setDailyJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobsError, setJobsError] = useState("");
+  const [jobsReloadToken, setJobsReloadToken] = useState(0);
   const [jobsRefreshing, setJobsRefreshing] = useState(false);
   const [jobsMessage, setJobsMessage] = useState("");
   const [applicationsList, setApplicationsList] = useState<Application[]>([]);
   const [companyQuery, setCompanyQuery] = useState("");
+  const deferredCompanyQuery = useDeferredValue(companyQuery);
   const [companyPriority, setCompanyPriority] = useState("全部");
   const [companyRegion, setCompanyRegion] = useState("全部地区");
   const [companyCollection, setCompanyCollection] = useState("全部接入状态");
@@ -663,6 +681,109 @@ export default function JobRadar() {
   const [contactSaving, setContactSaving] = useState(false);
   const [experiences, setExperiences] = useState<InterviewExperience[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [scanPanelOpen, setScanPanelOpen] = useState(false);
+  const [hardRequirementOpen, setHardRequirementOpen] = useState(false);
+  const navigationReady = useRef(false);
+  const scrollByView = useRef<Partial<Record<View, number>>>({});
+
+  useEffect(() => {
+    let stored: {
+      view?: View;
+      track?: string;
+      region?: string;
+      jobSort?: (typeof sortOptions)[number]["value"];
+      jobQuery?: string;
+      applicationBucket?: ApplicationBucket;
+      jobPage?: number;
+      companyPage?: number;
+      applicationPage?: number;
+      savedPage?: number;
+      scrollByView?: Partial<Record<View, number>>;
+    } = {};
+    try {
+      stored = JSON.parse(sessionStorage.getItem(NAVIGATION_STORAGE_KEY) || "{}") as typeof stored;
+    } catch {
+      sessionStorage.removeItem(NAVIGATION_STORAGE_KEY);
+    }
+    const restoreTimer = window.setTimeout(() => {
+      if (stored.view) setView(stored.view);
+      if (stored.track) setTrack(stored.track);
+      if (stored.region) setRegion(stored.region);
+      if (stored.jobSort) setJobSort(stored.jobSort);
+      if (typeof stored.jobQuery === "string") setJobQuery(stored.jobQuery);
+      if (stored.applicationBucket) setApplicationBucket(stored.applicationBucket);
+      if (stored.jobPage) setJobPage(stored.jobPage);
+      if (stored.companyPage) setCompanyPage(stored.companyPage);
+      if (stored.applicationPage) setApplicationPage(stored.applicationPage);
+      if (stored.savedPage) setSavedPage(stored.savedPage);
+      if (stored.scrollByView) scrollByView.current = stored.scrollByView;
+      navigationReady.current = true;
+    }, 0);
+    return () => window.clearTimeout(restoreTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!navigationReady.current) return;
+    sessionStorage.setItem(NAVIGATION_STORAGE_KEY, JSON.stringify({
+      view,
+      track,
+      region,
+      jobSort,
+      jobQuery,
+      applicationBucket,
+      jobPage,
+      companyPage,
+      applicationPage,
+      savedPage,
+      scrollByView: scrollByView.current,
+    }));
+  }, [view, track, region, jobSort, jobQuery, applicationBucket, jobPage, companyPage, applicationPage, savedPage]);
+
+  useEffect(() => {
+    let scrollTimer = 0;
+    const rememberScroll = () => {
+      window.clearTimeout(scrollTimer);
+      scrollTimer = window.setTimeout(() => {
+        scrollByView.current[view] = window.scrollY;
+        try {
+          const stored = JSON.parse(sessionStorage.getItem(NAVIGATION_STORAGE_KEY) || "{}") as Record<string, unknown>;
+          sessionStorage.setItem(NAVIGATION_STORAGE_KEY, JSON.stringify({ ...stored, scrollByView: scrollByView.current }));
+        } catch {}
+      }, 120);
+    };
+    window.addEventListener("scroll", rememberScroll, { passive: true });
+    const restoreFrame = window.requestAnimationFrame(() => window.scrollTo({ top: scrollByView.current[view] ?? 0 }));
+    return () => {
+      window.removeEventListener("scroll", rememberScroll);
+      window.cancelAnimationFrame(restoreFrame);
+      window.clearTimeout(scrollTimer);
+    };
+  }, [view]);
+
+  useEffect(() => {
+    const accept = (message: unknown) => {
+      if (!message || typeof message !== "object") return;
+      const payload = message as { type?: string; application?: Application };
+      if (payload.type !== "ivy-job-radar-pending-created" || !payload.application?.id) return;
+      const application = payload.application as Application;
+      setApplicationsList((current) => [
+        application,
+        ...current.filter((item) => item.id !== payload.application?.id),
+      ]);
+      setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, application)));
+    };
+    const storageHandler = (event: StorageEvent) => {
+      if (event.key !== PENDING_STORAGE_KEY || !event.newValue) return;
+      try { accept(JSON.parse(event.newValue)); } catch {}
+    };
+    const channel = typeof BroadcastChannel === "undefined" ? null : new BroadcastChannel(PENDING_CHANNEL_NAME);
+    if (channel) channel.onmessage = (event) => accept(event.data);
+    window.addEventListener("storage", storageHandler);
+    return () => {
+      channel?.close();
+      window.removeEventListener("storage", storageHandler);
+    };
+  }, []);
 
   const loadScanStatus = async () => {
     const response = await fetch("/api/scan-status", { cache: "no-store" });
@@ -824,7 +945,7 @@ export default function JobRadar() {
   }, [tasks, interviews, applicationsList]);
 
   useEffect(() => {
-    if (view !== "today") return;
+    if (view !== "today" || !scanPanelOpen) return;
     const refreshStatus = () => {
       void loadScanStatus();
       void loadChinaScanStatus();
@@ -839,7 +960,7 @@ export default function JobRadar() {
       window.clearInterval(statusTimer);
       window.clearInterval(clockTimer);
     };
-  }, [view]);
+  }, [view, scanPanelOpen]);
 
   const enableBrowserNotifications = async () => {
     if (!("Notification" in window)) return;
@@ -853,11 +974,6 @@ export default function JobRadar() {
       window.localStorage.setItem("ivy-job-radar-scan-notices", JSON.stringify(updated));
       return updated;
     });
-  };
-
-  const loadApplications = async () => {
-    const response = await fetch("/api/applications", { cache: "no-store" });
-    if (response.ok) setApplicationsList(await response.json());
   };
 
   const loadAnalytics = async () => {
@@ -935,31 +1051,13 @@ export default function JobRadar() {
     };
   }, [view]);
 
-  const loadSavedJobs = async () => {
-    const response = await fetch("/api/saved-jobs", { cache: "no-store" });
-    if (!response.ok) return;
-    const rows = await response.json() as Array<{ jobId: number }>;
-    setSaved(rows.map((row) => row.jobId));
-  };
-
-  useEffect(() => {
-    let active = true;
-    fetch("/api/saved-jobs", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : []))
-      .then((rows: Array<{ jobId: number }>) => {
-        if (active) setSaved(rows.map((row) => row.jobId));
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
   const loadIgnoredJobs = async () => {
     const response = await fetch("/api/ignored-jobs", { cache: "no-store" });
     if (response.ok) setIgnoredJobs(await response.json());
   };
 
   useEffect(() => {
+    if (!["tools", "ignored"].includes(view) && !scanPanelOpen) return;
     let active = true;
     fetch("/api/ignored-jobs", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
@@ -969,7 +1067,7 @@ export default function JobRadar() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [view, scanPanelOpen]);
 
   const loadProfile = async () => {
     setProfileLoading(true);
@@ -1143,18 +1241,26 @@ export default function JobRadar() {
   useEffect(() => {
     let active = true;
     fetch("/api/jobs", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : []))
-      .then((rows) => {
+      .then((response) => {
+        if (!response.ok) throw new Error(`Job request failed with ${response.status}`);
+        return response.json();
+      })
+      .then((rows: Job[]) => {
         if (active) {
           setDailyJobs(rows);
+          setSaved(rows.filter((row) => row.saved).map((row) => row.id));
           setJobsLoading(false);
         }
       })
-      .catch(() => active && setJobsLoading(false));
+      .catch(() => {
+        if (!active) return;
+        setJobsError("岗位读取暂时失败。已有岗位数据仍然保留，请重试。");
+        setJobsLoading(false);
+      });
     return () => {
       active = false;
     };
-  }, []);
+  }, [jobsReloadToken]);
 
   const loadRequests = async () => {
     const response = await fetch("/api/job-requests", { cache: "no-store" });
@@ -1176,7 +1282,7 @@ export default function JobRadar() {
 
   const jobs = useMemo(
     () => {
-      const normalizedQuery = jobQuery.trim().toLowerCase();
+      const normalizedQuery = deferredJobQuery.trim().toLowerCase();
       const filtered = dailyJobs.filter(
         (job) =>
           (view !== "today" || !["已过期", "疑似过期"].includes(job.status)) &&
@@ -1206,7 +1312,7 @@ export default function JobRadar() {
         return b.score - a.score || newestFirst;
       });
     },
-    [dailyJobs, track, region, saved, view, jobSort, jobQuery],
+    [dailyJobs, track, region, saved, view, jobSort, deferredJobQuery],
   );
 
   useEffect(() => {
@@ -1256,7 +1362,7 @@ export default function JobRadar() {
     return [...completeCompanyPool, ...verified];
   }, [dailyJobs]);
   const companies = useMemo(() => {
-    const query = companyQuery.trim().toLowerCase();
+    const query = deferredCompanyQuery.trim().toLowerCase();
     return companyRecords.filter((company) => {
       const searchable = `${company.company} ${company.keywords} ${company.companyType} ${company.track}`.toLowerCase();
       return (
@@ -1266,7 +1372,7 @@ export default function JobRadar() {
         (companyCollection === "全部接入状态" || companyCollectionMode(findCompanySource(company.company)) === companyCollection)
       );
     });
-  }, [companyRecords, companyQuery, companyPriority, companyRegion, companyCollection]);
+  }, [companyRecords, deferredCompanyQuery, companyPriority, companyRegion, companyCollection]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setCompanyPage(1), 0);
@@ -1302,7 +1408,7 @@ export default function JobRadar() {
   const applicationPageCount = Math.max(1, Math.ceil(visibleApplications.length / APPLICATION_PAGE_SIZE));
   const safeApplicationPage = Math.min(applicationPage, applicationPageCount);
   const pagedApplications = visibleApplications.slice((safeApplicationPage - 1) * APPLICATION_PAGE_SIZE, safeApplicationPage * APPLICATION_PAGE_SIZE);
-  const normalizedSavedQuery = jobQuery.trim().toLocaleLowerCase();
+  const normalizedSavedQuery = deferredJobQuery.trim().toLocaleLowerCase();
   const filteredPendingApplications = pendingApplications.filter((application) =>
     (track === "全部" || application.track === track)
     && (region === "全部地区" || application.region === region)
@@ -1346,6 +1452,13 @@ export default function JobRadar() {
   const savedPageCount = Math.max(1, Math.ceil(mergedSavedItems.length / APPLICATION_PAGE_SIZE));
   const safeSavedPage = Math.min(savedPage, savedPageCount);
   const pagedSavedItems = mergedSavedItems.slice((safeSavedPage - 1) * APPLICATION_PAGE_SIZE, safeSavedPage * APPLICATION_PAGE_SIZE);
+  useEffect(() => {
+    if (view !== "saved") return;
+    const frame = window.requestAnimationFrame(() => {
+      window.dispatchEvent(new CustomEvent("ivy-job-radar-candidate-rendered"));
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [view, safeSavedPage, applicationsList, saved]);
   const expirationForApplication = (application: Application) => dailyJobs.find((job) =>
     ["已过期", "疑似过期"].includes(job.status)
       && ((application.applicationId && job.applicationId === application.applicationId)
@@ -1378,6 +1491,7 @@ export default function JobRadar() {
   const toggleSaved = async (id: number) => {
     const isSaved = saved.includes(id);
     setSaved((current) => isSaved ? current.filter((item) => item !== id) : [...current, id]);
+    setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: !isSaved } : job));
     try {
       const response = await fetch(
         isSaved ? `/api/saved-jobs?jobId=${id}` : "/api/saved-jobs",
@@ -1389,7 +1503,8 @@ export default function JobRadar() {
       );
       if (!response.ok) throw new Error(`Saved job request failed with ${response.status}`);
     } catch {
-      await loadSavedJobs();
+      setSaved((current) => isSaved ? [...current, id] : current.filter((item) => item !== id));
+      setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: isSaved } : job));
     }
   };
 
@@ -1440,6 +1555,9 @@ export default function JobRadar() {
         if (index < 0) return [savedApplication, ...current];
         return current.map((item, itemIndex) => itemIndex === index ? savedApplication : item);
       });
+      if (!["撤回", "拒绝"].includes(savedApplication.status)) {
+        setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, savedApplication)));
+      }
 
       // The editor already closed optimistically. Automatic task creation and server
       // reconciliation stay in the background and never block the perceived save action.
@@ -1461,7 +1579,6 @@ export default function JobRadar() {
           });
           if (taskResponse.ok) await loadWorkflow();
         }
-        await loadApplications();
       })();
     } finally {
       setSaving(false);
@@ -1508,23 +1625,6 @@ export default function JobRadar() {
     setTasks((current) => current.map((item) => item.id === task.id ? { ...item, status: nextStatus } : item));
     const response = await fetch("/api/workflow", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "task", ...task, status: nextStatus }) });
     if (!response.ok) await loadWorkflow();
-  };
-
-  const openInterview = (application: Application, interview?: Interview) => {
-    if (!application.id) return;
-    setInterviewForm(interview ?? {
-      applicationId: application.id,
-      round: interviewStatuses.includes(application.status) ? application.status : "一面",
-      scheduledAt: "",
-      format: "Video",
-      contactName: "",
-      contactEmail: "",
-      notes: "",
-      outcome: "待进行",
-      thankYouStatus: "未发送",
-      thankYouDueAt: "",
-      followUpAt: application.followUpDate,
-    });
   };
 
   const saveInterview = async (event: FormEvent) => {
@@ -1639,7 +1739,57 @@ export default function JobRadar() {
     await loadRequests();
   };
 
-  const ignoreJob = async (reason: string) => {
+  const resolveManualReview = async (
+    kind: "request" | "quality",
+    id: number,
+    action: "approve" | "ignore" | "delete" | "rerun",
+    label: string,
+  ) => {
+    const prompt = action === "approve"
+      ? `确认人工通过 ${label} 吗？`
+      : action === "ignore"
+        ? `确认将 ${label} 加入不再推荐吗？`
+        : action === "rerun"
+          ? `确认重新核验 ${label} 吗？`
+          : "确认仅删除这条核验记录吗？该岗位未来仍可能再次出现。";
+    if (!window.confirm(prompt)) return;
+
+    const requestSnapshot = requests;
+    const qualitySnapshot = quality;
+    if (kind === "request" && action !== "rerun") {
+      setRequests((current) => current.filter((item) => item.id !== id));
+    }
+    if (kind === "quality") {
+      setQuality((current) => current ? {
+        ...current,
+        issues: current.issues.filter((issue) => issue.jobId !== id),
+      } : current);
+    }
+
+    const response = await fetch(kind === "request" ? "/api/manual-review" : "/api/quality-manual-review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(kind === "request" ? { id, action } : { jobId: id, action }),
+    });
+    if (!response.ok) {
+      setRequests(requestSnapshot);
+      setQuality(qualitySnapshot);
+      const payload = await response.json().catch(() => ({})) as { error?: string };
+      window.alert(payload.error || "操作失败，请稍后重试。");
+      return;
+    }
+    if (action === "approve" || action === "ignore") {
+      const jobsResponse = await fetch("/api/jobs", { cache: "no-store" });
+      if (jobsResponse.ok) {
+        const rows = await jobsResponse.json() as Job[];
+        setDailyJobs(rows);
+        setSaved(rows.filter((row) => row.saved).map((row) => row.id));
+      }
+    }
+    if (kind === "request" && action === "rerun") await loadRequests();
+  };
+
+  const ignoreJob = async (reason: string, hardRequirement = false) => {
     if (!ignoreTarget) return;
     setIgnoreSaving(true);
     const response = await fetch("/api/ignored-jobs", {
@@ -1649,7 +1799,11 @@ export default function JobRadar() {
         company: ignoreTarget.company,
         title: ignoreTarget.title,
         jobUrl: ignoreTarget.jobUrl,
-        reason,
+        reason: hardRequirement ? `硬性要求不符合：${reason}` : reason,
+        ...(hardRequirement ? {
+          exclusionType: "hard_requirement_mismatch",
+          learningEligible: false,
+        } : {}),
       }),
     });
     setIgnoreSaving(false);
@@ -1657,7 +1811,8 @@ export default function JobRadar() {
     setDailyJobs((current) => current.filter((job) => job.id !== ignoreTarget.id));
     setSaved((current) => current.filter((id) => id !== ignoreTarget.id));
     setIgnoreTarget(null);
-    await loadIgnoredJobs();
+    setHardRequirementOpen(false);
+    void loadIgnoredJobs();
   };
 
   const restoreIgnoredJob = async (id: number) => {
@@ -1714,7 +1869,7 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "个人资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
           <p className="hero-copy">
             {view === "applications"
               ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
@@ -1726,16 +1881,47 @@ export default function JobRadar() {
                   ? "提交岗位、查看统一核验队列，并在同一页监控自动数据质检。"
                   : view === "profile"
                     ? "集中维护个人信息、标准技能清单和用于定制申请材料的基础 CV。"
+                  : view === "tools"
+                    ? "低频管理、核验和申请辅助功能都集中在这里，主流程保持简单。"
                   : view === "ignored"
                     ? "这些岗位不会在之后的每日搜索中再次出现。"
                 : "今天只看真正值得你花时间申请的岗位。"}
           </p>
         </div>
-        <div className="scan-status">
-          <span className="pulse" />
-          <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : "手动更新"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : "按需运行"}</span></div>
-        </div>
+        {view === "today" ? (
+          <button className="scan-status scan-status-toggle" type="button" onClick={() => setScanPanelOpen((current) => !current)} aria-expanded={scanPanelOpen}>
+            <span className="pulse" />
+            <div><strong>岗位更新</strong><span>{scanPanelOpen ? "收起更新面板" : "需要时再打开"}</span></div>
+          </button>
+        ) : (
+          <div className="scan-status">
+            <span className="pulse" />
+            <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : view === "tools" ? "集中入口" : "已隐藏"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : view === "tools" ? "7 个辅助功能" : `${ignoredJobs.length} 条`}</span></div>
+          </div>
+        )}
       </section>
+
+      {view === "today" && (
+        <section className="quick-start" aria-label="使用流程">
+          <div><span>1</span><strong>看今日岗位</strong><p>先用搜索和筛选缩小范围。</p></div>
+          <div><span>2</span><strong>星标进候选</strong><p>值得研究的岗位先集中保存。</p></div>
+          <div><span>3</span><strong>建立申请记录</strong><p>准备、投递和面试都在申请页跟进。</p></div>
+        </section>
+      )}
+
+      {view === "tools" && (
+        <section className="tools-section" aria-label="求职工具">
+          <div className="tools-grid">
+            <button type="button" onClick={() => setView("companies")}><span>⌕</span><strong>公司与面经</strong><p>查看目标公司、招聘入口和公开面经。</p></button>
+            <button type="button" onClick={() => setView("verify")}><span>✓</span><strong>岗位核验</strong><p>提交链接并处理人工复核例外。</p></button>
+            <button type="button" onClick={() => setView("ignored")}><span>⊘</span><strong>不再推荐</strong><p>查看或恢复被忽略的岗位。</p></button>
+            <a href="/autofill"><span>✦</span><strong>申请 Autofill</strong><p>管理申请表自动填写资料。</p></a>
+            <a href="/bookmarklet"><span>＋</span><strong>Chrome 保存岗位</strong><p>从任意 JD 页面直接加入候选。</p></a>
+            <a href="/cv-knowledge"><span>◈</span><strong>CV 知识库</strong><p>维护可证明的项目、技能与事实。</p></a>
+            <a href="/screening-learning"><span>◇</span><strong>筛选学习</strong><p>查看从人工判断中提炼的建议。</p></a>
+          </div>
+        </section>
+      )}
 
       {view === "applications" && (
         <section className="stats" aria-label="申请概览">
@@ -1861,7 +2047,7 @@ export default function JobRadar() {
         </section>
       )}
 
-      {view === "today" && (
+      {view === "today" && scanPanelOpen && (
         <section className="scan-dashboard" aria-label="岗位扫描入口">
           <div className="scan-dashboard-head">
             <div><strong>真实招聘数据</strong><p>美国来源与中国来源独立运行、独立显示进度，结果进入同一个岗位库统一去重。</p></div>
@@ -2061,6 +2247,7 @@ export default function JobRadar() {
                     {item.notes && <p className="record-note">{item.notes}</p>}
                     <div className="record-actions">
                       {item.jobUrl && <a href={item.jobUrl} target="_blank" rel="noreferrer">打开 JD ↗</a>}
+                      {item.id && <a data-cv-tailor-action="true" href={`/cv-tailor?applicationId=${item.id}`}>定制 CV</a>}
                       <button onClick={() => openTask(item)}>新增任务</button>
                       <button onClick={() => setForm({ ...item })}>编辑记录</button>
                       <button className="danger" onClick={() => deleteApplication(item.id)}>删除</button>
@@ -2113,8 +2300,14 @@ export default function JobRadar() {
           ) : <section className="job-list" aria-live="polite">
             {jobsLoading ? (
               <div className="empty-state"><span>◌</span><h3>正在读取岗位</h3><p>请稍等，正在载入最新核验结果。</p></div>
+            ) : jobsError ? (
+              <div className="empty-state"><span>!</span><h3>岗位读取失败</h3><p>{jobsError}</p><button className="primary" onClick={() => {
+                setJobsLoading(true);
+                setJobsError("");
+                setJobsReloadToken((value) => value + 1);
+              }}>重新读取</button></div>
             ) : jobs.length === 0 ? (
-              <div className="empty-state"><span>◎</span><h3>这个筛选下暂时没有已核验岗位</h3><p>点击“立即更新”运行首轮扫描。</p></div>
+              <div className="empty-state"><span>◎</span><h3>这个筛选下暂时没有已核验岗位</h3><p>打开“岗位更新”面板即可运行首轮扫描。</p></div>
             ) : visibleJobs.map((job) => (
               <article className="job-card" key={job.id}>
                 <div className="job-card-top">
@@ -2190,7 +2383,7 @@ export default function JobRadar() {
           <div className="section-heading">
             <div>
               <p className="eyebrow">APPLICATION TRACKER</p>
-              <h2>{applicationBucket === "submitted" ? "我的申请" : applicationBucket === "interview" ? "我的面试" : applicationBucket === "offer" ? "我的 Offer" : "拒绝记录"}</h2>
+              <h2>{applicationBucket === "submitted" ? "我的申请" : applicationBucket === "interview" ? "我的面试" : applicationBucket === "offer" ? "我的 Offer" : "拒绝记录"}（{visibleApplications.length}）</h2>
             </div>
             <div className="section-actions">
               <button className={`quiet-list-button ${applicationBucket === "rejected" ? "active" : ""}`} onClick={() => setApplicationBucket("rejected")}>拒绝记录 {rejectedApplications.length}</button>
@@ -2199,32 +2392,19 @@ export default function JobRadar() {
           {visibleApplications.length === 0 ? (
             <div className="empty-state"><span>▤</span><h3>{applicationBucket === "rejected" ? "没有拒绝记录" : "还没有申请记录"}</h3><p>{applicationBucket === "rejected" ? "被拒绝的岗位会保留在这个隐藏列表中。" : "发现具体 JD 后新增一条，之后直接在这里更新状态。"}</p></div>
           ) : (
-            <div className="application-list">
+            <div className="compact-application-list" role="table" aria-label="申请记录">
               <PaginationControls page={safeApplicationPage} pageCount={applicationPageCount} onPageChange={setApplicationPage} label="申请" />
+              <div className="compact-application-header" role="row">
+                <span role="columnheader">公司</span>
+                <span role="columnheader">岗位</span>
+                <span role="columnheader">申请日期</span>
+              </div>
               {pagedApplications.map((item) => (
-                <article className="application-card" key={item.id}>
-                  <div className="application-head">
-                    <div><span className={`status status-${item.status}`}>{item.status}</span>{expirationForApplication(item) && <span className="expired-job-label">{expirationForApplication(item)?.status}</span>}<h3>{item.title}</h3><p>{item.company} · {item.location || item.region}</p></div>
-                    <span className="priority">{item.priority}</span>
-                  </div>
-                  <div className="application-details">
-                    <span><b>匹配度</b>{item.fit}/5</span>
-                    <span><b>申请日期</b>{item.appliedDate || "尚未申请"}</span>
-                    <span><b>Application ID</b>{item.applicationId || "未填写"}</span>
-                    <span><b>下一步</b>{item.nextAction || "未填写"}</span>
-                    <span><b>跟进日期</b>{item.followUpDate || "未设置"}</span>
-                    <span><b>申请截止</b>{deadlineLabel(item.deadline, item.deadlineType)}</span>
-                  </div>
-                  {item.notes && <p className="record-note">{item.notes}</p>}
-                  <div className="record-actions">
-                    {item.jobUrl && <a href={item.jobUrl} target="_blank" rel="noreferrer">打开 JD ↗</a>}
-                    <button onClick={() => openTask(item)}>新增任务</button>
-                    <button onClick={() => openInterview(item)}>记录面试</button>
-                    <button onClick={() => openContactForApplication(item)}>新增联系人</button>
-                    <button onClick={() => setForm({ ...item })}>编辑记录</button>
-                    <button className="danger" onClick={() => deleteApplication(item.id)}>删除</button>
-                  </div>
-                </article>
+                <div className="compact-application-row" role="row" key={item.id}>
+                  <strong role="cell" title={item.company}>{item.company}</strong>
+                  <span role="cell" title={item.title}>{item.title}</span>
+                  <time role="cell" dateTime={item.appliedDate || undefined}>{item.appliedDate || "未记录"}</time>
+                </div>
               ))}
             </div>
           )}
@@ -2360,6 +2540,10 @@ export default function JobRadar() {
                 {item.notes && <p className="request-note">{item.notes}</p>}
                 <div className="record-actions">
                   {item.jobUrl && <a href={item.jobUrl} target="_blank" rel="noreferrer">打开原链接 ↗</a>}
+                  {item.status === "需复核" && item.id && <>
+                    <button className="primary" onClick={() => void resolveManualReview("request", item.id as number, "approve", `${item.company} · ${item.title}`)}>人工通过</button>
+                    <button className="danger" onClick={() => void resolveManualReview("request", item.id as number, "ignore", `${item.company} · ${item.title}`)}>不再推荐</button>
+                  </>}
                   <button disabled={verifyingId === item.id} onClick={() => rerunVerification(item.id)}>
                     {verifyingId === item.id ? "核验中…" : "重新核验"}
                   </button>
@@ -2379,6 +2563,12 @@ export default function JobRadar() {
                 <div className="record-actions">
                   <span className="quality-date">{issue.automationStatus === "needs_review" ? "自动处理无法可靠判断" : issue.automationStatus === "retrying" ? `已尝试 ${issue.attempts} 次，将自动重试` : "系统正在读取并回写原岗位"}</span>
                   {issue.jobUrl && <a href={issue.jobUrl} target="_blank" rel="noreferrer">打开原 JD ↗</a>}
+                  {issue.automationStatus === "needs_review" && <>
+                    <button className="primary" onClick={() => void resolveManualReview("quality", issue.jobId, "approve", `${issue.company} · ${issue.title}`)}>人工通过</button>
+                    <button onClick={() => void resolveManualReview("quality", issue.jobId, "rerun", `${issue.company} · ${issue.title}`)}>重新核验</button>
+                    <button className="danger" onClick={() => void resolveManualReview("quality", issue.jobId, "ignore", `${issue.company} · ${issue.title}`)}>不再推荐</button>
+                    <button onClick={() => void resolveManualReview("quality", issue.jobId, "delete", `${issue.company} · ${issue.title}`)}>仅删除记录</button>
+                  </>}
                 </div>
               </article>
             ))}
@@ -2634,29 +2824,42 @@ export default function JobRadar() {
       )}
 
       {ignoreTarget && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setIgnoreTarget(null)}>
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => {
+          if (event.currentTarget !== event.target) return;
+          setIgnoreTarget(null);
+          setHardRequirementOpen(false);
+        }}>
           <section className="ignore-dialog" role="dialog" aria-modal="true" aria-labelledby="ignore-title">
             <div className="form-head">
               <div><p className="eyebrow">不再推荐</p><h2 id="ignore-title">{ignoreTarget.title}</h2></div>
-              <button type="button" onClick={() => setIgnoreTarget(null)} aria-label="关闭">×</button>
+              <button type="button" onClick={() => { setIgnoreTarget(null); setHardRequirementOpen(false); }} aria-label="关闭">×</button>
             </div>
             <p>{ignoreTarget.company} · 请选择原因。以后每日刷新时，同一公司和相同岗位将不会再次出现。</p>
             <div className="ignore-options">
               <button disabled={ignoreSaving} onClick={() => ignoreJob("岗位已关闭或链接失效")}>岗位已关闭或链接失效</button>
               <button disabled={ignoreSaving} onClick={() => ignoreJob("不感兴趣，不想申请")}>不感兴趣，不想申请</button>
+              <button disabled={ignoreSaving} onClick={() => setHardRequirementOpen((current) => !current)}>{hardRequirementOpen ? "收起硬性要求原因" : "硬性要求不符合"}</button>
             </div>
-            <button className="dialog-cancel" onClick={() => setIgnoreTarget(null)}>取消</button>
+            {hardRequirementOpen && (
+              <div className="hard-requirement-options" aria-label="选择不符合的硬性要求">
+                <p>只排除当前岗位，不参与负面关键词学习。岗位方向和 JD 关键词仍会保留。</p>
+                {hardRequirementReasons.map((reason) => (
+                  <button key={reason} disabled={ignoreSaving} onClick={() => void ignoreJob(reason, true)}>{reason}</button>
+                ))}
+              </div>
+            )}
+            <button className="dialog-cancel" onClick={() => { setIgnoreTarget(null); setHardRequirementOpen(false); }}>取消</button>
           </section>
         </div>
       )}
 
+      <PendingApplicationFitScores />
       <nav className="bottom-nav" aria-label="主要导航">
         <button className={view === "today" ? "selected" : ""} onClick={() => setView("today")}><span>⌂</span>今日</button>
         <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>候选</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
-        <button className={view === "companies" ? "selected" : ""} onClick={() => setView("companies")}><span>⌕</span>公司</button>
-        <button className={view === "verify" ? "selected" : ""} onClick={() => setView("verify")}><span>✓</span>核验</button>
         <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>个人</button>
+        <button className={["tools", "companies", "verify", "ignored"].includes(view) ? "selected" : ""} onClick={() => setView("tools")}><span>•••</span>工具</button>
       </nav>
     </main>
   );
