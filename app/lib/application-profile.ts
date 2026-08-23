@@ -39,12 +39,18 @@ export type ApplicationLanguage = {
 export type FixedApplicationProfile = {
   version: 1;
   defaultRegion: "US" | "CN";
+  defaultLanguage: "en" | "zh";
   identity: {
     firstName: string;
     middleName: string;
     lastName: string;
     preferredName: string;
     email: string;
+    chineseFullName: string;
+    chineseFirstName: string;
+    chineseLastName: string;
+    chinesePreferredName: string;
+    chineseEmail: string;
     usPhone: string;
     chinaPhone: string;
     wechat: string;
@@ -89,12 +95,18 @@ const emptyAddress: ApplicationAddress = {
 export const emptyFixedApplicationProfile: FixedApplicationProfile = {
   version: 1,
   defaultRegion: "US",
+  defaultLanguage: "en",
   identity: {
     firstName: "",
     middleName: "",
     lastName: "",
     preferredName: "",
     email: "",
+    chineseFullName: "",
+    chineseFirstName: "",
+    chineseLastName: "",
+    chinesePreferredName: "",
+    chineseEmail: "",
     usPhone: "",
     chinaPhone: "",
     wechat: "",
@@ -163,12 +175,18 @@ export function normalizeFixedApplicationProfile(value: unknown): FixedApplicati
   return {
     version: 1,
     defaultRegion: source.defaultRegion === "CN" ? "CN" : "US",
+    defaultLanguage: source.defaultLanguage === "zh" || (!source.defaultLanguage && source.defaultRegion === "CN") ? "zh" : "en",
     identity: {
       firstName: text(identity.firstName, 120),
       middleName: text(identity.middleName, 120),
       lastName: text(identity.lastName, 120),
       preferredName: text(identity.preferredName, 120),
       email: text(identity.email, 320),
+      chineseFullName: text(identity.chineseFullName, 160),
+      chineseFirstName: text(identity.chineseFirstName, 120),
+      chineseLastName: text(identity.chineseLastName, 120),
+      chinesePreferredName: text(identity.chinesePreferredName, 120),
+      chineseEmail: text(identity.chineseEmail, 320),
       usPhone: text(identity.usPhone, 60),
       chinaPhone: text(identity.chinaPhone, 60),
       wechat: text(identity.wechat, 120),
@@ -233,12 +251,18 @@ export function profileFromGlobalAutofill(value: unknown): FixedApplicationProfi
   const identity = record(source.identity);
   return normalizeFixedApplicationProfile({
     defaultRegion: "US",
+    defaultLanguage: "en",
     identity: {
       firstName: identity.first_name_en,
       middleName: identity.middle_name_en,
       lastName: identity.last_name_en,
       preferredName: identity.preferred_name,
       email: identity.email,
+      chineseFullName: identity.full_name_zh || identity.name_zh,
+      chineseFirstName: identity.first_name_zh || identity.given_name_zh,
+      chineseLastName: identity.last_name_zh || identity.family_name_zh,
+      chinesePreferredName: identity.preferred_name_zh,
+      chineseEmail: identity.email_zh || identity.email,
       usPhone: identity.phone_us || identity.phone,
       chinaPhone: identity.phone_cn || identity.phone,
       wechat: identity.wechat,
@@ -277,9 +301,13 @@ export function mergeFixedApplicationProfile(
   globalProfile: Record<string, unknown>,
   fixedProfile: FixedApplicationProfile,
 ) {
-  const selectedPhone = fixedProfile.defaultRegion === "CN"
+  const useChinese = fixedProfile.defaultLanguage === "zh";
+  const selectedPhone = useChinese
     ? fixedProfile.identity.chinaPhone || fixedProfile.identity.usPhone
     : fixedProfile.identity.usPhone || fixedProfile.identity.chinaPhone;
+  const selectedEmail = useChinese
+    ? fixedProfile.identity.chineseEmail || fixedProfile.identity.email
+    : fixedProfile.identity.email || fixedProfile.identity.chineseEmail;
   const identity = record(globalProfile.identity);
   const awards = fixedProfile.awards.filter((item) => item.name || item.description).map((item) => ({
     name: item.name,
@@ -316,7 +344,13 @@ export function mergeFixedApplicationProfile(
       middle_name_en: fixedProfile.identity.middleName || identity.middle_name_en,
       last_name_en: fixedProfile.identity.lastName || identity.last_name_en,
       preferred_name: fixedProfile.identity.preferredName || identity.preferred_name,
-      email: fixedProfile.identity.email || identity.email,
+      full_name_zh: fixedProfile.identity.chineseFullName || identity.full_name_zh,
+      first_name_zh: fixedProfile.identity.chineseFirstName || identity.first_name_zh,
+      last_name_zh: fixedProfile.identity.chineseLastName || identity.last_name_zh,
+      preferred_name_zh: fixedProfile.identity.chinesePreferredName || identity.preferred_name_zh,
+      email: selectedEmail || identity.email,
+      email_en: fixedProfile.identity.email || identity.email_en,
+      email_zh: fixedProfile.identity.chineseEmail || identity.email_zh,
       phone: selectedPhone || identity.phone,
       phone_us: fixedProfile.identity.usPhone,
       phone_cn: fixedProfile.identity.chinaPhone,

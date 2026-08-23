@@ -2,7 +2,7 @@
 
 最后更新：2026-08-23（America/New_York）
 
-## 最高优先级交接：Autofill 0.4.12 已接入申请固定资料库，CV Prebuilder 使用 Responses API
+## 最高优先级交接：Autofill 0.4.13 已支持中英文固定资料切换，CV Prebuilder 使用 Responses API
 
 > 本节是 2026-08-23 当前最高权威，覆盖下方所有仍写着“Workspace Agent”“API channel”“conversation_url”“下一阶段接入 Agent”“尚未自动生成 CV”或其他旧 next step 的章节。旧内容只用于追溯，不得回退到 Workspace Agent 方案，也不得重新建立另一套自动填表或 CV 定制流程。
 
@@ -11,8 +11,8 @@
 - 原“个人资料”页已改为“申请固定资料”，删除目标岗位、目标行业、职业概述、技能清单和基础 CV 上传等重复入口。
 - D1 `user_profiles.autofill_profile_json` 保存中美电话号码、中美地址、姓名与链接、工作授权、固定选择题、奖项、论文、语言及用户自定义固定问答；`/api/profile` 只允许当前 ChatGPT 登录用户读写。
 - Autofill 的 global profile 路由会把 D1 固定资料合并到 CV 仓库的 global application profile。固定资料以网站保存值为准；教育、工作经历、项目、技能和岗位定制描述仍从 CV 事实库及当前 APP 最终 CV 读取。
-- Chrome 扩展已升级到 `0.4.12`，支持按页面地区选择中国或美国联系方式与地址，并可按高置信问题文本填写用户保存的其他固定问答；仍只填空白、不填敏感 EEO 字段、不自动提交。
-- 用户固定扩展目录仍为 `/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`，更新方式仍是 `git pull origin main`、Chrome Reload、刷新申请页。备用下载包为 `/ivy-job-autofill-0.4.12.zip`。
+- Chrome 扩展已升级到 `0.4.13`，弹窗提供“中文资料 / English profile”显式选择并记住上次选择；姓名、电话、邮箱和地址按所选资料填写，不再依赖页面语言猜测。仍只填空白、不填敏感 EEO 字段、不自动提交。
+- 用户固定扩展目录仍为 `/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`，更新方式仍是 `git pull origin main`、Chrome Reload、刷新申请页。备用下载包为 `/ivy-job-autofill-0.4.13.zip`。
 
 ### 0. Phase 3 当前权威架构与费用边界
 
@@ -31,8 +31,8 @@
 ### A. 当前版本与验收锚点
 
 - Ivy Job Radar 生产 Site：`https://ivy-job-radar.rourou1199.chatgpt.site`
-- Autofill 0.4.11 的历史生产代码锚点是 Site version 137；当前扩展已升级到 0.4.12。
-- Chrome 扩展版本：`0.4.12`，弹窗顶部应显示 `AUTOFILL V4.12`。
+- Autofill 0.4.11 的历史生产代码锚点是 Site version 137；当前扩展已升级到 0.4.13。
+- Chrome 扩展版本：`0.4.13`，弹窗顶部应显示 `AUTOFILL V4.13`。
 - GitHub `XinyuIvy/ivy-job-radar@main` 的 0.4.11 同步提交：`28ffa555a475625550bb94add3b4c7534ca4633f`。
 - 全局自动填表资料：`XinyuIvy/CV@main:master/application-forms/application-autofill-profile.md`。
 - 期刊评级资料写入提交：`1fdc36caa9d9bd8282388c6fa44a50fd07ee7d97`。

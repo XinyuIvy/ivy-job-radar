@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V4.11)
+# Ivy Job Radar Application Autofill (V4.13)
 
 Chrome Manifest V3 extension for user-triggered job-application autofill.
 
@@ -19,6 +19,7 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - V4.10 recognizes publication cards from their title input, author and venue selectors, date control, and details textarea even when the recruiting site does not associate visible labels with those controls.
 - V4.11 auto-adds verified repeated rows for education, employment/internships, projects, awards, languages, portfolio links, campus activities, and publications. It clicks only the explicit Add button inside the matching section and does not create rows when no authoritative records exist.
 - V4.11 fills a publication Level selector only from the stored per-venue ranking record. The profile keeps the ranking year, JCR/CAS/CCF evidence, selected Level, and source URL; unranked conferences and preprint servers remain blank.
+- V4.13 adds an explicit Chinese profile / English profile selector in the popup. The choice is remembered and controls the name, email, phone, and address set without relying on page-language inference.
 - Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
 - Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
 - V4.7 reads each control's direct label before using section structure, so a card containing every publication/project label cannot cross-wire title, date, author, venue, role, or details fields.
@@ -67,4 +68,4 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 
 ## Current scope
 
-V4.11 provides APP-ID-aware form filling, application-specific experience/project/education data from the final customized CV, finalized CV attachment, and verified repeated-row creation. It clicks only a visible, explicit Add control contained in a recognized education, employment/internship, project, publication, award, language, portfolio, or campus-experience section. It does not click ambiguous page-level controls, draft open-ended answers, or submit applications. Those remain human-reviewed steps.
+V4.13 provides APP-ID-aware form filling, an explicit bilingual fixed-profile selector, application-specific experience/project/education data from the final customized CV, finalized CV attachment, and verified repeated-row creation. It clicks only a visible, explicit Add control contained in a recognized education, employment/internship, project, publication, award, language, portfolio, or campus-experience section. It does not click ambiguous page-level controls, draft open-ended answers, or submit applications. Those remain human-reviewed steps.

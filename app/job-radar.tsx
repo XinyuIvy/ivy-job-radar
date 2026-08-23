@@ -3032,20 +3032,40 @@ export default function JobRadar() {
 
               <article className="profile-card">
                 <div className="section-heading compact">
-                  <div><p className="eyebrow">IDENTITY & CONTACT</p><h2>身份与联系方式</h2></div>
+                  <div><p className="eyebrow">BILINGUAL IDENTITY & CONTACT</p><h2>中英文身份与联系方式</h2></div>
                   <span>私有</span>
                 </div>
                 <div className="profile-grid">
-                  <label>First name<input value={profile.applicationProfile.identity.firstName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, firstName: event.target.value })} /></label>
-                  <label>Middle name<input value={profile.applicationProfile.identity.middleName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, middleName: event.target.value })} /></label>
-                  <label>Last name<input value={profile.applicationProfile.identity.lastName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, lastName: event.target.value })} /></label>
-                  <label>Preferred name<input value={profile.applicationProfile.identity.preferredName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, preferredName: event.target.value })} /></label>
-                  <label>申请邮箱<input type="email" value={profile.applicationProfile.identity.email} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, email: event.target.value })} /></label>
+                  <label>默认 Autofill 资料<select value={profile.applicationProfile.defaultLanguage} onChange={(event) => updateFixedProfileSection("defaultLanguage", event.target.value as "en" | "zh")}><option value="zh">中文资料</option><option value="en">English profile</option></select></label>
                   <label>登录邮箱<input value={profile.userEmail} disabled /></label>
-                  <label>美国电话号码<input value={profile.applicationProfile.identity.usPhone} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, usPhone: event.target.value })} placeholder="例如 +1 615 555 0123" /></label>
-                  <label>中国电话号码<input value={profile.applicationProfile.identity.chinaPhone} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chinaPhone: event.target.value })} placeholder="例如 +86 138 0000 0000" /></label>
-                  <label>微信号<input value={profile.applicationProfile.identity.wechat} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, wechat: event.target.value })} /></label>
-                  <label>默认申请地区<select value={profile.applicationProfile.defaultRegion} onChange={(event) => updateFixedProfileSection("defaultRegion", event.target.value as "US" | "CN")}><option value="US">美国</option><option value="CN">中国</option></select></label>
+                </div>
+                <p className="profile-help">Chrome 扩展每次填写前都可以切换中文或英文；这里的默认值只在扩展尚未保存选择时使用。</p>
+                <div className="profile-addresses">
+                  <section className="profile-repeat-card">
+                    <h3>English profile</h3>
+                    <div className="profile-grid">
+                      <label>First name<input value={profile.applicationProfile.identity.firstName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, firstName: event.target.value })} /></label>
+                      <label>Middle name<input value={profile.applicationProfile.identity.middleName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, middleName: event.target.value })} /></label>
+                      <label>Last name<input value={profile.applicationProfile.identity.lastName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, lastName: event.target.value })} /></label>
+                      <label>Preferred name<input value={profile.applicationProfile.identity.preferredName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, preferredName: event.target.value })} /></label>
+                      <label>Application email<input type="email" value={profile.applicationProfile.identity.email} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, email: event.target.value })} /></label>
+                      <label>US phone<input value={profile.applicationProfile.identity.usPhone} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, usPhone: event.target.value })} placeholder="e.g. +1 615 555 0123" /></label>
+                    </div>
+                  </section>
+                  <section className="profile-repeat-card">
+                    <h3>中文资料</h3>
+                    <div className="profile-grid">
+                      <label className="full">中文姓名<input value={profile.applicationProfile.identity.chineseFullName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseFullName: event.target.value })} placeholder="例如 张心语" /></label>
+                      <label>姓<input value={profile.applicationProfile.identity.chineseLastName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseLastName: event.target.value })} /></label>
+                      <label>名<input value={profile.applicationProfile.identity.chineseFirstName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseFirstName: event.target.value })} /></label>
+                      <label>常用名<input value={profile.applicationProfile.identity.chinesePreferredName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chinesePreferredName: event.target.value })} /></label>
+                      <label>申请邮箱<input type="email" value={profile.applicationProfile.identity.chineseEmail} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseEmail: event.target.value })} /></label>
+                      <label>中国电话号码<input value={profile.applicationProfile.identity.chinaPhone} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chinaPhone: event.target.value })} placeholder="例如 +86 138 0000 0000" /></label>
+                      <label>微信号<input value={profile.applicationProfile.identity.wechat} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, wechat: event.target.value })} /></label>
+                    </div>
+                  </section>
+                </div>
+                <div className="profile-grid">
                   <label>LinkedIn<input type="url" value={profile.applicationProfile.links.linkedin} onChange={(event) => updateFixedProfileSection("links", { ...profile.applicationProfile.links, linkedin: event.target.value })} /></label>
                   <label>GitHub<input type="url" value={profile.applicationProfile.links.github} onChange={(event) => updateFixedProfileSection("links", { ...profile.applicationProfile.links, github: event.target.value })} /></label>
                   <label className="full">个人网站<input type="url" value={profile.applicationProfile.links.website} onChange={(event) => updateFixedProfileSection("links", { ...profile.applicationProfile.links, website: event.target.value })} /></label>
@@ -3053,11 +3073,11 @@ export default function JobRadar() {
               </article>
 
               <article className="profile-card">
-                <div className="section-heading compact"><div><p className="eyebrow">ADDRESSES</p><h2>中美地址</h2></div><span>Autofill 按页面地区选择</span></div>
+                <div className="section-heading compact"><div><p className="eyebrow">BILINGUAL ADDRESSES</p><h2>中英文申请地址</h2></div><span>按 Autofill 选择使用</span></div>
                 <div className="profile-addresses">
                   {(["us", "china"] as const).map((region) => {
                     const address = profile.applicationProfile.addresses[region];
-                    const title = region === "us" ? "美国地址" : "中国地址";
+                    const title = region === "us" ? "English profile address" : "中文资料地址";
                     return <section className="profile-repeat-card" key={region}>
                       <h3>{title}</h3>
                       <div className="profile-grid">

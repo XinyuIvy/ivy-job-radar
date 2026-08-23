@@ -66,7 +66,7 @@ class FakeCombobox extends FakeField {
   }
 }
 
-async function runFill(fields, packet, generalProfile = null, buttons = []) {
+async function runFill(fields, packet, generalProfile = null, buttons = [], profileLanguage = "", hostname = "example.cn") {
   const body = { tagName: "BODY", textContent: "", innerText: "", parentElement: null };
   let listener;
   const labels = new Map(fields.map((field) => [field.id, { textContent: field.label }]));
@@ -86,7 +86,7 @@ async function runFill(fields, packet, generalProfile = null, buttons = []) {
   const context = vm.createContext({
     window,
     document,
-    location: { hostname: "example.cn" },
+    location: { hostname },
     CSS: { escape: (value) => value },
     Event: class {},
     File: class {},
@@ -105,7 +105,7 @@ async function runFill(fields, packet, generalProfile = null, buttons = []) {
   const source = await readFile(new URL("../browser-extension/content.js", import.meta.url), "utf8");
   vm.runInContext(source, context);
   return new Promise((resolve) => {
-    listener({ type: "IVY_FILL_PAGE", applicationPacket: packet, generalProfile }, {}, resolve);
+    listener({ type: "IVY_FILL_PAGE", applicationPacket: packet, generalProfile, profileLanguage }, {}, resolve);
   });
 }
 
@@ -178,6 +178,58 @@ test("uses the saved fixed application profile for China contact data and custom
   assert.equal(city.value, "成都");
   assert.equal(travel.value, "Yes");
   assert.equal(result.fields.includes("fixed.answer"), true);
+});
+
+test("uses the explicitly selected Chinese or English fixed profile regardless of page host", async () => {
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [],
+    fixed_application: {
+      defaultLanguage: "zh",
+      defaultRegion: "CN",
+      identity: {
+        firstName: "Xinyu",
+        middleName: "Ivy",
+        lastName: "Zhang",
+        preferredName: "Ivy",
+        email: "ivy.en@example.com",
+        chineseFullName: "张心语",
+        chineseFirstName: "心语",
+        chineseLastName: "张",
+        chinesePreferredName: "心语",
+        chineseEmail: "ivy.zh@example.com",
+        usPhone: "+1 615 555 0100",
+        chinaPhone: "+86 138 0000 0000",
+      },
+      addresses: {
+        us: { address1: "100 West End Ave", city: "Nashville", state: "TN", postalCode: "37203", country: "United States" },
+        china: { address1: "人民南路一段 1 号", city: "成都", state: "四川", postalCode: "610000", country: "中国" },
+      },
+      links: {}, eligibility: {}, application: {}, fixedAnswers: [],
+    },
+  };
+
+  const englishBody = { tagName: "BODY", textContent: "", innerText: "", parentElement: null };
+  const englishFields = [
+    new FakeInput({ id: "en-name", label: "Full name", parentElement: englishBody }),
+    new FakeInput({ id: "en-phone", label: "Phone", parentElement: englishBody }),
+    new FakeInput({ id: "en-email", label: "Email", parentElement: englishBody }),
+    new FakeInput({ id: "en-address", label: "Street address", parentElement: englishBody }),
+  ];
+  const englishResult = await runFill(englishFields, null, generalProfile, [], "en", "example.cn");
+  assert.equal(englishResult.ok, true);
+  assert.deepEqual(englishFields.map((field) => field.value), ["Xinyu Ivy Zhang", "+1 615 555 0100", "ivy.en@example.com", "100 West End Ave"]);
+
+  const chineseBody = { tagName: "BODY", textContent: "", innerText: "", parentElement: null };
+  const chineseFields = [
+    new FakeInput({ id: "zh-name", label: "中文姓名", parentElement: chineseBody }),
+    new FakeInput({ id: "zh-phone", label: "手机号码", parentElement: chineseBody }),
+    new FakeInput({ id: "zh-email", label: "邮箱", parentElement: chineseBody }),
+    new FakeInput({ id: "zh-address", label: "家庭住址", parentElement: chineseBody }),
+  ];
+  const chineseResult = await runFill(chineseFields, null, generalProfile, [], "zh", "example.com");
+  assert.equal(chineseResult.ok, true);
+  assert.deepEqual(chineseFields.map((field) => field.value), ["张心语", "+86 138 0000 0000", "ivy.zh@example.com", "人民南路一段 1 号"]);
 });
 
 test("adapts a project date range to full-date controls", async () => {

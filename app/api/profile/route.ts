@@ -79,16 +79,21 @@ export async function PUT(request: Request) {
   const applicationProfile = normalizeFixedApplicationProfile(raw.applicationProfile);
   applicationProfile.identity.email ||= user.email;
   const now = new Date().toISOString();
-  const fullName = [
-    applicationProfile.identity.firstName,
-    applicationProfile.identity.middleName,
-    applicationProfile.identity.lastName,
-  ].filter(Boolean).join(" ");
-  const selectedAddress = applicationProfile.defaultRegion === "CN"
+  const englishFullName = [
+      applicationProfile.identity.firstName,
+      applicationProfile.identity.middleName,
+      applicationProfile.identity.lastName,
+    ].filter(Boolean).join(" ");
+  const chineseFullName = applicationProfile.identity.chineseFullName
+    || [applicationProfile.identity.chineseLastName, applicationProfile.identity.chineseFirstName].filter(Boolean).join("");
+  const fullName = applicationProfile.defaultLanguage === "zh"
+    ? chineseFullName || englishFullName
+    : englishFullName || chineseFullName;
+  const selectedAddress = applicationProfile.defaultLanguage === "zh"
     ? applicationProfile.addresses.china
     : applicationProfile.addresses.us;
   const location = [selectedAddress.city, selectedAddress.state, selectedAddress.country].filter(Boolean).join(", ");
-  const workAuthorization = applicationProfile.defaultRegion === "CN"
+  const workAuthorization = applicationProfile.defaultLanguage === "zh"
     ? applicationProfile.eligibility.workAuthorizationChina
     : applicationProfile.eligibility.visaStatusUS || applicationProfile.eligibility.workAuthorizationUS;
   const sponsorshipNeed = applicationProfile.eligibility.sponsorshipUS;

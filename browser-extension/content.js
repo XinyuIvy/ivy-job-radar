@@ -98,6 +98,7 @@
   }
 
   const RULES = [
+    ["identity.fullName", /\b(full name|legal name|complete name)\b|中文姓名|姓名/],
     ["identity.firstName", /\b(first name|given name|forename)\b|名字/],
     ["identity.middleName", /\b(middle name|middle initial)\b/],
     ["identity.lastName", /\b(last name|family name|surname)\b|姓氏/],
@@ -662,7 +663,10 @@
   function globalIdentityValue(generalProfile, key) {
     if (!globalProfileIsAuthoritative(generalProfile) || !key.startsWith("identity.")) return { handled: false, value: "", aliases: [] };
     const identity = generalProfile.identity || {};
+    const englishFullName = [identity.first_name_en, identity.middle_name_en, identity.last_name_en]
+      .map((value) => String(value || "").trim()).filter(Boolean).join(" ");
     const map = {
+      "identity.fullName": identity.full_name_en || englishFullName,
       "identity.firstName": identity.first_name_en,
       "identity.middleName": identity.middle_name_en,
       "identity.lastName": identity.last_name_en,
@@ -680,23 +684,29 @@
     return { handled: true, value, aliases };
   }
 
-  function fixedApplicationValue(generalProfile, key) {
+  function fixedApplicationValue(generalProfile, key, profileLanguage = "") {
     const fixed = generalProfile?.fixed_application;
     if (!fixed || typeof fixed !== "object") return { handled: false, value: "", aliases: [] };
-    const useChina = pageUsesChinese() || /(?:^|\.)cn$/i.test(location.hostname)
-      ? true
-      : fixed.defaultRegion === "CN";
+    const explicitLanguage = profileLanguage === "zh" || profileLanguage === "en" ? profileLanguage : "";
+    const useChina = explicitLanguage
+      ? explicitLanguage === "zh"
+      : fixed.defaultLanguage === "zh" || (!fixed.defaultLanguage && (pageUsesChinese() || /(?:^|\.)cn$/i.test(location.hostname) || fixed.defaultRegion === "CN"));
     const identity = fixed.identity || {};
     const address = useChina ? fixed.addresses?.china || {} : fixed.addresses?.us || {};
     const phone = useChina
       ? identity.chinaPhone || identity.usPhone
       : identity.usPhone || identity.chinaPhone;
+    const englishFullName = [identity.firstName, identity.middleName, identity.lastName]
+      .map((value) => String(value || "").trim()).filter(Boolean).join(" ");
+    const chineseFullName = String(identity.chineseFullName || "").trim()
+      || [identity.chineseLastName, identity.chineseFirstName].map((value) => String(value || "").trim()).filter(Boolean).join("");
     const map = {
-      "identity.firstName": identity.firstName,
-      "identity.middleName": identity.middleName,
-      "identity.lastName": identity.lastName,
-      "identity.preferredName": identity.preferredName,
-      "identity.email": identity.email,
+      "identity.fullName": useChina ? chineseFullName || englishFullName : englishFullName || chineseFullName,
+      "identity.firstName": useChina ? identity.chineseFirstName || identity.firstName : identity.firstName,
+      "identity.middleName": useChina ? "" : identity.middleName,
+      "identity.lastName": useChina ? identity.chineseLastName || identity.lastName : identity.lastName,
+      "identity.preferredName": useChina ? identity.chinesePreferredName || identity.preferredName : identity.preferredName,
+      "identity.email": useChina ? identity.chineseEmail || identity.email : identity.email || identity.chineseEmail,
       "identity.phone": phone,
       "identity.wechat": identity.wechat,
       "location.address1": address.address1,
@@ -758,8 +768,8 @@
     return { handled: true, value, aliases };
   }
 
-  function resolveValue(profile, generalProfile, packet, key, packetCounters, globalCounters, generalEntryCounters) {
-    const fixedValue = fixedApplicationValue(generalProfile, key);
+  function resolveValue(profile, generalProfile, packet, key, packetCounters, globalCounters, generalEntryCounters, profileLanguage = "") {
+    const fixedValue = fixedApplicationValue(generalProfile, key, profileLanguage);
     if (fixedValue.handled && fixedValue.value) return { value: fixedValue.value, aliases: fixedValue.aliases };
     const identityValue = globalIdentityValue(generalProfile, key);
     if (identityValue.handled && identityValue.value) return { value: identityValue.value, aliases: identityValue.aliases };
@@ -1462,7 +1472,7 @@
     return { filled, fields };
   }
 
-  async function fill(profile, generalProfile = null, applicationPacket = null) {
+  async function fill(profile, generalProfile = null, applicationPacket = null, profileLanguage = "") {
     const desiredRows = {
       publication: Array.isArray(generalProfile?.publications) ? generalProfile.publications.length : 0,
       project: packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects) ? applicationPacket.projects.length : 0,
@@ -1515,7 +1525,7 @@
       if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
       if (hasGlobalPublications(generalProfile) && key.startsWith("publication.")) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.")) continue;
-      const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters);
+      const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters, profileLanguage);
       if (!value) continue;
       const changed = await fillMappedControl(el, key, value, aliases);
 
@@ -1595,7 +1605,7 @@
     if (message?.type === "IVY_FILL_PAGE") {
       chrome.storage.local.get(["ivyProfile"], (result) => {
         window.__ivyLastApplicationPacket = message.applicationPacket || null;
-        fill(result.ivyProfile || {}, message.generalProfile || null, message.applicationPacket || null)
+        fill(result.ivyProfile || {}, message.generalProfile || null, message.applicationPacket || null, message.profileLanguage || "")
           .then((payload) => sendResponse({ ok: true, ...payload }))
           .catch((error) => sendResponse({ ok: false, error: String(error?.message || error) }));
       });

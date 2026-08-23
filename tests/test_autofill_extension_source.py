@@ -10,7 +10,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
     def test_manifest_remains_manual_trigger_only(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.4.12")
+        self.assertEqual(manifest["version"], "0.4.13")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
@@ -39,6 +39,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         content = (EXT / "content.js").read_text(encoding="utf-8")
         for key in [
             "identity.firstName",
+            "identity.fullName",
             "identity.lastName",
             "identity.email",
             "identity.phone",
@@ -154,7 +155,13 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
-        self.assertIn("AUTOFILL V4.12", popup_html)
+        self.assertIn("AUTOFILL V4.13", popup_html)
+        self.assertIn('id="profileLanguage"', popup_html)
+        self.assertIn("中文资料", popup_html)
+        self.assertIn("English profile", popup_html)
+        self.assertIn("ivyAutofillLanguage", popup)
+        self.assertIn("profileLanguage: profileLanguageSelect.value", popup)
+        self.assertIn('message.profileLanguage || ""', (EXT / "content.js").read_text(encoding="utf-8"))
         self.assertNotIn("AUTOFILL V3", popup_html)
         self.assertIn("从已提交申请中手动选择", popup_html)
         self.assertIn('src="manual-fallback.js"', popup_html)

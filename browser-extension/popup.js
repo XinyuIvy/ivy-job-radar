@@ -6,6 +6,7 @@ const questionsButton = document.getElementById("questions");
 const contextBox = document.getElementById("context");
 const candidateWrap = document.getElementById("candidateWrap");
 const candidateSelect = document.getElementById("candidate");
+const profileLanguageSelect = document.getElementById("profileLanguage");
 
 let lastQuestions = [];
 let currentContext = null;
@@ -36,7 +37,14 @@ async function ensureContentScript(tabId) {
 }
 
 async function getStored() {
-  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig"]);
+  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig", "ivyAutofillLanguage"]);
+}
+
+async function restoreProfileLanguage() {
+  const { ivyAutofillLanguage } = await getStored();
+  if (ivyAutofillLanguage === "zh" || ivyAutofillLanguage === "en") {
+    profileLanguageSelect.value = ivyAutofillLanguage;
+  }
 }
 
 function originPattern(origin) {
@@ -152,7 +160,7 @@ function renderContext(context) {
 
 async function refreshContext(interactive = false) {
   const tab = await activeTab();
-  const { ivyRadarConfig } = await getStored();
+  const { ivyRadarConfig, ivyAutofillLanguage } = await getStored();
   if (!ivyRadarConfig) return renderContext(null);
   if (!tab?.url || !/^https?:/i.test(tab.url)) return renderContext(null);
   if (!await ensureRadarPermission(ivyRadarConfig, interactive)) {
@@ -162,6 +170,15 @@ async function refreshContext(interactive = false) {
   try {
     const context = await fetchContext(ivyRadarConfig, tab.url);
     renderContext(context);
+    if (!ivyAutofillLanguage) {
+      try {
+        const generalProfile = await fetchGlobalProfile(ivyRadarConfig);
+        const defaultLanguage = generalProfile?.fixed_application?.defaultLanguage;
+        if (defaultLanguage === "zh" || defaultLanguage === "en") profileLanguageSelect.value = defaultLanguage;
+      } catch {
+        // The visible selector remains usable when the profile endpoint is temporarily unavailable.
+      }
+    }
     return context;
   } catch (error) {
     showContext("Job Radar 连接失败", String(error.message || error), "warn");
@@ -215,6 +232,10 @@ candidateSelect.addEventListener("change", async () => {
   }
 });
 
+profileLanguageSelect.addEventListener("change", async () => {
+  await chrome.storage.local.set({ ivyAutofillLanguage: profileLanguageSelect.value });
+});
+
 fillButton.addEventListener("click", async () => {
   fillButton.disabled = true;
   show("正在读取 global profile、识别当前 APP 并填写页面…");
@@ -249,6 +270,7 @@ fillButton.addEventListener("click", async () => {
       type: "IVY_FILL_PAGE",
       applicationPacket,
       generalProfile,
+      profileLanguage: profileLanguageSelect.value,
     });
     if (!fillResult?.ok) return show(fillResult?.error || "自动填写失败。", "error");
 
@@ -309,4 +331,5 @@ importButton.addEventListener("click", async () => {
 
 optionsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 
+void restoreProfileLanguage();
 void refreshContext(false);

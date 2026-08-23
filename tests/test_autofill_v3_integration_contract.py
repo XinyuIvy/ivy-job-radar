@@ -13,13 +13,14 @@ class AutofillV3IntegrationContractTests(unittest.TestCase):
         global_source = (ROOT / "app" / "lib" / "global-autofill-profile.ts").read_text(encoding="utf-8")
         manifest = (ROOT / "browser-extension" / "manifest.json").read_text(encoding="utf-8")
 
-        self.assertIn('"version":"0.4.12"', manifest)
+        self.assertIn('"version":"0.4.13"', manifest)
         self.assertIn('/api/autofill/application-packet', popup)
         self.assertIn('/api/autofill/general-profile', popup)
         self.assertIn('applicationPacket', popup)
         self.assertIn('generalProfile', popup)
         self.assertIn('message.generalProfile || null', content)
         self.assertIn('message.applicationPacket || null', content)
+        self.assertIn('message.profileLanguage || ""', content)
         self.assertIn('final_customized_cv_only', content)
         for key in [
             'award.type', 'award.summary', 'publication.title', 'publication.authorOrder',
