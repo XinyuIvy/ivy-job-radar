@@ -1,4 +1,5 @@
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const applications = sqliteTable("applications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -132,10 +133,10 @@ export const savedJobs = sqliteTable("saved_jobs", {
 
 export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
-  jobId: integer("job_id").notNull().unique(),
+  jobId: integer("job_id").notNull(),
   applicationRowId: integer("application_row_id"),
   prebuildId: text("prebuild_id").notNull().default(""),
-  generationKey: text("generation_key").unique(),
+  generationKey: text("generation_key"),
   status: text("status").notNull().default("queued"),
   language: text("language").notNull().default(""),
   track: text("track").notNull().default(""),
@@ -151,7 +152,12 @@ export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
   updatedAt: text("updated_at").notNull(),
   completedAt: text("completed_at").notNull().default(""),
 }, (table) => [
+  index("cv_prebuild_jobs_job_id_updated_at_idx").on(table.jobId, table.updatedAt),
   index("cv_prebuild_jobs_status_updated_at_idx").on(table.status, table.updatedAt),
+  uniqueIndex("cv_prebuild_jobs_generation_key_unique").on(table.generationKey),
+  uniqueIndex("cv_prebuild_jobs_pending_job_unique")
+    .on(table.jobId)
+    .where(sql`${table.generationKey} IS NULL`),
 ]);
 
 export const dataQualityChecks = sqliteTable("data_quality_checks", {
