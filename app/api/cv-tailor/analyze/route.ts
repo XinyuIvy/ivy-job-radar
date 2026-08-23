@@ -151,7 +151,7 @@ function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrac
   if (candidate.classification === "No Evidence") return null;
   const fact = candidate.fact;
   const translationTrack = track === "clinical_neuro" ? "pharma" : track;
-  const translation = fact.industry_translation[translationTrack];
+  const translation = fact.industry_translation?.[translationTrack];
   const classification: EvidenceClassification = fact.fact_status === "planned" ? "Adjacent" : candidate.classification;
   return {
     projectId: fact.project_id,
@@ -168,7 +168,7 @@ function verifiedSupportEvidence(candidate: HybridCandidate, track: IndustryTrac
     evidenceLocation: fact.evidence_location,
     claimBoundary: fact.claim_boundary,
     capabilityContext: fact.problem_solved,
-    industryTranslation: translation?.valid_transferable_interpretation[0] || "",
+    industryTranslation: translation?.valid_transferable_interpretation?.[0] || "",
     industryGuardrail: candidate.limitation,
     score: Math.round(candidate.preverificationScore * 10) / 10,
     retrievalChannels: candidate.retrievalChannels,
