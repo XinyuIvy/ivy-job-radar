@@ -9,7 +9,7 @@
 ### A. 当前版本与验收锚点
 
 - Ivy Job Radar 生产 Site：`https://ivy-job-radar.rourou1199.chatgpt.site`
-- Site 生产版本：version 137。
+- Autofill 0.4.11 的生产代码锚点是 Site version 137；后续只修改 handoff 的 checkpoint 会继续增加 Site version，但不代表扩展代码再次变化。
 - Chrome 扩展版本：`0.4.11`，弹窗顶部应显示 `AUTOFILL V4.11`。
 - GitHub `XinyuIvy/ivy-job-radar@main` 的 0.4.11 同步提交：`28ffa555a475625550bb94add3b4c7534ca4633f`。
 - 全局自动填表资料：`XinyuIvy/CV@main:master/application-forms/application-autofill-profile.md`。
