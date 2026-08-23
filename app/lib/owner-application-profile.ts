@@ -5,7 +5,7 @@ import {
   type FixedApplicationProfile,
 } from "./application-profile";
 
-export const OWNER_PROFILE_DATA_REVISION = 2026082302;
+export const OWNER_PROFILE_DATA_REVISION = 2026082303;
 
 const awards: ApplicationAward[] = [
   {
@@ -217,6 +217,16 @@ export function applyOwnerApplicationProfileUpgrade(
     dataRevision: OWNER_PROFILE_DATA_REVISION,
     identity: {
       ...profile.identity,
+      firstName: "Xinyu",
+      lastName: "Zhang",
+      email: "xinyu.zhang@vanderbilt.edu",
+      chineseFullName: "张馨予",
+      chineseFirstName: "馨予",
+      chineseLastName: "张",
+      chineseEmail: "xinyu.zhang@vanderbilt.edu",
+      usPhone: "+1 (475) 216-5398",
+      chinaPhone: "+86 (158) 4047-0437",
+      wechat: "ivyzzzhang",
       nativePlaceZh: "四川省成都市",
       nativePlaceEn: "Chengdu, Sichuan, China",
       birthPlaceZh: "辽宁省沈阳市",

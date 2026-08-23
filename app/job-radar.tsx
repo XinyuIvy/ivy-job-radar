@@ -3055,7 +3055,7 @@ export default function JobRadar() {
                   <section className="profile-repeat-card">
                     <h3>中文资料</h3>
                     <div className="profile-grid">
-                      <label className="full">中文姓名<input value={profile.applicationProfile.identity.chineseFullName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseFullName: event.target.value })} placeholder="例如 张心语" /></label>
+                      <label className="full">中文姓名<input value={profile.applicationProfile.identity.chineseFullName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseFullName: event.target.value })} placeholder="例如 张馨予" /></label>
                       <label>姓<input value={profile.applicationProfile.identity.chineseLastName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseLastName: event.target.value })} /></label>
                       <label>名<input value={profile.applicationProfile.identity.chineseFirstName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chineseFirstName: event.target.value })} /></label>
                       <label>常用名<input value={profile.applicationProfile.identity.chinesePreferredName} onChange={(event) => updateFixedProfileSection("identity", { ...profile.applicationProfile.identity, chinesePreferredName: event.target.value })} /></label>
