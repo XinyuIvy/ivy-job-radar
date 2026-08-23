@@ -224,10 +224,10 @@ export async function getDb() {
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS cv_prebuild_jobs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      job_id INTEGER NOT NULL UNIQUE,
+      job_id INTEGER NOT NULL,
       application_row_id INTEGER,
       prebuild_id TEXT NOT NULL DEFAULT '',
-      generation_key TEXT UNIQUE,
+      generation_key TEXT,
       status TEXT NOT NULL DEFAULT 'queued',
       language TEXT NOT NULL DEFAULT '',
       track TEXT NOT NULL DEFAULT '',
@@ -245,10 +245,25 @@ export async function getDb() {
     )
   `).run();
 
-  await env.DB.prepare(`
-    CREATE INDEX IF NOT EXISTS cv_prebuild_jobs_status_updated_at_idx
-    ON cv_prebuild_jobs (status, updated_at)
-  `).run();
+  await env.DB.batch([
+    env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS cv_prebuild_jobs_job_id_updated_at_idx
+      ON cv_prebuild_jobs (job_id, updated_at)
+    `),
+    env.DB.prepare(`
+      CREATE INDEX IF NOT EXISTS cv_prebuild_jobs_status_updated_at_idx
+      ON cv_prebuild_jobs (status, updated_at)
+    `),
+    env.DB.prepare(`
+      CREATE UNIQUE INDEX IF NOT EXISTS cv_prebuild_jobs_generation_key_unique
+      ON cv_prebuild_jobs (generation_key)
+    `),
+    env.DB.prepare(`
+      CREATE UNIQUE INDEX IF NOT EXISTS cv_prebuild_jobs_pending_job_unique
+      ON cv_prebuild_jobs (job_id)
+      WHERE generation_key IS NULL
+    `),
+  ]);
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS data_quality_checks (
