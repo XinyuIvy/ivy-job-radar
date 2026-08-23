@@ -11,8 +11,9 @@ class SavedJobsSourceTests(unittest.TestCase):
         self.assertIn("export async function POST", route)
         self.assertIn("export async function DELETE", route)
         self.assertIn("listSavedJobs(await getD1())", route)
-        self.assertIn("saveJob(await getD1()", route)
-        self.assertIn("deleteSavedJob(await getD1()", route)
+        self.assertIn("const database = await getD1()", route)
+        self.assertIn("saveJob(database", route)
+        self.assertIn("deleteSavedJob(database", route)
 
     def test_store_uses_a_unique_insert_and_only_deletes_the_saved_relation(self):
         store = (ROOT / "app" / "lib" / "saved-jobs-store.ts").read_text(encoding="utf-8")

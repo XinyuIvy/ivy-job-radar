@@ -334,6 +334,12 @@ button { color: inherit; }
 }
 .job-title h3 { margin: 5px 0 3px; font-size: 18px; letter-spacing: -.02em; }
 .job-title p { margin: 0; color: var(--muted); font-size: 12px; }
+.cv-prebuild-badge { display: inline-flex; margin-top: 8px; padding: 4px 8px; border-radius: 999px; font-size: 10px; font-weight: 800; }
+.cv-prebuild-badge.active { color: #245d80; background: #e8f4fb; }
+.cv-prebuild-badge.ready { color: var(--green-dark); background: #e4f5ec; }
+.cv-prebuild-badge.blocked { color: #765b31; background: #fff2d9; }
+.cv-prebuild-badge.warning { color: #8a3f36; background: #fdecea; }
+.cv-prebuild-badge.neutral { color: #59645f; background: #eef1ef; }
 .job-meta { display: flex; gap: 7px; }
 .job-meta span { color: var(--green); background: #edf7f1; padding: 3px 7px; border-radius: 6px; font-size: 10px; font-weight: 700; }
 .save-button { border: 0; background: transparent; font-size: 25px; cursor: pointer; color: #819088; }

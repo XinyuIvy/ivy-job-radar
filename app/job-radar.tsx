@@ -5,6 +5,7 @@ import { FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } fro
 import companyPool from "./company-pool.json";
 import companyPoolAdditions from "./company-pool-additions.json";
 import { companyCollectionMode, companySourceSearchUrl, findCompanySource } from "./lib/company-sources";
+import { cvPrebuildStatusView, type CvPrebuildStatus } from "./lib/cv-prebuild-status";
 import { sameLogicalJob } from "./lib/job-identity";
 import PendingApplicationFitScores from "./pending-application-fit-scores";
 
@@ -32,7 +33,14 @@ type Job = {
   discoveredAt: string;
   checkedAt: string;
   saved?: boolean;
+  cvPrebuildStatus?: CvPrebuildStatus | null;
 };
+
+function CvPrebuildStatusBadge({ status }: { status?: CvPrebuildStatus | null }) {
+  const view = cvPrebuildStatusView(status);
+  if (!view) return null;
+  return <span className={`cv-prebuild-badge ${view.tone}`}>{view.label}</span>;
+}
 
 type Application = {
   id?: number;
@@ -1502,6 +1510,12 @@ export default function JobRadar() {
         },
       );
       if (!response.ok) throw new Error(`Saved job request failed with ${response.status}`);
+      if (!isSaved) {
+        const payload = await response.json() as { prebuildStatus?: CvPrebuildStatus };
+        setDailyJobs((current) => current.map((job) => job.id === id
+          ? { ...job, cvPrebuildStatus: payload.prebuildStatus ?? job.cvPrebuildStatus }
+          : job));
+      }
     } catch {
       setSaved((current) => isSaved ? [...current, id] : current.filter((item) => item !== id));
       setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: isSaved } : job));
@@ -2264,6 +2278,7 @@ export default function JobRadar() {
                         <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
                         <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
                         {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
+                        <CvPrebuildStatusBadge status={job.cvPrebuildStatus} />
                       </div>
                       <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => toggleSaved(job.id)} aria-label="从候选岗位移除">
                         ★
@@ -2316,6 +2331,7 @@ export default function JobRadar() {
                     <div className="job-meta"><span>{new Date(job.discoveredAt).toLocaleDateString("zh-CN")}</span><span>{job.track}</span></div>
                     <h3>{job.title}</h3><p>{job.company} · {job.location}</p>
                     {["已过期", "疑似过期"].includes(job.status) && <span className="expired-job-label">{job.status}{job.expirationReason ? ` · ${job.expirationReason}` : ""}</span>}
+                    {saved.includes(job.id) && <CvPrebuildStatusBadge status={job.cvPrebuildStatus} />}
                   </div>
                   <button className={`save-button ${saved.includes(job.id) ? "saved" : ""}`} onClick={() => toggleSaved(job.id)} aria-label={saved.includes(job.id) ? "取消收藏" : "收藏岗位"}>
                     {saved.includes(job.id) ? "★" : "☆"}

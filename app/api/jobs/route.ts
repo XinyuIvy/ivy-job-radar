@@ -2,14 +2,19 @@ import { and, desc, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
-import { applications, ignoredJobs, jobs, savedJobs, scanStatus } from "../../../db/schema";
+import { applications, cvPrebuildJobs, ignoredJobs, jobs, savedJobs, scanStatus } from "../../../db/schema";
 import { ashbyBoards, greenhouseBoards, iCimsBoards, leverBoards, paylocityBoards, workdayBoards } from "../../lib/company-sources";
+import { repairBookmarkCompany } from "../../lib/bookmark-capture";
 import { extractDeadline } from "../../lib/data-quality";
 import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/job-expiration";
 import { sameDisplayedJob } from "../../lib/job-display-identity";
 import {
   canonicalizeJobIdentityUrl,
+  extractStableJobId,
+  isPlaceholderJobTitle,
   makeDistinctStoredJobUrl,
+  normalizeJobIdentityText,
+  normalizeJobLocation,
   sameLogicalJob,
 } from "../../lib/job-identity";
 
@@ -72,57 +77,6 @@ async function reconcileExpiration(sources: SourceStats[], now: string) {
     }
   }
 }
-
-const initialJobs = [
-  {
-    company: "Amazon",
-    title: "Applied Scientist, Pricing Science",
-    location: "Seattle, WA",
-    region: "美国",
-    track: "Technology",
-    score: 72,
-    visa: "JD 未明确",
-    evidence: "申请入口核验时有效；学历：明确接受博士；核心优势：因果推断与实验设计；主要缺口：较强 Python 与生产级建模要求。",
-    skills: JSON.stringify(["Causal inference", "Experimentation", "Python"]),
-    jobUrl: "https://www.amazon.jobs/en/jobs/10414298/applied-scientist-pricing-science",
-    source: "Amazon Careers",
-    status: "开放",
-    discoveredAt: "2026-07-30T23:30:00.000Z",
-    checkedAt: "2026-07-30T23:30:00.000Z",
-  },
-  {
-    company: "Boston Red Sox",
-    title: "Data Scientist, Baseball Analytics",
-    location: "Boston, MA",
-    region: "美国",
-    track: "Technology",
-    score: 78,
-    visa: "JD 未明确",
-    evidence: "公司官方招聘系统的申请入口核验时有效；学历：接受统计等定量专业；核心优势：统计建模、R/Python 与研究沟通。",
-    skills: JSON.stringify(["Statistical modeling", "R / Python", "SQL"]),
-    jobUrl: "https://jobs.lever.co/redsox/46e29255-3049-4733-8c5a-047eefa3cbd0",
-    source: "Lever",
-    status: "开放",
-    discoveredAt: "2026-07-30T23:30:00.000Z",
-    checkedAt: "2026-07-30T23:30:00.000Z",
-  },
-  {
-    company: "Artera",
-    title: "Biostatistics Research Associate",
-    location: "Remote, US/Canada",
-    region: "美国",
-    track: "Healthcare AI",
-    score: 34,
-    visa: "明确不支持",
-    evidence: "公司官方招聘系统的申请入口核验时有效；专业内容匹配，但 JD 明确不提供 sponsorship，因此不进入美国推荐列表。",
-    skills: JSON.stringify(["Biostatistics", "Clinical AI validation", "R"]),
-    jobUrl: "https://jobs.lever.co/artera/1de03f42-aadf-41b7-99bd-51ef67c50528",
-    source: "Lever",
-    status: "开放",
-    discoveredAt: "2026-07-30T23:30:00.000Z",
-    checkedAt: "2026-07-30T23:30:00.000Z",
-  },
-];
 
 // Tenant-specific ATS endpoints. Add a company here after its official careers
 // URL has been verified; the adapters keep the parsing logic shared.
@@ -761,35 +715,133 @@ async function dispatchGlobalScan() {
   };
 }
 
-let initialJobsSeeded = false;
+type IdentityRow = {
+  company?: string;
+  title?: string;
+  location?: string;
+  jobUrl?: string;
+  canonicalUrl?: string;
+  applicationId?: string;
+};
 
-async function seedInitialJobs() {
-  const db = await getDb();
-  if (initialJobsSeeded) return db;
-  for (const job of initialJobs) {
-    const canonicalUrl = canonicalizeJobUrl(job.jobUrl);
-    const applicationId = extractApplicationId(job.jobUrl);
-    await db.insert(jobs).values({ ...job, canonicalUrl, applicationId }).onConflictDoUpdate({
-      target: jobs.jobUrl,
-      set: {
-        score: job.score,
-        visa: job.visa,
-        evidence: job.evidence,
-        skills: job.skills,
-        canonicalUrl,
-        applicationId,
-        checkedAt: job.checkedAt,
-      },
-    });
+function identityParts(row: IdentityRow) {
+  const company = normalizeJobIdentityText(row.company);
+  const title = normalizeJobIdentityText(row.title);
+  const location = normalizeJobLocation(row.location);
+  const stableId = extractStableJobId(row.jobUrl, row.applicationId);
+  const canonicalUrl = canonicalizeJobIdentityUrl(row.canonicalUrl || row.jobUrl);
+  let origin = "";
+  try {
+    origin = new URL(canonicalUrl).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {}
+  const usableRole = Boolean(company && title && !isPlaceholderJobTitle(row.title));
+  return {
+    stableId,
+    stableKey: stableId ? `${origin}::${stableId}` : "",
+    roleKey: usableRole ? `${company}::${title}` : "",
+    locationKey: usableRole ? `${company}::${title}::${location}` : "",
+    canonicalKey: canonicalUrl || "",
+  };
+}
+
+function buildTrackedApplicationMatcher(rows: Array<IdentityRow>) {
+  const byStable = new Map<string, IdentityRow>();
+  const anyByCanonical = new Map<string, IdentityRow>();
+  const noStableByCanonical = new Map<string, IdentityRow>();
+  const noStableByLocation = new Map<string, IdentityRow>();
+  const noStableByRole = new Map<string, IdentityRow>();
+
+  for (const row of rows) {
+    const keys = identityParts(row);
+    if (keys.stableKey && !byStable.has(keys.stableKey)) byStable.set(keys.stableKey, row);
+    if (keys.canonicalKey && !anyByCanonical.has(keys.canonicalKey)) anyByCanonical.set(keys.canonicalKey, row);
+    if (!keys.stableId) {
+      if (keys.canonicalKey && !noStableByCanonical.has(keys.canonicalKey)) noStableByCanonical.set(keys.canonicalKey, row);
+      if (keys.locationKey && !noStableByLocation.has(keys.locationKey)) noStableByLocation.set(keys.locationKey, row);
+      if (keys.roleKey && !noStableByRole.has(keys.roleKey)) noStableByRole.set(keys.roleKey, row);
+    }
   }
-  initialJobsSeeded = true;
-  return db;
+
+  return (job: IdentityRow) => {
+    const keys = identityParts(job);
+    const candidates = keys.stableId
+      ? [
+        byStable.get(keys.stableKey),
+        noStableByCanonical.get(keys.canonicalKey),
+        noStableByLocation.get(keys.locationKey),
+        noStableByRole.get(keys.roleKey),
+      ]
+      : [
+        anyByCanonical.get(keys.canonicalKey),
+        noStableByLocation.get(keys.locationKey),
+        noStableByRole.get(keys.roleKey),
+      ];
+    return candidates.some((candidate) => candidate && sameLogicalJob(job, candidate));
+  };
+}
+
+function deduplicateDisplayedJobs<Row extends IdentityRow>(rows: Row[], rank: (row: Row) => number) {
+  const result: Row[] = [];
+  const byStable = new Map<string, number>();
+  const anyByCanonical = new Map<string, number>();
+  const anyByLocation = new Map<string, number>();
+  const anyByRole = new Map<string, number>();
+  const ambiguousByCanonical = new Map<string, number>();
+  const ambiguousByLocation = new Map<string, number>();
+  const ambiguousByRole = new Map<string, number>();
+
+  const register = (row: Row, index: number) => {
+    const keys = identityParts(row);
+    if (keys.stableKey && !byStable.has(keys.stableKey)) byStable.set(keys.stableKey, index);
+    if (keys.canonicalKey && !anyByCanonical.has(keys.canonicalKey)) anyByCanonical.set(keys.canonicalKey, index);
+    if (keys.locationKey && !anyByLocation.has(keys.locationKey)) anyByLocation.set(keys.locationKey, index);
+    if (keys.roleKey && !anyByRole.has(keys.roleKey)) anyByRole.set(keys.roleKey, index);
+    if (!keys.stableId) {
+      if (keys.canonicalKey && !ambiguousByCanonical.has(keys.canonicalKey)) ambiguousByCanonical.set(keys.canonicalKey, index);
+      if (keys.locationKey && !ambiguousByLocation.has(keys.locationKey)) ambiguousByLocation.set(keys.locationKey, index);
+      if (keys.roleKey && !ambiguousByRole.has(keys.roleKey)) ambiguousByRole.set(keys.roleKey, index);
+    }
+  };
+
+  for (const row of rows) {
+    const keys = identityParts(row);
+    const candidates = keys.stableId
+      ? [
+        byStable.get(keys.stableKey),
+        ambiguousByCanonical.get(keys.canonicalKey),
+        ambiguousByLocation.get(keys.locationKey),
+        ambiguousByRole.get(keys.roleKey),
+      ]
+      : [
+        anyByCanonical.get(keys.canonicalKey),
+        anyByLocation.get(keys.locationKey),
+        anyByRole.get(keys.roleKey),
+      ];
+    const duplicateIndex = [...new Set(candidates.filter((index): index is number => index !== undefined))]
+      .sort((left, right) => left - right)
+      .find((index) => sameDisplayedJob(result[index], row));
+
+    if (duplicateIndex === undefined) {
+      const index = result.push(row) - 1;
+      register(row, index);
+      continue;
+    }
+    if (rank(row) > rank(result[duplicateIndex])) {
+      result[duplicateIndex] = row;
+      register(row, duplicateIndex);
+    }
+  }
+  return result;
 }
 
 export async function GET() {
-  const db = await seedInitialJobs();
+  const db = await getDb();
   const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
   const savedIds = new Set((await db.select().from(savedJobs)).map((row) => row.jobId));
+  const cvPrebuildStatusByJob = new Map(
+    (await db.select({ jobId: cvPrebuildJobs.jobId, status: cvPrebuildJobs.status }).from(cvPrebuildJobs))
+      .map((row) => [row.jobId, row.status]),
+  );
   const hiddenApplicationStatuses = new Set([
     "准备材料",
     "已申请",
@@ -801,9 +853,11 @@ export async function GET() {
   ]);
   const hiddenApplications = (await db.select().from(applications))
     .filter((row) => hiddenApplicationStatuses.has(row.status));
-  const rows = await db.select().from(jobs).orderBy(desc(jobs.discoveredAt));
-  const isTrackedApplication = (row: (typeof rows)[number]) =>
-    hiddenApplications.some((application) => sameLogicalJob(row, application));
+  const rows = (await db.select().from(jobs).orderBy(desc(jobs.discoveredAt))).map((row) => ({
+    ...row,
+    company: repairBookmarkCompany(row.company, row.title, row.jobUrl),
+  }));
+  const isTrackedApplication = buildTrackedApplicationMatcher(hiddenApplications);
 
   const filteredRows = rows
     .filter((row) =>
@@ -817,28 +871,20 @@ export async function GET() {
     .filter((row) => !activeJobStatuses.has(row.status) || !isExcludedTitle(row.title))
     .filter((row) => !activeJobStatuses.has(row.status) || row.score >= 55);
 
-  const uniqueRows = filteredRows.reduce<typeof filteredRows>((result, row) => {
-    const duplicateIndex = result.findIndex((candidate) => sameDisplayedJob(candidate, row));
-    if (duplicateIndex < 0) {
-      result.push(row);
-      return result;
-    }
-
-    const current = result[duplicateIndex];
-    const rank = (candidate: typeof row) =>
+  const uniqueRows = deduplicateDisplayedJobs(filteredRows, (candidate) =>
       Number(savedIds.has(candidate.id)) * 100
       + Number(candidate.source.includes("手动")) * 30
       + Number(Boolean(candidate.description)) * 10
       + Math.min(10, candidate.skills.length)
-      + Math.min(10, candidate.score / 10);
-    if (rank(row) > rank(current)) result[duplicateIndex] = row;
-    return result;
-  }, []);
+      + Math.min(10, candidate.score / 10),
+  );
 
   return NextResponse.json(
     uniqueRows.map((row) => ({
       ...row,
       skills: JSON.parse(row.skills || "[]"),
+      saved: savedIds.has(row.id),
+      cvPrebuildStatus: cvPrebuildStatusByJob.get(row.id) ?? null,
     })),
   );
 }

@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export const applications = sqliteTable("applications", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -129,6 +129,30 @@ export const savedJobs = sqliteTable("saved_jobs", {
   jobId: integer("job_id").notNull().unique(),
   createdAt: text("created_at").notNull(),
 });
+
+export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  jobId: integer("job_id").notNull().unique(),
+  applicationRowId: integer("application_row_id"),
+  prebuildId: text("prebuild_id").notNull().default(""),
+  generationKey: text("generation_key").unique(),
+  status: text("status").notNull().default("queued"),
+  language: text("language").notNull().default(""),
+  track: text("track").notNull().default(""),
+  templateFile: text("template_file").notNull().default(""),
+  jdSha256: text("jd_sha256").notNull().default(""),
+  factMasterSha: text("fact_master_sha").notNull().default(""),
+  promptVersion: text("prompt_version").notNull().default(""),
+  agentTriggerRunId: text("agent_trigger_run_id").notNull().default(""),
+  conversationUrl: text("conversation_url").notNull().default(""),
+  attempts: integer("attempts").notNull().default(0),
+  lastError: text("last_error").notNull().default(""),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+  completedAt: text("completed_at").notNull().default(""),
+}, (table) => [
+  index("cv_prebuild_jobs_status_updated_at_idx").on(table.status, table.updatedAt),
+]);
 
 export const dataQualityChecks = sqliteTable("data_quality_checks", {
   id: integer("id").primaryKey({ autoIncrement: true }),

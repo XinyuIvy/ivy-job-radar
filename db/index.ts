@@ -2,6 +2,8 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 let schemaInitialization: Promise<void> | null = null;
+const SCHEMA_VERSION = 1;
+const SCHEMA_MARKER = `ivy_schema_v${SCHEMA_VERSION}`;
 
 export async function getDb() {
   // Load the runtime binding only when an API request reaches the database.
@@ -14,6 +16,13 @@ export async function getDb() {
 
   if (!schemaInitialization) {
     schemaInitialization = (async () => {
+  // D1 rejects writable user_version pragmas in production. A marker table
+  // keeps the cold-start path to one read without touching application data.
+  const version = await env.DB.prepare(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ? LIMIT 1",
+  ).bind(SCHEMA_MARKER).first<{ name: string }>();
+  if (version?.name === SCHEMA_MARKER) return;
+
   // Runtime initialization keeps local previews and fresh deployments usable.
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS applications (
@@ -93,6 +102,22 @@ export async function getDb() {
       deadline_type TEXT NOT NULL DEFAULT 'unknown',
       discovered_at TEXT NOT NULL,
       checked_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS scan_status (
+      id INTEGER PRIMARY KEY,
+      state TEXT NOT NULL DEFAULT 'idle',
+      ats_scanned INTEGER NOT NULL DEFAULT 0,
+      ats_matched INTEGER NOT NULL DEFAULT 0,
+      created INTEGER NOT NULL DEFAULT 0,
+      updated INTEGER NOT NULL DEFAULT 0,
+      skipped INTEGER NOT NULL DEFAULT 0,
+      total_jobs INTEGER NOT NULL DEFAULT 0,
+      started_at TEXT NOT NULL DEFAULT '',
+      completed_at TEXT NOT NULL DEFAULT '',
+      message TEXT NOT NULL DEFAULT ''
     )
   `).run();
 
@@ -197,6 +222,35 @@ export async function getDb() {
   `).run();
 
   await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS cv_prebuild_jobs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id INTEGER NOT NULL UNIQUE,
+      application_row_id INTEGER,
+      prebuild_id TEXT NOT NULL DEFAULT '',
+      generation_key TEXT UNIQUE,
+      status TEXT NOT NULL DEFAULT 'queued',
+      language TEXT NOT NULL DEFAULT '',
+      track TEXT NOT NULL DEFAULT '',
+      template_file TEXT NOT NULL DEFAULT '',
+      jd_sha256 TEXT NOT NULL DEFAULT '',
+      fact_master_sha TEXT NOT NULL DEFAULT '',
+      prompt_version TEXT NOT NULL DEFAULT '',
+      agent_trigger_run_id TEXT NOT NULL DEFAULT '',
+      conversation_url TEXT NOT NULL DEFAULT '',
+      attempts INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL,
+      completed_at TEXT NOT NULL DEFAULT ''
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE INDEX IF NOT EXISTS cv_prebuild_jobs_status_updated_at_idx
+    ON cv_prebuild_jobs (status, updated_at)
+  `).run();
+
+  await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS data_quality_checks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       job_id INTEGER NOT NULL UNIQUE,
@@ -254,22 +308,6 @@ export async function getDb() {
       source_ids TEXT NOT NULL DEFAULT '[]',
       readiness INTEGER NOT NULL DEFAULT 0,
       updated_at TEXT NOT NULL
-    )
-  `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS scan_status (
-      id INTEGER PRIMARY KEY,
-      state TEXT NOT NULL DEFAULT 'idle',
-      ats_scanned INTEGER NOT NULL DEFAULT 0,
-      ats_matched INTEGER NOT NULL DEFAULT 0,
-      created INTEGER NOT NULL DEFAULT 0,
-      updated INTEGER NOT NULL DEFAULT 0,
-      skipped INTEGER NOT NULL DEFAULT 0,
-      total_jobs INTEGER NOT NULL DEFAULT 0,
-      started_at TEXT NOT NULL DEFAULT '',
-      completed_at TEXT NOT NULL DEFAULT '',
-      message TEXT NOT NULL DEFAULT ''
     )
   `).run();
 
@@ -346,6 +384,12 @@ export async function getDb() {
       SELECT 1
       FROM application_status_events
       WHERE application_status_events.application_id = applications.id
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS ${SCHEMA_MARKER} (
+      id INTEGER PRIMARY KEY CHECK (id = 1)
     )
   `).run();
 
