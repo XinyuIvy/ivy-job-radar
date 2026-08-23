@@ -25,7 +25,7 @@ export type FactIndexRecord = {
   statistical_analytical_concepts: string[];
   problem_solved: string;
   transferable_capabilities: string[];
-  industry_translation: Record<string, IndustryTranslation>;
+  industry_translation?: Record<string, IndustryTranslation>;
   prohibited_overclaims: string[];
   concept_nodes: string[];
   claim_boundary: string;
@@ -51,6 +51,7 @@ export type RequirementRule = {
   category: string;
   aliases: string[];
   projectTerms?: string[];
+  conceptIds?: string[];
 };
 
 export type JdRequirement = {
@@ -275,7 +276,7 @@ export function extractJdRequirements(jd: string, rules: RequirementRule[], fact
       category: rule.category,
       sourceText,
       literalTerms,
-      normalizedConcepts: stableUnique([normalized(rule.label).replace(/ /g, "_"), ...normalizedConcepts]),
+      normalizedConcepts: stableUnique([...(rule.conceptIds ?? []), normalized(rule.label).replace(/ /g, "_"), ...normalizedConcepts]),
       evidenceTerms: stableUnique(rule.projectTerms ?? []),
       hardRequirement,
       importance: hardRequirement ? "high" : "medium",
@@ -493,7 +494,7 @@ export function runHybridRag(jd: string, track: IndustryTrack, rules: Requiremen
       const directOverlap = directEvidenceOverlap(requirement, fact);
       const conceptSimilarity = setSimilarity(tokenSet(queryText), tokenSet(fact.statistical_analytical_concepts));
       const problemSimilarity = cosine(queryEmbedding, localEmbedding(fact.problem_solved));
-      const translation = fact.industry_translation[industryTrack(track)] ?? { translation_type: "no_evidence", valid_transferable_interpretation: [], invalid_overclaim: [] };
+      const translation = fact.industry_translation?.[industryTrack(track)] ?? { translation_type: "no_evidence", valid_transferable_interpretation: [], invalid_overclaim: [] };
       const industrySimilarity = setSimilarity(tokenSet(queryText), tokenSet(translation.valid_transferable_interpretation));
       const graphPath = graphResults.get(fact.fact_id) ?? null;
       const retrievalChannels = stableUnique([
