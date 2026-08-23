@@ -19,7 +19,11 @@
 
 #### A.1 2026-08-22 最新站点修复
 
-- CV Prebuilder Phase 1 已完成：新增 `cv_prebuild_jobs` D1 状态表、安全 migration、收藏状态初始化/取消和候选岗位 badge。代码锚点为 Site version 143 / commit `9f37143`，GitHub `main` 同步提交为 `ba0f5614bbab7749b6bfc83e02aa05a676375c1f`。本阶段没有调用 Agent、没有创建 PRECV bundle、没有自动生成或提交 CV。下一 Chat 必须从 Phase 2 的 PRECV bundle 开始，不得重复 Phase 0–1。
+- CV Prebuilder Phase 2 已完成：新增服务端 `/api/cv-prebuild/prepare`，只允许真实收藏且仍开放、含完整 JD 的 job row 创建私有 PRECV bundle；job record、完整 JD、事实母版、展示规则、六个 canonical indexes 与临时推荐母版全部冻结在同一个精确 CV commit。代码锚点为 Site version 145 / commit `c2e0a96`，GitHub `main` 同步提交为 `a1af0cd056ef78aa0871716a2e62f021658459b9`，私有归档合同提交为 `3c229e1dd974a9628d0acc4fc38c23314e0274a6`。
+- Phase 2 使用覆盖稳定岗位身份、JD SHA-256、母版、CV commit、事实母版 SHA 与 Prompt version 的唯一 `generation_key` 保证幂等；D1 允许同一岗位保留多个 generation，旧输入标记 stale，仍只允许一个无 generation key 的占位行。重试可恢复停在 `preparing_bundle` 的同一 generation，API 不返回私有 bundle URL、token 或上游错误正文。
+- Phase 2 没有创建 applications 记录或 APP ID，没有写任何 `cv_customized` / `cv_submitted` 文件，没有创建 Agent，也没有调用 Workspace Agent / OpenAI API。下一 Chat 必须从 Phase 3 创建并发布 Workspace Agent 开始，不得重复 Phase 0–2，也不得提前进入 Phase 4 的收藏自动触发。
+- Phase 2 验收为 42 个 Node 测试、248 个 Python 测试、lint、production build、Drizzle 再生成无漂移和 Phase 1 到 Phase 2 migration 模拟全部通过。
+- CV Prebuilder Phase 1 已完成：新增 `cv_prebuild_jobs` D1 状态表、安全 migration、收藏状态初始化/取消和候选岗位 badge。代码锚点为 Site version 143 / commit `9f37143`，GitHub `main` 同步提交为 `ba0f5614bbab7749b6bfc83e02aa05a676375c1f`。本阶段没有调用 Agent、没有创建 PRECV bundle、没有自动生成或提交 CV，后续只把它作为状态层回归边界。
 - Phase 1 对已有收藏做了安全回填：没有完整 JD 的岗位显示 `blocked_missing_jd`，有完整 JD 但尚未配置 Agent 的岗位显示 `blocked_configuration`；取消收藏会标记 `cancelled`。UI 已覆盖 queued、准备 bundle、Agent 排队/运行、ready、stale、可重试/终止失败和 cancelled badge，供后续阶段直接复用。
 - Phase 1 验收为 37 个 Node 测试、243 个 Python 测试、lint、production build、Drizzle 再生成和“旧库已含 scan_status 新列”的 migration 模拟全部通过。Drizzle 历史 `0010_snapshot.json` 缺少末尾 `}` 的已有错误也已修复；`0013` migration 明确不重复 ALTER `scan_status`，避免再次触发数据库冷启动失败。
 - CV Prebuilder Phase 0 已完成：`/api/saved-jobs` 现在有 D1 权威持久化、POST/DELETE 幂等与失败回滚，代码锚点为 Site commit `a61f38e`。后续不得重复实现 Phase 0。
@@ -263,12 +267,12 @@ cancelled
 - `ivy_schema_v1` 冷启动标记保持不变；新 migration 不重复添加已有 `scan_status` 列。
 - 后续修改必须保留 Phase 0–1 回归：收藏持久化与幂等、缺 JD/缺配置仍保存成功、取消任务状态、状态 badge 和无 Agent 调用。
 
-#### Phase 2：建立 prebuild bundle
+#### Phase 2：已完成，保留为 PRECV bundle 回归边界
 
-- 从 job row、完整 JD、推荐临时母版与同一 CV commit 创建私有 PRECV bundle。
-- 不创建虚假的 applications 记录，不提前分配最终 APP ID。
-- 用 `generation_key` 保证幂等。
-- 验证 bundle 的完整 JD、事实母版、canonical indexes、展示规则和母版来自同一冻结版本。
+- `/api/cv-prebuild/prepare` 从真实收藏的 job row、完整 JD、推荐临时母版与一个精确 CV commit 创建私有 PRECV bundle。
+- bundle 固定包含 `job_record.yaml`、完整 `jd_snapshot.md`、事实母版、展示规则、六个 canonical indexes、`cv_base.tex` 与 `prebuild_prompt.txt`，全部 CV 权威文件来自同一冻结 commit。
+- 不创建 applications 记录，不分配最终 APP ID，不生成最终 TeX/PDF，不调用 Agent；私有归档仓库的 `docs/PREBUILD_BUNDLE_CONTRACT.md` 是跨仓库合同。
+- `generation_key` 唯一约束、generation 历史、stale 切换、重试恢复和私有错误边界均已完成。Phase 3 必须直接复用此 bundle，不得另造一套 Agent 输入格式。
 
 #### Phase 3：创建并发布 Workspace Agent
 
@@ -314,7 +318,7 @@ cancelled
 
 任务一：保留并验证 Autofill 0.4.11。不得回退为逐个关键词识别，不得覆盖用户已经手动填写的字段。自动添加支持教育、工作/实习、当前 APP 项目、完整论文、奖励、语言、作品和有权威数据的校园经历。低置信字段与无法核实的期刊等级/日期继续留空。
 
-任务二：按 Phase 2 继续 CV Prebuilder Agent。Phase 0 的收藏权威持久化和 Phase 1 的 `cv_prebuild_jobs` 状态层都已经完成，不要重复实现。下一步只建立 PRECV bundle、稳定 `generation_key` 和临时母版选择，仍不调用 Agent；之后再创建/发布 Workspace Agent，最后接 trigger 和状态轮询。
+任务二：按 Phase 3 继续 CV Prebuilder Agent。Phase 0 的收藏权威持久化、Phase 1 的 `cv_prebuild_jobs` 状态层和 Phase 2 的 PRECV bundle、稳定 `generation_key` 与临时母版选择都已经完成，不要重复实现。下一步只创建并发布 Workspace Agent，继承 H 节硬规则并复用现有 PRECV bundle；只有这一阶段需要用户完成一次 API channel 与 access token 安全设置。Phase 3 先手动验证一个用户确实收藏的真实岗位，仍不接收藏自动触发；trigger 和状态轮询留到 Phase 4。
 
 用户要求收藏岗位后立即后台生成临时 CV。临时 Agent 必须执行完整 JD/事实审核、岗位角色画像、项目与论文取舍、事实复核、风格对齐、中文语言审校、年月检查、LuaLaTeX 两页密度检查和最终回归。行业/实习、研究型项目、应用型项目必须分节；学术传播写九个第一作者会议报告；所有项目精确到年月；目标接近但不挤满两页。
 
