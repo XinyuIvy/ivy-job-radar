@@ -43,6 +43,29 @@ export type AutomationTaskRow = {
   draftPdfKey: string;
 };
 
+export type AutomationReviewTaskRow = Pick<AutomationTaskRow,
+  | "id"
+  | "jobId"
+  | "status"
+  | "stage"
+  | "atsProvider"
+  | "language"
+  | "templateTrack"
+  | "eligibilityScore"
+  | "decisionJson"
+  | "blockerJson"
+  | "createdAt"
+  | "updatedAt"
+  | "company"
+  | "title"
+  | "location"
+  | "jobUrl"
+> & {
+  description: string;
+  source: string;
+  visa: string;
+};
+
 export async function getAutomationConfig(database: AutomationDatabase): Promise<AutomationConfig> {
   const row = await database.prepare(`
     SELECT enabled, execution_mode AS executionMode, daily_limit AS dailyLimit,
@@ -72,13 +95,32 @@ export async function getAutomationConfig(database: AutomationDatabase): Promise
   return {
     enabled: Boolean(row.enabled),
     executionMode: row.executionMode === "automatic" ? "automatic" : "pilot",
-    dailyLimit: Math.max(1, Math.min(5, row.dailyLimit || 3)),
+    // Application review is intentionally fixed at ten jobs per batch.
+    dailyLimit: 10,
     minimumScore: Math.max(70, Math.min(95, row.minimumScore || 75)),
     defaultLanguage: row.defaultLanguage === "zh" ? "zh" : "en",
     allowedAts,
     finalSubmitEnabled: Boolean(row.finalSubmitEnabled),
     updatedAt: row.updatedAt,
   };
+}
+
+export async function listAutomationReviewBatch(database: AutomationDatabase, limit = 10) {
+  const result = await database.prepare(`
+    SELECT task.id, task.job_id AS jobId, task.status, task.stage,
+      task.ats_provider AS atsProvider, task.language,
+      task.template_track AS templateTrack, task.eligibility_score AS eligibilityScore,
+      task.decision_json AS decisionJson, task.blocker_json AS blockerJson,
+      task.created_at AS createdAt, task.updated_at AS updatedAt,
+      job.company, job.title, job.location, job.job_url AS jobUrl,
+      job.description, job.source, job.visa
+    FROM application_automation_tasks AS task
+    JOIN jobs AS job ON job.id = task.job_id
+    WHERE task.status = 'awaiting_user_approval'
+    ORDER BY task.created_at ASC, task.id ASC
+    LIMIT ?
+  `).bind(Math.max(1, Math.min(10, limit))).all<AutomationReviewTaskRow>();
+  return result.results ?? [];
 }
 
 export async function reconcileAutomationTasks(database: AutomationDatabase, now: string) {

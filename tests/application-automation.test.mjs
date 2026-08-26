@@ -36,7 +36,9 @@ Candidates should have a PhD in statistics, biostatistics, computer science, or 
 };
 
 test("high-confidence target roles pass deterministic hard filters", () => {
-  const result = evaluateAutomationCandidate(baseJob, defaultAutomationConfig());
+  const config = defaultAutomationConfig();
+  const result = evaluateAutomationCandidate(baseJob, config);
+  assert.equal(config.dailyLimit, 10);
   assert.equal(result.eligible, true);
   assert.equal(result.atsProvider, "greenhouse");
   assert.equal(result.templateTrack, "clinical_neuro");

@@ -1,6 +1,7 @@
 import type { ArchiveTrack } from "./application-archive";
 
 export const automationTaskStatuses = [
+  "awaiting_user_approval",
   "awaiting_cv",
   "ready_for_browser",
   "claimed",
@@ -62,7 +63,7 @@ const OPEN_STATUSES = new Set(["开放", "待官网核验"]);
 export const defaultAutomationConfig = (now = new Date().toISOString()): AutomationConfig => ({
   enabled: true,
   executionMode: "pilot",
-  dailyLimit: 3,
+  dailyLimit: 10,
   minimumScore: 75,
   defaultLanguage: "en",
   allowedAts: ["greenhouse", "lever", "ashby"],
@@ -137,6 +138,7 @@ export function evaluateAutomationCandidate(
 
 export function automationStatusLabel(status: string) {
   const labels: Record<string, string> = {
+    awaiting_user_approval: "等待整批确认",
     awaiting_cv: "等待 CV",
     ready_for_browser: "等待浏览器填写",
     claimed: "浏览器已领取",
