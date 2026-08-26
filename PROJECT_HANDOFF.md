@@ -10,7 +10,7 @@
 
 - 每日美国岗位扫描完成后，`POST /api/application-automation` 使用确定性硬门槛筛选候选：只接收已开放、完整 JD、初筛达到阈值、岗位标题明确属于已确认目标方向且 ATS 位于 Greenhouse/Lever/Ashby 白名单的美国岗位；明确超过 3 年经验、拒绝 sponsorship、要求美国公民/U.S. Person/ITAR/Security Clearance、标题含糊、ATS 不支持、排除职级或排除方向的岗位直接记录为 `screened_out`，不调用 CV API。
 - 每日默认最多选择 3 份。入选岗位才创建或激活申请记录、生成对应岗位英文 CV，并要求 Responses API 同时产出 `application_decision.json`。只有 `eligible=true`、`recommended_action=apply`、置信度至少 `0.8` 且 `hard_blockers` 为空时，任务才进入浏览器队列。
-- D1 `application_automation_config` 保存开关、pilot/automatic 模式、每日上限、最低分、默认语言、ATS 白名单和最终提交开关；`application_automation_tasks` 保存每个岗位的筛选、CV、浏览器 claim、异常、提交回执与重试状态。任务状态在 `/` 底部“自动”页统一查看；该总览本身会轮询 Responses 状态、解析结构化决策并推进任务，不再依赖扩展先启动才更新。
+- D1 `application_automation_config` 保存开关、pilot/automatic 模式、每日上限、最低分、默认语言、ATS 白名单和最终提交开关；`application_automation_tasks` 保存每个岗位的筛选、CV、浏览器 claim、异常、提交回执与重试状态。任务状态在 `/` 底部“自动”页统一查看；该总览本身会轮询 Responses 状态、解析结构化决策并推进最多 200 条任务，不再依赖扩展先启动才更新，也不得把推进范围缩小到列表显示范围以下。
 - Chrome 扩展已升级到 `0.5.0`。后台每 5 分钟领取一个已批准任务，打开精确岗位链接、填写空白字段、添加权威重复记录并上传该岗位的预生成 PDF。验证码、登录、敏感必答题、开放题、缺失必填项、非 CV 附件和不唯一提交按钮全部转入 `needs_review`，不猜答案、不绕过限制。
 - 前 5 份强制使用受控试运行：扩展完成填写和上传后停在最终提交前，由用户检查真实表单并提交，再在总览确认。服务端在不足 5 份已确认样本时拒绝开启 automatic/final submit。之后也只允许 Greenhouse、Lever、Ashby 白名单页面在所有页面级检查通过且能识别成功回执时自动提交。
 - 扩展私有桥接继续使用由 `IVY_JOB_RADAR_SYNC_TOKEN` 派生的 Autofill key；不向浏览器发送 OpenAI key、GitHub token 或 R2 key。失败 claim 30 分钟后自动释放；自动提交只有检测到成功确认页才记录为“已申请”。

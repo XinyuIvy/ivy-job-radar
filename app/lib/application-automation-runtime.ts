@@ -17,7 +17,7 @@ export async function reconcileCvForAutomation() {
   const database = await getD1();
   const db = await getDb();
   const config = await getAutomationConfig(database);
-  let tasks = await listAutomationTasks(database, 30);
+  let tasks = await listAutomationTasks(database, 200);
   const now = new Date().toISOString();
 
   // Re-check unclaimed tasks against the current hard filters. This prevents a
@@ -52,7 +52,7 @@ export async function reconcileCvForAutomation() {
     }
   }
 
-  tasks = await listAutomationTasks(database, 30);
+  tasks = await listAutomationTasks(database, 200);
   const { env } = await import("cloudflare:workers");
   const apiKey = String(env.OPENAI_API_KEY ?? "").trim();
   if (apiKey && env.BUCKET) {
@@ -69,7 +69,7 @@ export async function reconcileCvForAutomation() {
     }
   }
 
-  tasks = await listAutomationTasks(database, 30);
+  tasks = await listAutomationTasks(database, 200);
   if (env.BUCKET) {
     for (const task of tasks.filter((row) => row.status === "awaiting_cv")) {
       const prebuild = await getLatestCvPrebuildJob(database, task.jobId);
