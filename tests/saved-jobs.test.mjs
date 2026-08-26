@@ -67,6 +67,7 @@ class TestD1Database {
         draft_pdf_key TEXT NOT NULL DEFAULT '',
         draft_text_key TEXT NOT NULL DEFAULT '',
         review_key TEXT NOT NULL DEFAULT '',
+        decision_key TEXT NOT NULL DEFAULT '',
         input_tokens INTEGER NOT NULL DEFAULT 0,
         cached_input_tokens INTEGER NOT NULL DEFAULT 0,
         output_tokens INTEGER NOT NULL DEFAULT 0,

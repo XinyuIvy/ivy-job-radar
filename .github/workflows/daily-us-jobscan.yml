@@ -1,6 +1,8 @@
-name: Manual US job scan
+name: Daily US job scan and application preparation
 
 on:
+  schedule:
+    - cron: "0 10 * * *"
   workflow_dispatch:
 
 permissions:
@@ -13,7 +15,7 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - name: Mark website scan as running
         env:
@@ -233,6 +235,44 @@ jobs:
               "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
           done
 
+      - name: Select high-confidence US applications and start customized CVs
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        shell: bash
+        run: |
+          automation_result="$(mktemp)"
+          curl --fail-with-body --retry 3 --retry-all-errors \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+            --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+            --data '{}' \
+            --output "${automation_result}" \
+            "https://ivy-job-radar.rourou1199.chatgpt.site/api/application-automation"
+
+          selected_job_ids="$(python - "${automation_result}" <<'PY'
+          import json
+          import sys
+
+          with open(sys.argv[1], encoding="utf-8") as handle:
+              payload = json.load(handle)
+          print(" ".join(str(value) for value in payload.get("queuedJobIds", [])))
+          PY
+          )"
+
+          for job_id in ${selected_job_ids}; do
+            if ! curl --fail-with-body --retry 2 --retry-all-errors \
+              --request POST \
+              --header "Content-Type: application/json" \
+              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
+              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
+              --data "{\"jobId\":${job_id},\"language\":\"en\"}" \
+              "https://ivy-job-radar.rourou1199.chatgpt.site/api/cv-prebuild/prepare"; then
+              echo "Warning: CV preparation did not start for job ${job_id}. The task remains visible for retry."
+            fi
+          done
+
       - name: Publish completed run receipt
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
@@ -278,7 +318,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/scans/
-          git commit -m "Update manual US job scan"
+          git commit -m "Update daily US job scan"
 
           # The scan can run for a long time while main receives unrelated updates.
           # Rebase the generated snapshot onto the newest main before pushing.

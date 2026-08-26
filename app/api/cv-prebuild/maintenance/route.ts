@@ -13,15 +13,23 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function hasMaintenanceAccess(request: NextRequest, configuredToken: string) {
+function hasMaintenanceAccess(request: NextRequest, configuredToken: string, configuredSyncToken: string) {
   const providedToken = request.nextUrl.searchParams.get("token")?.trim() ?? "";
-  return Boolean(configuredToken && providedToken && providedToken === configuredToken);
+  const authorization = request.headers.get("authorization") ?? "";
+  const providedSyncToken = authorization.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length).trim()
+    : "";
+  return Boolean(
+    (configuredToken && providedToken && providedToken === configuredToken)
+    || (configuredSyncToken && providedSyncToken === configuredSyncToken),
+  );
 }
 
 export async function GET(request: NextRequest) {
   const { env } = await import("cloudflare:workers");
   const maintenanceToken = String(env.CV_MAINTENANCE_TOKEN ?? "").trim();
-  if (!hasMaintenanceAccess(request, maintenanceToken)) {
+  const syncToken = String(env.IVY_JOB_RADAR_SYNC_TOKEN ?? "").trim();
+  if (!hasMaintenanceAccess(request, maintenanceToken, syncToken)) {
     return NextResponse.json({ error: "Unauthorized maintenance request." }, { status: 401 });
   }
 

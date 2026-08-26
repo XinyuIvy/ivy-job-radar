@@ -37,6 +37,7 @@ export type CvPrebuildJobRow = {
   draftPdfKey: string;
   draftTextKey: string;
   reviewKey: string;
+  decisionKey: string;
   inputTokens: number;
   cachedInputTokens: number;
   outputTokens: number;
@@ -94,6 +95,7 @@ const SELECT_PREBUILD_FIELDS = `
     draft_pdf_key AS draftPdfKey,
     draft_text_key AS draftTextKey,
     review_key AS reviewKey,
+    decision_key AS decisionKey,
     input_tokens AS inputTokens,
     cached_input_tokens AS cachedInputTokens,
     output_tokens AS outputTokens,
@@ -375,6 +377,7 @@ export async function completeCvPrebuildRun(
     draftPdfKey: string;
     draftTextKey: string;
     reviewKey: string;
+    decisionKey: string;
     inputTokens: number;
     cachedInputTokens: number;
     outputTokens: number;
@@ -385,7 +388,7 @@ export async function completeCvPrebuildRun(
     UPDATE cv_prebuild_jobs
     SET status = 'ready', openai_response_id = ?, openai_container_id = ?,
         service_tier = ?, draft_tex_key = ?, draft_pdf_key = ?,
-        draft_text_key = ?, review_key = ?, input_tokens = ?,
+        draft_text_key = ?, review_key = ?, decision_key = ?, input_tokens = ?,
         cached_input_tokens = ?, output_tokens = ?, last_error = '',
         updated_at = ?, completed_at = ?
     WHERE generation_key = ?
@@ -397,6 +400,7 @@ export async function completeCvPrebuildRun(
     input.draftPdfKey,
     input.draftTextKey,
     input.reviewKey,
+    input.decisionKey,
     input.inputTokens,
     input.cachedInputTokens,
     input.outputTokens,

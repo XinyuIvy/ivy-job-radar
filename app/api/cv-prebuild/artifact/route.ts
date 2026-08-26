@@ -13,7 +13,7 @@ import { getLatestCvPrebuildJob } from "../../../lib/cv-prebuild-store";
 
 export const dynamic = "force-dynamic";
 
-const validKinds = new Set<CvPrebuildArtifactKind>(["pdf", "tex", "text", "review"]);
+const validKinds = new Set<CvPrebuildArtifactKind>(["pdf", "tex", "text", "review", "decision"]);
 
 function parseJobId(value: unknown) {
   const jobId = Number(value);
@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
     tex: prebuild?.draftTexKey ?? "",
     text: prebuild?.draftTextKey ?? "",
     review: prebuild?.reviewKey ?? "",
+    decision: prebuild?.decisionKey ?? "",
   };
   const key = keyByKind[kind];
   if (!key) return NextResponse.json({ error: "The requested artifact is not ready." }, { status: 404 });
@@ -64,4 +65,3 @@ export async function GET(request: NextRequest) {
     },
   });
 }
-

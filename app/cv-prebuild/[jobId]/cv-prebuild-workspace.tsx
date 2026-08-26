@@ -25,7 +25,7 @@ type WorkspacePayload = {
     failureMessage: string;
     updatedAt: string;
     completedAt: string;
-    artifacts: { pdf: boolean; tex: boolean; text: boolean; review: boolean };
+    artifacts: { pdf: boolean; tex: boolean; text: boolean; review: boolean; decision?: boolean };
     usage: { inputTokens: number; cachedInputTokens: number; outputTokens: number };
   };
   messages: Array<{

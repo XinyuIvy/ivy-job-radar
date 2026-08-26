@@ -52,8 +52,14 @@ export async function POST(request: NextRequest) {
   const { env } = await import("cloudflare:workers");
   const maintenanceToken = request.headers.get("x-cv-maintenance-token")?.trim() ?? "";
   const configuredMaintenanceToken = String(env.CV_MAINTENANCE_TOKEN ?? "").trim();
+  const authorization = request.headers.get("authorization") ?? "";
+  const syncToken = authorization.startsWith("Bearer ")
+    ? authorization.slice("Bearer ".length).trim()
+    : "";
+  const configuredSyncToken = String(env.IVY_JOB_RADAR_SYNC_TOKEN ?? "").trim();
   const maintenanceAuthorized = Boolean(
-    configuredMaintenanceToken && maintenanceToken === configuredMaintenanceToken,
+    (configuredMaintenanceToken && maintenanceToken === configuredMaintenanceToken)
+    || (configuredSyncToken && syncToken === configuredSyncToken),
   );
   if (!maintenanceAuthorized && !(await getChatGPTUser())) {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });

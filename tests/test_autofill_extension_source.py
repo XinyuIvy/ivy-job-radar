@@ -7,22 +7,28 @@ EXT = ROOT / "browser-extension"
 
 
 class ApplicationAutofillSourceTests(unittest.TestCase):
-    def test_manifest_remains_manual_trigger_only(self):
+    def test_manifest_supports_guarded_background_automation(self):
         manifest = json.loads((EXT / "manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["manifest_version"], 3)
-        self.assertEqual(manifest["version"], "0.4.14")
+        self.assertEqual(manifest["version"], "0.5.0")
         self.assertIn("activeTab", manifest["permissions"])
         self.assertIn("scripting", manifest["permissions"])
+        self.assertIn("alarms", manifest["permissions"])
+        self.assertIn("tabs", manifest["permissions"])
         self.assertNotIn("content_scripts", manifest)
-        self.assertNotIn("host_permissions", manifest)
-        self.assertIn("optional_host_permissions", manifest)
+        self.assertIn("host_permissions", manifest)
+        self.assertEqual(manifest["background"]["service_worker"], "service-worker.js")
 
-    def test_content_script_never_submits_and_resume_upload_is_narrowly_scoped(self):
+    def test_content_script_submits_only_after_a_strict_audit_and_resume_upload_is_narrowly_scoped(self):
         content = (EXT / "content.js").read_text(encoding="utf-8")
         self.assertIn(':not([type="submit"])', content)
         self.assertIn("SUBMIT_RE", content)
         self.assertNotIn("form.submit(", content)
         self.assertNotIn("requestSubmit(", content)
+        self.assertIn("applicationFormAudit", content)
+        self.assertIn("clickSafeSubmit", content)
+        self.assertIn("if (!audit.safeToSubmit)", content)
+        self.assertIn("IVY_CLICK_SAFE_SUBMIT", content)
         self.assertIn('input[type="file"]', content)
         self.assertIn("RESUME_RE", content)
         self.assertIn("NON_RESUME_FILE_RE", content)
@@ -139,7 +145,7 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("ivy_job_application_profile_v1", client)
         self.assertIn("ivy_job_autofill_config_v1", client)
         self.assertIn("window.localStorage.setItem", client)
-        self.assertIn("不会点击 Submit", client)
+        self.assertIn("最终 Submit 保持关闭", client)
         self.assertIn("最终定制 CV", client)
 
     def test_popup_fetches_global_profile_app_packet_and_final_pdf(self):
@@ -155,7 +161,8 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertIn("X-Ivy-Autofill-Key", popup)
         self.assertIn("IVY_UPLOAD_RESUME", popup)
         self.assertIn("复制未填问题", popup_html)
-        self.assertIn("AUTOFILL V4.14", popup_html)
+        self.assertIn("AUTOFILL V5.0", popup_html)
+        self.assertIn("IVY_RUN_AUTOMATION_NOW", popup)
         self.assertIn('id="profileLanguage"', popup_html)
         self.assertIn("中文资料", popup_html)
         self.assertIn("English profile", popup_html)
@@ -174,6 +181,12 @@ class ApplicationAutofillSourceTests(unittest.TestCase):
         self.assertNotIn("当前页面对应多个待提交申请", popup)
         self.assertNotIn("CV_GITHUB_TOKEN", popup)
         self.assertNotIn("APPLICATION_ARCHIVE_GITHUB_TOKEN", popup)
+
+        service_worker = (EXT / "service-worker.js").read_text(encoding="utf-8")
+        self.assertIn("/api/application-automation/extension", service_worker)
+        self.assertIn("task.allowFinalSubmit", service_worker)
+        self.assertIn("IVY_AUDIT_APPLICATION_FORM", service_worker)
+        self.assertIn("IVY_CONFIRM_SUBMISSION", service_worker)
 
     def test_server_bridges_require_derived_key_and_use_private_sources(self):
         context_route = (ROOT / "app" / "api" / "autofill" / "application-context" / "route.ts").read_text(encoding="utf-8")

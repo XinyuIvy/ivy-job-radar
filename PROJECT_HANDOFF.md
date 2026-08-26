@@ -1,19 +1,30 @@
 # Job Application / CV Knowledge Base 项目交接
 
-最后更新：2026-08-23（America/New_York）
+最后更新：2026-08-26（America/New_York）
 
-## 最高优先级交接：Autofill 0.4.14 已补齐双语固定资料与论文等级，CV Prebuilder 使用 Responses API
+## 最高优先级交接：Autofill 0.5.0 受控自动投递已接入，CV Prebuilder 输出结构化申请决策
 
-> 本节是 2026-08-23 当前最高权威，覆盖下方所有仍写着“Workspace Agent”“API channel”“conversation_url”“下一阶段接入 Agent”“尚未自动生成 CV”或其他旧 next step 的章节。旧内容只用于追溯，不得回退到 Workspace Agent 方案，也不得重新建立另一套自动填表或 CV 定制流程。
+> 本节是 2026-08-26 当前最高权威，覆盖下方所有仍写着“Workspace Agent”“API channel”“conversation_url”“下一阶段接入 Agent”“尚未自动生成 CV”“不自动投递”或其他旧 next step 的章节。旧内容只用于追溯，不得回退到 Workspace Agent 方案，也不得重新建立另一套自动填表、CV 定制或投递流程。
+
+### 自动投递当前权威架构
+
+- 每日美国岗位扫描完成后，`POST /api/application-automation` 使用确定性硬门槛筛选候选：只接收已开放、完整 JD、初筛达到阈值且属于已确认目标方向的美国岗位；明确超过 3 年经验、拒绝 sponsorship、要求美国公民/U.S. Person/ITAR/Security Clearance、排除职级或排除方向的岗位直接记录为 `screened_out`，不调用 CV API。
+- 每日默认最多选择 3 份。入选岗位才创建或激活申请记录、生成对应岗位英文 CV，并要求 Responses API 同时产出 `application_decision.json`。只有 `eligible=true`、`recommended_action=apply`、置信度至少 `0.8` 且 `hard_blockers` 为空时，任务才进入浏览器队列。
+- D1 `application_automation_config` 保存开关、pilot/automatic 模式、每日上限、最低分、默认语言、ATS 白名单和最终提交开关；`application_automation_tasks` 保存每个岗位的筛选、CV、浏览器 claim、异常、提交回执与重试状态。任务状态在 `/` 底部“自动”页统一查看。
+- Chrome 扩展已升级到 `0.5.0`。后台每 5 分钟领取一个已批准任务，打开精确岗位链接、填写空白字段、添加权威重复记录并上传该岗位的预生成 PDF。验证码、登录、敏感必答题、开放题、缺失必填项、非 CV 附件和不唯一提交按钮全部转入 `needs_review`，不猜答案、不绕过限制。
+- 前 5 份强制使用受控试运行：扩展完成填写和上传后停在最终提交前，由用户检查真实表单并提交，再在总览确认。服务端在不足 5 份已确认样本时拒绝开启 automatic/final submit。之后也只允许 Greenhouse、Lever、Ashby 白名单页面在所有页面级检查通过且能识别成功回执时自动提交。
+- 扩展私有桥接继续使用由 `IVY_JOB_RADAR_SYNC_TOKEN` 派生的 Autofill key；不向浏览器发送 OpenAI key、GitHub token 或 R2 key。失败 claim 30 分钟后自动释放；自动提交只有检测到成功确认页才记录为“已申请”。
+- GitHub workflow `daily-us-jobscan.yml` 已恢复每日 `10:00 UTC` 调度，并在岗位回写后调用自动筛选与 CV prepare。手动“立即运行一轮”仍可在网站触发相同幂等流程。
+- 当前验收：59 个 Node 测试、261 个 Python 测试、ESLint、production build、扩展 JavaScript syntax、workflow YAML 和 Drizzle 无漂移检查全部通过。扩展备用包为 `/ivy-job-autofill-0.5.0.zip`。
 
 ### 最新申请固定资料架构
 
 - 原“个人资料”页已改为“申请固定资料”，删除目标岗位、目标行业、职业概述、技能清单和基础 CV 上传等重复入口。
 - D1 `user_profiles.autofill_profile_json` 保存中美电话号码、美国邮寄地址、中文籍贯/出生地/性别、姓名与链接、工作授权、固定选择题、奖项、论文、语言及用户自定义固定问答；`/api/profile` 只允许当前 ChatGPT 登录用户读写。
 - Autofill 的 global profile 路由会把 D1 固定资料合并到 CV 仓库的 global application profile。固定资料以网站保存值为准；教育、工作经历、项目、技能和岗位定制描述仍从 CV 事实库及当前 APP 最终 CV 读取。
-- Chrome 扩展已升级到 `0.4.14`，弹窗继续提供“中文资料 / English profile”显式选择并记住上次选择；姓名、电话、邮箱、籍贯、出生地、已确认性别、奖项说明、论文作者顺序与论文说明按所选语言填写。仍只填空白、不自动提交，除已在固定资料中明确确认的出生日期、民族和性别外不填敏感 EEO 字段。
+- Chrome 扩展 `0.5.0` 继续提供“中文资料 / English profile”显式选择并记住上次选择；姓名、电话、邮箱、籍贯、出生地、已确认性别、奖项说明、论文作者顺序与论文说明按所选语言填写。仍只填空白，除已在固定资料中明确确认的出生日期、民族和性别外不填敏感 EEO 字段。最终提交边界以本节“自动投递当前权威架构”为准。
 - 当前 owner profile 采用一次性 `dataRevision` 迁移：登录个人资料页或扩展读取 global profile 时，会把中英文姓名与两套电话号码、已确认的籍贯四川成都、出生地辽宁沈阳、性别女、三项奖项、11 项论文/手稿、已发表论文 DOI、双语说明和已核验 JCR 分区写入 D1。中科院/CCF 无可靠依据时保持空白，通用论文等级使用最佳已核验等级。
-- 用户固定扩展目录仍为 `/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`，更新方式仍是 `git pull origin main`、Chrome Reload、刷新申请页。备用下载包为 `/ivy-job-autofill-0.4.14.zip`。
+- 用户固定扩展目录仍为 `/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`，更新方式仍是 `git pull origin main`、Chrome Reload、刷新申请页。备用下载包为 `/ivy-job-autofill-0.5.0.zip`。
 
 ### 0. Phase 3 当前权威架构与费用边界
 
@@ -32,8 +43,8 @@
 ### A. 当前版本与验收锚点
 
 - Ivy Job Radar 生产 Site：`https://ivy-job-radar.rourou1199.chatgpt.site`
-- Autofill 0.4.11 的历史生产代码锚点是 Site version 137；当前扩展已升级到 0.4.14。
-- Chrome 扩展版本：`0.4.14`，弹窗顶部应显示 `AUTOFILL V4.14`。
+- Autofill 0.4.11 的历史生产代码锚点是 Site version 137；当前扩展已升级到 0.5.0。
+- Chrome 扩展版本：`0.5.0`，弹窗顶部应显示 `AUTOFILL V5.0`。
 - GitHub `XinyuIvy/ivy-job-radar@main` 的 0.4.11 同步提交：`28ffa555a475625550bb94add3b4c7534ca4633f`。
 - 全局自动填表资料：`XinyuIvy/CV@main:master/application-forms/application-autofill-profile.md`。
 - 期刊评级资料写入提交：`1fdc36caa9d9bd8282388c6fa44a50fd07ee7d97`。

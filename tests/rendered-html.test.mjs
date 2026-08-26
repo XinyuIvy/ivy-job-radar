@@ -33,9 +33,8 @@ test("renders development preview metadata", async () => {
   assert.match(await response.text(), developmentPreviewMeta);
 });
 
-test("keeps a fixed five-slot mobile navigation", async () => {
+test("keeps a fixed six-slot mobile navigation", async () => {
   const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
   assert.match(css, /\.bottom-nav\s*\{[\s\S]*?position:\s*fixed;/);
-  assert.match(css, /grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
-  assert.doesNotMatch(css, /grid-template-columns:\s*repeat\(6,/);
+  assert.match(css, /grid-template-columns:\s*repeat\(6,\s*minmax\(0,\s*1fr\)\)/);
 });

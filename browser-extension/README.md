@@ -1,12 +1,12 @@
-# Ivy Job Radar Application Autofill (V4.14)
+# Ivy Job Radar Application Autofill (V5.0)
 
-Chrome Manifest V3 extension for user-triggered job-application autofill.
+Chrome Manifest V3 extension for manual autofill and guarded application-automation pilots.
 
 ## What it does
 
 - Fills stable profile fields such as identity, contact, address, professional links, work authorization, sponsorship, relocation and other configured application fields.
 - Uses generic label/name/placeholder matching plus custom combobox support so it works across Greenhouse, Lever, Ashby, Workday and many custom ATS pages.
-- Runs only when the user clicks **填写当前申请页 + CV** in the extension popup.
+- Keeps the manual **填写当前申请页 + CV** flow and also polls Job Radar every five minutes for an approved automation task while Chrome is running.
 - Stores the cross-application profile in `chrome.storage.local` on the user's browser.
 - Imports both the saved profile and a derived Job Radar bridge key from Ivy Job Radar `/autofill`.
 - Matches the current job page to the user's **待提交申请** record using exact URL, stable job ID, or canonical URL. If the page is ambiguous, it asks the user to choose instead of guessing.
@@ -20,6 +20,8 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 - V4.11 auto-adds verified repeated rows for education, employment/internships, projects, awards, languages, portfolio links, campus activities, and publications. It clicks only the explicit Add button inside the matching section and does not create rows when no authoritative records exist.
 - V4.11 fills a publication Level selector only from the stored per-venue ranking record. The profile keeps the ranking year, JCR/CAS/CCF evidence, selected Level, and source URL; unranked conferences and preprint servers remain blank.
 - V4.14 keeps the explicit Chinese profile / English profile selector and adds bilingual birthplace, native place, gender, awards, publication descriptions, DOI links, and separate verified journal-ranking fields.
+- V5.0 adds a background task runner. It claims only a Job Radar task whose tailored CV and structured application decision are ready, opens the exact job URL, fills blank fields, uploads that task's CV, and performs a final form audit.
+- V5.0 pilot mode never clicks the final submit button. Automatic mode remains locked until five pilot submissions are confirmed. Even then, submission is allowed only on a configured ATS with one unique final button, no CAPTCHA, no required sensitive or open-ended question, no missing required field, and a detected success confirmation after the click.
 - Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
 - Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
 - V4.7 reads each control's direct label before using section structure, so a card containing every publication/project label cannot cross-wire title, date, author, venue, role, or details fields.
@@ -37,7 +39,7 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 
 ## Safety boundaries
 
-- Never clicks Submit / Apply / Finish.
+- Never clicks a final Submit / Finish action during pilot mode. In automatic mode, a final click is possible only after the server and in-page safety gates both pass.
 - Never auto-fills EEO, race, ethnicity, gender, disability, veteran, religion, marital status, sexual orientation, pronouns, date of birth, SSN or similar sensitive questions.
 - Never guesses which application-specific CV or experience packet to use when multiple pending applications share the same recruiting portal URL.
 - Never fills cover-letter, transcript, portfolio or other non-resume file inputs with the CV.
@@ -68,4 +70,4 @@ Chrome Manifest V3 extension for user-triggered job-application autofill.
 
 ## Current scope
 
-V4.14 provides APP-ID-aware form filling, an explicit bilingual fixed-profile selector, application-specific experience/project/education data from the final customized CV, finalized CV attachment, and verified repeated-row creation. It clicks only a visible, explicit Add control contained in a recognized education, employment/internship, project, publication, award, language, portfolio, or campus-experience section. It does not click ambiguous page-level controls, draft open-ended answers, or submit applications. Those remain human-reviewed steps.
+V5.0 preserves all V4.14 form-filling behavior and adds guarded background execution for approved Job Radar tasks. The first five tasks are pilot tasks: the extension may open the application page, add repeated rows, fill blank values, and upload the exact prebuilt CV, but it stops before final submission. CAPTCHA, authentication, sensitive required fields, open questions, missing required fields, non-resume attachments, an unknown ATS, and ambiguous submit controls always move the task to review.

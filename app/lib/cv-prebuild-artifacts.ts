@@ -1,4 +1,4 @@
-export type CvPrebuildArtifactKind = "pdf" | "tex" | "text" | "review";
+export type CvPrebuildArtifactKind = "pdf" | "tex" | "text" | "review" | "decision";
 
 type R2ObjectBody = {
   body: ReadableStream;
@@ -21,6 +21,7 @@ const artifactDefinitions: Record<CvPrebuildArtifactKind, { filename: string; co
   tex: { filename: "cv_draft.tex", contentType: "text/x-tex; charset=utf-8" },
   text: { filename: "cv_draft.txt", contentType: "text/plain; charset=utf-8" },
   review: { filename: "cv_review.md", contentType: "text/markdown; charset=utf-8" },
+  decision: { filename: "application_decision.json", contentType: "application/json; charset=utf-8" },
 };
 
 export function cvPrebuildArtifactDefinition(kind: CvPrebuildArtifactKind) {
@@ -57,4 +58,3 @@ export async function readCvPrebuildArtifactText(
   if (!key) return "";
   return (await bucket.get(key))?.text() ?? "";
 }
-

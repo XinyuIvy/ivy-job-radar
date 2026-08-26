@@ -4,6 +4,8 @@
 
   const SENSITIVE_RE = /(race|ethnic|gender|sex(?!ual)|veteran|disability|religion|marital|sexual orientation|pronoun|date of birth|birth date|ssn|social security|demographic|eeo|equal employment|种族|族裔|民族|性别|残障|退伍|宗教|出生日期|社会安全号)/i;
   const SUBMIT_RE = /(submit|send application|complete application|apply now|finish application|提交申请|完成申请)/i;
+  const FINAL_SUBMIT_RE = /^(?:submit(?: application)?|send application|complete application|finish application|提交申请|完成申请)$/i;
+  const APPLICATION_ENTRY_RE = /^(?:apply|apply now|start application|continue application|立即申请|马上申请|申请职位)$/i;
   const RESUME_RE = /\b(resume|résumé|cv|curriculum vitae)\b|简历/i;
   const NON_RESUME_FILE_RE = /(cover letter|portfolio|transcript|writing sample|certificate|photo|头像|成绩单|作品集)/i;
   const OPEN_QUESTION_RE = /(why|motivat|interest|describe|tell us|additional information|anything else|experience with|what excites|why this|cover letter|statement|请描述|为什么|动机|补充信息|相关经验)/i;
@@ -1645,6 +1647,99 @@
     return "Generic ATS";
   }
 
+  function isVisible(el) {
+    if (!el || el.hidden || el.getAttribute?.("aria-hidden") === "true") return false;
+    const style = getComputedStyle(el);
+    if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity) === 0) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  }
+
+  function controlIsEmpty(el) {
+    if (el.matches?.('input[type="checkbox"], input[type="radio"]')) {
+      const name = el.getAttribute("name");
+      const group = name ? Array.from(document.querySelectorAll(`[name="${CSS.escape(name)}"]`)) : [el];
+      return !group.some((item) => item.checked);
+    }
+    if (el.matches?.('input[type="file"]')) return !el.files?.length;
+    if (el.getAttribute?.("role") === "combobox") {
+      return !String(el.getAttribute("aria-valuetext") || el.textContent || "").trim();
+    }
+    return !String(el.value || "").trim();
+  }
+
+  function applicationFormAudit() {
+    const controls = Array.from(document.querySelectorAll(
+      'input:not([type="hidden"]), textarea, select, [role="combobox"]',
+    )).filter(isVisible);
+    const requiredEmpty = [];
+    const sensitiveRequired = [];
+    const openRequired = [];
+    const requiredNonResumeFiles = [];
+    for (const el of controls) {
+      const required = el.required || el.getAttribute("aria-required") === "true";
+      if (!required || !controlIsEmpty(el)) continue;
+      const text = fieldText(el).slice(0, 180) || "未标注的必填字段";
+      requiredEmpty.push(text);
+      if (SENSITIVE_RE.test(text)) sensitiveRequired.push(text);
+      if (OPEN_QUESTION_RE.test(text) || el.matches("textarea")) openRequired.push(text);
+      if (el.matches('input[type="file"]') && (!RESUME_RE.test(text) || NON_RESUME_FILE_RE.test(text))) {
+        requiredNonResumeFiles.push(text);
+      }
+    }
+    const bodyText = normalize(document.body?.innerText?.slice(0, 12000));
+    const captcha = Boolean(
+      document.querySelector('iframe[src*="captcha" i], iframe[src*="recaptcha" i], iframe[src*="hcaptcha" i], [class*="captcha" i], [id*="captcha" i]')
+      || /verify you are human|i am not a robot|captcha|人机验证|验证码/.test(bodyText),
+    );
+    const submitButtons = Array.from(document.querySelectorAll('button, input[type="submit"], [role="button"]'))
+      .filter(isVisible)
+      .filter((button) => FINAL_SUBMIT_RE.test(String(button.textContent || button.value || "").trim()))
+      .filter((button) => !button.disabled && button.getAttribute("aria-disabled") !== "true");
+    const blockers = [];
+    if (captcha) blockers.push("页面包含 CAPTCHA 或人机验证");
+    if (sensitiveRequired.length) blockers.push("存在未确认的必填敏感问题");
+    if (openRequired.length) blockers.push("存在未回答的必填开放题");
+    if (requiredNonResumeFiles.length) blockers.push("存在未上传的必填非简历附件");
+    if (requiredEmpty.length) blockers.push(`仍有 ${requiredEmpty.length} 个必填字段为空`);
+    if (submitButtons.length !== 1) blockers.push(submitButtons.length ? "页面存在多个最终提交按钮" : "没有找到唯一的最终提交按钮");
+    return {
+      platform: detectPlatform(),
+      blockers: [...new Set(blockers)],
+      requiredEmpty: [...new Set(requiredEmpty)].slice(0, 30),
+      sensitiveRequired: [...new Set(sensitiveRequired)].slice(0, 20),
+      openRequired: [...new Set(openRequired)].slice(0, 20),
+      submitButtonCount: submitButtons.length,
+      safeToSubmit: blockers.length === 0,
+    };
+  }
+
+  function openApplicationForm() {
+    const candidates = Array.from(document.querySelectorAll('a, button, [role="button"]'))
+      .filter(isVisible)
+      .filter((element) => APPLICATION_ENTRY_RE.test(String(element.textContent || element.value || "").trim()));
+    if (candidates.length !== 1) return { clicked: false, candidates: candidates.length };
+    candidates[0].click();
+    return { clicked: true, candidates: 1 };
+  }
+
+  function clickSafeSubmit() {
+    const audit = applicationFormAudit();
+    if (!audit.safeToSubmit) return { clicked: false, audit };
+    const [button] = Array.from(document.querySelectorAll('button, input[type="submit"], [role="button"]'))
+      .filter(isVisible)
+      .filter((element) => FINAL_SUBMIT_RE.test(String(element.textContent || element.value || "").trim()));
+    if (!button) return { clicked: false, audit };
+    button.click();
+    return { clicked: true, audit };
+  }
+
+  function submissionConfirmation() {
+    const text = normalize(document.body?.innerText?.slice(0, 12000));
+    const confirmed = /application (?:has been )?(?:submitted|received)|thank you for applying|we have received your application|申请已提交|投递成功|感谢您的申请/.test(text);
+    return { confirmed, text: confirmed ? text.slice(0, 500) : "" };
+  }
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message?.type === "IVY_FILL_PAGE") {
       chrome.storage.local.get(["ivyProfile"], (result) => {
@@ -1667,6 +1762,22 @@
       } catch (error) {
         sendResponse({ ok: false, error: String(error?.message || error) });
       }
+      return false;
+    }
+    if (message?.type === "IVY_OPEN_APPLICATION_FORM") {
+      sendResponse({ ok: true, ...openApplicationForm() });
+      return false;
+    }
+    if (message?.type === "IVY_AUDIT_APPLICATION_FORM") {
+      sendResponse({ ok: true, ...applicationFormAudit() });
+      return false;
+    }
+    if (message?.type === "IVY_CLICK_SAFE_SUBMIT") {
+      sendResponse({ ok: true, ...clickSafeSubmit() });
+      return false;
+    }
+    if (message?.type === "IVY_CONFIRM_SUBMISSION") {
+      sendResponse({ ok: true, ...submissionConfirmation() });
       return false;
     }
   });

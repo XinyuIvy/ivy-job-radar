@@ -29,6 +29,7 @@ const artifactKindsByFilename: Record<string, CvPrebuildArtifactKind> = {
   "cv_draft.tex": "tex",
   "cv_draft.txt": "text",
   "cv_review.md": "review",
+  "application_decision.json": "decision",
 };
 
 function terminalFailure(response: OpenAiCvResponse) {
@@ -111,6 +112,7 @@ export async function reconcileCvPrebuildRun(input: {
       draftPdfKey: keys.pdf || row.draftPdfKey,
       draftTextKey: keys.text || row.draftTextKey,
       reviewKey: keys.review || row.reviewKey,
+      decisionKey: keys.decision || row.decisionKey,
       ...usage,
       now,
     });

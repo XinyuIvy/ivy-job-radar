@@ -161,6 +161,7 @@ export const cvPrebuildJobs = sqliteTable("cv_prebuild_jobs", {
   draftPdfKey: text("draft_pdf_key").notNull().default(""),
   draftTextKey: text("draft_text_key").notNull().default(""),
   reviewKey: text("review_key").notNull().default(""),
+  decisionKey: text("decision_key").notNull().default(""),
   inputTokens: integer("input_tokens").notNull().default(0),
   cachedInputTokens: integer("cached_input_tokens").notNull().default(0),
   outputTokens: integer("output_tokens").notNull().default(0),
@@ -190,6 +191,43 @@ export const cvPrebuildMessages = sqliteTable("cv_prebuild_messages", {
 }, (table) => [
   index("cv_prebuild_messages_job_created_at_idx").on(table.cvPrebuildJobId, table.createdAt),
   uniqueIndex("cv_prebuild_messages_response_unique").on(table.openaiResponseId),
+]);
+
+export const applicationAutomationConfig = sqliteTable("application_automation_config", {
+  id: integer("id").primaryKey(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
+  executionMode: text("execution_mode").notNull().default("pilot"),
+  dailyLimit: integer("daily_limit").notNull().default(3),
+  minimumScore: integer("minimum_score").notNull().default(75),
+  defaultLanguage: text("default_language").notNull().default("en"),
+  allowedAtsJson: text("allowed_ats_json").notNull().default('["greenhouse","lever","ashby"]'),
+  finalSubmitEnabled: integer("final_submit_enabled", { mode: "boolean" }).notNull().default(false),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const applicationAutomationTasks = sqliteTable("application_automation_tasks", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  jobId: integer("job_id").notNull().unique(),
+  applicationRowId: integer("application_row_id"),
+  status: text("status").notNull().default("awaiting_cv"),
+  stage: text("stage").notNull().default("screened"),
+  atsProvider: text("ats_provider").notNull().default("unknown"),
+  language: text("language").notNull().default("en"),
+  templateTrack: text("template_track").notNull().default("tech"),
+  eligibilityScore: integer("eligibility_score").notNull().default(0),
+  decisionJson: text("decision_json").notNull().default("{}"),
+  blockerJson: text("blocker_json").notNull().default("[]"),
+  claimToken: text("claim_token").notNull().default(""),
+  claimedAt: text("claimed_at").notNull().default(""),
+  attempts: integer("attempts").notNull().default(0),
+  lastError: text("last_error").notNull().default(""),
+  submittedAt: text("submitted_at").notNull().default(""),
+  confirmationText: text("confirmation_text").notNull().default(""),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [
+  index("application_automation_tasks_status_updated_at_idx").on(table.status, table.updatedAt),
+  index("application_automation_tasks_application_row_id_idx").on(table.applicationRowId),
 ]);
 
 export const dataQualityChecks = sqliteTable("data_quality_checks", {

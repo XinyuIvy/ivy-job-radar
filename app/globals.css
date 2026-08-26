@@ -921,6 +921,59 @@ button { color: inherit; }
 }
 .quick-start strong { font-size: 12px; }
 .quick-start p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.4; }
+.application-automation { display: grid; gap: 14px; padding-bottom: 28px; }
+.automation-command-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px;
+  border: 1px solid var(--line); border-radius: 22px; padding: 22px; background: var(--card);
+  box-shadow: 0 12px 36px rgba(37,62,52,.05);
+}
+.automation-command-bar h2 { margin: 0; font: 700 28px/1.1 Georgia, "Songti SC", serif; }
+.automation-command-bar p:last-child { max-width: 620px; margin: 8px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.automation-command-bar > button {
+  flex: 0 0 auto; min-width: 150px; border: 0; border-radius: 12px; padding: 12px 16px;
+  background: var(--green-dark); color: white; cursor: pointer; font-weight: 800;
+}
+.automation-command-bar > button:disabled { cursor: wait; opacity: .55; }
+.automation-settings { display: grid; grid-template-columns: repeat(3, minmax(0, .7fr)) minmax(220px, 1.4fr); gap: 10px; }
+.automation-settings > label, .automation-mode {
+  min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: rgba(255,255,255,.82);
+}
+.automation-settings label span { color: var(--muted); font-size: 11px; font-weight: 800; }
+.automation-settings input { width: 18px; height: 18px; accent-color: var(--green-dark); }
+.automation-settings select { border: 1px solid var(--line); border-radius: 9px; background: white; padding: 8px; color: var(--ink); }
+.automation-mode { display: grid; align-content: center; justify-content: stretch; background: #fff7e7; border-color: #eed5a5; }
+.automation-mode.live { background: var(--mint); border-color: #b8d9c8; }
+.automation-mode strong { font-size: 12px; }
+.automation-mode span { color: var(--muted); font-size: 10px; line-height: 1.4; }
+.automation-summary-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px; }
+.automation-summary-grid article { border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: var(--card); }
+.automation-summary-grid span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; }
+.automation-summary-grid strong { display: block; margin-top: 9px; font: 700 28px/1 Georgia, serif; }
+.automation-summary-grid article.attention { background: #fff6e5; border-color: #efd6a7; }
+.automation-summary-grid article.complete { background: var(--green-dark); border-color: var(--green-dark); color: white; }
+.automation-summary-grid article.complete span { color: #bad6ca; }
+.automation-task-list { overflow-x: auto; border: 1px solid var(--line); border-radius: 17px; background: var(--card); }
+.automation-task-head, .automation-task-row { min-width: 840px; display: grid; grid-template-columns: minmax(300px, 1.8fr) 190px 100px minmax(240px, 1fr); gap: 16px; align-items: center; }
+.automation-task-head { padding: 10px 14px; background: #f3f6f4; color: var(--muted); font-size: 10px; font-weight: 800; }
+.automation-task-row { min-height: 76px; padding: 10px 14px; border-top: 1px solid #edf1ee; }
+.automation-task-row > div:first-child { min-width: 0; }
+.automation-task-row strong, .automation-task-row span, .automation-task-row small { display: block; }
+.automation-task-row > div:first-child strong, .automation-task-row > div:first-child span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.automation-task-row > div:first-child strong { font-size: 12px; }
+.automation-task-row > div:first-child span { margin-top: 3px; font-size: 12px; }
+.automation-task-row small { margin-top: 4px; color: var(--muted); font-size: 9px; }
+.automation-status { display: inline-block !important; width: fit-content; border-radius: 999px; padding: 5px 8px; background: #edf1ee; color: #52625b; font-size: 10px; font-weight: 800; }
+.automation-status.status-needs_review, .automation-status.status-cv_failed, .automation-status.status-failed_retryable { background: #fbe8e5; color: #98463e; }
+.automation-status.status-submitted { background: var(--mint); color: var(--green-dark); }
+.automation-status.status-ready_for_browser, .automation-status.status-claimed, .automation-status.status-filling { background: #e5f1f8; color: #2d6482; }
+.automation-task-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.automation-task-actions a, .automation-task-actions button { border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--green-dark); padding: 7px 8px; text-decoration: none; cursor: pointer; font-size: 9px; font-weight: 800; }
+.automation-task-actions button { border-color: var(--green-dark); background: var(--green-dark); color: white; }
+.automation-task-actions button:disabled { opacity: .5; cursor: wait; }
+.automation-loading, .automation-empty { border: 1px dashed #bbc9c1; border-radius: 16px; padding: 28px; color: var(--muted); text-align: center; font-size: 12px; }
+.automation-empty { border: 0; border-top: 1px solid #edf1ee; border-radius: 0; }
+.automation-footnote { margin: 0; border-radius: 13px; background: #fff8e9; color: #765b31; padding: 12px 14px; font-size: 11px; line-height: 1.6; }
 .tools-section { margin: 0 0 26px; }
 .tools-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .tools-grid > a, .tools-grid > button {
@@ -1118,7 +1171,7 @@ button { color: inherit; }
     width: calc(100% - 20px);
     bottom: max(10px, env(safe-area-inset-bottom));
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     overflow-x: hidden;
     padding: 5px;
     border-radius: 17px;
@@ -1247,6 +1300,11 @@ button { color: inherit; }
   .cv-task-actions { grid-template-columns: 1fr 1fr; }
   .candidate-stage-tabs { grid-template-columns: 1fr 1fr; }
   .candidate-automation-note { align-items: flex-start; flex-direction: column; }
+  .automation-command-bar { align-items: stretch; flex-direction: column; }
+  .automation-command-bar > button { width: 100%; }
+  .automation-settings { grid-template-columns: 1fr 1fr; }
+  .automation-mode { grid-column: 1 / -1; }
+  .automation-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .detail-shell { width: min(100% - 22px, 1040px); padding-top: 16px; }
   .detail-nav { margin-bottom: 14px; }
   .detail-header { display: grid; gap: 14px; padding: 19px 17px; border-radius: 18px; }

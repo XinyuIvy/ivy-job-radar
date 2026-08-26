@@ -110,6 +110,7 @@ export async function GET(request: NextRequest) {
         tex: Boolean(prebuild.draftTexKey),
         text: Boolean(prebuild.draftTextKey),
         review: Boolean(prebuild.reviewKey),
+        decision: Boolean(prebuild.decisionKey),
       },
       usage: {
         inputTokens: prebuild.inputTokens,

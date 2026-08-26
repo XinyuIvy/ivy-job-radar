@@ -14,6 +14,7 @@ import {
   CV_GENERATION_RULES_MAX_LENGTH,
   DEFAULT_CV_GENERATION_RULES,
 } from "./lib/cv-generation-rules";
+import { automationStatusLabel } from "./lib/application-automation";
 import {
   emptyFixedApplicationProfile,
   type FixedApplicationProfile,
@@ -362,6 +363,48 @@ type ApplicationAnalytics = {
   };
 };
 
+type ApplicationAutomationDashboard = {
+  config: {
+    enabled: boolean;
+    executionMode: "pilot" | "automatic";
+    dailyLimit: number;
+    minimumScore: number;
+    defaultLanguage: "en" | "zh";
+    allowedAts: string[];
+    finalSubmitEnabled: boolean;
+    updatedAt: string;
+  };
+  summary: {
+    total: number;
+    screening: number;
+    awaitingCv: number;
+    ready: number;
+    running: number;
+    needsReview: number;
+    submitted: number;
+    failed: number;
+    screenedOut: number;
+  };
+  tasks: Array<{
+    id: number;
+    jobId: number;
+    applicationRowId: number | null;
+    status: string;
+    stage: string;
+    atsProvider: string;
+    eligibilityScore: number;
+    company: string;
+    title: string;
+    location: string;
+    jobUrl: string;
+    cvStatus: string;
+    reasons: string[];
+    blockers: string[];
+    lastError: string;
+    updatedAt: string;
+  }>;
+};
+
 type QualityIssue = {
   key: string;
   label: string;
@@ -402,7 +445,7 @@ type ScanNotice = {
   read: boolean;
 };
 
-type View = "today" | "saved" | "applications" | "profile" | "tools" | "companies" | "verify" | "ignored";
+type View = "today" | "saved" | "automation" | "applications" | "profile" | "tools" | "companies" | "verify" | "ignored";
 
 const tracks = ["全部", "Technology", "Quant", "Pharma", "Medical Device", "Healthcare AI", "Consulting"];
 const sortOptions = [
@@ -716,6 +759,10 @@ export default function JobRadar() {
   const [jobsRefreshing, setJobsRefreshing] = useState(false);
   const [jobsMessage, setJobsMessage] = useState("");
   const [applicationsList, setApplicationsList] = useState<Application[]>([]);
+  const [automationDashboard, setAutomationDashboard] = useState<ApplicationAutomationDashboard | null>(null);
+  const [automationLoading, setAutomationLoading] = useState(true);
+  const [automationSaving, setAutomationSaving] = useState(false);
+  const [automationMessage, setAutomationMessage] = useState("");
   const [companyQuery, setCompanyQuery] = useState("");
   const deferredCompanyQuery = useDeferredValue(companyQuery);
   const [companyPriority, setCompanyPriority] = useState("全部");
@@ -778,6 +825,30 @@ export default function JobRadar() {
   const automaticQueueRef = useRef<Set<number>>(new Set());
   const automaticCvJobRef = useRef<number | null>(null);
   const scrollByView = useRef<Partial<Record<View, number>>>({});
+
+  const loadApplicationAutomation = useCallback(async () => {
+    const response = await fetch("/api/application-automation", { cache: "no-store" });
+    const payload = await response.json() as ApplicationAutomationDashboard & { error?: string };
+    if (!response.ok) throw new Error(payload.error || "自动投递任务读取失败。");
+    setAutomationDashboard(payload);
+    return payload;
+  }, []);
+
+  useEffect(() => {
+    if (view !== "automation") return;
+    let cancelled = false;
+    const initialTimer = window.setTimeout(() => {
+      void loadApplicationAutomation()
+        .catch((error) => !cancelled && setAutomationMessage(error instanceof Error ? error.message : "自动投递任务读取失败。"))
+        .finally(() => !cancelled && setAutomationLoading(false));
+    }, 0);
+    const timer = window.setInterval(() => void loadApplicationAutomation().catch(() => {}), 15000);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(initialTimer);
+      window.clearInterval(timer);
+    };
+  }, [loadApplicationAutomation, view]);
 
   useEffect(() => {
     let stored: {
@@ -1724,6 +1795,82 @@ export default function JobRadar() {
     setCvRecoveryRunning(false);
   };
 
+  const runApplicationAutomation = async () => {
+    if (automationSaving) return;
+    setAutomationSaving(true);
+    setAutomationMessage("正在筛选最新美国岗位并建立 CV 任务…");
+    try {
+      const response = await fetch("/api/application-automation", { method: "POST" });
+      const payload = await response.json() as { queuedJobIds?: number[]; screenedOut?: number; error?: string };
+      if (!response.ok) throw new Error(payload.error || "自动筛选启动失败。");
+      const queuedJobIds = Array.isArray(payload.queuedJobIds) ? payload.queuedJobIds : [];
+      for (const jobId of queuedJobIds) {
+        const cvResponse = await fetch("/api/cv-prebuild/prepare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jobId,
+            language: automationDashboard?.config.defaultLanguage || "en",
+            generationRules: cvGenerationRules.trim() || DEFAULT_CV_GENERATION_RULES,
+          }),
+        });
+        if (!cvResponse.ok) {
+          const failed = await cvResponse.json().catch(() => ({})) as { error?: string };
+          setAutomationMessage(`岗位已进入队列，但一份 CV 未能启动：${failed.error || cvResponse.status}`);
+        }
+      }
+      setAutomationMessage(queuedJobIds.length
+        ? `已选择 ${queuedJobIds.length} 个高匹配岗位并启动英文 CV。浏览器扩展会在 CV 完成后继续填写。`
+        : `本轮没有新的岗位进入投递队列；已自动筛除 ${payload.screenedOut || 0} 个不满足硬条件的岗位。`);
+      await loadApplicationAutomation();
+      setJobsReloadToken((value) => value + 1);
+    } catch (error) {
+      setAutomationMessage(error instanceof Error ? error.message : "自动筛选启动失败。");
+    } finally {
+      setAutomationSaving(false);
+    }
+  };
+
+  const updateApplicationAutomationConfig = async (updates: Record<string, unknown>) => {
+    if (!automationDashboard || automationSaving) return;
+    setAutomationSaving(true);
+    try {
+      const response = await fetch("/api/application-automation", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...automationDashboard.config, ...updates }),
+      });
+      const payload = await response.json() as { config?: ApplicationAutomationDashboard["config"]; error?: string };
+      if (!response.ok || !payload.config) throw new Error(payload.error || "自动投递设置保存失败。");
+      setAutomationDashboard((current) => current ? { ...current, config: payload.config! } : current);
+      setAutomationMessage("自动投递设置已保存。");
+    } catch (error) {
+      setAutomationMessage(error instanceof Error ? error.message : "自动投递设置保存失败。");
+    } finally {
+      setAutomationSaving(false);
+    }
+  };
+
+  const updateApplicationAutomationTask = async (taskId: number, action: "confirm_submitted" | "retry") => {
+    if (automationSaving) return;
+    setAutomationSaving(true);
+    try {
+      const response = await fetch("/api/application-automation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId, action }),
+      });
+      const payload = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(payload.error || "任务更新失败。");
+      await loadApplicationAutomation();
+      setAutomationMessage(action === "confirm_submitted" ? "这份申请已记为已投递。" : "任务已重新进入自动队列。");
+    } catch (error) {
+      setAutomationMessage(error instanceof Error ? error.message : "任务更新失败。");
+    } finally {
+      setAutomationSaving(false);
+    }
+  };
+
   const toggleSaved = async (id: number) => {
     const isSaved = saved.includes(id);
     const savedSnapshot = saved;
@@ -2247,12 +2394,14 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "申请固定资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "automation" ? "自动投递" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "申请固定资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
           <p className="hero-copy">
             {view === "applications"
               ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
               : view === "saved"
                 ? "你保存或建立申请记录但尚未投递的岗位，都在同一个列表里统一管理。"
+              : view === "automation"
+                ? "系统每天筛选美国岗位、生成英文 CV，并把可执行任务交给 Chrome；不确定答案进入异常队列。"
               : view === "companies"
                 ? `公司池共 ${companyRecords.length} 条；自动汇总官网、招聘入口、岗位记录与历年公开面经。`
                 : view === "verify"
@@ -2274,7 +2423,7 @@ export default function JobRadar() {
         ) : (
           <div className="scan-status">
             <span className="pulse" />
-            <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : view === "tools" ? "集中入口" : "已隐藏"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : view === "tools" ? "7 个辅助功能" : `${ignoredJobs.length} 条`}</span></div>
+            <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "automation" ? "受控执行" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : view === "tools" ? "集中入口" : "已隐藏"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "automation" ? `${automationDashboard?.summary.submitted || 0} 已投 · ${automationDashboard?.summary.needsReview || 0} 待确认` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : view === "tools" ? "7 个辅助功能" : `${ignoredJobs.length} 条`}</span></div>
           </div>
         )}
       </section>
@@ -2295,6 +2444,61 @@ export default function JobRadar() {
           <button type="button" role="tab" aria-selected={candidateBucket === "pending"} className={candidateBucket === "pending" ? "active" : ""} onClick={() => setCandidateBucket("pending")}>
             <span>待申请</span><strong>{pendingApplications.length}</strong><em>生成中 {cvTaskSummary.queued + cvTaskSummary.running} · 已生成 {cvTaskSummary.ready} · 需处理 {cvTaskSummary.needs_action}</em>
           </button>
+        </section>
+      )}
+
+      {view === "automation" && (
+        <section className="application-automation" aria-live="polite">
+          <div className="automation-command-bar">
+            <div>
+              <p className="eyebrow">US AUTO APPLICATION</p>
+              <h2>自动投递总览</h2>
+              <p>当前先运行 5 份受控样本。浏览器会自动填写并上传 CV，但最终提交保持关闭，直到样本确认无误。</p>
+            </div>
+            <button type="button" className="primary" disabled={automationSaving} onClick={() => void runApplicationAutomation()}>
+              {automationSaving ? "正在处理…" : "立即运行一轮"}
+            </button>
+          </div>
+          {automationMessage && <p className="cv-automation-notice" role="status">{automationMessage}</p>}
+          {automationLoading && !automationDashboard ? (
+            <div className="automation-loading">正在读取自动投递任务…</div>
+          ) : automationDashboard && (
+            <>
+              <div className="automation-settings">
+                <label><span>自动筛选</span><input type="checkbox" checked={automationDashboard.config.enabled} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ enabled: event.target.checked })} /></label>
+                <label><span>每日上限</span><select value={automationDashboard.config.dailyLimit} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ dailyLimit: Number(event.target.value) })}>{[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} 份</option>)}</select></label>
+                <label><span>最低初筛分</span><select value={automationDashboard.config.minimumScore} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ minimumScore: Number(event.target.value) })}>{[75, 80, 85, 90].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+                <div className={`automation-mode ${automationDashboard.config.finalSubmitEnabled ? "live" : "pilot"}`}><strong>{automationDashboard.config.finalSubmitEnabled ? "自动提交已开启" : "受控试运行"}</strong><span>{automationDashboard.config.finalSubmitEnabled ? "仅白名单 ATS 且无拦截项时提交" : "自动填写完成后进入一次确认"}</span></div>
+              </div>
+              <div className="automation-summary-grid">
+                <article><span>等待 CV</span><strong>{automationDashboard.summary.awaitingCv}</strong></article>
+                <article><span>等待浏览器</span><strong>{automationDashboard.summary.ready}</strong></article>
+                <article><span>正在执行</span><strong>{automationDashboard.summary.running}</strong></article>
+                <article className={automationDashboard.summary.needsReview ? "attention" : ""}><span>需要确认</span><strong>{automationDashboard.summary.needsReview}</strong></article>
+                <article className="complete"><span>已投递</span><strong>{automationDashboard.summary.submitted}</strong></article>
+                <article><span>硬条件筛除</span><strong>{automationDashboard.summary.screenedOut}</strong></article>
+              </div>
+              <div className="automation-task-list">
+                <div className="automation-task-head"><span>公司与岗位</span><span>阶段</span><span>ATS</span><span>操作</span></div>
+                {automationDashboard.tasks.filter((task) => task.status !== "screened_out").length === 0 ? (
+                  <div className="automation-empty">还没有进入自动投递队列的岗位。每日美国岗位扫描完成后会自动建立任务。</div>
+                ) : automationDashboard.tasks.filter((task) => task.status !== "screened_out").map((task) => (
+                  <article className="automation-task-row" key={task.id}>
+                    <div><strong>{task.company}</strong><span>{task.title}</span><small>{task.location || "美国"} · 初筛 {task.eligibilityScore}</small></div>
+                    <div><span className={`automation-status status-${task.status}`}>{automationStatusLabel(task.status)}</span><small>{task.cvStatus ? `CV: ${task.cvStatus}` : task.stage}</small></div>
+                    <span>{task.atsProvider}</span>
+                    <div className="automation-task-actions">
+                      <a href={task.jobUrl} target="_blank" rel="noreferrer">打开申请页</a>
+                      {task.applicationRowId && <a href={`/applications/${task.applicationRowId}`}>查看记录</a>}
+                      {task.status === "needs_review" && <button type="button" disabled={automationSaving} onClick={() => void updateApplicationAutomationTask(task.id, "confirm_submitted")}>确认已提交</button>}
+                      {["cv_failed", "failed_retryable", "needs_review"].includes(task.status) && <button type="button" disabled={automationSaving} onClick={() => void updateApplicationAutomationTask(task.id, "retry")}>重新执行</button>}
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <p className="automation-footnote">Chrome 扩展必须已更新到 V5.0，并至少有一个 Chrome 窗口在运行。CAPTCHA、登录验证、敏感必答题、开放题和不唯一的提交按钮都会自动停下并进入“需要确认”。</p>
+            </>
+          )}
         </section>
       )}
 
@@ -3434,6 +3638,7 @@ export default function JobRadar() {
       <nav className="bottom-nav" aria-label="主要导航">
         <button className={view === "today" ? "selected" : ""} onClick={() => setView("today")}><span>⌂</span>今日</button>
         <button className={view === "saved" ? "selected" : ""} onClick={() => setView("saved")}><span>☆</span>候选</button>
+        <button className={view === "automation" ? "selected" : ""} onClick={() => setView("automation")}><span>◎</span>自动</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
         <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>资料</button>
         <button className={["tools", "companies", "verify", "ignored"].includes(view) ? "selected" : ""} onClick={() => setView("tools")}><span>•••</span>工具</button>

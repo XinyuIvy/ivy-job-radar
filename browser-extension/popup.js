@@ -7,6 +7,8 @@ const contextBox = document.getElementById("context");
 const candidateWrap = document.getElementById("candidateWrap");
 const candidateSelect = document.getElementById("candidate");
 const profileLanguageSelect = document.getElementById("profileLanguage");
+const automationBox = document.getElementById("automation");
+const runAutomationButton = document.getElementById("runAutomation");
 
 let lastQuestions = [];
 let currentContext = null;
@@ -99,6 +101,30 @@ async function fetchGlobalProfile(config) {
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error || `Global autofill profile failed (${response.status}).`);
   return result.profile || null;
+}
+
+async function refreshAutomation() {
+  const { ivyRadarConfig } = await getStored();
+  const detail = automationBox.querySelector("span");
+  if (!ivyRadarConfig?.siteOrigin || !ivyRadarConfig?.accessKey) {
+    detail.textContent = "连接 Job Radar 后才会读取自动投递任务。";
+    return;
+  }
+  try {
+    const endpoint = new URL("/api/application-automation/extension", ivyRadarConfig.siteOrigin);
+    const response = await fetch(endpoint, {
+      cache: "no-store",
+      headers: { "X-Ivy-Autofill-Key": ivyRadarConfig.accessKey },
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Queue request failed (${response.status}).`);
+    const mode = result.config?.finalSubmitEnabled ? "自动提交已开启" : "受控试运行";
+    detail.textContent = `${mode} · 等待执行 ${result.ready?.length || 0} · 浏览器处理中 ${result.active?.length || 0}`;
+    automationBox.dataset.tone = result.ready?.length ? "ready" : "";
+  } catch (error) {
+    detail.textContent = `队列读取失败：${error.message || error}`;
+    automationBox.dataset.tone = "error";
+  }
 }
 
 function renderCandidates(context) {
@@ -331,5 +357,20 @@ importButton.addEventListener("click", async () => {
 
 optionsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 
+runAutomationButton.addEventListener("click", async () => {
+  runAutomationButton.disabled = true;
+  try {
+    const result = await chrome.runtime.sendMessage({ type: "IVY_RUN_AUTOMATION_NOW" });
+    if (!result?.ok) throw new Error(result?.error || "自动投递检查失败。");
+    show("已检查自动投递队列。已生成 CV 的任务会由浏览器继续处理。", "ok");
+    await refreshAutomation();
+  } catch (error) {
+    show(`队列检查失败：${error.message || error}`, "error");
+  } finally {
+    runAutomationButton.disabled = false;
+  }
+});
+
 void restoreProfileLanguage();
 void refreshContext(false);
+void refreshAutomation();

@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 let schemaInitialization: Promise<void> | null = null;
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 const SCHEMA_MARKER = `ivy_schema_v${SCHEMA_VERSION}`;
 
 export async function getDb() {
@@ -254,6 +254,7 @@ export async function getDb() {
       draft_pdf_key TEXT NOT NULL DEFAULT '',
       draft_text_key TEXT NOT NULL DEFAULT '',
       review_key TEXT NOT NULL DEFAULT '',
+      decision_key TEXT NOT NULL DEFAULT '',
       input_tokens INTEGER NOT NULL DEFAULT 0,
       cached_input_tokens INTEGER NOT NULL DEFAULT 0,
       output_tokens INTEGER NOT NULL DEFAULT 0,
@@ -274,6 +275,7 @@ export async function getDb() {
   await ensureColumn("cv_prebuild_jobs", "draft_pdf_key", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("cv_prebuild_jobs", "draft_text_key", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("cv_prebuild_jobs", "review_key", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("cv_prebuild_jobs", "decision_key", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("cv_prebuild_jobs", "input_tokens", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn("cv_prebuild_jobs", "cached_input_tokens", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn("cv_prebuild_jobs", "output_tokens", "INTEGER NOT NULL DEFAULT 0");
@@ -424,6 +426,57 @@ export async function getDb() {
   `).run();
 
   await ensureColumn("user_profiles", "autofill_profile_json", "TEXT NOT NULL DEFAULT '{}'");
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS application_automation_config (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      enabled INTEGER NOT NULL DEFAULT 1,
+      execution_mode TEXT NOT NULL DEFAULT 'pilot',
+      daily_limit INTEGER NOT NULL DEFAULT 3,
+      minimum_score INTEGER NOT NULL DEFAULT 75,
+      default_language TEXT NOT NULL DEFAULT 'en',
+      allowed_ats_json TEXT NOT NULL DEFAULT '["greenhouse","lever","ashby"]',
+      final_submit_enabled INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.prepare(`
+    INSERT INTO application_automation_config (
+      id, enabled, execution_mode, daily_limit, minimum_score,
+      default_language, allowed_ats_json, final_submit_enabled, updated_at
+    ) VALUES (1, 1, 'pilot', 3, 75, 'en', '["greenhouse","lever","ashby"]', 0, ?)
+    ON CONFLICT(id) DO NOTHING
+  `).bind(new Date().toISOString()).run();
+
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS application_automation_tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id INTEGER NOT NULL UNIQUE,
+      application_row_id INTEGER,
+      status TEXT NOT NULL DEFAULT 'awaiting_cv',
+      stage TEXT NOT NULL DEFAULT 'screened',
+      ats_provider TEXT NOT NULL DEFAULT 'unknown',
+      language TEXT NOT NULL DEFAULT 'en',
+      template_track TEXT NOT NULL DEFAULT 'tech',
+      eligibility_score INTEGER NOT NULL DEFAULT 0,
+      decision_json TEXT NOT NULL DEFAULT '{}',
+      blocker_json TEXT NOT NULL DEFAULT '[]',
+      claim_token TEXT NOT NULL DEFAULT '',
+      claimed_at TEXT NOT NULL DEFAULT '',
+      attempts INTEGER NOT NULL DEFAULT 0,
+      last_error TEXT NOT NULL DEFAULT '',
+      submitted_at TEXT NOT NULL DEFAULT '',
+      confirmation_text TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    )
+  `).run();
+
+  await env.DB.batch([
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS application_automation_tasks_status_updated_at_idx ON application_automation_tasks (status, updated_at)"),
+    env.DB.prepare("CREATE INDEX IF NOT EXISTS application_automation_tasks_application_row_id_idx ON application_automation_tasks (application_row_id)"),
+  ]);
 
   await env.DB.prepare(`
     CREATE TABLE IF NOT EXISTS profile_resumes (

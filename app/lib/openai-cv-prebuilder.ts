@@ -63,10 +63,11 @@ Use the hosted shell for file work. Create these exact artifacts under /mnt/data
 - cv_draft.pdf: the compiled preview, using LuaLaTeX twice
 - cv_draft.txt: text extracted from the PDF
 - cv_review.md: role profile, evidence choices, keyword coverage, fact audit, language audit, physical page count, and any unresolved issue
+- application_decision.json: strict machine-readable application decision using this exact shape: {"eligible":boolean,"confidence":number,"recommended_action":"apply"|"review"|"skip","hard_blockers":string[],"matched_requirements":string[],"unsupported_preferences":string[]}. Set recommended_action to apply only when every explicit minimum requirement is supported by the frozen facts, the experience requirement is compatible, and the JD has no citizenship, U.S. Person, export-control, clearance, or sponsorship blocker. Use review for genuine ambiguity and skip for a confirmed hard mismatch.
 
 The PDF must be at most two physical pages, close to but not crowded to two pages, text-extractable, and faithful to the frozen template. Run pdfinfo and pdftotext. If compilation fails, repair the TeX and retry. Do not write to GitHub, create an APP ID, change application state, or create final submitted artifacts.
 
-In the final assistant response, briefly summarize the draft and attach all four files. Respond in the CV language.`;
+In the final assistant response, briefly summarize the draft and attach all five files. Respond in the CV language.`;
 
 const REVISION_INSTRUCTIONS = `You are continuing one Ivy CV Prebuilder conversation. Apply the user's requested changes to the attached current draft while preserving every previously frozen fact boundary and the original CV language and template.
 
@@ -75,8 +76,9 @@ Use the hosted shell and replace these exact artifacts under /mnt/data:
 - cv_draft.pdf
 - cv_draft.txt
 - cv_review.md
+- application_decision.json
 
-Compile with LuaLaTeX twice, verify at most two physical pages with pdfinfo, verify extractable text with pdftotext, and repair any error before finishing. Do not write to GitHub, create an APP ID, change application state, or create a final submitted artifact. In the final assistant response, summarize the changes and attach all four files.`;
+Compile with LuaLaTeX twice, verify at most two physical pages with pdfinfo, verify extractable text with pdftotext, and repair any error before finishing. Re-evaluate application_decision.json after every material revision. Do not write to GitHub, create an APP ID, change application state, or create a final submitted artifact. In the final assistant response, summarize the changes and attach all five files.`;
 
 const bundleOrder = [
   "fact_master_snapshot.md",

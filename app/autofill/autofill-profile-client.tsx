@@ -122,7 +122,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     <div className="profile-shell">
       <header>
         <div>
-          <p className="eyebrow">APPLICATION AUTOFILL · V4.14</p>
+          <p className="eyebrow">APPLICATION AUTOFILL · V5.0</p>
           <h1>本地基础申请资料</h1>
           <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
         </div>
@@ -130,12 +130,12 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </header>
 
       <section className="privacy-note">
-        <strong>仍然不会自动处理：</strong> EEO、种族、性别、残障、退伍军人、宗教、出生日期、SSN 等敏感字段；不会绕过验证码，也不会点击 Submit。开放题会列为“未填问题”供你检查，不会擅自编答案。
+        <strong>始终不会自动猜测：</strong> EEO、种族、残障、退伍军人、宗教、SSN 等敏感字段；不会绕过验证码，也不会擅自编开放题。受控试运行只自动打开、填写并上传 CV，最终 Submit 保持关闭；完成 5 份核验样本后，只有白名单 ATS 且全部安全检查通过时才允许自动提交。
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.4.14 已支持完整双语固定资料：</strong><span>填写前明确选择中文资料或 English profile；身份、奖项、论文说明与等级按所选语言和字段类型填写。</span></div>
-        <a href="/ivy-job-autofill-0.4.14.zip" download>下载完整双语资料版扩展</a>
+        <div><strong>扩展 0.5.0 已加入受控自动投递：</strong><span>继续支持双语固定资料；Chrome 打开时每 5 分钟领取一份已完成 CV 的任务，遇到验证码、敏感问题或不唯一按钮立即停下。</span></div>
+        <a href="/ivy-job-autofill-0.5.0.zip" download>下载自动投递试运行版扩展</a>
       </section>
 
       <form onSubmit={save}>

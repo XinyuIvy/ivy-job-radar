@@ -8,7 +8,7 @@ import {
 } from "./application-archive";
 import { normalizeCvGenerationRules } from "./cv-generation-rules";
 
-export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v4-bounded-agent-context";
+export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v5-structured-application-decision";
 
 export type CvPrebuildSourceFile = {
   text: string;
