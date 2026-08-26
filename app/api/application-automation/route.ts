@@ -18,8 +18,8 @@ import {
 import {
   getAutomationConfig,
   listAutomationTasks,
-  reconcileAutomationTasks,
 } from "../../lib/application-automation-store";
+import { reconcileCvForAutomation } from "../../lib/application-automation-runtime";
 import { recommendCvPrebuildTemplate } from "../../lib/cv-prebuild-bundle";
 import { getLatestCvPrebuildJob, initializeCvPrebuildJob } from "../../lib/cv-prebuild-store";
 import { sameLogicalJob } from "../../lib/job-identity";
@@ -76,9 +76,7 @@ export async function GET() {
   if (!(await getChatGPTUser())) {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
   }
-  const database = await getD1();
-  const now = new Date().toISOString();
-  await reconcileAutomationTasks(database, now);
+  const database = await reconcileCvForAutomation();
   const [config, tasks] = await Promise.all([
     getAutomationConfig(database),
     listAutomationTasks(database, 150),

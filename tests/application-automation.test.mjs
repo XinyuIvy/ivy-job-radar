@@ -62,3 +62,14 @@ test("ATS detection and experience extraction stay conservative", () => {
   assert.equal(maximumRequiredExperience("Minimum 2 years of relevant experience."), 2);
   assert.equal(maximumRequiredExperience("Requires 5+ years experience."), 5);
 });
+
+test("automation rejects ambiguous titles and unsupported ATS pages before CV generation", () => {
+  const ambiguous = evaluateAutomationCandidate({
+    ...baseJob,
+    title: "Campus Recruitment",
+    jobUrl: "https://careers.example.com/campus/position/123",
+  }, defaultAutomationConfig());
+  assert.equal(ambiguous.eligible, false);
+  assert.ok(ambiguous.blockers.some((value) => value.includes("岗位标题")));
+  assert.ok(ambiguous.blockers.some((value) => value.includes("申请系统")));
+});

@@ -10,13 +10,10 @@ import {
 import {
   getAutomationConfig,
   listAutomationTasks,
-  reconcileAutomationTasks,
   updateAutomationTask,
 } from "../../../lib/application-automation-store";
+import { reconcileCvForAutomation } from "../../../lib/application-automation-runtime";
 import { deriveBookmarkCaptureKey, secureBookmarkKeyEqual } from "../../../lib/bookmark-capture";
-import type { CvPrebuildArtifactBucket } from "../../../lib/cv-prebuild-artifacts";
-import { reconcileCvPrebuildRun } from "../../../lib/cv-prebuild-runtime";
-import { getLatestCvPrebuildJob } from "../../../lib/cv-prebuild-store";
 
 export const dynamic = "force-dynamic";
 
@@ -45,93 +42,6 @@ async function authorize(request: NextRequest) {
 function parseTaskId(value: unknown) {
   const taskId = Number(value);
   return Number.isSafeInteger(taskId) && taskId > 0 ? taskId : null;
-}
-
-async function reconcileCvForAutomation() {
-  const database = await getD1();
-  let tasks = await listAutomationTasks(database, 20);
-  const { env } = await import("cloudflare:workers");
-  const apiKey = String(env.OPENAI_API_KEY ?? "").trim();
-  if (apiKey && env.BUCKET) {
-    for (const task of tasks.filter((row) => ["awaiting_cv", "ready_for_browser"].includes(row.status))) {
-      const prebuild = await getLatestCvPrebuildJob(database, task.jobId);
-      if (!prebuild?.openaiResponseId || !["agent_queued", "agent_running"].includes(prebuild.status)) continue;
-      await reconcileCvPrebuildRun({
-        database,
-        bucket: env.BUCKET as CvPrebuildArtifactBucket,
-        row: prebuild,
-        apiKey,
-        now: new Date().toISOString(),
-      });
-    }
-  }
-  tasks = await listAutomationTasks(database, 20);
-  if (env.BUCKET) {
-    for (const task of tasks.filter((row) => row.status === "awaiting_cv")) {
-      const prebuild = await getLatestCvPrebuildJob(database, task.jobId);
-      if (prebuild?.status !== "ready") continue;
-      if (!prebuild.decisionKey) {
-        await updateAutomationTask(database, task.id, {
-          status: "needs_review",
-          stage: "ai_decision_missing",
-          error: "The CV completed without a structured application decision.",
-          now: new Date().toISOString(),
-        });
-        continue;
-      }
-      const object = await (env.BUCKET as CvPrebuildArtifactBucket).get(prebuild.decisionKey);
-      let decision: {
-        eligible?: boolean;
-        confidence?: number;
-        recommended_action?: string;
-        hard_blockers?: unknown[];
-        matched_requirements?: unknown[];
-      } | null = null;
-      try {
-        decision = object ? JSON.parse(await object.text()) as typeof decision : null;
-      } catch {}
-      const confidence = Number(decision?.confidence ?? 0);
-      const normalizedConfidence = confidence > 1 ? confidence / 100 : confidence;
-      const hardBlockers = Array.isArray(decision?.hard_blockers) ? decision.hard_blockers.map(String) : [];
-      const matchedRequirements = Array.isArray(decision?.matched_requirements) ? decision.matched_requirements.map(String) : [];
-      const action = String(decision?.recommended_action ?? "review");
-      await database.prepare(`
-        UPDATE application_automation_tasks
-        SET decision_json = ?, blocker_json = ?, updated_at = ?
-        WHERE id = ?
-      `).bind(
-        JSON.stringify(matchedRequirements),
-        JSON.stringify(hardBlockers),
-        new Date().toISOString(),
-        task.id,
-      ).run();
-      if (action === "apply" && decision?.eligible === true && normalizedConfidence >= 0.8 && hardBlockers.length === 0) {
-        await updateAutomationTask(database, task.id, {
-          status: "ready_for_browser",
-          stage: "ai_decision_approved",
-          now: new Date().toISOString(),
-        });
-        continue;
-      }
-      const nextStatus = action === "skip" || hardBlockers.length ? "screened_out" : "needs_review";
-      await updateAutomationTask(database, task.id, {
-        status: nextStatus,
-        stage: nextStatus === "screened_out" ? "ai_hard_filter" : "ai_review_required",
-        error: hardBlockers.join("; ") || "The structured application decision requires review.",
-        now: new Date().toISOString(),
-      });
-      if (nextStatus === "screened_out" && task.applicationRowId) {
-        const db = await getDb();
-        await db.update(applications).set({
-          status: "收藏",
-          nextAction: "AI 复核发现硬性条件不匹配",
-          updatedAt: new Date().toISOString(),
-        }).where(eq(applications.id, task.applicationRowId));
-      }
-    }
-  }
-  await reconcileAutomationTasks(database, new Date().toISOString());
-  return database;
 }
 
 export async function GET(request: NextRequest) {

@@ -111,14 +111,15 @@ export function evaluateAutomationCandidate(
   if (!OPEN_STATUSES.has(job.status)) blockers.push("岗位不是已确认开放状态");
   if (job.score < config.minimumScore) blockers.push(`初筛分数低于 ${config.minimumScore}`);
   if (job.description.trim().length < 400) blockers.push("缺少足够完整的 JD");
-  if (!TARGET_ROLE_RE.test(content)) blockers.push("岗位名称或职责不属于已确认目标方向");
+  if (!TARGET_ROLE_RE.test(job.title)) blockers.push("岗位标题不属于已确认目标方向");
   if (EXCLUDED_ROLE_RE.test(job.title)) blockers.push("岗位属于明确排除的职级或方向");
+  if (!config.allowedAts.includes(atsProvider)) blockers.push("申请系统暂不在自动投递支持范围内");
   if (experienceYears !== null && experienceYears > 3) blockers.push(`明确要求 ${experienceYears} 年经验`);
   if (job.visa === "明确不支持" || SPONSORSHIP_BLOCK_RE.test(content)) blockers.push("岗位明确不支持未来签证 sponsorship");
   if (CITIZENSHIP_BLOCK_RE.test(content)) blockers.push("岗位包含公民身份、U.S. Person、ITAR 或 Security Clearance 限制");
 
   if (job.score >= config.minimumScore) reasons.push(`岗位初筛 ${job.score} 分`);
-  if (TARGET_ROLE_RE.test(content)) reasons.push("岗位方向符合已确认目标范围");
+  if (TARGET_ROLE_RE.test(job.title)) reasons.push("岗位标题符合已确认目标范围");
   if (experienceYears === null) reasons.push("JD 未发现超过三年的明确最低年限");
   else if (experienceYears <= 3) reasons.push(`最低经验年限 ${experienceYears} 年，在允许范围内`);
   if (!SPONSORSHIP_BLOCK_RE.test(content) && job.visa !== "明确不支持") reasons.push("未发现明确拒绝 sponsorship 的文本");
