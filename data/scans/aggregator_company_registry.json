@@ -4,84 +4,77 @@
     "upstream_company": "abbott",
     "ats": "Workday",
     "sample_job_url": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/Germany---Neustadt-am-Rbenberge/XMLNAME--Senior--Controller--m-w-d-_31156693",
-    "jobs_seen": 956
+    "jobs_seen": 989
   },
   {
     "company": "Acadia Pharmaceuticals",
     "upstream_company": "acadiapharmaceuticals",
     "ats": "Greenhouse",
-    "sample_job_url": "https://acadia.com/en-us/careers/job-board/8435950002?gh_jid=8435950002",
-    "jobs_seen": 76
+    "sample_job_url": "https://acadia.com/en-us/careers/job-board/8625839002?gh_jid=8625839002",
+    "jobs_seen": 80
   },
   {
     "company": "Alcon",
     "upstream_company": "alcon",
     "ats": "Workday",
-    "sample_job_url": "https://alcon.wd5.myworkdayjobs.com/careers_alcon/job/Mulgrave/Software-Engineer---12-months-contract_R-2026-47942-1",
-    "jobs_seen": 381
+    "sample_job_url": "https://alcon.wd5.myworkdayjobs.com/careers_alcon/job/Remote-California/Account-Manager---Sherman-Oaks--CA_R-2026-48811-1",
+    "jobs_seen": 409
   },
   {
     "company": "Amgen",
     "upstream_company": "amgen",
     "ats": "Workday",
     "sample_job_url": "https://amgen.wd1.myworkdayjobs.com/careers/job/Japan---Tokyo/XMLNAME--Senior--Medical-Advisor_R-249615-6",
-    "jobs_seen": 380
+    "jobs_seen": 407
   },
   {
     "company": "AstraZeneca",
     "upstream_company": "astrazeneca",
     "ats": "Workday",
     "sample_job_url": "https://astrazeneca.wd3.myworkdayjobs.com/careers/job/Shanghai---Guilin-Road/XMLNAME--Associate-Director--Principal-Clinical-Pharmacologist--Cell-Therapy-Discovery_R-255457",
-    "jobs_seen": 3329
+    "jobs_seen": 3404
   },
   {
     "company": "Baxter",
     "upstream_company": "baxter",
     "ats": "Workday",
-    "sample_job_url": "https://baxter.wd1.myworkdayjobs.com/baxter/job/Taipei-Taipei-City/XMLNAME--Sr--RA-Specialist_JR-204055",
-    "jobs_seen": 316
+    "sample_job_url": "https://baxter.wd1.myworkdayjobs.com/baxter/job/Taichung-Taichung-City/XMLNAME--Senior--Account-Executive_JR-208379",
+    "jobs_seen": 346
   },
   {
     "company": "Biofourmis",
     "upstream_company": "biofourmis",
     "ats": "Greenhouse",
-    "sample_job_url": "https://job-boards.greenhouse.io/biofourmis/jobs/5011875007",
-    "jobs_seen": 1
+    "sample_job_url": "https://job-boards.greenhouse.io/biofourmis/jobs/5116816007",
+    "jobs_seen": 2
   },
   {
     "company": "Bristol Myers Squibb",
     "upstream_company": "bristolmyerssquibb",
     "ats": "Workday",
     "sample_job_url": "https://bristolmyerssquibb.wd5.myworkdayjobs.com/bms/job/Seoul---KR/XMLNAME--Sr--Pricing---Reimbursement-Specialist--Market-Access--Fixed-Term-Contract-_R1605083",
-    "jobs_seen": 448
+    "jobs_seen": 461
   },
   {
     "company": "Dexcom",
     "upstream_company": "dexcom",
     "ats": "Workday",
-    "sample_job_url": "https://dexcom.wd1.myworkdayjobs.com/dexcom/job/Edinburgh-Scotland/Accountant---Healthcare---Edinburgh_JR120374-1",
-    "jobs_seen": 238
-  },
-  {
-    "company": "Exact Sciences",
-    "upstream_company": "exactsciences",
-    "ats": "Workday",
-    "sample_job_url": "https://exactsciences.wd1.myworkdayjobs.com/exact_sciences/job/US---WI---Madison/Associate-Screening-Representative--Inside-Sales---Central-Ohio-Territory_R26-13756-1",
-    "jobs_seen": 42
+    "sample_job_url": "https://dexcom.wd1.myworkdayjobs.com/dexcom/job/San-Diego-California/XMLNAME-2027-US-Summer-Internship---Early-Interest_JR116511",
+    "jobs_seen": 265
   },
   {
     "company": "Flatiron Health",
     "upstream_company": "flatironhealth",
     "ats": "Greenhouse",
     "sample_job_url": "https://flatiron.com/careers/open-positions/job?gh_jid=8097651",
-    "jobs_seen": 47
+    "jobs_seen": 50
   },
   {
     "company": "Fortrea",
     "upstream_company": "fortrea",
     "ats": "Workday",
     "sample_job_url": "https://fortrea.wd1.myworkdayjobs.com/fortrea/job/Shanghai/XMLNAME--Senior--Regional-Recruitment-Specialist_264670",
-    "jobs_seen": 280
+    "jobs_seen": 289
   },
   {
     "company": "Freenome",
@@ -94,78 +87,78 @@
     "company": "GSK",
     "upstream_company": "gsk",
     "ats": "Workday",
-    "sample_job_url": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Durham-Blackwell-Street/XMLNAME-40808Sr-Manager--HCP-Marketing---Belamaf--Philadelphia--PA-_444852",
-    "jobs_seen": 524
+    "sample_job_url": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Singapore---Rochester-Park/Account-Manager_444903",
+    "jobs_seen": 514
   },
   {
     "company": "Genentech/Roche",
     "upstream_company": "roche",
     "ats": "Workday",
     "sample_job_url": "https://roche.wd3.myworkdayjobs.com/roche-ext/job/Basel/Principal-Scientist-si-RNA-Design_202606-115829-1",
-    "jobs_seen": 2708
+    "jobs_seen": 2740
   },
   {
     "company": "ICON",
     "upstream_company": "icon",
     "ats": "Workday",
     "sample_job_url": "https://icon.wd3.myworkdayjobs.com/broadbean_external/job/Poland-Warsaw/Project-Manager--Feasibility-Site-Activation_JR148219",
-    "jobs_seen": 61
+    "jobs_seen": 57
   },
   {
     "company": "IQVIA",
     "upstream_company": "iqvia",
     "ats": "Workday",
-    "sample_job_url": "https://iqvia.wd1.myworkdayjobs.com/iqvia/job/New-Orleans-LA/Flex-Nurse-Educator---New-Orleans--LA_R1563769",
-    "jobs_seen": 416
+    "sample_job_url": "https://iqvia.wd1.myworkdayjobs.com/iqvia/job/Manila-Philippines/XMLNAME-130---Event-Project-Support-Specialist_R1547820",
+    "jobs_seen": 413
   },
   {
     "company": "Illumina",
     "upstream_company": "illumina",
     "ats": "Workday",
     "sample_job_url": "https://illumina.wd1.myworkdayjobs.com/illumina-careers/job/India---Bengaluru---Manyata/Accounting-Analyst---Cash--Prepaids-and-T-E_43226-JOB",
-    "jobs_seen": 97
+    "jobs_seen": 117
   },
   {
     "company": "Insulet",
     "upstream_company": "insulet",
     "ats": "Workday",
     "sample_job_url": "https://insulet.wd5.myworkdayjobs.com/insuletcareers/job/London-United-Kingdom/Analytics-Manager---Marketing_REQ-2026-17412",
-    "jobs_seen": 197
+    "jobs_seen": 227
   },
   {
     "company": "Komodo Health",
     "upstream_company": "komodohealth",
     "ats": "Greenhouse",
-    "sample_job_url": "https://job-boards.greenhouse.io/komodohealth/jobs/8645773002",
-    "jobs_seen": 52
+    "sample_job_url": "https://job-boards.greenhouse.io/komodohealth/jobs/8725146002",
+    "jobs_seen": 48
   },
   {
     "company": "Medable",
     "upstream_company": "medable",
     "ats": "Workday",
-    "sample_job_url": "https://medable.wd503.myworkdayjobs.com/explore-career-opportunities/job/Croatia/Clinical-Implementation-Specialist_JR100180",
-    "jobs_seen": 20
+    "sample_job_url": "https://medable.wd503.myworkdayjobs.com/explore-career-opportunities/job/United-Kingdom/Associate-Forward-Deployed-Engineer_JR100219",
+    "jobs_seen": 14
   },
   {
     "company": "Medtronic",
     "upstream_company": "medtronic",
     "ats": "Workday",
     "sample_job_url": "https://medtronic.wd1.myworkdayjobs.com/redeploymentmedtroniccareers/job/Ho-Chi-Minh-City-Ho-Chi-Minh-City-Vietnam/Product-Marketing--Specialist_R72127",
-    "jobs_seen": 926
+    "jobs_seen": 908
   },
   {
     "company": "Novartis",
     "upstream_company": "novartis",
     "ats": "Workday",
-    "sample_job_url": "https://novartis.wd3.myworkdayjobs.com/internal_careers_for_acquired_entities/job/London-The-Westworks/XMLNAME--Senior--Clinical-Development-Medical-Director_REQ-10079033",
-    "jobs_seen": 875
+    "sample_job_url": "https://novartis.wd3.myworkdayjobs.com/novartis_careers/job/Hong-Kong/XMLNAME--Senior-Brand-Manager_REQ-10084604",
+    "jobs_seen": 897
   },
   {
     "company": "Parexel",
     "upstream_company": "parexel",
     "ats": "Workday",
     "sample_job_url": "https://parexel.wd1.myworkdayjobs.com/parexel_external_careers/job/Poland-Remote/Associate-Director--Data-Engineering--D-T_R0000042328-1",
-    "jobs_seen": 80
+    "jobs_seen": 69
   },
   {
     "company": "PathAI",
@@ -179,77 +172,77 @@
     "upstream_company": "pfizer",
     "ats": "Workday",
     "sample_job_url": "https://pfizer.wd1.myworkdayjobs.com/pfizercareers/job/China---Shanghai---Shanghai/XMLNAME--Sr---Manager--Statistics---Sr-Clinical-Statistician_4961146",
-    "jobs_seen": 657
+    "jobs_seen": 677
   },
   {
     "company": "Philips",
     "upstream_company": "philips",
     "ats": "Workday",
     "sample_job_url": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Osaka/Account-Manage-IGTD---_588098-1",
-    "jobs_seen": 686
+    "jobs_seen": 667
   },
   {
     "company": "Precision AQ",
     "upstream_company": "precisionaq",
     "ats": "Greenhouse",
     "sample_job_url": "https://job-boards.greenhouse.io/precisionaq/jobs/6105773004",
-    "jobs_seen": 70
+    "jobs_seen": 68
   },
   {
     "company": "RapidAI",
     "upstream_company": "rapidai",
     "ats": "Lever",
     "sample_job_url": "https://jobs.lever.co/rapidai/0042125f-5864-42a1-9e15-bb5472cf31d0",
-    "jobs_seen": 12
+    "jobs_seen": 15
   },
   {
     "company": "Regeneron",
     "upstream_company": "regeneron",
     "ats": "Workday",
-    "sample_job_url": "https://regeneron.wd1.myworkdayjobs.com/careers/job/Limerick/Apprentice-I---Electrical-Instrumentation_R49434-1",
-    "jobs_seen": 550
+    "sample_job_url": "https://regeneron.wd1.myworkdayjobs.com/careers/job/Tokyo/Administrative-Coordinator--Regulatory-Affairs_R50068",
+    "jobs_seen": 543
   },
   {
     "company": "ResMed",
     "upstream_company": "resmed",
     "ats": "Workday",
     "sample_job_url": "https://resmed.wd3.myworkdayjobs.com/brightree_external_careers/job/Peachtree-Corners-GA-United-States/Advanced-Professional-Services-Consultant_JR_051400-1",
-    "jobs_seen": 165
+    "jobs_seen": 164
   },
   {
     "company": "Sanofi",
     "upstream_company": "sanofi",
     "ats": "Workday",
     "sample_job_url": "https://sanofi.wd3.myworkdayjobs.com/sanoficareers/job/Taipei/XMLNAME--Senior--Medical-Science-Liaison---Dupixent_R2850602",
-    "jobs_seen": 481
+    "jobs_seen": 490
   },
   {
     "company": "Schrödinger",
     "upstream_company": "schrdinger",
     "ats": "Greenhouse",
     "sample_job_url": "https://job-boards.greenhouse.io/schrdinger/jobs/7694468003",
-    "jobs_seen": 30
+    "jobs_seen": 28
   },
   {
     "company": "Stryker",
     "upstream_company": "stryker",
     "ats": "Workday",
     "sample_job_url": "https://stryker.wd1.myworkdayjobs.com/strykercareers/job/Moskva-Moscow-3rd-floor-Business-center-SkyLight/Associate-Clinical-Application-Specialist--Mako-Product--Moscow-_R563228",
-    "jobs_seen": 234
+    "jobs_seen": 252
   },
   {
     "company": "Syneos Health",
     "upstream_company": "syneoshealth",
     "ats": "Workday",
-    "sample_job_url": "https://syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site/job/KOR-Seoul-Hybrid/XMLNAME--Sr-Director--Strategy---Delivery----South-Korea-_25110444",
-    "jobs_seen": 408
+    "sample_job_url": "https://syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site/job/PHL-Mandaluyong-Hybrid/XMLNAME--Sr--Project-Associate--hybrid---Manila_25111078",
+    "jobs_seen": 414
   },
   {
     "company": "Takeda",
     "upstream_company": "takeda",
     "ats": "Workday",
-    "sample_job_url": "https://takeda.wd3.myworkdayjobs.com/external/job/Shanghai-China/XMLNAME--Senior--Regional-Manager--GI--Shanghai_R0183490",
-    "jobs_seen": 250
+    "sample_job_url": "https://takeda.wd3.myworkdayjobs.com/external/job/Shanghai-China/XMLNAME--Sr--MSL--Medical--Immunology--Shanghai_R0185523",
+    "jobs_seen": 136
   },
   {
     "company": "Verana Health",
@@ -262,14 +255,14 @@
     "company": "Verily",
     "upstream_company": "verily",
     "ats": "Workday",
-    "sample_job_url": "https://verily.wd1.myworkdayjobs.com/verily_careers/job/Dallas-Texas/Chief-Information-Security-Officer_REQ-862",
-    "jobs_seen": 49
+    "sample_job_url": "https://verily.wd1.myworkdayjobs.com/verily_careers/job/Boston-Massachusetts/Pharmacy-Informaticist_REQ-431",
+    "jobs_seen": 53
   },
   {
     "company": "insitro",
     "upstream_company": "insitro",
     "ats": "Ashby",
     "sample_job_url": "https://jobs.ashbyhq.com/insitro/0921d216-0476-4d67-a80d-b5a36c5d2fb1",
-    "jobs_seen": 15
+    "jobs_seen": 18
   }
 ]
