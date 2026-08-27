@@ -8,6 +8,7 @@ import {
   applications,
   cvPrebuildJobs,
   jobs,
+  savedJobs,
 } from "../../../db/schema";
 import { getChatGPTUser } from "../../chatgpt-auth";
 import { templateFiles } from "../../lib/application-archive";
@@ -21,9 +22,13 @@ import {
   listAutomationTasks,
 } from "../../lib/application-automation-store";
 import { reconcileCvForAutomation } from "../../lib/application-automation-runtime";
+import { isChinaCompanyIdentity, sameCompanyIdentity } from "../../lib/company-identity";
 import { recommendCvPrebuildTemplate } from "../../lib/cv-prebuild-bundle";
 import { getLatestCvPrebuildJob, initializeCvPrebuildJob } from "../../lib/cv-prebuild-store";
+import { extractCoreJobDescription } from "../../lib/job-description";
 import { sameLogicalJob } from "../../lib/job-identity";
+import { scoreStoredJob } from "../../lib/job-scoring";
+import { evaluateTodayShortlistCandidate } from "../../lib/job-shortlist";
 import { saveJob } from "../../lib/saved-jobs-store";
 
 export const dynamic = "force-dynamic";
@@ -48,9 +53,14 @@ async function hasRunAccess(request: NextRequest) {
   return Boolean(configured && provided === configured);
 }
 
-function summaryFor(tasks: Awaited<ReturnType<typeof listAutomationTasks>>) {
+async function completeAutomationSummary(database: Awaited<ReturnType<typeof reconcileCvForAutomation>>) {
+  const result = await database.prepare(`
+    SELECT status, COUNT(*) AS count
+    FROM application_automation_tasks
+    GROUP BY status
+  `).all<{ status: string; count: number }>();
   const summary = {
-    total: tasks.length,
+    total: 0,
     awaitingReview: 0,
     screening: 0,
     awaitingCv: 0,
@@ -61,18 +71,44 @@ function summaryFor(tasks: Awaited<ReturnType<typeof listAutomationTasks>>) {
     failed: 0,
     screenedOut: 0,
   };
-  for (const task of tasks) {
-    if (task.status === "awaiting_user_approval") summary.awaitingReview += 1;
-    else if (task.status === "screened_out") summary.screenedOut += 1;
-    else if (task.status === "awaiting_cv") summary.awaitingCv += 1;
-    else if (task.status === "ready_for_browser") summary.ready += 1;
-    else if (["claimed", "filling"].includes(task.status)) summary.running += 1;
-    else if (task.status === "needs_review") summary.needsReview += 1;
-    else if (task.status === "submitted") summary.submitted += 1;
-    else if (["cv_failed", "failed_retryable"].includes(task.status)) summary.failed += 1;
-    else summary.screening += 1;
+  for (const row of result.results ?? []) {
+    const count = Number(row.count) || 0;
+    summary.total += count;
+    if (row.status === "awaiting_user_approval") summary.awaitingReview += count;
+    else if (row.status === "screened_out") summary.screenedOut += count;
+    else if (row.status === "awaiting_cv") summary.awaitingCv += count;
+    else if (row.status === "ready_for_browser") summary.ready += count;
+    else if (["claimed", "filling"].includes(row.status)) summary.running += count;
+    else if (row.status === "needs_review") summary.needsReview += count;
+    else if (row.status === "submitted") summary.submitted += count;
+    else if (["cv_failed", "failed_retryable"].includes(row.status)) summary.failed += count;
+    else if (row.status !== "cancelled") summary.screening += count;
   }
   return summary;
+}
+
+const trackedApplicationStatuses = new Set([
+  "准备材料",
+  "已申请",
+  "一面",
+  "二面/技术面",
+  "终面",
+  "Offer",
+]);
+
+function applicationAlreadyTracksJob(
+  job: typeof jobs.$inferSelect,
+  applicationRows: Array<typeof applications.$inferSelect>,
+  savedJobRows: Array<typeof jobs.$inferSelect>,
+  reviewedCompanies: string[],
+) {
+  return applicationRows.some((application) =>
+    sameLogicalJob(application, job),
+  ) || savedJobRows.some((savedJob) => sameLogicalJob(savedJob, job))
+    || (
+      isChinaCompanyIdentity(job.company)
+      && reviewedCompanies.some((company) => sameCompanyIdentity(company, job.company))
+    );
 }
 
 export async function GET() {
@@ -80,14 +116,23 @@ export async function GET() {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
   }
   const database = await reconcileCvForAutomation();
-  const [config, tasks, reviewBatch] = await Promise.all([
+  const now = new Date().toISOString();
+  await database.prepare(`
+    UPDATE application_automation_tasks
+    SET status = 'cancelled', stage = 'superseded_by_verified_today_pool',
+      last_error = '旧批次来自历史混合岗位池，已取消', updated_at = ?
+    WHERE status = 'awaiting_user_approval'
+      AND stage <> 'verified_today_batch'
+  `).bind(now).run();
+  const [config, tasks, reviewBatch, summary] = await Promise.all([
     getAutomationConfig(database),
     listAutomationTasks(database, 200),
     listAutomationReviewBatch(database, 10),
+    completeAutomationSummary(database),
   ]);
   return NextResponse.json({
     config,
-    summary: summaryFor(tasks),
+    summary,
     reviewBatch: reviewBatch.map((task) => ({
       ...task,
       reasons: parseJsonArray(task.decisionJson),
@@ -114,20 +159,17 @@ export async function PUT(request: NextRequest) {
   }
   const database = await getD1();
   const current = await getAutomationConfig(database);
-  const requestedMode = body.executionMode === "automatic" ? "automatic" : "pilot";
   const submitted = await database.prepare(`
     SELECT COUNT(*) AS count FROM application_automation_tasks WHERE status = 'submitted'
   `).first<{ count: number }>();
   const pilotComplete = Number(submitted?.count ?? 0) >= 5;
-  const finalSubmitEnabled = requestedMode === "automatic"
-    && body.finalSubmitEnabled === true
-    && pilotComplete;
+  const finalSubmitEnabled = false;
   const next: AutomationConfig = {
     ...current,
     enabled: body.enabled === undefined ? current.enabled : body.enabled === true,
-    executionMode: finalSubmitEnabled ? "automatic" : "pilot",
+    executionMode: "pilot",
     dailyLimit: 10,
-    minimumScore: Math.max(70, Math.min(95, Number(body.minimumScore) || current.minimumScore)),
+    minimumScore: Math.max(50, Math.min(80, Number(body.minimumScore) || current.minimumScore)),
     defaultLanguage: body.defaultLanguage === "zh" ? "zh" : "en",
     allowedAts: current.allowedAts,
     finalSubmitEnabled,
@@ -172,61 +214,124 @@ export async function POST(request: NextRequest) {
 
   const db = await getDb();
   const now = new Date().toISOString();
-  const [jobRows, existingTasks] = await Promise.all([
-    db.select().from(jobs).orderBy(desc(jobs.discoveredAt), desc(jobs.score)).limit(600),
+  const [storedJobs, existingTasks, savedRows, allApplications] = await Promise.all([
+    db.select().from(jobs).orderBy(desc(jobs.checkedAt), desc(jobs.discoveredAt), desc(jobs.score)),
     db.select().from(applicationAutomationTasks),
+    db.select().from(savedJobs),
+    db.select().from(applications),
   ]);
-  const openReviewBatch = existingTasks.filter((task) => task.status === "awaiting_user_approval");
-  if (openReviewBatch.length) {
+  const savedIds = new Set(savedRows.map((row) => row.jobId));
+  const trackedApplications = allApplications.filter((row) => trackedApplicationStatuses.has(row.status));
+  const savedJobRows = storedJobs.filter((job) => savedIds.has(job.id));
+  const reviewedCompanies = [
+    ...trackedApplications.map((application) => application.company),
+    ...savedJobRows.map((job) => job.company),
+  ];
+  const existingTaskByJob = new Map(existingTasks.map((task) => [task.jobId, task]));
+  const activeTaskStatuses = new Set([
+    "awaiting_cv",
+    "ready_for_browser",
+    "claimed",
+    "filling",
+    "needs_review",
+    "submitted",
+    "cv_failed",
+    "failed_retryable",
+  ]);
+  const candidates: Array<{
+    job: typeof jobs.$inferSelect;
+    decision: ReturnType<typeof evaluateAutomationCandidate>;
+  }> = [];
+  let todayEligible = 0;
+  let trackedOrSaved = 0;
+
+  for (const storedJob of storedJobs) {
+    const description = extractCoreJobDescription(storedJob.description).text;
+    const rescored = scoreStoredJob({
+      title: storedJob.title,
+      content: description || storedJob.evidence,
+      region: storedJob.region,
+    });
+    const job = {
+      ...storedJob,
+      description,
+      score: rescored.score,
+      visa: rescored.visa,
+    };
+    const shortlist = evaluateTodayShortlistCandidate(job, { now });
+    const alreadyTracked = savedIds.has(job.id)
+      || applicationAlreadyTracksJob(job, trackedApplications, savedJobRows, reviewedCompanies);
+    if (!shortlist.eligible || alreadyTracked) {
+      if (alreadyTracked) trackedOrSaved += 1;
+      continue;
+    }
+    todayEligible += 1;
+    const decision = evaluateAutomationCandidate(job, config);
+    if (!decision.eligible) continue;
+    const existingTask = existingTaskByJob.get(job.id);
+    if (existingTask && activeTaskStatuses.has(existingTask.status)) continue;
+    candidates.push({ job, decision });
+  }
+
+  candidates.sort((left, right) =>
+    right.decision.score - left.decision.score
+    || right.job.score - left.job.score
+    || right.job.checkedAt.localeCompare(left.job.checkedAt),
+  );
+  const candidateIds = new Set(candidates.map(({ job }) => job.id));
+  const validOpenReviewBatch = existingTasks.filter((task) =>
+    task.status === "awaiting_user_approval"
+    && task.stage === "verified_today_batch"
+    && candidateIds.has(task.jobId),
+  );
+  for (const task of existingTasks.filter((row) => row.status === "awaiting_user_approval" && !validOpenReviewBatch.includes(row))) {
+    await db.update(applicationAutomationTasks).set({
+      status: "cancelled",
+      stage: "superseded_by_verified_today_pool",
+      lastError: "岗位不再属于已核验的今日高匹配池",
+      updatedAt: now,
+    }).where(eq(applicationAutomationTasks.id, task.id));
+  }
+  if (validOpenReviewBatch.length) {
     return NextResponse.json({
       ok: true,
       mode: config.executionMode,
       batchSize: config.dailyLimit,
-      reviewJobIds: openReviewBatch.slice(0, config.dailyLimit).map((task) => task.jobId),
+      reviewJobIds: validOpenReviewBatch.slice(0, config.dailyLimit).map((task) => task.jobId),
       queuedJobIds: [],
-      screenedOut: 0,
+      sourcePool: storedJobs.length,
+      todayEligible,
+      automationEligible: candidates.length,
+      trackedOrSaved,
+      screenedOut: Math.max(0, storedJobs.length - candidates.length),
       existingBatch: true,
     });
   }
-  const existingTaskByJob = new Map(existingTasks.map((task) => [task.jobId, task]));
   const reviewJobIds: number[] = [];
-  const screenedOut: number[] = [];
 
-  for (const job of jobRows) {
-    if (existingTaskByJob.has(job.id)) continue;
-    const decision = evaluateAutomationCandidate(job, config);
-    if (!decision.eligible) {
-      await db.insert(applicationAutomationTasks).values({
-        jobId: job.id,
-        status: "screened_out",
-        stage: "hard_filter",
-        atsProvider: decision.atsProvider,
-        language: config.defaultLanguage,
-        templateTrack: decision.templateTrack,
-        eligibilityScore: decision.score,
-        decisionJson: JSON.stringify(decision.reasons),
-        blockerJson: JSON.stringify(decision.blockers),
-        createdAt: now,
-        updatedAt: now,
-      }).onConflictDoNothing();
-      screenedOut.push(job.id);
-      continue;
-    }
-    await db.insert(applicationAutomationTasks).values({
-      jobId: job.id,
-      status: "awaiting_user_approval",
-      stage: "batch_review",
+  for (const { job, decision } of candidates.slice(0, config.dailyLimit)) {
+    const values = {
+      status: "awaiting_user_approval" as const,
+      stage: "verified_today_batch",
       atsProvider: decision.atsProvider,
       language: config.defaultLanguage,
       templateTrack: decision.templateTrack,
       eligibilityScore: decision.score,
       decisionJson: JSON.stringify(decision.reasons),
       blockerJson: JSON.stringify(decision.blockers),
+      claimToken: "",
+      claimedAt: "",
+      lastError: "",
       createdAt: now,
       updatedAt: now,
-    }).onConflictDoNothing();
+    };
+    const existingTask = existingTaskByJob.get(job.id);
+    if (existingTask) {
+      await db.update(applicationAutomationTasks).set(values).where(eq(applicationAutomationTasks.id, existingTask.id));
+    } else {
+      await db.insert(applicationAutomationTasks).values({ jobId: job.id, ...values }).onConflictDoNothing();
+    }
     reviewJobIds.push(job.id);
-    if (reviewJobIds.length >= config.dailyLimit) break;
   }
 
   return NextResponse.json({
@@ -235,7 +340,11 @@ export async function POST(request: NextRequest) {
     batchSize: config.dailyLimit,
     reviewJobIds,
     queuedJobIds: [],
-    screenedOut: screenedOut.length,
+    sourcePool: storedJobs.length,
+    todayEligible,
+    automationEligible: candidates.length,
+    trackedOrSaved,
+    screenedOut: Math.max(0, storedJobs.length - candidates.length),
     selectedForReview: reviewJobIds.length,
   });
 }
