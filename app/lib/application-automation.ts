@@ -1,4 +1,8 @@
 import type { ArchiveTrack } from "./application-archive";
+import {
+  evaluateTodayShortlistCandidate,
+  type ShortlistJobInput,
+} from "./job-shortlist";
 
 export const automationTaskStatuses = [
   "awaiting_user_approval",
@@ -29,19 +33,9 @@ export type AutomationConfig = {
   updatedAt: string;
 };
 
-export type AutomationJobInput = {
+export type AutomationJobInput = ShortlistJobInput & {
   id: number;
-  company: string;
-  title: string;
-  region: string;
   location: string;
-  track: string;
-  score: number;
-  visa: string;
-  description: string;
-  jobUrl: string;
-  status: string;
-  discoveredAt: string;
 };
 
 export type AutomationDecision = {
@@ -54,17 +48,11 @@ export type AutomationDecision = {
   requiresBrowserReview: boolean;
 };
 
-const TARGET_ROLE_RE = /\b(?:data scientist|applied scientist|research scientist|machine learning scientist|ml scientist|statistical scientist|biostatistician|epidemiologist|quantitative researcher|quant researcher|health economics|outcomes research|rwe scientist|clinical data scientist|imaging scientist|decision scientist)\b|生物统计|统计科学家|数据科学家|应用科学家|研究科学家|量化研究|医疗人工智能|医学影像/i;
-const EXCLUDED_ROLE_RE = /\b(?:postdoc|postdoctoral|software engineer|frontend|front end|backend|back end|data engineer|product manager|program manager|nlp engineer|llm engineer|language model|generative ai|senior|principal|staff|director|manager|lead|head of|vice president)\b|博士后|前端|后端|软件工程|数据工程|产品经理|大模型|自然语言处理|资深|首席|总监|经理|负责人/i;
-const SPONSORSHIP_BLOCK_RE = /\b(?:no|not|unable to|cannot|can not|will not|won't)\s+(?:provide\s+)?(?:visa\s+)?sponsor(?:ship)?\b|\b(?:visa\s+)?sponsorship\s+(?:is\s+)?(?:will\s+not\s+be\s+provided|not\s+(?:available|provided|offered)|unavailable)\b|\bwithout\s+(?:current or future\s+)?sponsorship\b|不提供(?:工作)?签证|不支持(?:工作)?签证/i;
-const CITIZENSHIP_BLOCK_RE = /\b(?:must|required to)\s+be\s+(?:a\s+)?u\.?s\.?\s+citizen\b|\bu\.?s\.?\s+citizenship\s+(?:is\s+)?required\b|\bactive\s+(?:security\s+)?clearance\b|\bsecurity clearance\s+(?:is\s+)?required\b|\bitar\b|\bu\.?s\.?\s+person\s+(?:is\s+)?required\b|要求美国公民|必须为美国公民|安全许可/i;
-const OPEN_STATUSES = new Set(["开放", "待官网核验"]);
-
 export const defaultAutomationConfig = (now = new Date().toISOString()): AutomationConfig => ({
   enabled: true,
   executionMode: "pilot",
   dailyLimit: 10,
-  minimumScore: 75,
+  minimumScore: 55,
   defaultLanguage: "en",
   allowedAts: ["greenhouse", "lever", "ashby"],
   finalSubmitEnabled: false,
@@ -90,48 +78,29 @@ export function recommendAutomationTemplate(job: Pick<AutomationJobInput, "title
   return "tech";
 }
 
-export function maximumRequiredExperience(text: string) {
-  const matches = Array.from(text.matchAll(
-    /(?:minimum|at least|requires?|required)\s+(\d+)\+?\s+years?|(?:^|\D)(\d+)\+?\s+years?\s+(?:of\s+)?(?:relevant|related|professional|industry|work)?\s*experience|至少\s*(\d+)\s*年|(?:要求|需具备)\s*(\d+)\s*年/gi,
-  ));
-  const values = matches.flatMap((match) => match.slice(1).filter(Boolean).map(Number));
-  return values.length ? Math.max(...values) : null;
-}
+export { maximumRequiredExperience } from "./job-shortlist";
 
 export function evaluateAutomationCandidate(
   job: AutomationJobInput,
   config: AutomationConfig,
 ): AutomationDecision {
-  const content = `${job.title}\n${job.description}`;
-  const blockers: string[] = [];
-  const reasons: string[] = [];
   const atsProvider = detectAutomationAts(job.jobUrl);
-  const experienceYears = maximumRequiredExperience(content);
+  const shortlist = evaluateTodayShortlistCandidate(job);
+  const blockers = [...shortlist.blockers];
+  const reasons = [...shortlist.reasons];
 
   if (job.region !== "美国") blockers.push("不是美国岗位");
-  if (!OPEN_STATUSES.has(job.status)) blockers.push("岗位不是已确认开放状态");
-  if (job.score < config.minimumScore) blockers.push(`初筛分数低于 ${config.minimumScore}`);
-  if (job.description.trim().length < 400) blockers.push("缺少足够完整的 JD");
-  if (!TARGET_ROLE_RE.test(job.title)) blockers.push("岗位标题不属于已确认目标方向");
-  if (EXCLUDED_ROLE_RE.test(job.title)) blockers.push("岗位属于明确排除的职级或方向");
+  if (shortlist.fitScore < config.minimumScore) blockers.push(`综合匹配分低于 ${config.minimumScore}`);
   if (!config.allowedAts.includes(atsProvider)) blockers.push("申请系统暂不在自动投递支持范围内");
-  if (experienceYears !== null && experienceYears > 3) blockers.push(`明确要求 ${experienceYears} 年经验`);
-  if (job.visa === "明确不支持" || SPONSORSHIP_BLOCK_RE.test(content)) blockers.push("岗位明确不支持未来签证 sponsorship");
-  if (CITIZENSHIP_BLOCK_RE.test(content)) blockers.push("岗位包含公民身份、U.S. Person、ITAR 或 Security Clearance 限制");
-
-  if (job.score >= config.minimumScore) reasons.push(`岗位初筛 ${job.score} 分`);
-  if (TARGET_ROLE_RE.test(job.title)) reasons.push("岗位标题符合已确认目标范围");
-  if (experienceYears === null) reasons.push("JD 未发现超过三年的明确最低年限");
-  else if (experienceYears <= 3) reasons.push(`最低经验年限 ${experienceYears} 年，在允许范围内`);
-  if (!SPONSORSHIP_BLOCK_RE.test(content) && job.visa !== "明确不支持") reasons.push("未发现明确拒绝 sponsorship 的文本");
+  if (job.region === "美国" && !shortlist.blockers.some((value) => value.includes("sponsorship"))) reasons.push("未发现明确拒绝 sponsorship 的文本");
 
   return {
     eligible: blockers.length === 0,
-    score: job.score,
+    score: shortlist.fitScore,
     atsProvider,
     templateTrack: recommendAutomationTemplate(job),
-    reasons,
-    blockers,
+    reasons: [...new Set(reasons)],
+    blockers: [...new Set(blockers)],
     requiresBrowserReview: !config.allowedAts.includes(atsProvider),
   };
 }
@@ -143,8 +112,8 @@ export function automationStatusLabel(status: string) {
     ready_for_browser: "等待浏览器填写",
     claimed: "浏览器已领取",
     filling: "正在填写",
-    needs_review: "需要一次确认",
-    submitted: "已自动投递",
+    needs_review: "待你浏览并提交",
+    submitted: "已确认提交",
     screened_out: "已筛除",
     cv_failed: "CV 生成失败",
     failed_retryable: "执行失败，可重试",
