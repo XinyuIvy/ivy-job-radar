@@ -10,6 +10,7 @@ const vite = await createServer({
 });
 const {
   buildCvPrebuildBundleFiles,
+  buildCvPrebuildPrompt,
   createCvPrebuildIdentity,
   recommendCvPrebuildTemplate,
 } = await vite.ssrLoadModule("/app/lib/cv-prebuild-bundle.ts");
@@ -131,6 +132,28 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
   assert.match(record, new RegExp(`cv_commit: "${identity.cvCommit}"`));
   assert.match(prompt, /LuaLaTeX/);
   assert.match(prompt, /BEGIN USER-EDITABLE CV GENERATION RULES/);
+  assert.match(prompt, /当前 CV 语言专项规则：中文/);
+  assert.doesNotMatch(prompt, /Current CV language rules: English/);
   assert.match(prompt, /Prioritize direct evidence and rewrite every supported bullet/);
   assert.match(prompt, /禁止创建 application\/APP ID/);
+});
+
+test("English CV prompts receive only the English language contract", async () => {
+  const identity = await createCvPrebuildIdentity({
+    job: { ...job, region: "美国" },
+    jd: "Complete JD",
+    cvCommit: "1".repeat(40),
+    factMasterSha: "2".repeat(40),
+    generationRules: "Prioritize verified evidence.",
+    templateLanguage: "en",
+    date: new Date("2026-08-22T12:00:00Z"),
+  });
+  const prompt = buildCvPrebuildPrompt({
+    identity,
+    jd: "Complete JD",
+    generationRules: "Prioritize verified evidence.",
+  });
+  assert.match(prompt, /Current CV language rules: English/);
+  assert.match(prompt, /idiomatic U\.S\. English resume/);
+  assert.doesNotMatch(prompt, /当前 CV 语言专项规则：中文/);
 });
