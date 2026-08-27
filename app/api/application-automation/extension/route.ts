@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     config: {
       enabled: config.enabled,
       executionMode: config.executionMode,
-      finalSubmitEnabled: config.finalSubmitEnabled,
+      finalSubmitEnabled: false,
       allowedAts: config.allowedAts,
       defaultLanguage: config.defaultLanguage,
     },
@@ -74,9 +74,7 @@ export async function GET(request: NextRequest) {
       language: task.language,
       templateTrack: task.templateTrack,
       cvReady: Boolean(task.draftPdfKey),
-      allowFinalSubmit: config.executionMode === "automatic"
-        && config.finalSubmitEnabled
-        && config.allowedAts.includes(task.atsProvider as typeof config.allowedAts[number]),
+      allowFinalSubmit: false,
     })),
     active: active.map((task) => ({ id: task.id, status: task.status, updatedAt: task.updatedAt })),
   });
