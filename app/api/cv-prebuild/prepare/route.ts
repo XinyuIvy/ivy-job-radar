@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getD1, getDb } from "../../../../db";
-import { jobs, savedJobs } from "../../../../db/schema";
+import { applications, jobs, savedJobs } from "../../../../db/schema";
 import { getChatGPTUser } from "../../../chatgpt-auth";
 import { ARCHIVE_REPOSITORY, canonicalSnapshotFiles, type ArchiveLanguage, type ArchiveTrack } from "../../../lib/application-archive";
 import {
@@ -24,6 +24,7 @@ import {
 } from "../../../lib/cv-prebuild-store";
 import { activeJobStatuses } from "../../../lib/job-expiration";
 import { extractCoreJobDescription } from "../../../lib/job-description";
+import { sameCompanyRole } from "../../../lib/job-identity";
 import { normalizeCvGenerationRules } from "../../../lib/cv-generation-rules";
 import {
   createOpenAiConversation,
@@ -107,6 +108,29 @@ export async function POST(request: NextRequest) {
 
   const database = await getD1();
   const now = new Date().toISOString();
+  const applicationRows = await db.select().from(applications);
+  const duplicatePending = applicationRows.find((application) =>
+    application.status === "准备材料" && sameCompanyRole(application, job));
+  const priorApplication = applicationRows.find((application) =>
+    !["收藏", "准备材料"].includes(application.status) && sameCompanyRole(application, job));
+  if (duplicatePending && priorApplication) {
+    await db.update(applications).set({
+      status: "撤回",
+      nextAction: "同一公司与岗位名称已有申请历史，已自动移出待申请",
+      updatedAt: now,
+    }).where(eq(applications.id, duplicatePending.id));
+    await database.prepare(`
+      UPDATE cv_prebuild_jobs
+      SET status = 'cancelled', last_error = 'DUPLICATE_APPLICATION_HISTORY',
+        updated_at = ?, completed_at = ?
+      WHERE job_id = ?
+        AND status IN ('queued', 'preparing_bundle', 'agent_queued', 'agent_running', 'failed_retryable')
+    `).bind(now, now, jobId).run();
+    return NextResponse.json({
+      error: "The same company and role already exists in application history.",
+      code: "DUPLICATE_APPLICATION_HISTORY",
+    }, { status: 409 });
+  }
   const apiKey = String(env.OPENAI_API_KEY ?? "").trim();
   const agentConfigured = Boolean(apiKey);
   await initializeCvPrebuildJob(database, jobId, agentConfigured, now);
