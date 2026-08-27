@@ -56,8 +56,13 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "研究/学术产出导向",
             "应用/业务交付导向",
             "角色画像对齐后的风格重写",
-            "只有完成岗位角色画像和风格对齐后，才进行中文语言审校",
+            "只有完成岗位角色画像和风格对齐后，才执行本次冻结语言的专项审校",
             "完成后只等待我进行一次最终确认",
+            "10 秒招聘官扫描测试",
+            "最可能拒绝该候选人的三个理由",
+            "cvLanguageGenerationRules(language)",
+            "最终版本必须同时通过五个门槛",
+            "本轮输入、关键判断、实际修改和通过或未通过",
         ]:
             self.assertIn(phrase, helper)
 
@@ -82,7 +87,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "至少要把研究型项目与应用型项目分成两个不同的项目 section",
             "行业/实习经历另设独立 section",
             "每个项目只能出现一次",
-            "仍被平铺在同一 section，直接判定为不合格",
+            "仍被平铺在同一 section，或 Summary、Skills 与前三条核心 bullet 没有形成一致定位",
         ]:
             self.assertIn(phrase, helper)
 
@@ -95,7 +100,7 @@ class ApplicationArchiveSourceTests(unittest.TestCase):
             "尽量接近但不挤满 2 页",
             "不超过 2 个物理页面",
             "不要把 1.5 页当成理想目标",
-            "不得加入弱相关内容机械凑页数",
+            "不得加入弱相关论文或其他弱内容机械凑页数",
             "只写年份即视为不合格",
         ]:
             self.assertIn(phrase, helper)
