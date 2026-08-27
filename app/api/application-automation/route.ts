@@ -7,6 +7,7 @@ import {
   applicationStatusEvents,
   applications,
   cvPrebuildJobs,
+  ignoredJobs,
   jobs,
   savedJobs,
 } from "../../../db/schema";
@@ -40,6 +41,11 @@ function parseJsonArray(value: string) {
   } catch {
     return [];
   }
+}
+
+function ignoredJobFingerprint(company: string, title: string) {
+  const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
+  return `${normalize(company)}::${normalize(title)}`;
 }
 
 async function hasRunAccess(request: NextRequest) {
@@ -269,6 +275,7 @@ export async function POST(request: NextRequest) {
     const decision = evaluateAutomationCandidate(job, config);
     if (!decision.eligible) continue;
     const existingTask = existingTaskByJob.get(job.id);
+    if (existingTask?.stage === "user_removed_from_review") continue;
     if (existingTask && activeTaskStatuses.has(existingTask.status)) continue;
     candidates.push({ job, decision });
   }
@@ -292,24 +299,14 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     }).where(eq(applicationAutomationTasks.id, task.id));
   }
-  if (validOpenReviewBatch.length) {
-    return NextResponse.json({
-      ok: true,
-      mode: config.executionMode,
-      batchSize: config.dailyLimit,
-      reviewJobIds: validOpenReviewBatch.slice(0, config.dailyLimit).map((task) => task.jobId),
-      queuedJobIds: [],
-      sourcePool: storedJobs.length,
-      todayEligible,
-      automationEligible: candidates.length,
-      trackedOrSaved,
-      screenedOut: Math.max(0, storedJobs.length - candidates.length),
-      existingBatch: true,
-    });
-  }
-  const reviewJobIds: number[] = [];
+  const reviewJobIds = validOpenReviewBatch
+    .slice(0, config.dailyLimit)
+    .map((task) => task.jobId);
+  const reviewJobIdSet = new Set(reviewJobIds);
 
-  for (const { job, decision } of candidates.slice(0, config.dailyLimit)) {
+  for (const { job, decision } of candidates) {
+    if (reviewJobIds.length >= config.dailyLimit) break;
+    if (reviewJobIdSet.has(job.id)) continue;
     const values = {
       status: "awaiting_user_approval" as const,
       stage: "verified_today_batch",
@@ -332,6 +329,7 @@ export async function POST(request: NextRequest) {
       await db.insert(applicationAutomationTasks).values({ jobId: job.id, ...values }).onConflictDoNothing();
     }
     reviewJobIds.push(job.id);
+    reviewJobIdSet.add(job.id);
   }
 
   return NextResponse.json({
@@ -346,6 +344,8 @@ export async function POST(request: NextRequest) {
     trackedOrSaved,
     screenedOut: Math.max(0, storedJobs.length - candidates.length),
     selectedForReview: reviewJobIds.length,
+    replenished: Math.max(0, reviewJobIds.length - validOpenReviewBatch.length),
+    existingBatch: validOpenReviewBatch.length > 0,
   });
 }
 
@@ -547,6 +547,41 @@ export async function PATCH(request: NextRequest) {
       updatedAt: now,
     }).where(eq(applicationAutomationTasks.id, taskId));
     return NextResponse.json({ ok: true, taskId, status: nextStatus });
+  }
+  if (body.action === "remove_from_batch") {
+    if (task.status !== "awaiting_user_approval") {
+      return NextResponse.json({ error: "Only a review-batch task can be removed." }, { status: 409 });
+    }
+    const [job] = await db.select().from(jobs).where(eq(jobs.id, task.jobId)).limit(1);
+    if (!job) return NextResponse.json({ error: "Job not found." }, { status: 404 });
+    await db.insert(ignoredJobs).values({
+      company: job.company,
+      title: job.title,
+      jobUrl: job.jobUrl,
+      fingerprint: ignoredJobFingerprint(job.company, job.title),
+      reason: "用户从自动投递待确认批次永久移除",
+      createdAt: now,
+    }).onConflictDoUpdate({
+      target: ignoredJobs.fingerprint,
+      set: {
+        jobUrl: job.jobUrl,
+        reason: "用户从自动投递待确认批次永久移除",
+        createdAt: now,
+      },
+    });
+    await Promise.all([
+      db.update(jobs).set({ status: "忽略" }).where(eq(jobs.id, job.id)),
+      db.delete(savedJobs).where(eq(savedJobs.jobId, job.id)),
+      db.update(applicationAutomationTasks).set({
+      status: "cancelled",
+      stage: "user_removed_from_review",
+      claimToken: "",
+      claimedAt: "",
+      lastError: "用户从待确认批次移除",
+      updatedAt: now,
+      }).where(eq(applicationAutomationTasks.id, taskId)),
+    ]);
+    return NextResponse.json({ ok: true, taskId, jobId: job.id, status: "cancelled", ignored: true });
   }
   return NextResponse.json({ error: "Unsupported task action." }, { status: 400 });
 }
