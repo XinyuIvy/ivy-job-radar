@@ -80,10 +80,9 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
 
     def test_saved_cv_tasks_bypass_active_job_display_filters(self):
         jobs = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
-        self.assertGreaterEqual(
-            jobs.count("savedIds.has(row.id) || !activeJobStatuses.has(row.status)"),
-            4,
-        )
+        self.assertIn("activeJobStatuses.has(row.status)", jobs)
+        self.assertIn("savedIds.has(row.id)", jobs)
+        self.assertIn("isTrackedForToday(row)", jobs)
 
     def test_each_job_has_authenticated_chat_status_and_private_artifacts(self):
         status = (ROOT / "app" / "api" / "cv-prebuild" / "status" / "route.ts").read_text(encoding="utf-8")
@@ -96,7 +95,7 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
             self.assertIn("savedJobs", source)
         self.assertIn('sqliteTable("cv_prebuild_messages"', schema)
         self.assertIn("openaiConversationId", schema)
-        self.assertIn("const SCHEMA_VERSION = 5", runtime)
+        self.assertIn("const SCHEMA_VERSION = 6", runtime)
         self.assertIn('ensureColumn("cv_prebuild_jobs", "openai_conversation_id"', runtime)
         self.assertIn("needsLegacyFailureDiagnosis", status)
         self.assertIn("failureMessage", status)
@@ -122,7 +121,22 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
         self.assertIn("compactCvBundleFilesForAgent(input.files, input.maxInputChars)", helper)
         self.assertIn('"agent_context_manifest.md"', helper)
         self.assertIn("The private archive retains every complete frozen source file.", helper)
-        self.assertIn('CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v5-structured-application-decision"', bundle)
+        self.assertIn('CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v9-language-specific-contracts"', bundle)
+        rules = (ROOT / "app" / "lib" / "cv-generation-rules.ts").read_text(encoding="utf-8")
+        self.assertIn("资深 HR 与招聘评估者", rules)
+        self.assertIn("初稿生成、资深 HR 差距复核与事实补强", rules)
+        self.assertIn("PDF 首次生成后，如果两页内仍有明显且合理的空余位置", rules)
+        self.assertIn("按照与 JD 和岗位画像的相关性补入已经核验的代表性论文", rules)
+        self.assertIn("招聘信号优先级", rules)
+        self.assertIn("最可能三个理由", rules)
+        self.assertIn("10 秒招聘官扫描测试", rules)
+        self.assertIn("CHINESE_CV_GENERATION_RULES", rules)
+        self.assertIn("ENGLISH_CV_GENERATION_RULES", rules)
+        self.assertIn("中文母语招聘官", rules)
+        self.assertIn("idiomatic U.S. English resume", rules)
+        self.assertIn("cvLanguageGenerationRules(input.identity.language)", bundle)
+        self.assertIn("最终交付必须同时通过五个门槛", rules)
+        self.assertIn("本轮输入、关键判断、实际修改、通过或未通过", rules)
         self.assertIn("application_decision.json", helper)
         self.assertIn("MAX_AUTOMATIC_CV_ATTEMPTS = 2", dashboard)
         self.assertIn("canAutomaticallyRetryCv(job)", dashboard)
