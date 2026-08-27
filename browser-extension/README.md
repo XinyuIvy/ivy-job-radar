@@ -1,4 +1,4 @@
-# Ivy Job Radar Application Autofill (V5.0)
+# Ivy Job Radar Application Autofill (V6.1)
 
 Chrome Manifest V3 extension for manual autofill and guarded application-automation pilots.
 
@@ -21,7 +21,10 @@ Chrome Manifest V3 extension for manual autofill and guarded application-automat
 - V4.11 fills a publication Level selector only from the stored per-venue ranking record. The profile keeps the ranking year, JCR/CAS/CCF evidence, selected Level, and source URL; unranked conferences and preprint servers remain blank.
 - V4.14 keeps the explicit Chinese profile / English profile selector and adds bilingual birthplace, native place, gender, awards, publication descriptions, DOI links, and separate verified journal-ranking fields.
 - V5.0 adds a background task runner. It claims only a Job Radar task whose tailored CV and structured application decision are ready, opens the exact job URL, fills blank fields, uploads that task's CV, and performs a final form audit.
-- V5.0 pilot mode never clicks the final submit button. Automatic mode remains locked until five pilot submissions are confirmed. Even then, submission is allowed only on a configured ATS with one unique final button, no CAPTCHA, no required sensitive or open-ended question, no missing required field, and a detected success confirmation after the click.
+- V6.1 never clicks the final submit button. After an approved batch is ready, it processes up to ten tasks, keeps every application tab open, and leaves the final review and submission to the user.
+- V6.0 adds API-based semantic question handling after deterministic autofill. It sends only unresolved, non-sensitive application questions together with the verified JD and a privacy-reduced career profile, then fills only answers supported with at least 90 percent confidence.
+- V6.0 keeps confirmed salary, relocation, non-compete and selected demographic answers in the private Job Radar profile. Confirmed demographic values are filled locally and are never sent to the model. SSN is not stored or filled.
+- V6.1 processes an approved batch with two guarded workers so multiple forms can be prepared without overwhelming the browser. Every completed or recoverable application tab remains open for manual inspection.
 - Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
 - Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
 - V4.7 reads each control's direct label before using section structure, so a card containing every publication/project label cannot cross-wire title, date, author, venue, role, or details fields.
@@ -39,12 +42,13 @@ Chrome Manifest V3 extension for manual autofill and guarded application-automat
 
 ## Safety boundaries
 
-- Never clicks a final Submit / Finish action during pilot mode. In automatic mode, a final click is possible only after the server and in-page safety gates both pass.
-- Never auto-fills EEO, race, ethnicity, gender, disability, veteran, religion, marital status, sexual orientation, pronouns, date of birth, SSN or similar sensitive questions.
+- Never clicks a final Submit / Finish action. The user reviews every retained application tab and submits manually.
+- Never sends EEO, race, ethnicity, gender, disability, veteran, religion, date-of-birth, SSN or similar sensitive questions to the model. Only locally stored values explicitly confirmed by the user may fill supported demographic controls.
+- Never stores or auto-fills SSN, financial credentials, passwords, or identity-document numbers.
 - Never guesses which application-specific CV or experience packet to use when multiple pending applications share the same recruiting portal URL.
 - Never fills cover-letter, transcript, portfolio or other non-resume file inputs with the CV.
 - Does not bypass CAPTCHA or anti-bot controls.
-- Open-ended questions are surfaced but not fabricated automatically.
+- Open-ended questions are answered only from verified facts and the JD. Missing evidence, ambiguity, or legal attestation sends the task to review.
 - Application-specific CV/packet retrieval requires the derived Job Radar autofill key and private archive server credentials; the private GitHub token is never stored in the extension.
 - The APP-specific packet is generated only from the final customized CV; it does not add projects or claims that are absent from that CV.
 
@@ -70,4 +74,4 @@ Chrome Manifest V3 extension for manual autofill and guarded application-automat
 
 ## Current scope
 
-V5.0 preserves all V4.14 form-filling behavior and adds guarded background execution for approved Job Radar tasks. The first five tasks are pilot tasks: the extension may open the application page, add repeated rows, fill blank values, and upload the exact prebuilt CV, but it stops before final submission. CAPTCHA, authentication, sensitive required fields, open questions, missing required fields, non-resume attachments, an unknown ATS, and ambiguous submit controls always move the task to review.
+V6.1 preserves guarded semantic answers for custom questions and changes the batch runner to a permanent manual-submit workflow. The extension may open up to ten approved application pages, add repeated rows, fill blank values, call the configured API for unresolved questions, upload each exact prebuilt CV, and audit the form. It never clicks final Submit and never closes the prepared tabs. CAPTCHA, authentication, unconfirmed sensitive fields, unsupported questions, missing required fields, non-resume attachments, an unknown ATS, and ambiguous controls remain visible for the user's review.
