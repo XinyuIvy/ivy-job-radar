@@ -13,7 +13,7 @@ type Profile = {
   links: { linkedin: string; github: string; website: string };
   education: { school: string; degree: string; major: string; graduationMonth: string; graduationYear: string };
   employment: { employer: string; title: string; location: string; startMonth: string; startYear: string; endMonth: string; endYear: string };
-  eligibility: { age18: string; workAuthorizationUS: string; sponsorshipUS: string; relocation: string; remoteWork: string };
+  eligibility: { age18: string; workAuthorizationUS: string; sponsorshipUS: string; relocation: string; remoteWork: string; nonCompete: string };
   application: { availableStartDate: string; salaryExpectation: string; hearAboutUs: string };
 };
 
@@ -24,7 +24,7 @@ const emptyProfile: Profile = {
   links: { linkedin: "", github: "", website: "" },
   education: { school: "", degree: "", major: "", graduationMonth: "", graduationYear: "" },
   employment: { employer: "", title: "", location: "", startMonth: "", startYear: "", endMonth: "", endYear: "" },
-  eligibility: { age18: "", workAuthorizationUS: "", sponsorshipUS: "", relocation: "", remoteWork: "" },
+  eligibility: { age18: "", workAuthorizationUS: "", sponsorshipUS: "", relocation: "", remoteWork: "", nonCompete: "" },
   application: { availableStartDate: "", salaryExpectation: "", hearAboutUs: "" },
 };
 
@@ -122,7 +122,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     <div className="profile-shell">
       <header>
         <div>
-          <p className="eyebrow">APPLICATION AUTOFILL · V5.0</p>
+          <p className="eyebrow">APPLICATION AUTOFILL · V6.1</p>
           <h1>本地基础申请资料</h1>
           <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
         </div>
@@ -130,12 +130,12 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </header>
 
       <section className="privacy-note">
-        <strong>始终不会自动猜测：</strong> EEO、种族、残障、退伍军人、宗教、SSN 等敏感字段；不会绕过验证码，也不会擅自编开放题。受控试运行只自动打开、填写并上传 CV，最终 Submit 保持关闭；完成 5 份核验样本后，只有白名单 ATS 且全部安全检查通过时才允许自动提交。
+        <strong>逐题语义填写已启用：</strong> API 只处理规则无法识别的自定义问题，并且只能使用 JD、事实库和已确认答案。SSN 永远不保存或自动填写；验证码和无法确认的问题仍会暂停。系统不会点击最终 Submit，填写后的申请页面会保留给你浏览和手动提交。
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.5.0 已加入受控自动投递：</strong><span>继续支持双语固定资料；Chrome 打开时每 5 分钟领取一份已完成 CV 的任务，遇到验证码、敏感问题或不唯一按钮立即停下。</span></div>
-        <a href="/ivy-job-autofill-0.5.0.zip" download>下载自动投递试运行版扩展</a>
+        <div><strong>扩展 0.6.1 支持整批保留页面：</strong><span>Chrome 打开时每 5 分钟领取最多 10 份已完成 CV 的任务，先规则填写，再让 API 处理自定义问题，最后保留页面供你逐一检查和提交。</span></div>
+        <a href="/ivy-job-autofill-0.6.1.zip" download>下载整批语义填写版扩展</a>
       </section>
 
       <form onSubmit={save}>
@@ -158,6 +158,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
               ["eligibility.sponsorshipUS", "Need U.S. visa sponsorship now or in the future?"],
               ["eligibility.relocation", "Willing to relocate?"],
               ["eligibility.remoteWork", "Willing / able to work remotely?"],
+              ["eligibility.nonCompete", "Subject to a non-compete restriction?"],
             ] as const).map(([path, label]) => <label key={path}>
               <span>{label}</span>
               <select value={getPath(profile, path)} onChange={(event) => setProfile((current) => updatePath(current, path, event.target.value))}>
