@@ -54,6 +54,9 @@ type Job = {
   expirationReason?: string;
   discoveredAt: string;
   checkedAt: string;
+  todayEligible?: boolean;
+  todayFitScore?: number;
+  todayBlockers?: string[];
   saved?: boolean;
   cvPrebuildStatus?: CvPrebuildStatus | null;
   cvPrebuildError?: string;
@@ -1324,8 +1327,11 @@ export default function JobRadar() {
       const backgroundMessage = result.backgroundScan?.triggered
         ? " 美国 JobSpy 与美国公司官网核验已在后台启动，通常几分钟后自动回写。"
         : ` ${result.backgroundScan?.message ?? "后台全网搜索未启动。"}`
+      const officialJdMessage = result.officialJds
+        ? ` 另有 ${result.officialJds.verified || 0} 个历史候选已从官方申请页补全 JD，${result.officialJds.closed || 0} 个确认关闭，${result.officialJds.unverified || 0} 个因无法取得官方 JD 移出今日岗位。`
+        : "";
       setJobsMessage(
-        `公司 ATS 已扫描 ${result.scanned} 个岗位，筛出 ${result.matched} 个候选岗位。${sourceSummary ? ` 来源连接：${sourceSummary}。` : ""}${matchedJobs.length ? ` 候选：${matchedJobs.join("；")}。` : ""}${backgroundMessage}`,
+        `公司 ATS 已扫描 ${result.scanned} 个岗位，筛出 ${result.matched} 个候选岗位。${sourceSummary ? ` 来源连接：${sourceSummary}。` : ""}${matchedJobs.length ? ` 候选：${matchedJobs.join("；")}。` : ""}${officialJdMessage}${backgroundMessage}`,
       );
       await loadScanStatus();
       const jobsResponse = await fetch("/api/jobs", { cache: "no-store" });
@@ -1544,6 +1550,8 @@ export default function JobRadar() {
       const filtered = dailyJobs.filter(
         (job) =>
           (view !== "today" || (
+            job.todayEligible !== false
+            &&
             !["已过期", "疑似过期"].includes(job.status)
             && !job.saved
             && !saved.includes(job.id)
@@ -1822,14 +1830,14 @@ export default function JobRadar() {
     setAutomationMessage("正在筛选下一批美国岗位，未确认前不会生成 CV 或打开申请表…");
     try {
       const response = await fetch("/api/application-automation", { method: "POST" });
-      const payload = await response.json() as { reviewJobIds?: number[]; screenedOut?: number; existingBatch?: boolean; error?: string };
+      const payload = await response.json() as { reviewJobIds?: number[]; screenedOut?: number; todayEligible?: number; automationEligible?: number; existingBatch?: boolean; error?: string };
       if (!response.ok) throw new Error(payload.error || "自动筛选启动失败。");
       const reviewJobIds = Array.isArray(payload.reviewJobIds) ? payload.reviewJobIds : [];
       setAutomationMessage(reviewJobIds.length
         ? payload.existingBatch
           ? `当前已有 ${reviewJobIds.length} 个岗位等待你确认。请先看完这一批的完整 JD。`
-          : `已整理 ${reviewJobIds.length} 个高匹配岗位。请逐个查看完整 JD，确认整批后才会开始定制 CV 和投递。`
-        : `本轮没有新的岗位进入投递队列；已自动筛除 ${payload.screenedOut || 0} 个不满足硬条件的岗位。`);
+          : `从清理后的 ${payload.todayEligible || 0} 个今日岗位中，已整理 ${reviewJobIds.length} 个美国高匹配岗位。请逐个查看完整 JD，确认整批后才会开始定制 CV 和填写申请表。`
+        : `清理后共有 ${payload.todayEligible || 0} 个今日岗位，其中没有新的美国岗位同时满足匹配度、签证和自动投递条件。`);
       await loadApplicationAutomation();
     } catch (error) {
       setAutomationMessage(error instanceof Error ? error.message : "自动筛选启动失败。");
@@ -1841,7 +1849,7 @@ export default function JobRadar() {
   const approveApplicationAutomationBatch = async () => {
     if (automationSaving || !automationDashboard?.reviewBatch.length) return;
     setAutomationSaving(true);
-    setAutomationMessage(`正在确认这 ${automationDashboard.reviewBatch.length} 个岗位并同时启动英文 CV…`);
+    setAutomationMessage(`正在确认这 ${automationDashboard.reviewBatch.length} 个岗位并同时启动英文 CV。CV 完成后会自动填写并保留全部申请页面…`);
     try {
       const response = await fetch("/api/application-automation", {
         method: "PATCH",
@@ -2485,7 +2493,7 @@ export default function JobRadar() {
 
       {view === "today" && (
         <section className="quick-start" aria-label="使用流程">
-          <div><span>1</span><strong>看今日岗位</strong><p>先用搜索和筛选缩小范围。</p></div>
+          <div><span>1</span><strong>看今日岗位</strong><p>只显示近期确认开放且通过硬条件筛选的岗位。</p></div>
           <div><span>2</span><strong>星标进候选</strong><p>值得研究的岗位先集中保存。</p></div>
           <div><span>3</span><strong>建立申请记录</strong><p>准备、投递和面试都在申请页跟进。</p></div>
         </section>
@@ -2507,8 +2515,8 @@ export default function JobRadar() {
           <div className="automation-command-bar">
             <div>
               <p className="eyebrow">US AUTO APPLICATION</p>
-              <h2>10 个一批，先看 JD 再投</h2>
-              <p>系统先整理一批高匹配岗位并展示完整 JD。只有你确认整批后，才会同时定制英文 CV、打开申请表并进入投递流程。</p>
+              <h2>10 个一批，先确认，再生成和填写</h2>
+              <p>系统先整理一批高匹配岗位并展示完整 JD。只有你确认整批后，才会同时定制英文 CV、自动填写申请表，并保留这批页面供你浏览和手动提交。</p>
             </div>
             <button type="button" className="primary" disabled={automationSaving} onClick={() => void runApplicationAutomation()}>
               {automationSaving ? "正在处理…" : automationDashboard?.reviewBatch.length ? "刷新当前批次" : "生成下一批 10 个"}
@@ -2522,17 +2530,17 @@ export default function JobRadar() {
               <div className="automation-settings">
                 <label><span>自动筛选</span><input type="checkbox" checked={automationDashboard.config.enabled} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ enabled: event.target.checked })} /></label>
                 <div className="automation-mode batch"><strong>每批固定 10 个</strong><span>不足 10 个合格岗位时显示实际数量，不用低质量岗位补齐</span></div>
-                <label><span>最低初筛分</span><select value={automationDashboard.config.minimumScore} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ minimumScore: Number(event.target.value) })}>{[75, 80, 85, 90].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
-                <div className={`automation-mode ${automationDashboard.config.finalSubmitEnabled ? "live" : "pilot"}`}><strong>{automationDashboard.config.finalSubmitEnabled ? "自动提交已开启" : "受控试运行"}</strong><span>{automationDashboard.config.finalSubmitEnabled ? "仅白名单 ATS 且无拦截项时提交" : "整批确认后自动填写，最终提交前仍执行安全检查"}</span></div>
+                <label><span>最低综合匹配分</span><select value={automationDashboard.config.minimumScore} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ minimumScore: Number(event.target.value) })}>{[50, 55, 60, 65, 70, 75, 80].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
+                <div className="automation-mode pilot"><strong>最终提交由你完成</strong><span>自动生成 CV 和填写，但不会点击 Submit，10 个页面会保留打开</span></div>
               </div>
               <div className="automation-summary-grid">
                 <article className={automationDashboard.summary.awaitingReview ? "attention" : ""}><span>待整批确认</span><strong>{automationDashboard.summary.awaitingReview}</strong></article>
                 <article><span>等待 CV</span><strong>{automationDashboard.summary.awaitingCv}</strong></article>
                 <article><span>等待浏览器</span><strong>{automationDashboard.summary.ready}</strong></article>
                 <article><span>正在执行</span><strong>{automationDashboard.summary.running}</strong></article>
-                <article className={automationDashboard.summary.needsReview ? "attention" : ""}><span>表单需处理</span><strong>{automationDashboard.summary.needsReview}</strong></article>
+                <article className={automationDashboard.summary.needsReview ? "attention" : ""}><span>待你浏览提交</span><strong>{automationDashboard.summary.needsReview}</strong></article>
                 <article className="complete"><span>已投递</span><strong>{automationDashboard.summary.submitted}</strong></article>
-                <article><span>硬条件筛除</span><strong>{automationDashboard.summary.screenedOut}</strong></article>
+                <article><span>历史硬筛记录</span><strong>{automationDashboard.summary.screenedOut}</strong></article>
               </div>
               {automationDashboard.reviewBatch.length > 0 && (
                 <section className="automation-review-batch" aria-labelledby="automation-review-title">
@@ -2543,7 +2551,7 @@ export default function JobRadar() {
                       <p>请逐个展开查看系统保存的完整 JD。确认后，本批会一起进入 CV 定制和申请表填写。</p>
                     </div>
                     <button type="button" disabled={automationSaving} onClick={() => void approveApplicationAutomationBatch()}>
-                      {automationSaving ? "正在启动…" : `确认这 ${automationDashboard.reviewBatch.length} 个并开始投递`}
+                      {automationSaving ? "正在启动…" : `确认这 ${automationDashboard.reviewBatch.length} 个并生成 CV`}
                     </button>
                   </div>
                   <div className="automation-review-grid">
@@ -2575,9 +2583,9 @@ export default function JobRadar() {
               )}
               <div className="automation-task-list">
                 <div className="automation-task-head"><span>公司与岗位</span><span>阶段</span><span>ATS</span><span>操作</span></div>
-                {automationDashboard.tasks.filter((task) => !["screened_out", "awaiting_user_approval"].includes(task.status)).length === 0 ? (
-                  <div className="automation-empty">确认上面的岗位批次后，CV 生成、浏览器填写和投递进度会显示在这里。</div>
-                ) : automationDashboard.tasks.filter((task) => !["screened_out", "awaiting_user_approval"].includes(task.status)).map((task) => (
+                {automationDashboard.tasks.filter((task) => !["screened_out", "awaiting_user_approval", "cancelled"].includes(task.status)).length === 0 ? (
+                  <div className="automation-empty">确认上面的岗位批次后，CV 生成、浏览器填写和待你提交的进度会显示在这里。</div>
+                ) : automationDashboard.tasks.filter((task) => !["screened_out", "awaiting_user_approval", "cancelled"].includes(task.status)).map((task) => (
                   <article className="automation-task-row" key={task.id}>
                     <div><strong>{task.company}</strong><span>{task.title}</span><small>{task.location || "美国"} · 初筛 {task.eligibilityScore}</small></div>
                     <div><span className={`automation-status status-${task.status}`}>{automationStatusLabel(task.status)}</span><small>{task.cvStatus ? `CV: ${task.cvStatus}` : task.stage}</small></div>
@@ -2591,7 +2599,7 @@ export default function JobRadar() {
                   </article>
                 ))}
               </div>
-              <p className="automation-footnote">整批确认只授权这批岗位开始准备和填写。Chrome 扩展必须已更新到 V5.0，并至少有一个 Chrome 窗口在运行。CAPTCHA、登录验证、敏感必答题、开放题和不唯一的提交按钮都会自动停下，前 5 份受控样本仍会停在最终提交前。</p>
+              <p className="automation-footnote">整批确认只授权这批岗位生成 CV 和填写申请表。Chrome 扩展必须已更新到 V6.1，并至少有一个 Chrome 窗口在运行。固定字段由本地规则填写，自定义问题由 API 逐题判断；CAPTCHA、登录验证、未确认敏感题和无法从事实库回答的问题会留给你处理。系统永远不会点击最终 Submit，填写后的最多 10 个申请页面会继续保留打开。</p>
             </>
           )}
         </section>
@@ -2886,7 +2894,7 @@ export default function JobRadar() {
         <>
           <section className="toolbar">
             <div className="section-heading">
-              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `候选岗位（${allFavoriteJobs.length + pendingApplications.length}）` : `今日岗位（${jobs.length}）`}</h2></div>
+              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `候选岗位（${allFavoriteJobs.length + pendingApplications.length}）` : `今日岗位（${jobs.length}）`}</h2>{view === "today" && <p className="shortlist-filter-note">只显示官方申请页仍开放、已取得完整 JD 且没有硬性资格冲突的潜在岗位。匹配分只决定排序，不再把可申请岗位挡掉；已筛选中国公司整家公司排除，其他公司按具体岗位去重。</p>}</div>
               {view === "today" && <div className="job-controls">
                 <label className="job-search">
                   <span aria-hidden="true">⌕</span>
@@ -3404,16 +3412,26 @@ export default function JobRadar() {
               </article>
 
               <article className="profile-card">
-                <div className="section-heading compact"><div><p className="eyebrow">ELIGIBILITY</p><h2>工作授权与固定选择题</h2></div><span>不会自动提交</span></div>
+                <div className="section-heading compact"><div><p className="eyebrow">ELIGIBILITY</p><h2>工作授权与固定选择题</h2></div><span>API 仅回答事实可确认的问题</span></div>
                 <div className="profile-grid">
                   {([
                     ["age18", "已满 18 岁"], ["workAuthorizationUS", "有美国工作授权"], ["sponsorshipUS", "现在或未来需要美国 Sponsorship"],
-                    ["workAuthorizationChina", "有中国工作授权"], ["relocation", "愿意搬迁"], ["remoteWork", "可接受远程工作"],
+                    ["workAuthorizationChina", "有中国工作授权"], ["relocation", "愿意搬迁"], ["remoteWork", "可接受远程工作"], ["nonCompete", "受竞业限制"],
                   ] as const).map(([key, label]) => <label key={key}>{label}<select value={profile.applicationProfile.eligibility[key]} onChange={(event) => updateFixedProfileSection("eligibility", { ...profile.applicationProfile.eligibility, [key]: event.target.value })}><option value="">未设置</option><option value="yes">Yes</option><option value="no">No</option></select></label>)}
                   <label>美国签证 / 身份状态<input value={profile.applicationProfile.eligibility.visaStatusUS} onChange={(event) => updateFixedProfileSection("eligibility", { ...profile.applicationProfile.eligibility, visaStatusUS: event.target.value })} placeholder="例如 F-1 OPT" /></label>
+                  <label>最低薪资期望（USD）<input inputMode="numeric" value={profile.applicationProfile.application.minimumSalaryUsd} onChange={(event) => updateFixedProfileSection("application", { ...profile.applicationProfile.application, minimumSalaryUsd: event.target.value })} placeholder="例如 120000" /></label>
                   <label>最早入职时间<input value={profile.applicationProfile.application.availableStartDate} onChange={(event) => updateFixedProfileSection("application", { ...profile.applicationProfile.application, availableStartDate: event.target.value })} placeholder="例如 2027-06-01 或 Two weeks after offer" /></label>
                   <label className="full">How did you hear about us?<input value={profile.applicationProfile.application.hearAboutUs} onChange={(event) => updateFixedProfileSection("application", { ...profile.applicationProfile.application, hearAboutUs: event.target.value })} /></label>
                 </div>
+                <div className="profile-grid">
+                  <label>美国 Race<input value={profile.applicationProfile.sensitive.raceUS} onChange={(event) => updateFixedProfileSection("sensitive", { ...profile.applicationProfile.sensitive, raceUS: event.target.value })} /></label>
+                  <label>美国 Gender<input value={profile.applicationProfile.sensitive.genderUS} onChange={(event) => updateFixedProfileSection("sensitive", { ...profile.applicationProfile.sensitive, genderUS: event.target.value })} /></label>
+                  <label>Veteran status<input value={profile.applicationProfile.sensitive.veteranStatusUS} onChange={(event) => updateFixedProfileSection("sensitive", { ...profile.applicationProfile.sensitive, veteranStatusUS: event.target.value })} /></label>
+                  <label>Disability status<input value={profile.applicationProfile.sensitive.disabilityStatusUS} onChange={(event) => updateFixedProfileSection("sensitive", { ...profile.applicationProfile.sensitive, disabilityStatusUS: event.target.value })} /></label>
+                  <label>Religion<input value={profile.applicationProfile.sensitive.religion} onChange={(event) => updateFixedProfileSection("sensitive", { ...profile.applicationProfile.sensitive, religion: event.target.value })} /></label>
+                  <label>允许填写已确认敏感项<select value={profile.applicationProfile.sensitive.allowAutofill ? "yes" : "no"} onChange={(event) => updateFixedProfileSection("sensitive", { ...profile.applicationProfile.sensitive, allowAutofill: event.target.value === "yes" })}><option value="no">No</option><option value="yes">Yes</option></select></label>
+                </div>
+                <p className="profile-help">SSN 永远不保存、不发送给 API，也不会自动填写。敏感项只使用这里明确确认的固定答案，不交给模型推断。</p>
               </article>
 
               <article className="profile-card">
