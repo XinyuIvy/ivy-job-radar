@@ -118,7 +118,7 @@ async function refreshAutomation() {
     });
     const result = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(result.error || `Queue request failed (${response.status}).`);
-    const mode = result.config?.finalSubmitEnabled ? "自动提交已开启" : "受控试运行";
+    const mode = "最终提交由你完成";
     detail.textContent = `${mode} · 等待执行 ${result.ready?.length || 0} · 浏览器处理中 ${result.active?.length || 0}`;
     automationBox.dataset.tone = result.ready?.length ? "ready" : "";
   } catch (error) {
