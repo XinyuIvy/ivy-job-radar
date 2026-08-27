@@ -6,9 +6,9 @@ import {
   type ArchiveLanguage,
   type ArchiveTrack,
 } from "./application-archive";
-import { normalizeCvGenerationRules } from "./cv-generation-rules";
+import { cvLanguageGenerationRules, normalizeCvGenerationRules } from "./cv-generation-rules";
 
-export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v5-structured-application-decision";
+export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v9-language-specific-contracts";
 
 export type CvPrebuildSourceFile = {
   text: string;
@@ -208,6 +208,7 @@ export function buildCvPrebuildPrompt(input: {
   generationRules: string;
 }) {
   const languageLabel = input.identity.language === "zh" ? "中文（zh）" : "English（en）";
+  const languageRules = cvLanguageGenerationRules(input.identity.language);
   return `请为临时任务 \`${input.identity.prebuildId}\` 预生成一份接近定稿、但尚未获得用户最终确认的定向 CV。
 
 Job Radar 已从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支冻结完整目录 \`${input.identity.bundlePath}/\`。完整事实材料保留在该归档中；本次 Responses API 附件包含完整 JD、CV 母版、展示规则和一个按 JD 确定性筛选的事实及 canonical 索引切片。必须逐一读取已附加文件和 \`agent_context_manifest.md\`；不得把未附加的事实当成已验证证据。
@@ -221,6 +222,12 @@ Job Radar 已从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支冻结
 ----- BEGIN USER-EDITABLE CV GENERATION RULES -----
 ${input.generationRules.trim()}
 ----- END USER-EDITABLE CV GENERATION RULES -----
+
+下面是本次冻结语言对应的专项写作规则。它只适用于当前语言，是一级质量约束，不能被上面的可编辑规则删除或改成另一语言的写法。
+
+----- BEGIN CURRENT LANGUAGE-SPECIFIC RULES -----
+${languageRules}
+----- END CURRENT LANGUAGE-SPECIFIC RULES -----
 
 不得为贴合 JD 编造事实、改变论文状态或扩大贡献。规则与事实发生冲突时，以事实母版和 canonical indexes 为准，并在审校记录中说明冲突。
 
