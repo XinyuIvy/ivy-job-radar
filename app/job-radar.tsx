@@ -32,6 +32,7 @@ const MAX_AUTOMATIC_CV_ATTEMPTS = 2;
 const CV_GENERATION_RULES_STORAGE_KEY = "ivy-job-radar:cv-generation-rules:v1";
 const CV_TEMPLATE_LANGUAGE_STORAGE_KEY = "ivy-job-radar:cv-template-language:v1";
 const PENDING_CV_FAVORITES_STORAGE_KEY = "ivy-job-radar:pending-cv-favorites:v1";
+const CV_PROMPT_AUTOREGEN_STORAGE_KEY = "ivy-job-radar:cv-prompt-autoregen:v9-language-specific-contracts";
 
 type Job = {
   id: number;
@@ -767,6 +768,7 @@ export default function JobRadar() {
   const [cvRecoveryCandidates, setCvRecoveryCandidates] = useState<Job[]>([]);
   const [cvRecoverySelected, setCvRecoverySelected] = useState<number[]>([]);
   const [cvRecoveryRunning, setCvRecoveryRunning] = useState(false);
+  const [cvBulkRegenerating, setCvBulkRegenerating] = useState(false);
   const [candidateBucket, setCandidateBucket] = useState<CandidateBucket>("favorites");
   const [candidateMovingId, setCandidateMovingId] = useState<number | null>(null);
   const [pendingCvSelection, setPendingCvSelection] = useState<{
@@ -822,6 +824,32 @@ export default function JobRadar() {
     if (!storedRules) return;
     const timer = window.setTimeout(() => setCvGenerationRules(storedRules), 0);
     return () => window.clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    if (window.localStorage.getItem(CV_PROMPT_AUTOREGEN_STORAGE_KEY)) return;
+    window.localStorage.setItem(CV_PROMPT_AUTOREGEN_STORAGE_KEY, "running");
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void fetch("/api/cv-prebuild/regenerate-pending", { method: "POST" })
+        .then(async (response) => {
+          const payload = await response.json() as { queuedCount?: number; skippedCount?: number; error?: string };
+          if (!response.ok) throw new Error(payload.error || "批量重新生成排队失败。");
+          window.localStorage.setItem(CV_PROMPT_AUTOREGEN_STORAGE_KEY, "completed");
+          if (!active) return;
+          setCvAutomationNotice(
+            `已自动按最新 Prompt 重新排队 ${payload.queuedCount || 0} 份待申请 CV${payload.skippedCount ? `；${payload.skippedCount} 份已是最新版或缺少对应岗位` : ""}。`,
+          );
+          setJobsReloadToken((value) => value + 1);
+        })
+        .catch((error) => {
+          window.localStorage.removeItem(CV_PROMPT_AUTOREGEN_STORAGE_KEY);
+          if (active) setCvAutomationNotice(error instanceof Error ? error.message : "批量重新生成排队失败。");
+        });
+    }, 800);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, []);
   const [savedPage, setSavedPage] = useState(1);
   const [quality, setQuality] = useState<DataQuality | null>(null);
@@ -1894,6 +1922,73 @@ export default function JobRadar() {
     }
   };
 
+  const removeApplicationAutomationReviewTask = async (taskId: number) => {
+    if (automationSaving) return;
+    const removedTask = automationDashboard?.reviewBatch.find((task) => task.id === taskId);
+    setAutomationSaving(true);
+    setAutomationDashboard((current) => current ? {
+      ...current,
+      reviewBatch: current.reviewBatch.filter((task) => task.id !== taskId),
+      summary: {
+        ...current.summary,
+        awaitingReview: Math.max(0, current.summary.awaitingReview - 1),
+      },
+    } : current);
+    setAutomationMessage("正在永久排除这个岗位，并从合格池补入下一个岗位…");
+    try {
+      const removeResponse = await fetch("/api/application-automation", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId, action: "remove_from_batch" }),
+      });
+      const removed = await removeResponse.json() as { error?: string };
+      if (!removeResponse.ok) throw new Error(removed.error || "岗位移除失败。");
+      const refillResponse = await fetch("/api/application-automation", { method: "POST" });
+      const refilled = await refillResponse.json() as { reviewJobIds?: number[]; replenished?: number; error?: string };
+      if (!refillResponse.ok) throw new Error(refilled.error || "岗位已移除，但自动补位失败。");
+      await Promise.all([loadApplicationAutomation(), loadIgnoredJobs()]);
+      setJobsReloadToken((value) => value + 1);
+      setAutomationMessage(refilled.replenished
+        ? `${removedTask?.company || "该岗位"}已永久排除；其余岗位已上移，新岗位已补到第 10 位。`
+        : `已永久排除该岗位；当前只有 ${refilled.reviewJobIds?.length || 0} 个合格岗位，没有降低标准补位。`);
+    } catch (error) {
+      await loadApplicationAutomation().catch(() => {});
+      setAutomationMessage(error instanceof Error ? error.message : "岗位移除或补位失败。");
+    } finally {
+      setAutomationSaving(false);
+    }
+  };
+
+  const regenerateAllPendingCv = async () => {
+    if (cvBulkRegenerating) return;
+    setCvBulkRegenerating(true);
+    setCvAutomationNotice("正在把全部待申请 CV 按最新 Prompt 重新排队…");
+    try {
+      const response = await fetch("/api/cv-prebuild/regenerate-pending", { method: "POST" });
+      const payload = await response.json() as {
+        queuedCount?: number;
+        skippedCount?: number;
+        queued?: Array<{ jobId: number }>;
+        error?: string;
+      };
+      if (!response.ok) throw new Error(payload.error || "批量重新生成排队失败。");
+      const queuedJobIds = new Set((payload.queued || []).map((item) => item.jobId));
+      automaticQueueRef.current.clear();
+      automaticCvJobRef.current = null;
+      setCvTasks((current) => current.map((job) => queuedJobIds.has(job.id)
+        ? { ...job, cvPrebuildStatus: "queued", cvPrebuildError: "", cvPrebuildAttempts: 0 }
+        : job));
+      setCvAutomationNotice(
+        `已按最新 Prompt 重新排队 ${payload.queuedCount || 0} 份待申请 CV${payload.skippedCount ? `；${payload.skippedCount} 份缺少对应岗位，未启动` : ""}。系统会按顺序逐份生成。`,
+      );
+      setJobsReloadToken((value) => value + 1);
+    } catch (error) {
+      setCvAutomationNotice(error instanceof Error ? error.message : "批量重新生成排队失败。");
+    } finally {
+      setCvBulkRegenerating(false);
+    }
+  };
+
   const updateApplicationAutomationConfig = async (updates: Record<string, unknown>) => {
     if (!automationDashboard || automationSaving) return;
     setAutomationSaving(true);
@@ -2076,7 +2171,7 @@ export default function JobRadar() {
     || canAutomaticallyRetryCv(job));
   const cvGenerationActive = cvTasks.some((job) => activeCvPrebuildStatuses.has(job.cvPrebuildStatus ?? "queued"));
   useEffect(() => {
-    if (view !== "saved" || !pendingQueueCandidate?.application.id) return;
+    if (!pendingQueueCandidate?.application.id) return;
     const jobId = pendingQueueCandidate.job.id;
     if (automaticQueueRef.current.has(jobId)) return;
     automaticQueueRef.current.add(jobId);
@@ -2095,9 +2190,9 @@ export default function JobRadar() {
     }).catch(() => {
       automaticQueueRef.current.delete(jobId);
     });
-  }, [pendingQueueCandidate, view]);
+  }, [pendingQueueCandidate]);
   useEffect(() => {
-    if (view !== "saved" || !nextQueuedCvJobId || cvGenerationActive) return;
+    if (!nextQueuedCvJobId || cvGenerationActive) return;
     if (automaticCvJobRef.current === nextQueuedCvJobId) return;
     const queuedJob = cvTasks.find((job) => job.id === nextQueuedCvJobId)
       ?? dailyJobs.find((job) => job.id === nextQueuedCvJobId);
@@ -2115,7 +2210,7 @@ export default function JobRadar() {
       });
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [cvGenerationActive, cvGenerationRules, cvTasks, dailyJobs, nextQueuedCvJobId, startCvPrebuild, view]);
+  }, [cvGenerationActive, cvGenerationRules, cvTasks, dailyJobs, nextQueuedCvJobId, startCvPrebuild]);
 
   const openFromJob = (job: Job) => {
     setForm({
@@ -2569,6 +2664,9 @@ export default function JobRadar() {
                           </div>
                           <div className="automation-review-links">
                             <a href={task.jobUrl} target="_blank" rel="noreferrer">打开官网岗位</a>
+                            <button type="button" disabled={automationSaving} onClick={() => void removeApplicationAutomationReviewTask(task.id)}>
+                              永久排除并补一个
+                            </button>
                             <small>来源：{task.source || "公司官网"} · {task.visa || "Sponsorship 未明确"}</small>
                           </div>
                           <details className="automation-jd-details">
@@ -2928,6 +3026,11 @@ export default function JobRadar() {
                   <p className="eyebrow">{candidateBucket === "favorites" ? "FAVORITES" : "PENDING APPLICATIONS"}</p>
                   <h2>{candidateBucket === "favorites" ? "我的收藏" : "待申请岗位"}（{candidateRows.length}）</h2>
                 </div>
+                {candidateBucket === "pending" && candidateRows.length > 0 && (
+                  <button type="button" className="primary" disabled={cvBulkRegenerating} onClick={() => void regenerateAllPendingCv()}>
+                    {cvBulkRegenerating ? "正在重新排队…" : "按最新 Prompt 重新生成全部 CV"}
+                  </button>
+                )}
               </div>
               {cvAutomationNotice && <p className="cv-automation-notice" role="status">{cvAutomationNotice}</p>}
               {cvRecoveryCandidates.length > 0 && candidateBucket === "favorites" && (
