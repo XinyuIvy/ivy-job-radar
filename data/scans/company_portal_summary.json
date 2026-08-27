@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-08-26T17:00:29.810811+00:00",
+  "generated_at": "2026-08-27T01:11:14.192678+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
-  "companies_succeeded": 147,
+  "companies_succeeded": 148,
   "companies_failed": 11,
-  "companies_unidentified": 18,
-  "jobs_scanned": 9517,
-  "jobs_matched": 61,
+  "companies_unidentified": 17,
+  "jobs_scanned": 9534,
+  "jobs_matched": 59,
   "ats_counts": {
     "adp": 1,
     "ashby": 12,
@@ -26,10 +26,10 @@
   "region_counts": {
     "美国": {
       "companies_attempted": 176,
-      "companies_succeeded": 147,
+      "companies_succeeded": 148,
       "companies_failed": 11,
-      "companies_unidentified": 18,
-      "jobs_matched": 61
+      "companies_unidentified": 17,
+      "jobs_matched": 59
     }
   },
   "failure_companies": [
@@ -39,14 +39,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sage Therapeutics",
-      "url": "http://www.sagerx.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Evidera",
       "url": "",
       "error": "HTTP 202"
+    },
+    {
+      "company": "Sage Therapeutics",
+      "url": "https://www.supernus.com/careers-with-supernus",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Flatiron Health",
@@ -94,24 +94,19 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Qure.ai",
       "url": "https://qure.ai/careers",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "DRW",
-      "url": "https://www.drw.com/work-at-drw/listings/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Eli Lilly and Company",
       "url": "https://careers.lilly.com/",
       "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Fenix Group",
@@ -129,19 +124,14 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Meta",
-      "url": "https://www.metacareers.com/jobs/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Millennium Management",
-      "url": "https://career.mlp.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "NERA Economic Consulting",
       "url": "https://careers.marshmclennan.com/global/en/nera",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Sakata Seed America, Inc.",
@@ -159,6 +149,16 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "company": "Putnam (Inizio Ignite)",
       "url": "https://careers.inizioengage.com/",
       "error": "<urlopen error [Errno -2] Name or service not known>"
@@ -167,11 +167,6 @@
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "company": "UTHealth Houston",

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-26T16:59:17.926066+00:00",
+  "generated_at": "2026-08-27T01:09:04.798942+00:00",
   "matched_jobs": 0,
   "sources": [
     {
@@ -35,7 +35,7 @@
     {
       "source": "weworkremotely",
       "state": "success",
-      "scanned": 90,
+      "scanned": 89,
       "matched": 0
     },
     {

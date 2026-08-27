@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-26T16:59:11.015720+00:00",
-  "received": 15,
-  "open_verified": 2,
+  "generated_at": "2026-08-27T01:08:57.576424+00:00",
+  "received": 19,
+  "open_verified": 3,
   "closed": 0,
-  "needs_manual_verification": 13,
-  "official_urls_found": 3,
-  "job_ids_found": 3,
-  "sponsorship_explicit": 2
+  "needs_manual_verification": 16,
+  "official_urls_found": 5,
+  "job_ids_found": 4,
+  "sponsorship_explicit": 3
 }
