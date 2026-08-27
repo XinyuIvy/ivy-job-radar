@@ -37,7 +37,9 @@ const archivedBundleFilenames = [
 export function isTransientCvFailure(row: CvPrebuildJobRow) {
   if (!["queued", "failed_retryable"].includes(row.status)) return false;
   if (row.attempts >= MAX_AUTOMATIC_CV_ATTEMPTS) return false;
-  return /server_is_overloaded|rate_limit_exceeded|server_error|max_output_tokens/i.test(row.lastError);
+  if (row.status === "queued") return true;
+  return /server_is_overloaded|rate_limit_exceeded|server_error|max_output_tokens|OPENAI_(?:FAILED|INCOMPLETE|CANCELLED)|CV_ARTIFACT_PERSIST_FAILED|PREBUILD_BUNDLE_FAILED|CV_FALLBACK_START_FAILED|OPENAI_RESPONSE_TIMEOUT/i
+    .test(row.lastError);
 }
 
 function isStaleFallbackClaim(row: CvPrebuildJobRow, nowMs: number) {

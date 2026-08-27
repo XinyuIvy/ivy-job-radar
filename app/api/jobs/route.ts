@@ -5,11 +5,14 @@ import { getDb } from "../../../db";
 import { applications, cvPrebuildJobs, ignoredJobs, jobs, savedJobs, scanStatus } from "../../../db/schema";
 import { ashbyBoards, greenhouseBoards, iCimsBoards, leverBoards, paylocityBoards, workdayBoards } from "../../lib/company-sources";
 import { repairBookmarkCompany } from "../../lib/bookmark-capture";
+import { isChinaCompanyIdentity, sameCompanyIdentity } from "../../lib/company-identity";
 import { extractCoreJobDescription } from "../../lib/job-description";
 import { extractDeadline } from "../../lib/data-quality";
 import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/job-expiration";
+import { hardJobExclusionReasons } from "../../lib/job-hard-exclusions";
 import { sameDisplayedJob } from "../../lib/job-display-identity";
 import { scoreStoredJob } from "../../lib/job-scoring";
+import { evaluateTodayShortlistCandidate } from "../../lib/job-shortlist";
 import {
   canonicalizeJobIdentityUrl,
   extractStableJobId,
@@ -17,6 +20,7 @@ import {
   makeDistinctStoredJobUrl,
   normalizeJobIdentityText,
   normalizeJobLocation,
+  sameCompanyRole,
   sameLogicalJob,
 } from "../../lib/job-identity";
 
@@ -44,7 +48,7 @@ async function reconcileExpiration(sources: SourceStats[], now: string) {
     );
     for (const row of missing) {
       const misses = row.missedScanCount + 1;
-      const verification = await verifyPosting(row.jobUrl);
+      const verification = await verifyPosting(row.jobUrl, row.title);
       if (verification.state === "expired") {
         await db.update(jobs).set({
           status: "已过期",
@@ -54,6 +58,17 @@ async function reconcileExpiration(sources: SourceStats[], now: string) {
         continue;
       }
       if (misses < 2) {
+        if (verification.state === "open") {
+          await db.update(jobs).set({
+            status: "开放",
+            description: verification.description,
+            canonicalUrl: verification.canonicalUrl,
+            missedScanCount: 0,
+            expirationReason: "",
+            checkedAt: now,
+          }).where(eq(jobs.id, row.id));
+          continue;
+        }
         await db.update(jobs).set({
           missedScanCount: misses,
           expirationReason: verification.state === "unknown" ? verification.reason : "",
@@ -69,6 +84,8 @@ async function reconcileExpiration(sources: SourceStats[], now: string) {
       if (verification.state === "open") {
         await db.update(jobs).set({
           status: "开放",
+          description: verification.description,
+          canonicalUrl: verification.canonicalUrl,
           missedScanCount: 0,
           expirationReason: "",
           checkedAt: now,
@@ -214,10 +231,23 @@ async function saveCandidate(candidate: CandidateJob, ignored: Set<string>, now:
   const scoring = scoreStoredJob({ title, content, region });
   const visa = scoring.visa;
   const deadline = extractDeadline(content);
-  const phdTargeted = /\bph\.?d\.?\b|doctoral|doctorate|博士|硕博|硕士(?:研究生)?(?:及|或)?以上/i.test(content);
-  if (!scoring.eligible || !phdTargeted || scoring.score < 55) return false;
+  if (hardJobExclusionReasons({ title, description: content, region, visa }).length > 0) return false;
 
   const db = await getDb();
+  if (isChinaCompanyIdentity(company)) {
+    const [applicationRows, savedRows, storedJobs] = await Promise.all([
+      db.select().from(applications),
+      db.select().from(savedJobs),
+      db.select().from(jobs),
+    ]);
+    const savedIds = new Set(savedRows.map((row) => row.jobId));
+    const trackedStatuses = new Set(["准备材料", "已申请", "一面", "二面/技术面", "终面", "Offer"]);
+    const reviewedCompanies = [
+      ...applicationRows.filter((row) => trackedStatuses.has(row.status)).map((row) => row.company),
+      ...storedJobs.filter((row) => savedIds.has(row.id)).map((row) => row.company),
+    ];
+    if (reviewedCompanies.some((reviewed) => sameCompanyIdentity(reviewed, company))) return false;
+  }
   const canonicalUrl = canonicalizeJobUrl(jobUrl);
   const incomingIdentity = { company, title, location, jobUrl, canonicalUrl, applicationId };
   const candidates = await db
@@ -244,6 +274,7 @@ async function saveCandidate(candidate: CandidateJob, ignored: Set<string>, now:
     score: scoring.score,
     visa,
     evidence: ["公司当前职位列表中仍有该岗位", ...scoring.details].join("；"),
+    description: content.slice(0, 50000),
     skills: JSON.stringify(extractSkills(content)),
     jobUrl: storedJobUrl,
     canonicalUrl,
@@ -570,6 +601,60 @@ async function refreshOfficialBoards() {
   };
 }
 
+async function refreshStoredOfficialJds(limit = 24) {
+  const db = await getDb();
+  const rows = (await db.select().from(jobs).orderBy(desc(jobs.checkedAt), desc(jobs.score)))
+    .filter((row) => activeJobStatuses.has(row.status))
+    .filter((row) => extractCoreJobDescription(row.description).text.length < 300)
+    .filter((row) => hardJobExclusionReasons(row).length === 0)
+    .filter((row) => wantedTitles.some((signal) => row.title.toLowerCase().includes(signal)))
+    .slice(0, Math.max(1, Math.min(50, limit)));
+  const now = new Date().toISOString();
+  let verified = 0;
+  let closed = 0;
+  let unverified = 0;
+
+  for (let index = 0; index < rows.length; index += 6) {
+    const batch = rows.slice(index, index + 6);
+    const results = await Promise.all(batch.map(async (row) => ({
+      row,
+      verification: await verifyPosting(row.jobUrl, row.title),
+    })));
+    for (const { row, verification } of results) {
+      if (verification.state === "open") {
+        const rescored = scoreStoredJob({ title: row.title, content: verification.description, region: row.region });
+        await db.update(jobs).set({
+          description: verification.description,
+          canonicalUrl: verification.canonicalUrl,
+          score: rescored.score,
+          visa: rescored.visa,
+          status: "开放",
+          lastSeenAt: now,
+          checkedAt: now,
+          missedScanCount: 0,
+          expirationReason: "",
+        }).where(eq(jobs.id, row.id));
+        verified += 1;
+      } else if (verification.state === "expired") {
+        await db.update(jobs).set({
+          status: "已过期",
+          checkedAt: now,
+          expirationReason: verification.reason,
+        }).where(eq(jobs.id, row.id));
+        closed += 1;
+      } else {
+        await db.update(jobs).set({
+          status: "待官网核验",
+          checkedAt: now,
+          expirationReason: verification.reason,
+        }).where(eq(jobs.id, row.id));
+        unverified += 1;
+      }
+    }
+  }
+  return { attempted: rows.length, verified, closed, unverified };
+}
+
 async function dispatchGlobalScan() {
   const { env } = await import("cloudflare:workers");
   const token = String(env.GITHUB_WORKFLOW_TOKEN ?? "").trim();
@@ -626,14 +711,10 @@ function identityParts(row: IdentityRow) {
   const location = normalizeJobLocation(row.location);
   const stableId = extractStableJobId(row.jobUrl, row.applicationId);
   const canonicalUrl = canonicalizeJobIdentityUrl(row.canonicalUrl || row.jobUrl);
-  let origin = "";
-  try {
-    origin = new URL(canonicalUrl).hostname.toLowerCase().replace(/^www\./, "");
-  } catch {}
   const usableRole = Boolean(company && title && !isPlaceholderJobTitle(row.title));
   return {
     stableId,
-    stableKey: stableId ? `${origin}::${stableId}` : "",
+    stableKey: stableId ? `${company}::${stableId}` : "",
     roleKey: usableRole ? `${company}::${title}` : "",
     locationKey: usableRole ? `${company}::${title}::${location}` : "",
     canonicalKey: canonicalUrl || "",
@@ -643,6 +724,7 @@ function identityParts(row: IdentityRow) {
 function buildTrackedApplicationMatcher(rows: Array<IdentityRow>) {
   const byStable = new Map<string, IdentityRow>();
   const anyByCanonical = new Map<string, IdentityRow>();
+  const anyByRole = new Map<string, IdentityRow>();
   const noStableByCanonical = new Map<string, IdentityRow>();
   const noStableByLocation = new Map<string, IdentityRow>();
   const noStableByRole = new Map<string, IdentityRow>();
@@ -651,6 +733,7 @@ function buildTrackedApplicationMatcher(rows: Array<IdentityRow>) {
     const keys = identityParts(row);
     if (keys.stableKey && !byStable.has(keys.stableKey)) byStable.set(keys.stableKey, row);
     if (keys.canonicalKey && !anyByCanonical.has(keys.canonicalKey)) anyByCanonical.set(keys.canonicalKey, row);
+    if (keys.roleKey && !anyByRole.has(keys.roleKey)) anyByRole.set(keys.roleKey, row);
     if (!keys.stableId) {
       if (keys.canonicalKey && !noStableByCanonical.has(keys.canonicalKey)) noStableByCanonical.set(keys.canonicalKey, row);
       if (keys.locationKey && !noStableByLocation.has(keys.locationKey)) noStableByLocation.set(keys.locationKey, row);
@@ -666,13 +749,17 @@ function buildTrackedApplicationMatcher(rows: Array<IdentityRow>) {
         noStableByCanonical.get(keys.canonicalKey),
         noStableByLocation.get(keys.locationKey),
         noStableByRole.get(keys.roleKey),
+        anyByRole.get(keys.roleKey),
       ]
       : [
         anyByCanonical.get(keys.canonicalKey),
         noStableByLocation.get(keys.locationKey),
         noStableByRole.get(keys.roleKey),
+        anyByRole.get(keys.roleKey),
       ];
-    return candidates.some((candidate) => candidate && sameLogicalJob(job, candidate));
+    return candidates.some((candidate) => candidate && (
+      sameLogicalJob(job, candidate) || sameCompanyRole(job, candidate)
+    ));
   };
 }
 
@@ -732,6 +819,7 @@ function deduplicateDisplayedJobs<Row extends IdentityRow>(rows: Row[], rank: (r
 
 export async function GET() {
   const db = await getDb();
+  const now = new Date().toISOString();
   const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
   const savedIds = new Set((await db.select().from(savedJobs)).map((row) => row.jobId));
   const cvPrebuildByJob = new Map<number, { status: string; lastError: string }>();
@@ -746,47 +834,43 @@ export async function GET() {
   for (const row of cvPrebuildRows) {
     if (!cvPrebuildByJob.has(row.jobId)) cvPrebuildByJob.set(row.jobId, row);
   }
-  const hiddenApplicationStatuses = new Set([
-    "准备材料",
-    "已申请",
-    "一面",
-    "二面/技术面",
-    "终面",
-    "Offer",
-    "拒绝",
-  ]);
-  const hiddenApplications = (await db.select().from(applications))
-    .filter((row) => hiddenApplicationStatuses.has(row.status));
+  const trackedApplications = await db.select().from(applications);
   const rows = (await db.select().from(jobs).orderBy(desc(jobs.discoveredAt))).map((row) => {
     const description = extractCoreJobDescription(row.description).text;
-    const rescored = savedIds.has(row.id)
-      ? scoreStoredJob({
-        title: row.title,
-        content: description || row.evidence,
-        region: row.region,
-      })
-      : null;
+    const rescored = scoreStoredJob({
+      title: row.title,
+      content: description || row.evidence,
+      region: row.region,
+    });
     return {
       ...row,
       company: repairBookmarkCompany(row.company, row.title, row.jobUrl),
       description,
-      score: rescored?.score ?? row.score,
-      visa: rescored?.visa ?? row.visa,
+      score: rescored.score,
+      visa: rescored.visa,
     };
   });
-  const isTrackedApplication = buildTrackedApplicationMatcher(hiddenApplications);
+  const isTrackedApplication = buildTrackedApplicationMatcher(trackedApplications);
+  const savedJobRows = rows.filter((row) => savedIds.has(row.id));
+  const reviewedCompanies = [
+    ...trackedApplications.map((application) => application.company),
+    ...savedJobRows.map((row) => row.company),
+  ];
+  const isTrackedForToday = (row: (typeof rows)[number]) =>
+    isTrackedApplication(row)
+    || savedJobRows.some((savedJob) => sameLogicalJob(savedJob, row))
+    || (
+      isChinaCompanyIdentity(row.company)
+      && reviewedCompanies.some((company) => sameCompanyIdentity(company, row.company))
+    );
 
   const filteredRows = rows
     .filter((row) =>
       activeJobStatuses.has(row.status)
       || savedIds.has(row.id)
-      || isTrackedApplication(row),
+      || isTrackedForToday(row),
     )
-    .filter((row) => !ignored.has(fingerprint(row.company, row.title)))
-    .filter((row) => savedIds.has(row.id) || !activeJobStatuses.has(row.status) || !isTrackedApplication(row))
-    .filter((row) => savedIds.has(row.id) || !activeJobStatuses.has(row.status) || !(row.region === "美国" && row.visa === "明确不支持"))
-    .filter((row) => savedIds.has(row.id) || !activeJobStatuses.has(row.status) || !isExcludedTitle(row.title))
-    .filter((row) => savedIds.has(row.id) || !activeJobStatuses.has(row.status) || row.score >= 55);
+    .filter((row) => !ignored.has(fingerprint(row.company, row.title)));
 
   const uniqueRows = deduplicateDisplayedJobs(filteredRows, (candidate) =>
       Number(savedIds.has(candidate.id)) * 100
@@ -797,13 +881,25 @@ export async function GET() {
   );
 
   return NextResponse.json(
-    uniqueRows.map((row) => ({
-      ...row,
-      skills: JSON.parse(row.skills || "[]"),
-      saved: savedIds.has(row.id),
-      cvPrebuildStatus: cvPrebuildByJob.get(row.id)?.status ?? null,
-      cvPrebuildError: cvPrebuildByJob.get(row.id)?.lastError ?? "",
-    })),
+    uniqueRows.map((row) => {
+      const shortlist = evaluateTodayShortlistCandidate(row, { now });
+      const tracked = isTrackedForToday(row);
+      const saved = savedIds.has(row.id);
+      return {
+        ...row,
+        skills: JSON.parse(row.skills || "[]"),
+        saved,
+        todayEligible: shortlist.eligible && !saved && !tracked,
+        todayFitScore: shortlist.fitScore,
+        todayBlockers: [
+          ...shortlist.blockers,
+          ...(saved ? ["岗位已收藏"] : []),
+          ...(tracked ? ["岗位已被跟踪，或同一中国公司已有岗位被收藏/进入申请流程"] : []),
+        ],
+        cvPrebuildStatus: cvPrebuildByJob.get(row.id)?.status ?? null,
+        cvPrebuildError: cvPrebuildByJob.get(row.id)?.lastError ?? "",
+      };
+    }),
   );
 }
 
@@ -812,14 +908,14 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as Record<string, unknown>;
   } catch {
-    const [officialBoards, backgroundScan] = await Promise.all([
-      refreshOfficialBoards(),
-      dispatchGlobalScan(),
-    ]);
-    return NextResponse.json({ ...officialBoards, backgroundScan });
+    const officialBoards = await refreshOfficialBoards();
+    const officialJds = await refreshStoredOfficialJds();
+    const backgroundScan = await dispatchGlobalScan();
+    return NextResponse.json({ ...officialBoards, officialJds, backgroundScan });
   }
   if (Object.keys(body).length === 0 || body.action === "refresh") {
     const officialBoards = await refreshOfficialBoards();
+    const officialJds = await refreshStoredOfficialJds();
     const db = await getDb();
     const startedAt = new Date().toISOString();
     const totalJobs = (await db.select({ id: jobs.id }).from(jobs)).length;
@@ -880,7 +976,7 @@ export async function POST(request: NextRequest) {
       phase: backgroundScan.triggered ? "等待云端任务" : "启动失败",
       currentSource: backgroundScan.triggered ? "GitHub Actions" : "美国公司 ATS",
     }).where(eq(scanStatus.id, 1));
-    return NextResponse.json({ ...officialBoards, backgroundScan });
+    return NextResponse.json({ ...officialBoards, officialJds, backgroundScan });
   }
   const required = ["company", "title", "region", "track", "jobUrl"];
   if (required.some((key) => !String(body[key] ?? "").trim())) {

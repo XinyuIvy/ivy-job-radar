@@ -1,11 +1,12 @@
-import { and, desc, eq, or } from "drizzle-orm";
+import { and, desc, eq, notInArray, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
-import { applications } from "../../../db/schema";
+import { applications, cvPrebuildJobs } from "../../../db/schema";
 import {
   canonicalizeJobIdentityUrl,
   isPlaceholderJobTitle,
+  sameCompanyRole,
   sameLogicalJob,
 } from "../../lib/job-identity";
 
@@ -72,10 +73,35 @@ function baseJobPageUrl(value: unknown) {
 
 export async function GET() {
   const db = await getDb();
-  const rows = await db
+  let rows = await db
     .select()
     .from(applications)
     .orderBy(desc(applications.updatedAt));
+  const applicationHistory = rows.filter((row) => !["收藏", "准备材料"].includes(row.status));
+  const duplicatePending = rows.filter((row) =>
+    row.status === "准备材料"
+    && applicationHistory.some((history) => history.id !== row.id && sameCompanyRole(history, row)),
+  );
+  if (duplicatePending.length > 0) {
+    const now = new Date().toISOString();
+    await Promise.all(duplicatePending.map(async (row) => {
+      await db.update(applications).set({
+        status: "撤回",
+        nextAction: "同一公司与岗位名称已有申请历史，已自动移出待申请",
+        updatedAt: now,
+      }).where(eq(applications.id, row.id));
+      await db.update(cvPrebuildJobs).set({
+        status: "cancelled",
+        lastError: "DUPLICATE_APPLICATION_HISTORY",
+        updatedAt: now,
+        completedAt: now,
+      }).where(and(
+        eq(cvPrebuildJobs.applicationRowId, row.id),
+        notInArray(cvPrebuildJobs.status, ["ready", "cancelled", "stale"]),
+      ));
+    }));
+    rows = await db.select().from(applications).orderBy(desc(applications.updatedAt));
+  }
   return NextResponse.json(rows);
 }
 

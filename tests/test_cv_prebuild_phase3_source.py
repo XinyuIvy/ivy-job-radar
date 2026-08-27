@@ -138,9 +138,10 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
         self.assertIn("最终交付必须同时通过五个门槛", rules)
         self.assertIn("本轮输入、关键判断、实际修改、通过或未通过", rules)
         self.assertIn("application_decision.json", helper)
-        self.assertIn("MAX_AUTOMATIC_CV_ATTEMPTS = 2", dashboard)
+        self.assertIn("MAX_AUTOMATIC_CV_ATTEMPTS = 7", dashboard)
         self.assertIn("canAutomaticallyRetryCv(job)", dashboard)
-        self.assertIn("server_is_overloaded|rate_limit_exceeded|server_error", dashboard)
+        self.assertIn("PREBUILD_REPOSITORY_ACCESS_REQUIRED", dashboard)
+        self.assertIn("retryDelayMs", dashboard)
         self.assertIn("cvPrebuildAttempts", dashboard)
         self.assertNotIn("AUTO_REQUEUED_CV_JOBS_STORAGE_KEY", dashboard)
 
@@ -152,7 +153,7 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
         maintenance = (ROOT / "app" / "api" / "cv-prebuild" / "maintenance" / "route.ts").read_text(encoding="utf-8")
         for token in [
             "MAX_AUTOMATIC_CV_ATTEMPTS = 7",
-            "server_is_overloaded|rate_limit_exceeded|server_error|max_output_tokens",
+            "server_is_overloaded|rate_limit_exceeded|server_error|max_output_tokens|OPENAI_",
             "createOpenAiConversation",
             "FALLBACK_CV_MODEL",
             "FALLBACK_CV_MAX_OUTPUT_TOKENS",
@@ -167,7 +168,9 @@ class CvPrebuildPhase3SourceTests(unittest.TestCase):
         ]:
             self.assertIn(token, recovery)
         self.assertIn("attempts = attempts + 1", store)
+        self.assertIn("created_at = ?", store)
         self.assertIn("latest?.applicationRowId ?? null", store)
+        self.assertIn("MAX_OPENAI_RESPONSE_AGE_MS", (ROOT / "app" / "lib" / "cv-prebuild-runtime.ts").read_text(encoding="utf-8"))
         self.assertIn("AND NOT EXISTS", store)
         self.assertIn("pending_application.status = '准备材料'", store)
         self.assertIn("recoverTransientCvJobs", status)

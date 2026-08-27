@@ -54,3 +54,22 @@ test("preserves a clean structured description without a section title", () => {
   assert.equal(result.method, "unchanged");
   assert.equal(result.text, clean);
 });
+
+test("decodes escaped HTML and removes markup before JD extraction", () => {
+  const result = extractCoreJobDescription(`
+    &lt;h3&gt;&lt;strong&gt;About the Role&lt;/strong&gt;&lt;/h3&gt;
+    &lt;p&gt;You&amp;#39;ll partner with product and data teams.&amp;nbsp;
+    Read our &lt;a href=&quot;https://example.com&quot;&gt;interview guide&lt;/a&gt;.&lt;/p&gt;
+    &lt;h3&gt;Qualifications&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;PhD in Statistics&lt;/li&gt;&lt;li&gt;Python and R&lt;/li&gt;&lt;/ul&gt;
+  `);
+
+  assert.match(result.text, /^About the Role/);
+  assert.match(result.text, /You'll partner with product and data teams/);
+  assert.match(result.text, /• PhD in Statistics/);
+  assert.doesNotMatch(result.text, /&(?:lt|gt|quot|nbsp|#39);|<\/?(?:h3|p|a|ul|li)\b/i);
+});
+
+test("decodes double-escaped HTML", () => {
+  const result = extractCoreJobDescription("&amp;lt;p&amp;gt;Responsibilities&amp;lt;/p&amp;gt;&amp;lt;p&amp;gt;Build causal models.&amp;lt;/p&amp;gt;");
+  assert.equal(result.text, "Responsibilities\nBuild causal models.");
+});

@@ -19,7 +19,7 @@ import {
   emptyFixedApplicationProfile,
   type FixedApplicationProfile,
 } from "./lib/application-profile";
-import { sameLogicalJob } from "./lib/job-identity";
+import { sameCompanyRole, sameLogicalJob } from "./lib/job-identity";
 import CandidateFactFitScores from "./pending-application-fit-scores";
 
 const completeCompanyPool = [...companyPool, ...companyPoolAdditions];
@@ -28,7 +28,7 @@ const activeCvPrebuildStatuses = new Set<CvPrebuildStatus>([
   "agent_queued",
   "agent_running",
 ]);
-const MAX_AUTOMATIC_CV_ATTEMPTS = 2;
+const MAX_AUTOMATIC_CV_ATTEMPTS = 7;
 const CV_GENERATION_RULES_STORAGE_KEY = "ivy-job-radar:cv-generation-rules:v1";
 const CV_TEMPLATE_LANGUAGE_STORAGE_KEY = "ivy-job-radar:cv-template-language:v1";
 const PENDING_CV_FAVORITES_STORAGE_KEY = "ivy-job-radar:pending-cv-favorites:v1";
@@ -68,9 +68,9 @@ type Job = {
 function canAutomaticallyRetryCv(job: Job) {
   if (job.cvPrebuildStatus !== "failed_retryable") return false;
   const attempts = job.cvPrebuildAttempts ?? 0;
-  if (attempts < 1 || attempts >= MAX_AUTOMATIC_CV_ATTEMPTS) return false;
-  return job.cvPrebuildError === "OPENAI_FAILED"
-    || /server_is_overloaded|rate_limit_exceeded|server_error/i.test(job.cvPrebuildError ?? "");
+  if (attempts >= MAX_AUTOMATIC_CV_ATTEMPTS) return false;
+  return !/DUPLICATE_APPLICATION_HISTORY|JD_REQUIRED|JOB_NOT_OPEN|JOB_NOT_SAVED|PREBUILD_CONFIGURATION_REQUIRED|PREBUILD_REPOSITORY_ACCESS_REQUIRED/i
+    .test(job.cvPrebuildError ?? "");
 }
 
 function CvPrebuildStatusBadge({ status }: { status?: CvPrebuildStatus | null }) {
@@ -713,7 +713,7 @@ function applicationHidesFavorite(application: Application, job: Job) {
 }
 
 function applicationHidesToday(application: Application, job: Job) {
-  return !["撤回", "拒绝"].includes(application.status) && savedApplicationMatchesJob(application, job);
+  return savedApplicationMatchesJob(application, job) || sameCompanyRole(application, job);
 }
 
 function updatePendingCvFavorite(jobId: number, pending: boolean) {
@@ -890,7 +890,11 @@ export default function JobRadar() {
     if (view !== "automation") return;
     let cancelled = false;
     const initialTimer = window.setTimeout(() => {
-      void loadApplicationAutomation()
+      void fetch("/api/application-automation", { method: "POST" })
+        .then((response) => {
+          if (!response.ok) throw new Error("自动投递候选池刷新失败。");
+          return loadApplicationAutomation();
+        })
         .catch((error) => !cancelled && setAutomationMessage(error instanceof Error ? error.message : "自动投递任务读取失败。"))
         .finally(() => !cancelled && setAutomationLoading(false));
     }, 0);
@@ -989,7 +993,8 @@ export default function JobRadar() {
         application,
         ...current.filter((item) => item.id !== payload.application?.id),
       ]);
-      setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, application)));
+      setDailyJobs((current) => current.filter((job) =>
+        !sameLogicalJob(job, application) && !sameCompanyRole(job, application)));
     };
     const storageHandler = (event: StorageEvent) => {
       if (event.key !== PENDING_STORAGE_KEY || !event.newValue) return;
@@ -1485,15 +1490,21 @@ export default function JobRadar() {
   const activeCvJobKey = useMemo(() => {
     const jobIds = new Set<number>();
     for (const job of cvTasks) {
-      if (job.cvPrebuildStatus && activeCvPrebuildStatuses.has(job.cvPrebuildStatus)) {
+      const belongsToPendingApplication = applicationsList.some((application) =>
+        application.status === "准备材料" && savedApplicationMatchesJob(application, job));
+      if (
+        belongsToPendingApplication
+        && job.cvPrebuildStatus
+        && activeCvPrebuildStatuses.has(job.cvPrebuildStatus)
+      ) {
         jobIds.add(job.id);
       }
     }
     return [...jobIds].sort((left, right) => left - right).join(",");
-  }, [cvTasks]);
+  }, [applicationsList, cvTasks]);
 
   useEffect(() => {
-    if (view !== "saved" || !activeCvJobKey) return;
+    if (!activeCvJobKey) return;
     const jobIds = activeCvJobKey.split(",").map(Number).filter(Number.isSafeInteger);
     let active = true;
     const refreshCvStatuses = async () => {
@@ -1552,7 +1563,7 @@ export default function JobRadar() {
       window.clearTimeout(initialTimer);
       window.clearInterval(statusTimer);
     };
-  }, [view, activeCvJobKey]);
+  }, [activeCvJobKey]);
 
   const loadRequests = async () => {
     const response = await fetch("/api/job-requests", { cache: "no-store" });
@@ -2169,7 +2180,8 @@ export default function JobRadar() {
     !job.cvPrebuildStatus
     || ["stale", "cancelled"].includes(job.cvPrebuildStatus)
     || canAutomaticallyRetryCv(job));
-  const cvGenerationActive = cvTasks.some((job) => activeCvPrebuildStatuses.has(job.cvPrebuildStatus ?? "queued"));
+  const cvGenerationActive = pendingCvJobs.some(({ job }) =>
+    activeCvPrebuildStatuses.has(job.cvPrebuildStatus ?? "queued"));
   useEffect(() => {
     if (!pendingQueueCandidate?.application.id) return;
     const jobId = pendingQueueCandidate.job.id;
@@ -2198,6 +2210,9 @@ export default function JobRadar() {
       ?? dailyJobs.find((job) => job.id === nextQueuedCvJobId);
     if (!queuedJob) return;
     automaticCvJobRef.current = queuedJob.id;
+    const retryDelayMs = queuedJob.cvPrebuildAttempts
+      ? Math.min(30_000, 2_000 * (2 ** Math.max(0, queuedJob.cvPrebuildAttempts - 1)))
+      : 500;
     const timer = window.setTimeout(() => {
       void startCvPrebuild(
         queuedJob.id,
@@ -2208,7 +2223,7 @@ export default function JobRadar() {
         automaticQueueRef.current.delete(queuedJob.id);
         setJobsReloadToken((value) => value + 1);
       });
-    }, 500);
+    }, retryDelayMs);
     return () => window.clearTimeout(timer);
   }, [cvGenerationActive, cvGenerationRules, cvTasks, dailyJobs, nextQueuedCvJobId, startCvPrebuild]);
 
@@ -2260,7 +2275,8 @@ export default function JobRadar() {
         return current.map((item, itemIndex) => itemIndex === index ? savedApplication : item);
       });
       if (!["撤回", "拒绝"].includes(savedApplication.status)) {
-        setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, savedApplication)));
+        setDailyJobs((current) => current.filter((job) =>
+          !sameLogicalJob(job, savedApplication) && !sameCompanyRole(job, savedApplication)));
       }
 
       // The editor already closed optimistically. Automatic task creation and server

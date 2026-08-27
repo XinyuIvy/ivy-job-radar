@@ -13,9 +13,10 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
         self.assertIn('"准备材料"', component)
         self.assertIn('buildTrackedApplicationMatcher', component)
         self.assertIn('sameLogicalJob(job, candidate)', component)
-        self.assertIn('!activeJobStatuses.has(row.status) || !isTrackedApplication(row)', component)
+        self.assertIn('const isTrackedForToday', component)
+        self.assertIn('todayEligible: shortlist.eligible && !saved && !tracked', component)
         self.assertIn('Strong posting identity outranks unreliable scraped display fields', (ROOT / "app" / "lib" / "job-identity.ts").read_text(encoding="utf-8"))
-        self.assertIn('setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, application)))', (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8"))
+        self.assertIn('!sameLogicalJob(job, application) && !sameCompanyRole(job, application)', (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8"))
         self.assertNotIn('<PendingJobVisibility />', layout)
 
     def test_today_view_excludes_favorites_and_pending_applications(self):
@@ -34,8 +35,9 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
         route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
 
         self.assertIn('"准备材料"', route)
-        self.assertIn('const isTrackedApplication = buildTrackedApplicationMatcher(hiddenApplications)', route)
-        self.assertIn('!activeJobStatuses.has(row.status) || !isTrackedApplication(row)', route)
+        self.assertIn('const isTrackedApplication = buildTrackedApplicationMatcher(trackedApplications)', route)
+        self.assertIn('todayEligible: shortlist.eligible && !saved && !tracked', route)
+        self.assertIn('sameCompanyRole(job, candidate)', route)
         self.assertNotIn('appliedFingerprints', route)
 
     def test_application_post_uses_logical_identity_and_migrates_legacy_generic_rows(self):

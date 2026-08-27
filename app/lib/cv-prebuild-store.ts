@@ -179,9 +179,9 @@ export async function beginCvPrebuildGeneration(
       await database.prepare(`
         UPDATE cv_prebuild_jobs
         SET status = 'preparing_bundle', attempts = attempts + 1,
-            last_error = '', updated_at = ?, completed_at = ''
+            last_error = '', created_at = ?, updated_at = ?, completed_at = ''
         WHERE generation_key = ?
-      `).bind(input.now, input.generationKey).run();
+      `).bind(input.now, input.now, input.generationKey).run();
       return {
         outcome: "retry" as const,
         row: await getCvPrebuildByGenerationKey(database, input.generationKey),
@@ -205,7 +205,7 @@ export async function beginCvPrebuildGeneration(
       SET prebuild_id = ?, generation_key = ?, status = 'preparing_bundle',
           language = ?, track = ?, template_file = ?, jd_sha256 = ?,
           fact_master_sha = ?, prompt_version = ?, attempts = attempts + 1,
-          last_error = '', updated_at = ?, completed_at = ''
+          last_error = '', created_at = ?, updated_at = ?, completed_at = ''
       WHERE id = ? AND generation_key IS NULL
     `).bind(
       input.prebuildId,
@@ -216,6 +216,7 @@ export async function beginCvPrebuildGeneration(
       input.jdSha256,
       input.factMasterSha,
       input.promptVersion,
+      input.now,
       input.now,
       latest.id,
     ).run();
@@ -320,7 +321,7 @@ export async function claimCvPrebuildFallback(
   const claimed = await database.prepare(`
     UPDATE cv_prebuild_jobs
     SET status = 'preparing_bundle', attempts = attempts + 1,
-        last_error = '', updated_at = ?, completed_at = ''
+        last_error = '', created_at = ?, updated_at = ?, completed_at = ''
     WHERE id = ? AND generation_key = ?
       AND status IN ('queued', 'failed_retryable')
       AND attempts < ?
@@ -333,7 +334,7 @@ export async function claimCvPrebuildFallback(
           AND pending_application.status = '准备材料'
           AND active.status IN ('preparing_bundle', 'agent_queued', 'agent_running')
       )
-  `).bind(now, row.id, row.generationKey, maxAttempts).run();
+  `).bind(now, now, row.id, row.generationKey, maxAttempts).run();
   if (Number(claimed.meta?.changes ?? 0) === 0) return null;
   return getCvPrebuildByGenerationKey(database, row.generationKey);
 }

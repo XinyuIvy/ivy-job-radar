@@ -32,6 +32,8 @@ const artifactKindsByFilename: Record<string, CvPrebuildArtifactKind> = {
   "application_decision.json": "decision",
 };
 
+const MAX_OPENAI_RESPONSE_AGE_MS = 2 * 60 * 60 * 1_000;
+
 function terminalFailure(response: OpenAiCvResponse) {
   return ["failed", "cancelled", "incomplete"].includes(response.status);
 }
@@ -54,12 +56,31 @@ export async function reconcileCvPrebuildRun(input: {
 }) {
   const { database, bucket, row, apiKey, now } = input;
   if (!row.openaiResponseId || !row.generationKey) return row;
+  if (
+    ["agent_queued", "agent_running"].includes(row.status)
+    && Date.parse(now) - Date.parse(row.createdAt) >= MAX_OPENAI_RESPONSE_AGE_MS
+  ) {
+    return failCvPrebuildRun(
+      database,
+      row.generationKey,
+      row.openaiResponseId,
+      "OPENAI_RESPONSE_TIMEOUT",
+      now,
+    );
+  }
 
   let response: OpenAiCvResponse;
   try {
     response = await retrieveOpenAiCvResponse(apiKey, row.openaiResponseId);
   } catch {
-    return row;
+    if (Date.parse(now) - Date.parse(row.updatedAt) < MAX_OPENAI_RESPONSE_AGE_MS) return row;
+    return failCvPrebuildRun(
+      database,
+      row.generationKey,
+      row.openaiResponseId,
+      "OPENAI_STATUS_UNAVAILABLE",
+      now,
+    );
   }
 
   if (["queued", "in_progress"].includes(response.status)) {

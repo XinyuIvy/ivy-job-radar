@@ -54,9 +54,68 @@ const CORE_HEADINGS = [
 
 const UI_ONLY_LINE = /^(?:home|jobs?|careers?|search jobs?|back to jobs?|apply|apply now|save|share|sign in|log in|首页|职位|岗位|招聘|搜索职位|返回职位列表|立即申请|申请职位|收藏|分享|登录|注册)$/i;
 
+const NAMED_HTML_ENTITIES: Record<string, string> = {
+  amp: "&",
+  apos: "'",
+  bull: "•",
+  gt: ">",
+  hellip: "…",
+  ldquo: "“",
+  lsquo: "‘",
+  lt: "<",
+  mdash: "\u2014",
+  middot: "·",
+  nbsp: " ",
+  ndash: "\u2013",
+  quot: '"',
+  rdquo: "”",
+  rsquo: "’",
+};
+
+function decodeHtmlEntitiesOnce(value: string) {
+  return value.replace(/&(#x[\da-f]+|#\d+|[a-z][a-z\d]+);/gi, (match, entity: string) => {
+    const normalized = entity.toLowerCase();
+    if (normalized.startsWith("#")) {
+      const radix = normalized.startsWith("#x") ? 16 : 10;
+      const digits = normalized.slice(radix === 16 ? 2 : 1);
+      const codePoint = Number.parseInt(digits, radix);
+      if (!Number.isFinite(codePoint) || codePoint <= 0 || codePoint > 0x10ffff) return match;
+      try {
+        return String.fromCodePoint(codePoint);
+      } catch {
+        return match;
+      }
+    }
+    return NAMED_HTML_ENTITIES[normalized] ?? match;
+  });
+}
+
+function decodeHtmlEntities(value: string) {
+  let decoded = value;
+  for (let pass = 0; pass < 3; pass += 1) {
+    const next = decodeHtmlEntitiesOnce(decoded);
+    if (next === decoded) break;
+    decoded = next;
+  }
+  return decoded;
+}
+
+function htmlToPlainText(value: string) {
+  const decoded = decodeHtmlEntities(value)
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
+    .replace(/<\s*br\s*\/?>/gi, "\n")
+    .replace(/<\/\s*(?:p|div|h[1-6]|section|article|ul|ol|table|tr)\s*>/gi, "\n")
+    .replace(/<\s*li\b[^>]*>/gi, "• ")
+    .replace(/<\/\s*(?:li|td|th)\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ");
+  return decodeHtmlEntities(decoded);
+}
+
 function normalizeDescription(value: unknown, maximum = 80_000) {
-  return String(value ?? "")
+  return htmlToPlainText(String(value ?? ""))
     .replace(/\u0000/g, "")
+    .replace(/[\u00a0\u2007\u202f]/g, " ")
     .replace(/\r\n?/g, "\n")
     .replace(/[\t\f\v ]+/g, " ")
     .replace(/ *\n */g, "\n")

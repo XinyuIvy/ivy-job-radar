@@ -27,7 +27,7 @@ import { isChinaCompanyIdentity, sameCompanyIdentity } from "../../lib/company-i
 import { recommendCvPrebuildTemplate } from "../../lib/cv-prebuild-bundle";
 import { getLatestCvPrebuildJob, initializeCvPrebuildJob } from "../../lib/cv-prebuild-store";
 import { extractCoreJobDescription } from "../../lib/job-description";
-import { sameLogicalJob } from "../../lib/job-identity";
+import { sameCompanyRole, sameLogicalJob } from "../../lib/job-identity";
 import { scoreStoredJob } from "../../lib/job-scoring";
 import { evaluateTodayShortlistCandidate } from "../../lib/job-shortlist";
 import { saveJob } from "../../lib/saved-jobs-store";
@@ -93,15 +93,6 @@ async function completeAutomationSummary(database: Awaited<ReturnType<typeof rec
   return summary;
 }
 
-const trackedApplicationStatuses = new Set([
-  "准备材料",
-  "已申请",
-  "一面",
-  "二面/技术面",
-  "终面",
-  "Offer",
-]);
-
 function applicationAlreadyTracksJob(
   job: typeof jobs.$inferSelect,
   applicationRows: Array<typeof applications.$inferSelect>,
@@ -109,8 +100,8 @@ function applicationAlreadyTracksJob(
   reviewedCompanies: string[],
 ) {
   return applicationRows.some((application) =>
-    sameLogicalJob(application, job),
-  ) || savedJobRows.some((savedJob) => sameLogicalJob(savedJob, job))
+    sameLogicalJob(application, job) || sameCompanyRole(application, job),
+  ) || savedJobRows.some((savedJob) => sameLogicalJob(savedJob, job) || sameCompanyRole(savedJob, job))
     || (
       isChinaCompanyIdentity(job.company)
       && reviewedCompanies.some((company) => sameCompanyIdentity(company, job.company))
@@ -141,6 +132,7 @@ export async function GET() {
     summary,
     reviewBatch: reviewBatch.map((task) => ({
       ...task,
+      description: extractCoreJobDescription(task.description).text,
       reasons: parseJsonArray(task.decisionJson),
       blockers: parseJsonArray(task.blockerJson),
     })),
@@ -227,7 +219,7 @@ export async function POST(request: NextRequest) {
     db.select().from(applications),
   ]);
   const savedIds = new Set(savedRows.map((row) => row.jobId));
-  const trackedApplications = allApplications.filter((row) => trackedApplicationStatuses.has(row.status));
+  const trackedApplications = allApplications;
   const savedJobRows = storedJobs.filter((job) => savedIds.has(job.id));
   const reviewedCompanies = [
     ...trackedApplications.map((application) => application.company),
@@ -404,7 +396,17 @@ export async function PATCH(request: NextRequest) {
           continue;
         }
 
-        let application = applicationRows.find((row) => sameLogicalJob(row, job));
+        let application = applicationRows.find((row) => sameLogicalJob(row, job) || sameCompanyRole(row, job));
+        if (application && application.status !== "收藏") {
+          await db.update(applicationAutomationTasks).set({
+            status: "cancelled",
+            stage: "already_in_application_history",
+            lastError: "同一公司与岗位名称已有收藏、待申请或申请历史",
+            updatedAt: now,
+          }).where(eq(applicationAutomationTasks.id, task.id));
+          screenedOutJobIds.push(job.id);
+          continue;
+        }
         if (!application) {
           [application] = await db.insert(applications).values({
             company: job.company,

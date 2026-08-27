@@ -71,9 +71,10 @@ const PLACEHOLDER_TITLES = new Set([
 
 export function normalizeJobIdentityText(value: unknown) {
   return String(value ?? "")
-    .normalize("NFKC")
+    .normalize("NFKD")
     .toLowerCase()
     .replace(/&/g, "and")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
 }
 
@@ -102,7 +103,10 @@ function safeUrl(raw: unknown) {
 
 function jobUrlOrigin(raw: unknown) {
   const url = safeUrl(raw);
-  return url ? url.hostname.toLowerCase().replace(/^www\./, "") : "";
+  if (!url) return "";
+  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  if (url.searchParams.has("gh_jid") || /(?:^|\.)greenhouse\.io$/.test(host)) return "greenhouse.io";
+  return host;
 }
 
 function normalizeIdentifier(value: unknown) {
@@ -125,7 +129,7 @@ export function extractStableJobId(rawUrl: unknown, suppliedApplicationId: unkno
 
   const url = safeUrl(rawUrl);
   if (!url) return "";
-  const host = url.hostname.toLowerCase().replace(/^www\./, "");
+  const host = jobUrlOrigin(rawUrl);
 
   for (const [rawKey, rawValue] of url.searchParams.entries()) {
     const key = rawKey.toLowerCase().replace(/[^a-z0-9_]/g, "");
@@ -214,6 +218,21 @@ export function sameLogicalJob(left: JobIdentityInput, right: JobIdentityInput) 
   if (leftCompany && rightCompany && leftCompany !== rightCompany) return false;
   if (leftId || rightId) return false;
   return Boolean(usableTitles && leftCompany && leftCompany === rightCompany && leftTitle === rightTitle && sameLocation(left.location, right.location));
+}
+
+export function sameCompanyRole(left: JobIdentityInput, right: JobIdentityInput) {
+  const leftCompany = normalizeJobIdentityText(left.company);
+  const rightCompany = normalizeJobIdentityText(right.company);
+  const leftTitle = normalizeJobIdentityText(left.title);
+  const rightTitle = normalizeJobIdentityText(right.title);
+  return Boolean(
+    leftCompany
+    && leftCompany === rightCompany
+    && leftTitle
+    && leftTitle === rightTitle
+    && !isPlaceholderJobTitle(left.title)
+    && !isPlaceholderJobTitle(right.title),
+  );
 }
 
 function shortHash(value: string) {
