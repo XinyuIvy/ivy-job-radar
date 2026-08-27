@@ -90,6 +90,24 @@ async function fetchResume(config, taskId) {
   return { fileName, base64: bufferToBase64(await response.arrayBuffer()) };
 }
 
+async function answerSemanticQuestions(config, taskId, claimToken, tabId) {
+  const collected = await sendToTab(tabId, { type: "IVY_COLLECT_SEMANTIC_QUESTIONS" });
+  const questions = Array.isArray(collected?.questions) ? collected.questions : [];
+  if (!questions.length) return { requested: 0, filled: 0, reviewed: [], model: "none" };
+  const result = await apiRequest(config, "/api/application-automation/semantic-answers", {
+    method: "POST",
+    body: JSON.stringify({ taskId, claimToken, questions }),
+  });
+  const answers = Array.isArray(result?.answers) ? result.answers : [];
+  const applied = await sendToTab(tabId, { type: "IVY_APPLY_SEMANTIC_ANSWERS", answers });
+  return {
+    requested: questions.length,
+    filled: Number(applied?.filled || 0),
+    reviewed: answers.filter((answer) => answer?.decision !== "fill").map((answer) => answer?.ref).filter(Boolean),
+    model: result?.model || "configured-api-model",
+  };
+}
+
 async function reachApplicationForm(tabId) {
   await waitForTab(tabId);
   const entry = await sendToTab(tabId, { type: "IVY_OPEN_APPLICATION_FORM" }).catch(() => ({ clicked: false }));
@@ -128,50 +146,38 @@ async function runTask(config, task, language) {
       mimeType: "application/pdf",
       base64: resume.base64,
     });
+    let semanticResult = { requested: 0, filled: 0, reviewed: [], model: "none", error: "" };
+    try {
+      semanticResult = { ...semanticResult, ...await answerSemanticQuestions(config, task.id, claimToken, tabId) };
+    } catch (error) {
+      semanticResult.error = String(error?.message || error);
+    }
     const audit = await sendToTab(tabId, { type: "IVY_AUDIT_APPLICATION_FORM" });
     const blockers = [...(audit?.blockers || [])];
     if (!fillResult?.ok) blockers.push("自动填写没有成功完成");
     if (!uploadResult?.uploaded) blockers.push("没有找到可用的 Resume/CV 上传字段");
+    if (semanticResult.error) blockers.push("API 逐题判断没有完成");
+    if (semanticResult.reviewed.length) blockers.push("API 发现无法从事实库确认的问题");
 
-    if (blockers.length || !task.allowFinalSubmit) {
-      await updateTask(config, task.id, claimToken, "needs_review", "browser_review_required", {
-        confirmationText: JSON.stringify({
-          blockers,
-          filled: fillResult?.filled || 0,
-          unresolved: fillResult?.unresolved || [],
-          requiredEmpty: audit?.requiredEmpty || [],
-          platform: audit?.platform || "Unknown ATS",
-          tabId,
-        }),
-      });
-      return;
-    }
-
-    const submitted = await sendToTab(tabId, { type: "IVY_CLICK_SAFE_SUBMIT" });
-    if (!submitted?.clicked) {
-      await updateTask(config, task.id, claimToken, "needs_review", "submit_guard_blocked", {
-        confirmationText: JSON.stringify(submitted?.audit || {}),
-      });
-      return;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 4500));
-    await ensureContentScript(tabId).catch(() => null);
-    const confirmation = await chrome.tabs.sendMessage(tabId, { type: "IVY_CONFIRM_SUBMISSION" }).catch(() => ({ confirmed: false }));
-    if (!confirmation?.confirmed) {
-      await updateTask(config, task.id, claimToken, "needs_review", "submission_confirmation_missing", {
-        confirmationText: "最终提交按钮已点击，但没有识别到申请成功回执。",
-      });
-      return;
-    }
-    await updateTask(config, task.id, claimToken, "submitted", "submission_confirmed", {
-      confirmationText: confirmation.text || "Application submitted and confirmation detected.",
+    const finalTab = await chrome.tabs.get(tabId).catch(() => null);
+    await updateTask(config, task.id, claimToken, "needs_review", "manual_submit_required", {
+      confirmationText: JSON.stringify({
+        blockers,
+        filled: fillResult?.filled || 0,
+        unresolved: fillResult?.unresolved || [],
+        semantic: semanticResult,
+        requiredEmpty: audit?.requiredEmpty || [],
+        platform: audit?.platform || "Unknown ATS",
+        tabId,
+        tabUrl: finalTab?.url || task.jobUrl,
+        manualSubmitRequired: true,
+      }),
     });
-    await chrome.tabs.remove(tabId).catch(() => null);
   } catch (error) {
     await updateTask(config, task.id, claimToken, "failed_retryable", "browser_execution_failed", {
       error: String(error?.message || error),
     }).catch(() => null);
-    if (tabId) await chrome.tabs.update(tabId, { active: true }).catch(() => null);
+    // Keep the application tab open so the user can inspect and recover it.
   }
 }
 
@@ -184,7 +190,15 @@ async function pollAutomationQueue() {
     if (!config?.siteOrigin || !config?.accessKey) return;
     const queue = await apiRequest(config, "/api/application-automation/extension");
     if (!queue?.config?.enabled || !Array.isArray(queue.ready) || !queue.ready.length) return;
-    await runTask(config, queue.ready[0], stored.ivyAutofillLanguage || queue.config.defaultLanguage || "en");
+    const pending = queue.ready.slice(0, 10);
+    const workerCount = Math.min(2, pending.length);
+    const language = stored.ivyAutofillLanguage || queue.config.defaultLanguage || "en";
+    await Promise.all(Array.from({ length: workerCount }, async () => {
+      while (pending.length) {
+        const task = pending.shift();
+        if (task) await runTask(config, task, language);
+      }
+    }));
   } finally {
     running = false;
   }
