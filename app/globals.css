@@ -287,6 +287,7 @@ button { color: inherit; }
 .toolbar { padding: 38px 0 16px; }
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
 .section-heading h2 { margin: 0; font: 700 28px/1.1 Georgia, "Songti SC", serif; }
+.shortlist-filter-note { max-width: 720px; margin: 7px 0 0; color: var(--muted); font-size: 11px; line-height: 1.55; }
 .section-heading select {
   border: 1px solid var(--line); background: var(--card); border-radius: 12px;
   padding: 10px 12px; color: var(--ink); outline: none;
@@ -973,7 +974,10 @@ button { color: inherit; }
 .automation-review-reasons span { border-radius: 999px; background: #eff4f1; color: #53655c; padding: 5px 7px; font-size: 9px; line-height: 1.35; }
 .automation-review-links { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 10px; }
 .automation-review-links a { color: var(--green-dark); font-size: 10px; font-weight: 800; }
-.automation-review-links small { color: var(--muted); font-size: 9px; text-align: right; }
+.automation-review-links button { flex: 0 0 auto; border: 1px solid #b85d54; border-radius: 9px; background: #fff7f5; color: #983f37; padding: 7px 10px; cursor: pointer; font-size: 10px; font-weight: 800; }
+.automation-review-links button:hover { background: #fbe8e4; border-color: #983f37; }
+.automation-review-links button:disabled { cursor: wait; opacity: .5; }
+.automation-review-links small { margin-left: auto; color: var(--muted); font-size: 9px; text-align: right; }
 .automation-jd-details { margin-top: 10px; border-top: 1px solid #e4ece7; padding-top: 9px; }
 .automation-jd-details summary { color: var(--green-dark); cursor: pointer; font-size: 10px; font-weight: 800; }
 .automation-jd-details > div { max-height: 520px; overflow: auto; margin-top: 10px; border-radius: 10px; background: #f7f8f7; padding: 13px; color: #34433b; font: 10px/1.65 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
@@ -1333,7 +1337,8 @@ button { color: inherit; }
   .automation-review-head > button { width: 100%; }
   .automation-review-card { grid-template-columns: 28px minmax(0, 1fr); }
   .automation-review-links { align-items: flex-start; flex-direction: column; }
-  .automation-review-links small { text-align: left; }
+  .automation-review-links button { width: 100%; }
+  .automation-review-links small { margin-left: 0; text-align: left; }
   .detail-shell { width: min(100% - 22px, 1040px); padding-top: 16px; }
   .detail-nav { margin-bottom: 14px; }
   .detail-header { display: grid; gap: 14px; padding: 19px 17px; border-radius: 18px; }
