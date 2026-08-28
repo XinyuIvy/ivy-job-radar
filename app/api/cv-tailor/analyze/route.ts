@@ -390,10 +390,11 @@ export async function POST(request: NextRequest) {
   if (!templateFile) return NextResponse.json({ error: "该方向当前没有所选语言的 LaTeX 母版。", code: "CV_TEMPLATE_LANGUAGE_UNAVAILABLE" }, { status: 400 });
 
   try {
-    const [template, factIndexJsonl, statusAddendumJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl, conferenceIndexJsonl] = await Promise.all([
+    const [template, factIndexJsonl, statusAddendumJsonl, currentCleanupJsonl, conceptEdgesJsonl, credentialIndexJsonl, courseworkIndexJsonl, profileIndexJsonl, literatureIndexJsonl, conferenceIndexJsonl] = await Promise.all([
       readPrivateFileCached(`master/template-cv/${templateFile}`, token),
       readPrivateFileCached("master/project-evidence/FACT_INDEX.jsonl", token),
       readPrivateFileCached("master/project-evidence/FACT_INDEX_STATUS_ADDENDUM.jsonl", token),
+      readPrivateFileCached("master/project-evidence/FACT_INDEX_CURRENT_CLEANUP_2026-08-28.jsonl", token),
       readPrivateFileCached("master/project-evidence/CONCEPT_EDGES.jsonl", token),
       readPrivateFileCached("master/project-evidence/CREDENTIAL_INDEX.jsonl", token),
       readPrivateFileCached("master/project-evidence/COURSEWORK_INDEX.jsonl", token),
@@ -405,8 +406,9 @@ export async function POST(request: NextRequest) {
     const unifiedFactIndex = [
       ...parseJsonl<FactIndexRecord>(factIndexJsonl),
       ...parseJsonl<FactIndexRecord>(statusAddendumJsonl),
+      ...parseJsonl<FactIndexRecord>(currentCleanupJsonl),
     ];
-    // Later addendum records intentionally override stale base facts with the same fact_id.
+    // Merge precedence is base -> status addendum -> dated cleanup. Later records intentionally override stale facts with the same fact_id.
     const factById = new Map<string, FactIndexRecord>();
     for (const fact of unifiedFactIndex) {
       if ((!fact.record_type || fact.record_type === "project_fact") && fact.fact_id) factById.set(fact.fact_id, fact);
@@ -482,7 +484,7 @@ export async function POST(request: NextRequest) {
       sourceDiagnostics: {
         templateFile,
         templateSnippetCount: templateIndex.length,
-        factIndexFile: "master/project-evidence/FACT_INDEX.jsonl + FACT_INDEX_STATUS_ADDENDUM.jsonl",
+        factIndexFile: "master/project-evidence/FACT_INDEX.jsonl + FACT_INDEX_STATUS_ADDENDUM.jsonl + FACT_INDEX_CURRENT_CLEANUP_2026-08-28.jsonl",
         atomicFactCount: factIndex.length,
         structuredFactCount: structuredIndex.length,
         conceptEdgeCount: conceptEdges.length,
