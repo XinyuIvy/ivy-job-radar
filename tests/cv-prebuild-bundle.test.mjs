@@ -103,6 +103,7 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
     "canonical_concept_index.jsonl",
     "canonical_relation_index.jsonl",
     "canonical_retrieval_index.jsonl",
+    "canonical_current_addendum.jsonl",
     "cv_base.tex",
   ];
   const sources = Object.fromEntries(sourceNames.map((name) => [name, { text: `${name} content`, sha: `${name}-sha` }]));
@@ -129,12 +130,16 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
   const prompt = files[`${identity.bundlePath}/prebuild_prompt.txt`];
   assert.match(record, /application_id: null/);
   assert.match(record, /application_row_id: null/);
+  assert.match(record, /canonical_current_addendum\.jsonl/);
   assert.match(record, new RegExp(`cv_commit: "${identity.cvCommit}"`));
   assert.match(prompt, /LuaLaTeX/);
   assert.match(prompt, /BEGIN USER-EDITABLE CV GENERATION RULES/);
   assert.match(prompt, /当前 CV 语言专项规则：中文/);
   assert.doesNotMatch(prompt, /Current CV language rules: English/);
   assert.match(prompt, /Prioritize direct evidence and rewrite every supported bullet/);
+  assert.match(prompt, /canonical_current_addendum\.jsonl/);
+  assert.match(prompt, /完整.*fact_master_snapshot\.md.*第一最高权威/);
+  assert.match(prompt, /相同 record ID supersede baseline canonical record/);
   assert.match(prompt, /禁止创建 application\/APP ID/);
 });
 
