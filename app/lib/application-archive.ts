@@ -31,6 +31,7 @@ export const canonicalSnapshotFiles = [
   ["master/project-evidence/CANONICAL_CONCEPT_INDEX.jsonl", "canonical_concept_index.jsonl"],
   ["master/project-evidence/CANONICAL_RELATION_INDEX.jsonl", "canonical_relation_index.jsonl"],
   ["master/project-evidence/CANONICAL_RETRIEVAL_INDEX.jsonl", "canonical_retrieval_index.jsonl"],
+  ["master/project-evidence/CANONICAL_CURRENT_ADDENDUM.jsonl", "canonical_current_addendum.jsonl"],
 ] as const;
 
 function shortHash(value: string) {
@@ -130,6 +131,7 @@ export function buildApplicationRecord(input: {
     "  - canonical_concept_index.jsonl",
     "  - canonical_relation_index.jsonl",
     "  - canonical_retrieval_index.jsonl",
+    "  - canonical_current_addendum.jsonl",
     "  - cv_base.tex",
     "  - chat_prompt.txt",
     "",
@@ -191,9 +193,14 @@ ${confirmedFullJd}
 - \`canonical_concept_index.jsonl\`
 - \`canonical_relation_index.jsonl\`
 - \`canonical_retrieval_index.jsonl\`
+- \`canonical_current_addendum.jsonl\`
 - \`cv_base.tex\`
 
 如果申请 ID、目录或除 \`cv_display_rules_snapshot.yaml\` 之外任何必需文件不存在，立即停止并明确告诉我缺少什么。历史申请包若没有 \`cv_display_rules_snapshot.yaml\`，不要因此停止；继续执行，并严格遵守下面内嵌的全局展示边界。不要根据聊天记忆、岗位名称或相似申请猜测。
+
+### 当前事实与 canonical 修正规则
+
+\`fact_master_snapshot.md\` 是候选人事实的第一最高权威。六个 baseline canonical indexes 负责结构化召回、证据定位和边界核验；\`canonical_current_addendum.jsonl\` 是同一冻结版本下的当前 structured amendment。如果 current addendum 明确以相同 record ID supersede baseline canonical record，则在 canonical 层采用 current addendum；但它仍不能覆盖完整事实母版或凭检索结果创造新事实。
 
 ### 全局 CV 展示边界
 
@@ -228,7 +235,7 @@ ${confirmedFullJd}
 
 \`jd_snapshot.md\` 与上面内嵌的完整 JD 是岗位要求的主权威来源。\`jd_requirements.json\` 和 \`match_packet.json\` 都只是从完整 JD 派生出的结构化摘要，绝对不能替代完整 JD，也不能把分析范围限制在其中已经抽取的几条要求。不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配。必须自行从完整 JD 中识别所有职责、必需条件、优先条件、学历/经验、方法与工具、合作与沟通要求、工作授权/地点/工作方式以及其他会影响 CV 的信息；即使某项没有出现在结构化摘要里，也要纳入审核。
 
-\`match_packet.json\` 只是 Job Radar 的初步分类，不是最终结论。请在完整阅读 JD 后，再结合完整事实母版、canonical indexes 和当前 CV，独立审核每项 JD 要求属于 Direct、Transferable、Adjacent 还是 Unsupported。你可以纠正、补充或推翻 Job Radar 的分类，但必须说明事实依据。
+\`match_packet.json\` 只是 Job Radar 的初步分类，不是最终结论。请在完整阅读 JD 后，再结合完整事实母版、baseline canonical indexes、current canonical addendum 和当前 CV，独立审核每项 JD 要求属于 Direct、Transferable、Adjacent 还是 Unsupported。你可以纠正、补充或推翻 Job Radar 的分类，但必须说明事实依据。
 
 分类处理规则：
 
@@ -287,9 +294,9 @@ ${confirmedFullJd}
 
 先完成整份 CV 初稿，再切换为深度了解该 JD 所属行业、岗位职能和真实筛选标准的资深 HR。把 JD 要求分为硬门槛、核心职责、强优先项和一般关键词，明确候选人与岗位仍有哪些经验、行业、方法、工具、职责范围、交付、协作或影响力差距，并区分真实硬差距、证据位置不醒目、表达不具体和证据尚未被调用。
 
-针对所有可能补强的差距，再次检索完整事实母版与 canonical fact/project/capability/concept/relation/retrieval indexes。发现可靠证据后，必须把它自然补入 summary、skills、经历、项目或论文，不能只在审校记录中提到。事实库没有证据的差距必须保留，不得用相邻经历冒充直接经验。随后模拟招聘官最可能拒绝该候选人的三个理由，能用已核验事实修复的直接修复，不能修复的如实记录。
+针对所有可能补强的差距，再次检索完整事实母版与 baseline canonical indexes、current canonical addendum。发现可靠证据后，必须把它自然补入 summary、skills、经历、项目或论文，不能只在审校记录中提到。事实库没有证据的差距必须保留，不得用相邻经历冒充直接经验。随后模拟招聘官最可能拒绝该候选人的三个理由，能用已核验事实修复的直接修复，不能修复的如实记录。
 
-最后将 summary、skills、每段经历、每个项目、每篇论文、每项荣誉和所有数字逐项对照事实母版与 canonical indexes。检查贡献边界、作者/角色、方法、结果、样本量、日期、地点、论文状态和关键词均有证据支持；删除 Unsupported 内容，Transferable 和 Adjacent 保留真实边界。项目叙述必须抓住该项目在事实母版中的核心贡献，不能为了贴 JD 改成另一个故事。
+最后将 summary、skills、每段经历、每个项目、每篇论文、每项荣誉和所有数字逐项对照事实母版与 canonical evidence。检查贡献边界、作者/角色、方法、结果、样本量、日期、地点、论文状态和关键词均有证据支持；删除 Unsupported 内容，Transferable 和 Adjacent 保留真实边界。项目叙述必须抓住该项目在事实母版中的核心贡献，不能为了贴 JD 改成另一个故事。
 
 ### 第 5 轮：角色画像对齐后的风格重写
 
@@ -315,7 +322,7 @@ ${languageReviewRules}
 
 ### 第 9 轮：最终回归审查与一次性交付
 
-最后再次以相关行业资深 HR 视角对照完整 JD、岗位角色画像、招聘信号优先级、事实母版、canonical indexes 和全局展示边界，复查岗位匹配、前三个潜在拒绝理由、10 秒首屏扫描、事实准确、结构分区、中文流畅、JD 关键词覆盖、论文取舍、九个第一作者会议报告、所有项目年月、重复内容和 PDF 页面密度。若行业/实习、研究型项目和应用型项目仍被平铺在同一 section，或 Summary、Skills 与前三条核心 bullet 没有形成一致定位，直接判定为不合格并重新组织。未达到以上标准就继续在内部修改并重新编译，直到达到或遇到只能由我补充的事实阻塞。
+最后再次以相关行业资深 HR 视角对照完整 JD、岗位角色画像、招聘信号优先级、事实母版、canonical evidence 和全局展示边界，复查岗位匹配、前三个潜在拒绝理由、10 秒首屏扫描、事实准确、结构分区、中文流畅、JD 关键词覆盖、论文取舍、九个第一作者会议报告、所有项目年月、重复内容和 PDF 页面密度。若行业/实习、研究型项目和应用型项目仍被平铺在同一 section，或 Summary、Skills 与前三条核心 bullet 没有形成一致定位，直接判定为不合格并重新组织。未达到以上标准就继续在内部修改并重新编译，直到达到或遇到只能由我补充的事实阻塞。
 
 第一条完整回复直接交付接近定稿的版本，至少包括：
 
