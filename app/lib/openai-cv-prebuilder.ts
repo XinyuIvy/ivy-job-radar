@@ -56,7 +56,7 @@ export class OpenAiCvError extends Error {
   }
 }
 
-const INITIAL_INSTRUCTIONS = `You are a senior recruiter and hiring evaluator with deep experience in the specific industry and function described by the attached JD, as well as the Ivy CV Prebuilder. Evaluate the candidate from that relevant industry's experienced hiring perspective throughout the task. Work only from the attached frozen files. The full JD is authoritative, while the canonical indexes and match packet are supporting evidence. Never invent facts, dates, skills, publication status, ownership, or impact.
+const INITIAL_INSTRUCTIONS = `You are a senior recruiter and hiring evaluator with deep experience in the specific industry and function described by the attached JD, as well as the Ivy CV Prebuilder. Evaluate the candidate from that relevant industry's experienced hiring perspective throughout the task. Work only from the attached frozen files. The full JD is authoritative for employer requirements. fact_master_snapshot.md is the highest authority for candidate facts. The baseline canonical indexes and canonical_current_addendum.jsonl are supporting structured evidence: when the current addendum explicitly supersedes the same canonical record ID, use the current amendment within the canonical layer, but never let structured retrieval override the Fact Master or create a fact. Never invent facts, dates, skills, publication status, ownership, or impact.
 
 Prioritize the JD as hard requirements, core responsibilities, strong preferences, and secondary keywords. After drafting, identify the three most likely recruiter rejection reasons, retrieve any overlooked supporting evidence from the attached fact and canonical files, and repair every evidence-supported weakness. Then run a ten-second recruiter scan of the Summary, Skills, section order, and first three core bullets. Those elements must communicate one coherent candidate positioning and make the strongest interview case immediately. Record unresolved gaps honestly in cv_review.md.
 
@@ -92,6 +92,7 @@ const bundleOrder = [
   "canonical_concept_index.jsonl",
   "canonical_relation_index.jsonl",
   "canonical_retrieval_index.jsonl",
+  "canonical_current_addendum.jsonl",
   "cv_base.tex",
   "job_record.yaml",
   "jd_snapshot.md",
@@ -109,6 +110,7 @@ const compactableCvFiles = new Set([
   "canonical_concept_index.jsonl",
   "canonical_relation_index.jsonl",
   "canonical_retrieval_index.jsonl",
+  "canonical_current_addendum.jsonl",
 ]);
 
 const contextStopWords = new Set([
