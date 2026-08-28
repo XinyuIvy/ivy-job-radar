@@ -32,11 +32,13 @@ test("static CV authorities precede job-specific files for cache reuse", () => {
   const ordered = orderedCvBundleFiles([
     { filename: "jd_snapshot.md", text: "jd" },
     { filename: "cv_base.tex", text: "template" },
+    { filename: "canonical_current_addendum.jsonl", text: "current amendment" },
     { filename: "fact_master_snapshot.md", text: "facts" },
     { filename: "job_record.yaml", text: "job" },
   ]);
   assert.deepEqual(ordered.map((file) => file.filename), [
     "fact_master_snapshot.md",
+    "canonical_current_addendum.jsonl",
     "cv_base.tex",
     "job_record.yaml",
     "jd_snapshot.md",
@@ -97,6 +99,7 @@ test("initial agent context keeps fixed authorities and selects JD-relevant evid
       "canonical_concept_index.jsonl",
       "canonical_relation_index.jsonl",
       "canonical_retrieval_index.jsonl",
+      "canonical_current_addendum.jsonl",
     ].map((filename) => ({
       filename,
       text: relevantIndex.repeat(100) + unrelatedIndex.repeat(8_000),
@@ -111,8 +114,11 @@ test("initial agent context keeps fixed authorities and selects JD-relevant evid
   assert.equal(byName.get("cv_base.tex"), "COMPLETE TEMPLATE");
   assert.match(byName.get("fact_master_snapshot.md"), /Agentic analytics/);
   assert.match(byName.get("canonical_fact_index.jsonl"), /agentic machine learning analytics/);
+  assert.match(byName.get("canonical_current_addendum.jsonl"), /agentic machine learning analytics/);
   assert.match(byName.get("agent_context_manifest.md"), /private archive retains every complete frozen source file/i);
+  assert.match(byName.get("agent_context_manifest.md"), /canonical_current_addendum\.jsonl/);
   assert.ok(byName.get("fact_master_snapshot.md").length < files[4].text.length);
+  assert.ok(byName.get("canonical_current_addendum.jsonl").length < files.at(-1).text.length);
 
   const fallback = compactCvBundleFilesForAgent(files, MAX_CV_FALLBACK_INPUT_CHARS);
   const fallbackChars = fallback.reduce((total, file) => total + file.text.length, 0);
