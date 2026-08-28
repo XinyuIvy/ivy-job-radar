@@ -1,6 +1,219 @@
 # Job Application / CV Knowledge Base 项目交接
 
-最后更新：2026-08-26（America/New_York）
+最后更新：2026-08-28（America/New_York）
+
+## 2026-08-28 最高优先级交接：手动测试新版 CV Prompt，事实快照自动刷新尚未实现
+
+> 本节覆盖下方所有仍把完整 JD 泛化为“最高事实权威”、把 canonical indexes 当作主要生成输入、强制每个项目完全不可跨页、固定每个项目两条 bullet，或默认旧 APP 会随 `XinyuIvy/CV` 自动更新的旧说明。当前顺序是：先完成一份手动 Prompt 测试，用户确认质量后再修改网站 Prompt 和事实快照刷新机制。自动 CV 定制仍保持全局暂停，不得提前恢复或批量重生成。
+
+### 1. 本轮已经确认的权威边界
+
+- `fact_master_snapshot.md` 不是另一套简化的 Fact Master。它是 `XinyuIvy/CV@<application_record.source_versions.cv_commit>:master/FACT_MASTER.md` 在建立申请包时复制出的完整冻结副本。在某个 APP 的生成任务中，它就是该版本的完整事实模板。
+- 对“候选人做过什么、本人贡献、方法、工具、数据、结果、数字、年月、作者身份和论文状态”等所有候选人事实，完整事实模板是第一最高权威。每条 Summary、Skill 和 bullet 都必须能回到完整事实模板定位依据。
+- `jd_snapshot.md` 只对“雇主需要什么、硬性资格、核心职责、强优先能力、预期交付和岗位关键词”具有最高权威。JD 不能证明候选人做过任何事情，也不能覆盖事实模板。
+- `cv_base.tex` 和 `cv_display_rules_snapshot.yaml` 负责同语种固定教育背景、联系方式、已确认展示措辞、章节外层顺序和版式。它们不能新增事实。
+- `jd_requirements.json`、`match_packet.json`、canonical project/fact/capability/concept/relation/retrieval indexes 及旧 Direct/Transferable/Adjacent/Unsupported 标签都是二级辅助材料，只用于召回、证据定位和边界核验。任何召回内容必须回到完整事实模板确认。
+- 以后 Prompt 不再写一个含糊的总排序“完整 JD 是第一权威”。必须分别写清：候选人事实以完整事实模板为最高权威，岗位需求以完整冻结 JD 为最高权威，展示规则以同语种 Reference CV 为权威。
+
+### 2. 最新手动测试 Prompt 已经解决的内容
+
+- 开头明确角色为熟悉目标 JD 所属行业、岗位职能和招聘标准的资深招聘评估者与简历编辑。
+- 强制完整读取 `fact_master_snapshot.md` 和 `jd_snapshot.md` 到 EOF，不允许只读结构化摘要或检索命中片段。
+- 先从完整 JD 提炼不超过八项招聘信号，再直接与完整事实模板独立比较，重新判断 Direct、Transferable、Adjacent 和 Unsupported；canonical indexes 只在第二轮使用。
+- Summary、Skills、岗位相关 section 名称和第一页前三条核心 bullet 必须形成同一个候选人定位，并通过 10 秒招聘官扫描测试。
+- 外层顺序固定为“个人简介 -> 教育背景 -> 专业技能 -> 岗位相关主体 -> 论文/会议/荣誉”；专业技能不得移动到教育背景之前。
+- 正式工作或实习独立呈现。其他项目按当前 JD 的职责、方法或交付类型分组并命名，不再机械套用“研究项目 / 应用项目 / 算法研究”。统计或科学研究不得仅因使用编程而写成算法研究。
+- 每个项目只出现一次。核心项目可写 2 至 3 条 bullet，次要项目可写 1 至 2 条；每条必须增加新的招聘证据，不再固定所有项目恰好两条。
+- 项目 bullet 不写投稿、在审、返修、大修或接收状态，论文状态统一放到论文或学术成果 section。
+- 中文语义审校新增语境翻译规则。Pfizer 项目中的 effect retention/preservation 应写成“短期复合终点对长期治疗效应的保留程度”或等价自然中文，禁止“恢复分析”“效应恢复分析”“恢复治疗效应”等字面翻译。
+- 中文术语继续执行已确认边界，包括“脑区皮层厚度”“个体级 Bootstrap”“变量重要性（Model Reliance）”、FDR/FWER 规范全称和 SQL 只写 SQL；不得加入 TypeScript 或 React。
+- 页面长度只能通过高相关事实控制，所有同级 section、教育和项目间距必须统一。禁止拉大教育间距、局部 `\\vspace`、增大行距或添加空白凑两页。
+- 目标仍是正好两个物理页面，第二页实质正文超过可用正文高度的一半，并尽量接近但不挤满两页。第一页不得因分页控制留下明显大块空白。
+- 新分页优先级覆盖下方 v12 的绝对 `cvblock/minipage` 规则：section 标题与第一项同页，项目标题与第一条 bullet 同页，单条 bullet 不拆分；项目优先保持完整，但若整块不可拆分会造成上一页明显空白，允许在两条完整 bullet 之间分页。不得为整个多 bullet 项目机械套用不可拆分 `minipage` 或过大的 `Needspace`。
+- 使用 LuaLaTeX 编译两次，并用 `pdfinfo`、`pdftotext`、`pdffonts` 和逐页渲染验证页数、Unicode 映射、文本提取、页面密度、项目分页、异常断行、溢出和中文可见/可选/可复制。
+- 本轮人工测试不得写回 GitHub、不得修改申请状态、不得重启 PRECV、不得调用旧 CV 自动生成任务。第一版应直接返回临时 PDF 和 `cv_review.md`。
+
+### 3. 当前正在测试的状态
+
+- 用户已经在独立 Chat 中用 `APP-2026-OPP-0053` 启动最新版 Prompt 测试。测试结果尚未在本交接中确认，下一 Agent 不得把“已经启动”误报为“测试通过”。
+- 当前目标只验证四件事：岗位画像是否精确；内容是否真正来自完整事实模板；中文是否自然且没有错误直译；PDF 是否达到两页密度与正常分页要求。
+- 最新 Prompt 目前只存在于 Chat 测试中，尚未写入 `app/lib/application-archive.ts`、`app/lib/cv-prebuild-bundle.ts` 或现有 APP 的 `chat_prompt.txt`，也尚未同步到网站 Prompt 生成器。
+- 在用户明确确认这份测试通过前，不得重新打开 `CV_PREBUILD_AUTOMATION_PAUSED`，不得重生成待申请列表中的旧 CV，也不得把测试 Prompt 直接批量写入所有 APP。
+
+### 4. 已确认但尚未解决的事实快照刷新缺口
+
+- 正式 APP 创建时，`app/api/cv-tailor/archive/route.ts` 会从 `XinyuIvy/CV` 当前 `main` commit 同时复制完整事实模板、展示规则、六类 canonical indexes 和选定母版，并在 `application_record.yaml` 记录 `source_versions.cv_commit`。
+- `jd_snapshot.md`、岗位公司/名称/链接和 Application ID 应永久保持创建时版本，不能随招聘页面或事实库变化被覆盖。
+- 现有同语言、同母版 APP 再次打开时，当前代码只读取旧 `jd_snapshot.md` 并在 API 响应中动态返回当前 Prompt；它不会比较最新 CV commit，也不会刷新 `fact_master_snapshot.md`、展示规则、canonical indexes、`cv_base.tex` 或 `match_packet.json`，也不会把动态返回的新 Prompt持久化回 `chat_prompt.txt`。
+- 当前只有用户显式切换语言或母版，并且目录中尚无 finalized customized/submitted CV 时，archive route 才会整包 re-freeze。已经存在最终 CV 时会拒绝覆盖并要求明确 revision。
+- PRECV generation key 已包含 `cvCommit` 和 `factMasterSha`，所以新事实可以产生新的 PRECV generation；但正式 APP 不会因此自动导入最新事实。这两套刷新行为目前不一致。
+
+### 5. Prompt 测试通过后的待实现方案
+
+1. 在每次尚未定稿的 APP 开始手动定制或新生成 CV 前，比较 `application_record.source_versions.cv_commit` 与 `XinyuIvy/CV@main`。
+2. 如果 CV commit 未变化，复用现有事实快照，不产生多余写入或模型调用。
+3. 如果 CV commit 已变化且申请尚无 `cv_customized_<APP-ID>.tex/.pdf` 或 `cv_submitted_<APP-ID>.pdf`，只刷新事实相关输入：`fact_master_snapshot.md`、`cv_display_rules_snapshot.yaml`、全部 canonical indexes 和当前选定的 `cv_base.tex`；同时更新 `application_record.yaml` 的 CV commit、事实 SHA、刷新时间和来源版本。
+4. 完整 JD 和申请身份保持不变。刷新事实后重新计算会受事实变化影响的 `match_packet.json`，不得重新抓取或覆盖冻结 JD。
+5. 刷新动作必须是确定性的资料同步，不调用 OpenAI，不生成 PDF，也不修改申请状态。
+6. 如果已经存在最终或实际投递 CV，不得原地覆盖。应建立明确 revision，保留原事实快照、原 PDF、原 source commit 和实际投递历史。
+7. 修复同语言、同母版 existing APP 路径，使生成器在资料未过期时也能把最新已确认 Prompt 合同持久化到 `chat_prompt.txt`，而不是只在 HTTP 响应中临时返回。
+8. 增加回归测试：未定稿 APP 事实更新后刷新；JD 不变；无变化时幂等；finalized APP 拒绝覆盖；revision 保留历史；Prompt 文件与运行时返回一致；刷新过程零模型调用。
+9. 完成代码、测试和部署后，再对一个未定稿 APP 做真实刷新验证。只有用户确认 Prompt 测试和刷新结果都通过，才能讨论恢复自动 CV 生成。
+
+### 6. 下一位 Agent 的严格执行顺序
+
+1. 先读取用户对 `APP-2026-OPP-0053` 测试结果的反馈，不要重新生成第二份付费 CV。
+2. 根据测试中真实出现的问题修改唯一 Prompt 文本，并再次只测试一份。
+3. 用户确认 Prompt 后，把正式 APP Prompt 和 PRECV Prompt 合并为同一个共享合同，禁止继续维护两套逐渐分叉的长 Prompt。
+4. 再实现上述未定稿 APP 自动刷新事实快照机制；刷新本身不得调用模型。
+5. 最后再决定何时解除全局暂停。没有用户明确授权，不得恢复自动生成、自动重试或批量重做。
+
+## 2026-08-28 最高优先级交接：正式 APP 归档与 PRECV 生成记录分离
+
+- 用户确认页面需要显示的是 `APP-...` 正式申请文件夹编号，不是雇主 ATS 的 requisition/application ID。旧实现把两者混在 `applications.application_id`，导致多数已生成过 CV 的待申请岗位仍显示“未提供”。
+- 新数据模型新增 `applications.archive_id`。`application_id` 只保留公司职位编号，允许为空；`archive_id` 保存稳定的内部归档编号，必须用于 `applications/<year>/<APP-ID>/`、最终 CV 文件名和 autofill 读取。
+- schema v7 会把旧 `application_id` 中符合 `APP-...` 的值迁到 `archive_id` 并清空被误占用的公司职位编号字段。CV archive route 和 autofill routes 已改读独立 `archive_id`，不再把 APP ID 写回 jobs 的外部职位编号。
+- 当前生产待申请岗位均有 PRECV 生成记录，绝大多数有真实 PDF/TEX artifact key。资料没有丢失，但旧架构只建立了 `prebuilds/<year>/<PRECV-ID>/`，没有自动建立对应的正式 APP 文件夹。
+- `/api/application-archive/ensure` 不调用 OpenAI。它优先复用已经保存的 PRECV 完整 JD、事实母版、canonical indexes 和 `cv_base.tex`，建立正式 APP 文件夹，并写入 `prebuild_links.json` 关联历次 PRECV 与 R2 artifact key。不存在 PRECV 时才从冻结 CV repo 输入建立归档。
+- 进入待申请时必须先建立 APP 归档；打开现有待申请列表时会逐份、串行补齐缺失归档，避免 GitHub ref 冲突。列表直接显示 APP ID 和 CV 状态，右侧“已申请 / 移除”始终可见，不需要进入详情页。
+- 回收旧 PRECV 时不得把坏的历史 PDF 冒充 `cv_customized_<APP-ID>.pdf`。只记录 artifact link，保留原文件；用户确认新版 Prompt 和最终 CV 后再创建正式 customized/submitted 文件。
+
+## 2026-08-28 待申请岗位可直接移动状态
+
+- 待申请列表的每个岗位现在都有“已申请”和“移除”按钮，岗位详情页也提供“标记已申请”和“移出待申请”。
+- “已申请”会写入当天申请日期并进入“已提交申请”；“移除”会安全回到收藏，不删除岗位、申请历史或已生成的 CV 文件。
+- 两种操作都会取消该岗位尚未完成的 CV 队列状态，但不会取消或删除 `ready` 产物。
+- 服务端入口是 `/api/applications/pending-action`，只接受当前状态为“准备材料”的记录，重复提交按目标状态幂等处理。
+
+## 2026-08-28 最高优先级交接：待申请 CV 自动定制全局暂停
+
+- 用户确认待申请列表中的 CV 都已经生成过，但质量不合格。当前要求是保留岗位和现有 PDF，不再自动重生成、自动修复或自动重试，避免继续调用生成 API。
+- `CV_PREBUILD_AUTOMATION_PAUSED = true` 是当前最高优先级运行开关。前端打开待申请列表、进入待申请、确认自动申请批次、维护心跳、扩展心跳和任务轮询均不得启动新 CV。
+- `/api/cv-prebuild/queue`、`prepare`、`chat` 和 `regenerate-pending` 在暂停期间返回 `CV_AUTOMATION_PAUSED`。任务与维护接口会把仍处于 active/retry 状态的旧任务标记为 `cancelled`，但不删除 `ready` 稿件或其现有 artifacts。
+- 待申请页面只保留岗位、现有 CV 预览和下载。批量重生成按钮已移除，CV Chat 的新生成和修改输入已禁用。收藏仍可进入待申请，但不会创建 CV 任务。
+- 用户正在用独立 Chat 手动测试新版 Prompt。在用户确认测试通过前，不得将自动定制重新打开，也不得用任何维护或恢复逻辑绕过暂停开关。
+
+## 2026-08-28 最高优先级交接：CV v12 JD 职责分组、两页内容下限与真实排版验收
+
+> 本节覆盖下方 v9 仍把“最多两页”和十轮 review 当成模型自述的规则。生产成功标准从本版起以五件套内容和最终 TeX / PDF 结构验收为准，不能再凭 `cv_review.md` 写了“通过”就进入 `ready`。
+
+### 1. 用户确认的固定版式合同
+
+- 中文和英文都必须恰好两个物理页面，第二页真实正文必须越过可用正文区域的高度中线，整份 CV 实质超过一页半，并在不过度拥挤的前提下尽量接近完整两页。运行时要求第二页非空白文本量至少达到第一页的 55%；一页、三页、第二页未过半或两页严重失衡都不合格。不得用弱相关内容、重复 bullet、放大字号或大段空白凑页。
+- 外层顺序固定：中文为“个人简介 → 教育背景 → 专业技能 → 岗位相关主体章节 → 论文与荣誉”，英文为“Summary → Education → Professional Skills → role-specific experience/project sections → Publications and Honors”。前 3 个和最后 1 个章节是硬顺序。
+- 主体章节不得机械套用“行业经历 / 研究型项目 / 应用型项目”。每份 CV 必须先从当前完整 JD 提取 2 至 5 个高权重职责簇、能力主题和岗位原词，再用事实支持且自然的招聘语言命名、分组和排序。每项经历或项目只进入最能证明其岗位价值的一个章节；不得跨章节重复，也不得用 Unsupported 关键词改变项目真实性质。
+- 三个学位必须分别成块；学位、学校和日期在首行，论文题目另起一行。下一学位不得与上一条论文粘在同一行。
+- 每一条教育、行业经历、项目和论文必须独立包在 `cvblock` 中。`cvblock` 使用不可分页的 `minipage`，结束时固定保留 `0.45\baselineskip` 间距；标题、日期、正文和 bullet 不得拆到两页。所有章节通过 `cvsection` 加 `Needspace` 防止孤立标题。禁止用 `newpage`、`pagebreak` 或 `clearpage` 人工切页。
+- 保持冻结母版的单栏 ATS 结构；禁止图标、文本框、侧栏或改变阅读顺序的复杂表格。正文不得小于母版字号，母版无法判定时下限为 9.5pt；页边距、行距和项目间距不得低于母版。PDF 提取文本顺序必须与视觉阅读顺序一致。
+- 每次编译两遍后必须运行 `pdfinfo`、`pdftotext` 和 `pdftoppm`。两页分别渲染并检查教育粘连、项目间距、跨页条目、异常断行、溢出和页面密度；结果逐项写入十轮 `cv_review.md`。
+
+### 2. v12 运行时硬门禁
+
+- Prompt 版本为 `cv-prebuilder-v12-jd-aligned-sections`。JD 职责分组和固定排版合同独立于用户可编辑规则，fresh 生成和 Reference 改写都不能删除或缩短。
+- `cv-artifact-validation.ts` 在任何任务进入 `ready` 前下载并验证全部五件套：PDF、TEX、PDF 提取文本、十轮 review 和申请判断 JSON。缺少任一文件直接失败。
+- 验收器检查 PDF 头、恰好两个带换页符的文本页面、第二页至少达到第一页 55% 的文本内容下限、最低页面内容量、55% 密度平衡、固定章节顺序、三个教育块、至少三个项目或经历块、每个中间主体 section 至少一个 `cvblock`、块数量平衡、禁止手工分页、十轮 review 标记和 decision JSON 结构。
+- 未通过时记录 `CV_ARTIFACT_VALIDATION_FAILED`，不保存为可用成果、不建立 Reference、不进入浏览器填表；自动恢复链会重新生成，最多仍服从现有 7 次上限。
+
+### 3. 已有稿件与当前申请边界
+
+- 用户决定现有中文 CV 自行在 TeX 中手动调整。旧稿自动重排已关闭，避免额外模型费用；英文稿、中文旧稿和当前申请表均不会被维护心跳触发重新生成。
+- v12 的 JD 职责分组、两页内容下限、固定外层顺序、项目间距、教育分块、ATS 顺序和禁止条目跨页验收只约束以后新生成或用户明确要求重做的 CV。
+- 这次修复针对用户截图中的真实问题：专业技能跑在教育前、教育条目粘连、项目之间没有留白、项目标题或 bullet 跨页、第二页大面积空白。上述任一问题今后都不能显示“初稿可用”。
+- Teza Technologies 的岗位专属英文 PDF 已生成并在 Ashby 页面通过顶部 Autofill 上传，文件名为 `Teza_Quantitative_Researcher_Xinyu_Zhang.pdf`；用户随后切换到 CV 质量修复。Teza 页面尚未提交，邮箱和电话仍需在恢复表单任务后核对。其他五个真实申请表保持在最终 Submit 前。
+
+## 2026-08-27 最高优先级交接：Autofill 0.6.1、十岗确认批次、跨地点岗位去重与 CV 队列自愈
+
+> 本节是当前最高权威，覆盖下方仍写着 Autofill `0.5.0`、旧 CV Prompt、失败后回到“等待启动”、页面必须保持打开或旧批次交互的内容。下方历史章节只用于追溯，不得据此回退。
+
+### 1. 当前生产与代码锚点
+
+- 生产 Site：`https://ivy-job-radar.rourou1199.chatgpt.site`。多地点岗位去重修复已进入当前代码；生产版本号应以 Sites 部署记录为准。
+- GitHub `XinyuIvy/ivy-job-radar@main` 当前代码锚点为 `43de45f`（`Run CV recovery from extension heartbeat`）。
+- Chrome 扩展已经升级到 `0.6.1`，`browser-extension/manifest.json` 已核实为 `0.6.1`。用户 Mac 上原仓库因缺失 Git objects 无法正常 pull，已通过浅克隆干净副本并替换原目录完成修复；用户已经在 Chrome Reload 并确认 0.6.1 正常。旧目录备份仍保留为 `ivy-job-radar-backup-20260827`，暂时不要删除。
+- 用户固定扩展路径保持 `/Users/ivyzhang/Documents/Development_Projects/ivy-job-radar/browser-extension`。扩展最多同时处理两个获批申请页面，所有页面保留给用户检查，任何情况下都不点击最终 Submit。
+
+### 2. 十个岗位待确认批次
+
+- 自动筛选先给出最多 10 个 `awaiting_user_approval` 岗位；用户统一确认前不创建 CV、不填申请表。
+- 每张卡片已有红色描边按钮“永久排除并补一个”。点击后卡片应立即消失，后面的岗位即时上移；服务端把岗位写入永久排除记录，并把下一个满足同样硬门槛的岗位补到最后一位。补不到合格岗位时显示实际数量，不降低标准凑数。
+- 用户可以连续排除不想要的岗位；只有最终保留的整批岗位才统一确认并生成 CV。
+- JD 展示与 CV 输入都必须经过 `extractCoreJobDescription`：解码重复 HTML entities、删除 HTML 标签并整理空白，禁止把 `&lt;h3&gt;`、`&quot;`、`&#39;`、`&nbsp;` 等乱码送入页面或 CV Prompt。
+- 已收藏、待申请、已申请或历史申请过的同公司同岗位不得重新进入批次。当前保护同时使用精确岗位身份和 `sameCompanyRole`，CV prepare 前还会再次阻止重复申请历史。
+
+### 3. Twitch 多地点重复岗位：已核验为同一岗位，只申请一次
+
+- 2026-08-27 核对 Twitch 官方 Greenhouse 后确认，下面三个页面虽然 URL 和页面顶部地点不同，但属于同一个内部职位：
+  - San Francisco：`https://job-boards.greenhouse.io/twitch/jobs/8623477002`
+  - New York City：`https://job-boards.greenhouse.io/twitch/jobs/8625665002`
+  - Seattle：`https://job-boards.greenhouse.io/twitch/jobs/8625664002`
+- 三个页面的雇主内部 Job ID 都是 `TW9226`，均为 Monetization 团队的 Data Scientist；About the Role、职责、资格、Bonus、三地薪资和申请问题完全一致。正文明确写着可在 San Francisco、New York 或 Seattle 工作。
+- 结论：只能保留一个候选卡片并提交一份申请；地点在同一申请表内选择，不得为三个 Greenhouse posting ID 分别生成三份 CV 或重复申请。
+- 原因已确认：旧 `extractStableJobId` 只读取 Greenhouse URL path，因此把 `8623477002`、`8625665002`、`8625664002` 当成三个不同岗位。
+- 修复已实现：`extractEmployerJobId` 会从解码后的完整 JD 读取雇主内部 Job ID / Requisition ID，并在 URL posting ID 之前作为强身份。本例三页都解析为 `employer:tw9226`。解析使用完整规范化 JD，不会因为 `Equal Opportunity` 尾部裁剪而漏掉紧随其后的 Job ID。
+- `sameLogicalJob` 现在会在同公司内部编号相同时合并不同 URL 和不同地点；内部编号不同则保持为不同岗位。内部编号缺失时，只有“公司 + 标准化标题一致、清洗后完整 JD 精确一致、正文明确为多地点”三项同时成立才合并，避免仅凭相同通用标题误杀不同 requisition。
+- 自动批次 `POST /api/application-automation` 会先按上述逻辑对候选池去重，再保留最多 10 个；旧批次中的重复 task 会取消并由下一个合格岗位补位。`approve_batch` 另有第二道批内去重门禁，即使旧数据绕过候选去重，也只能创建一份 application/CV。
+- 回归测试覆盖 Twitch 三个 Greenhouse 页面、不同内部 Job ID 不合并、缺失内部 ID 的保守多地点 fallback，以及候选批次与确认批次双重门禁。
+
+### 4. 新版 CV Prompt 与全部待申请 CV 重生成
+
+- `2f32e04` 已把 CV 规则拆为共同招聘规则、中文专属规则和英文专属规则。生成中文时只注入中文写作合同；生成英文时只注入英文写作合同，禁止两套语言规则互相污染。
+- 新 Prompt 增加：硬门槛/核心职责/强优先项/普通关键词分级；行业资深 HR 差距审查；二次调用事实母版与 canonical indexes；模拟三个最可能拒绝理由；Summary、Skills、前三条核心 bullet 的 10 秒扫描；资格、证据、岗位定位、语言、PDF 五项门禁；PDF 有合理空余时补最相关且状态准确的论文；严格禁止编造经历、数字、影响、生产部署或论文状态。
+- `852ce58` / `d0948b6` 已加入“重新生成全部待申请 CV”能力。只处理状态为“准备材料”的现有申请，沿用每份原语言和原模板，旧自动初稿重新入队；不得触碰已定稿或已投递版本。
+- 本轮最初有 9 份待申请 CV；Ōura Research Scientist 因已有申请历史应被移出，所以真实待继续生成的数量为 8。运行时数量是易变状态，下一 Chat 必须读取真实 D1 记录与 R2 artifact 后再报告，不得照抄旧数量。
+
+### 5. CV 失败状态机与真实后台边界
+
+- 原 Bug：`failed_retryable` 被普通 queue 接口无条件改回 `queued`，导致页面把失败伪装成“等待启动”；同时每 5 秒对每份 CV 分别诊断，制造重复请求和 TPM 限流。该问题已由 `294c4b6` 修复。
+- 当前合法语义：失败必须保留错误码、失败阶段、attempts 和更新时间；只有任务被真正 claim 并开始恢复时才改变运行状态。达到 7 次自动尝试后进入 `failed_terminal`，显示“失败，需处理”，不得再回到“等待启动”。
+- 恢复为严格串行：只在没有 `preparing_bundle` / `agent_queued` / `agent_running` 活跃任务时领取最早的一份；限流至少退避 60 秒，服务器拥堵至少 30 秒，其余指数退避；第 6 次以后切回高容量恢复配置。90 秒未完成的 fallback claim 会释放；OpenAI response 超过 2 小时会按僵死任务诊断。
+- `43de45f` 已把 `recoverTransientCvJobs` 接到扩展的自动投递 heartbeat。0.6.1 扩展每 5 分钟调用一次队列接口，因此 Job Radar 网页关闭后仍可推进，但前提是用户的 Chrome 正在运行且扩展没有被停用。
+- 重要纠正：仓库中已验证的持续推进机制是 Chrome 扩展的 5 分钟 heartbeat；本次未发现独立于 Chrome 的服务端小时级 cron/监控实现。后续不得再笼统承诺“我会一直监控”或“独立每小时巡检”，除非先核实对应 automation/cron 真实存在并能读取生产任务状态。
+- 最近一次对话内观察曾显示 Deloitte CV 已生成，Precision AQ 因 TPM 限流进入第 3 次恢复，其余顺序排队；这不是最终完成证明。成功标准必须是每个目标 application 的 `cv_prebuild_jobs.status = ready`，并且对应 PDF、TEX、文本与 review artifact 在 R2 中真实存在、可读取。只看到 `agent_running` 或状态变化不算成功。
+
+### 6. 下一位 Agent 的执行顺序
+
+1. 先查询生产 D1 与 R2，逐份列出当前 8 份目标 CV 的 application/job、状态、attempts、最后错误、response age 和 PDF/TEX artifact 是否真实存在；不要先看汇总数字。
+2. 对仍失败的任务按具体错误修复，确认一份 artifact 完整后再推进下一份；不得用 `failed -> queued` 隐藏错误。
+3. Twitch `TW9226` 跨地点聚合与 approve 前二次去重已完成；后续不得回退到仅按 Greenhouse URL posting ID 去重。
+4. 只有全部目标 CV 的 PDF/TEX 均真实可用，或出现必须由用户处理的权限/配置/事实缺失，才能向用户报告最终状态。仍然禁止自动点击 Submit。
+
+### 7. 2026-08-27 十份新批次 CV 同时失败：共同根因与修复
+
+- 生产 D1 核验显示，新确认批次的 application rows `60–69` 对应 10 份 CV。9 份停在 `failed_retryable / CV_FALLBACK_START_FAILED`，1 份曾进入 `agent_running`；同一时刻生产日志记录 10 个 `POST /api/cv-prebuild/prepare` 全部返回 500。它们没有进入 PDF 编译或文件保存阶段。
+- 共同根因不是 10 个岗位各自内容有问题，而是 `approveApplicationAutomationBatch` 使用 `Promise.allSettled` 同时启动整批。10 个请求并发向 `XinyuIvy/job-application-archive` 的 `main` 写入 PRECV bundle，GitHub 对陈旧 parent 的非快进 ref 更新产生冲突；未成功写入 bundle 的任务随后被 fallback 恢复器读取，因归档文件不存在再次失败，最终只留下笼统的 `CV_FALLBACK_START_FAILED`。
+- 修复后的整批流程只启动第一份 CV，其余保持 `queued` 并严格串行。网页的 10 秒 CV task 轮询和扩展的 5 分钟 heartbeat 都会在没有真实活跃任务时领取下一份；`failed_retryable` 不再被误算成运行锁。
+- 私有归档写入改为 optimistic retry：blob 只创建一次，ref 更新遇到 GitHub 409/422 时重新读取最新 `main`、基于最新 tree 重建 commit，指数退避并最多尝试 8 次。并发请求即使发生，也不应再让整批材料包丢失。
+- `/api/cv-prebuild/prepare` 增加并发幂等门禁：同一 generation 已在 `preparing_bundle` / `agent_queued` / `agent_running` / `ready` 时直接复用，不得再启动第二个 Responses run；启动失败会保留 OpenAI 或 GitHub 冲突阶段，而不是统一覆盖成一个无信息错误。
+- “按最新 Prompt 重新生成全部 CV”现在会重新排队失败任务；仍在生成或已经 ready 的同 Prompt 任务不会被覆盖。部署后必须先调用该动作修复本批遗留的缺失 bundle，再确认系统只启动一份并逐份推进。
+- 回归门禁新增：整批前端不得再出现 `Promise.allSettled(queuedJobIds.map(...prepare...))`；task polling 必须调用 `getNextPendingCvStart`；归档 ref 冲突必须有重试。当前本地验收：75 个 Node 测试、265 个 Python 测试、ESLint 和 production build 全部通过。
+
+### 8. 2026-08-27 重复与相似岗位 CV 复用
+
+- CV prepare 现在先查询同语言、同 track、同模板且已有完整五件套 artifact 的历史成功版本，再决定是直接复用、以旧稿为底稿修改，还是完整新生成。不得跨语言、跨模板或跨岗位方向硬套。
+- 精确复用只允许在标准化公司名和岗位名相同，并且 JD SHA、事实母版 SHA、Prompt version 全部相同时发生。系统会再次核实 TEX、PDF、纯文本、review 和 application decision 五个 R2 对象都真实存在；任一缺失就不能把任务标成成功。满足条件时五件套直接复用，不启动新的模型生成，也不产生模型 token。
+- 精确复用会为新岗位建立独立 conversation，避免后续 CV Chat 修改串到旧岗位；artifact 可以安全引用历史不可变对象。新任务仍有自己的 generation、状态和审计记录。
+- 非精确但岗位标题高度相似时，系统只把上一份 TEX 和 review 当作 revision seed。当前 JD 与冻结事实仍是最高权威，模型必须逐段重新判断、删除无关内容、重写岗位定位与首批核心 bullets，并重新生成 review、application decision、TEX、PDF 和纯文本，不能只替换公司或岗位名。
+- 相似底稿不按“最近完成”选择。候选先限制为同语言、同 track、同模板，再按标题岗位族 `55%`、清洗后完整 JD 的职责/技能词集合 `30%`、职级兼容 `10%`、事实母版与 Prompt 兼容 `5%` 计算总分。标题相似至少 `0.60`、职级相似至少 `0.25`、JD 相似至少 `0.18`（标题几乎一致时可豁免）且总分至少 `0.60` 才能作为 seed。
+- 排序严格以总分、标题、JD、职级为先；同公司只在完全同分时破同分，完成时间不参与选择。仍完全同分时用稳定的历史 row ID，确保相同输入始终指向同一份底稿，而不是每次因“最近一份”变化。
+- Reference library 按语言、track、模板和岗位族分别维护 6 个稳定槽位：产品/实验 Data Science、ML/Research Scientist、Pharma/Biostatistics、Clinical/Neuro research、Quant research、Consulting/Analytics。纯软件工程本来就不属于自动申请目标，不为它建立 Reference；一般 Analytics 归入产品/实验 Data Science。
+- 每个槽位第一份五件套完整的高匹配历史 CV 会被晋升为 Reference；如果没有合格历史 CV，则该岗位完整生成成功后晋升。槽位一旦建立，后续同族岗位只从该稳定 Reference 起稿，不因新增一份更近的历史 CV 自动漂移。Reference 只负责结构和已核验表达，当前 JD 与事实母版仍是最终权威。
+- 现有完整 CV 会自动初始化空的 Reference 槽位：优先 ready、当前待申请、生成尝试较少且输出完整的稿件，再以稳定行号打破并列。网页轮询、扩展自动化心跳和维护心跳均执行同一幂等初始化。
+- CV 语言严格以完整 JD 为主：中文 JD 用中文母版，英文 JD 用英文母版。region 完全不参与语言判断；岗位标题只在 JD 缺失或过短时备用，自动化默认语言只在正文和标题均无法判断时回退，用户明确手选语言仍可覆盖。心跳会自动取消语言错误的 Reference，将仍在待申请的错误稿标为 stale，并用正确语言重新排队。
+- Reference 只提供起稿结构。Seeded revision 必须读取 `prebuild_prompt.txt`，按顺序执行其中每一轮检查，并在 `cv_review.md` 逐轮记录发现与修改或无需修改的决定；缺少任一轮或任一五件套产物都视为未完成。只有完全相同 JD、事实版本和 Prompt 版本的 exact duplicate 可直接复用已核验五件套。
+- 本批遗留的裸 `CV_FALLBACK_START_FAILED` 且没有 OpenAI response ID，代表 PRECV bundle 从未成功保存。它现在不再重复走必然失败的 fallback 读取，而是由串行队列重新调用 `/api/cv-prebuild/prepare`，先补齐 bundle，再进入上述复用或生成判断。
+- 批量重建可能遗留一个无 generation key 的 queued 占位行。如果同一 job 已有当前 Prompt 且五件套完整的 `ready` generation，串行领取器必须跳过该占位行，防止已成功岗位被反复挑中并挡住后面的任务。
+- Prepare 幂等门禁只能短路 `preparing_bundle`、`agent_queued`、`agent_running` 和 `ready`。失败 generation 即使保留旧 response ID，也必须允许显式重建；不得仅凭 response ID 存在就把失败任务误判为仍在运行。
+- 当前本地验收：85 个 Node 测试、265 个 Python 测试、ESLint 与 production build 全部通过。回归覆盖精确复用、相似岗位 seed、不同岗位 fresh、稳定岗位族 Reference、旧 artifact 缺失安全回退、缺失 bundle 重新进入 prepare、成功任务遗留占位行不阻塞队列，以及失败 generation 可重新启动。
+
+### 9. 2026-08-27 十岗批次只有一次确认，CV 完成后直接自动填表
+
+- 用户确认的权威流程是：先逐个筛选并整批确认最多 10 个岗位；随后生成全部 CV；CV 五件套完成后直接进入 Chrome 扩展自动填表；扩展填完并上传对应 PDF 后把页面保留在最终 Submit 前，由用户浏览并手动提交。整批确认是唯一的申请授权，CV 完成后不得再增加 AI 审核或第二次确认。
+- 旧错误把 `application_decision.json` 当成第二道申请门禁。它会把 CV 已完成的任务转成 `ai_review_required / needs_review` 或 `ai_hard_filter / screened_out`，并把后者的 application 从“准备材料”退回“收藏”。因此生产 application rows `60–69` 的 10 份英文 CV 虽然五件套全部完成，页面却只显示 4 至 5 条待处理记录。
+- 修复后，结构化 decision 只作为审计信息保存，不能改变用户已经确认的批次授权。任何已确认任务只要 ready 且 TEX、PDF、正文、review、decision 五项完整，就直接进入 `ready_for_browser / cv_ready_for_autofill`；既有 `ai_decision_missing`、`ai_decision_approved`、`ai_review_required`、`ai_hard_filter` 记录会自动恢复，application 回到“准备材料”，不会重新生成已完成的英文 CV。
+- `needs_review` 只允许表示浏览器已经真实填写表单并停在最终提交前，界面文案改为“表单已填，待你提交”。它不得再表示 CV 的 AI decision 需要第二次批准。
+- 已有当前 Prompt 完整 ready generation 时，遗留的无 generation key queued 占位行会标为 stale，并记录 `SUPERSEDED_BY_READY_CV`，防止成功岗位继续显示“待生成”或被重复生成。
+- 硬筛、重复申请检查和批内去重必须在待确认批次生成及用户确认动作中完成。用户确认后不再重新运行候选硬筛，也不得因 CV 内容保守或事实不足擅自把岗位退回收藏。最终 Submit 始终由用户手动完成。
+- 已确认任务提供“取消并不再推荐”。取消后 automation task 进入 `cancelled / user_cancelled_after_approval`，application 进入“撤回”，岗位写入永久排除并从保存队列移出；既有 CV 五件套保留用于审计，不删除、不重生成。该动作适用于用户确认后才发现地点或岗位不合适的情况。
 
 ## 最高优先级交接：Autofill 0.5.0 受控自动投递已接入，CV Prebuilder 输出结构化申请决策
 
