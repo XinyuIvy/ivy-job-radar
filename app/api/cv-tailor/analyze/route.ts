@@ -406,7 +406,12 @@ export async function POST(request: NextRequest) {
       ...parseJsonl<FactIndexRecord>(factIndexJsonl),
       ...parseJsonl<FactIndexRecord>(statusAddendumJsonl),
     ];
-    const factIndex = unifiedFactIndex.filter((fact) => !fact.record_type || fact.record_type === "project_fact");
+    // Later addendum records intentionally override stale base facts with the same fact_id.
+    const factById = new Map<string, FactIndexRecord>();
+    for (const fact of unifiedFactIndex) {
+      if ((!fact.record_type || fact.record_type === "project_fact") && fact.fact_id) factById.set(fact.fact_id, fact);
+    }
+    const factIndex = [...factById.values()];
     const structuredIndex = [
       ...parseJsonl<StructuredFactRecord>(credentialIndexJsonl),
       ...parseJsonl<StructuredFactRecord>(courseworkIndexJsonl),
