@@ -37,7 +37,9 @@ function currentProjectMetadata(record: JsonRecord) {
   ] as const;
   const result: JsonRecord = {};
   for (const field of fields) {
-    if (nonEmpty(record[field]) || field === "city" || field === "country") result[field] = record[field];
+    const explicitEmptyLocation = (field === "city" || field === "country")
+      && Object.prototype.hasOwnProperty.call(record, field);
+    if (nonEmpty(record[field]) || explicitEmptyLocation) result[field] = record[field];
   }
   return result;
 }
