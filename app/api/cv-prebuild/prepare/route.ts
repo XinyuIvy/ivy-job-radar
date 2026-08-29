@@ -12,6 +12,7 @@ import {
   type CvPrebuildJobInput,
   type CvPrebuildSourceFile,
 } from "../../../lib/cv-prebuild-bundle";
+import { buildEffectiveCanonicalProjectIndex } from "../../../lib/effective-canonical-project";
 import {
   beginCvPrebuildGeneration,
   completeCvPrebuildBundle,
@@ -182,13 +183,34 @@ export async function POST(request: NextRequest) {
     };
     const selection = recommendCvPrebuildTemplate(jobInput, selectedTrack, selectedLanguage);
     const sourcePairs = [...canonicalSnapshotFiles, [selection.templatePath, "cv_base.tex"] as const];
-    const frozenSources = await Promise.all(sourcePairs.map(async ([sourcePath, archiveName]) => ({
-      archiveName,
-      file: await readPrivateRepositoryTextFile(cvApiRoot, sourcePath, cvCommit, cvToken),
-    })));
+    const [frozenSources, currentProjectMetadata] = await Promise.all([
+      Promise.all(sourcePairs.map(async ([sourcePath, archiveName]) => ({
+        archiveName,
+        file: await readPrivateRepositoryTextFile(cvApiRoot, sourcePath, cvCommit, cvToken),
+      }))),
+      readPrivateRepositoryTextFile(
+        cvApiRoot,
+        "master/project-evidence/PROJECT_INDEX.jsonl",
+        cvCommit,
+        cvToken,
+      ),
+    ]);
     const sources = Object.fromEntries(
       frozenSources.map((item) => [item.archiveName, item.file]),
     ) as Record<string, CvPrebuildSourceFile>;
+    const baselineProject = sources["canonical_project_index.jsonl"];
+    const currentAddendum = sources["canonical_current_addendum.jsonl"];
+    if (!baselineProject?.text || !currentAddendum?.text || !currentProjectMetadata.text) {
+      throw new Error("The current project snapshot inputs are incomplete.");
+    }
+    sources["canonical_project_index.jsonl"] = {
+      text: buildEffectiveCanonicalProjectIndex({
+        baselineText: baselineProject.text,
+        currentAddendumText: currentAddendum.text,
+        currentProjectMetadataText: currentProjectMetadata.text,
+      }),
+      sha: `${baselineProject.sha}:${currentAddendum.sha}:${currentProjectMetadata.sha}`,
+    };
     const factMasterSha = sources["fact_master_snapshot.md"]?.sha;
     if (!factMasterSha) throw new Error("The frozen fact master SHA is unavailable.");
 
