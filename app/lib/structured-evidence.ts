@@ -83,7 +83,7 @@ function credentialCandidates(requirement: JdRequirement, records: StructuredFac
   const fieldRequirement = /statistics|biostatistics|统计|定量|quantitative|stem|理工|computer science|计算机|artificial intelligence|\bai\b|人工智能|information science|信息科学|mathematics|数学|automation|自动化/i.test(text);
   if (requirement.category !== "Education" && !levels.size && !fieldRequirement) return [];
   const explicitCompletion = /completed|conferred|degree awarded|must have (?:a |an )?(?:ph\.?d|doctorate)|已取得|已获得|须持有/i.test(text);
-  return records.filter((record) => record.record_type === "education_credential" && (!fieldRequirement || acceptedCredentialField(text, record)))
+  return records.filter((record) => record.record_type === "education_credential" && record.cv_eligible && (!fieldRequirement || acceptedCredentialField(text, record)))
     .filter((record) => !levels.size || levels.has(record.degree_level ?? ""))
     .map((record): StructuredCandidate => {
       const statusGap = explicitCompletion && /candidate|progress/i.test(record.degree_status ?? "");
@@ -102,13 +102,15 @@ function credentialCandidates(requirement: JdRequirement, records: StructuredFac
 function courseworkCandidates(requirement: JdRequirement, records: StructuredFactRecord[]) {
   if (["Education", "Professional Service", "Teaching", "Awards"].includes(requirement.category)) return [];
   const query = requirementTerms(requirement).join(" ");
-  return records.filter((record) => record.record_type === "coursework").map((record) => {
-    const concepts = [...(record.normalized_concepts ?? []), record.course ?? ""].join(" ").replace(/_/g, " ");
-    const exact = requirementTerms(requirement).some((term) => containsPhrase(concepts, term) || containsPhrase(term, concepts));
-    const similarity = tokenSimilarity(query, concepts);
-    if (!exact && similarity < 0.45) return null;
-    return { record, classification: "Coursework Match" as const, score: Math.round((exact ? 72 : 48 + 24 * similarity) * 10) / 10, why: "A transcript-supported course covers the named topic.", limitation: "Coursework shows academic exposure; it does not by itself establish professional implementation experience." };
-  }).filter((candidate): candidate is StructuredCandidate => Boolean(candidate));
+  return records
+    .filter((record) => record.record_type === "coursework" && record.cv_eligible && record.course_status !== "audited")
+    .map((record) => {
+      const concepts = [...(record.normalized_concepts ?? []), record.course ?? ""].join(" ").replace(/_/g, " ");
+      const exact = requirementTerms(requirement).some((term) => containsPhrase(concepts, term) || containsPhrase(term, concepts));
+      const similarity = tokenSimilarity(query, concepts);
+      if (!exact && similarity < 0.45) return null;
+      return { record, classification: "Coursework Match" as const, score: Math.round((exact ? 72 : 48 + 24 * similarity) * 10) / 10, why: "A transcript-supported completed course covers the named topic.", limitation: "Coursework shows academic exposure; it does not by itself establish professional implementation experience." };
+    }).filter((candidate): candidate is StructuredCandidate => Boolean(candidate));
 }
 
 function peerReviewedPublicationRequirement(requirement: JdRequirement) {
@@ -116,7 +118,7 @@ function peerReviewedPublicationRequirement(requirement: JdRequirement) {
 }
 
 function publicationCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
-  if (record.record_type !== "publication") return null;
+  if (!record.cv_eligible || record.record_type !== "publication") return null;
   if (!["Communication", "Leadership", "Research"].includes(requirement.category)) return null;
   if (peerReviewedPublicationRequirement(requirement)) {
     if (record.publication_status !== "published") return null;
@@ -137,7 +139,7 @@ function publicationCandidate(requirement: JdRequirement, record: StructuredFact
 }
 
 function conferenceCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
-  if (record.record_type !== "conference_participation") return null;
+  if (!record.cv_eligible || record.record_type !== "conference_participation") return null;
   const requirementText = [requirement.label, requirement.sourceText, ...requirement.literalTerms].join(" ");
   if (/presentation|oral|poster|invited talk|speaker|报告|口头|海报|特邀|chair|organizer|主持|组织/i.test(requirementText)) return null;
   if (!/conference|meeting|scientific community|professional engagement|学术会议|会议参与|参会|科研交流/i.test(requirementText)) return null;
@@ -154,6 +156,7 @@ function conferenceCandidate(requirement: JdRequirement, record: StructuredFactR
 }
 
 function profileCandidate(requirement: JdRequirement, record: StructuredFactRecord): StructuredCandidate | null {
+  if (!record.cv_eligible) return null;
   if (record.record_type === "publication") return publicationCandidate(requirement, record);
   if (record.record_type === "conference_participation") return conferenceCandidate(requirement, record);
   if (!["skill", "professional_service", "teaching", "award", "research_literature"].includes(record.record_type)) return null;
