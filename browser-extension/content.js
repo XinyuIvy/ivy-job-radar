@@ -1,5 +1,5 @@
 (() => {
-  const CONTENT_SCRIPT_VERSION = "0.6.6";
+  const CONTENT_SCRIPT_VERSION = "0.6.7";
   if (window.__ivyJobAutofillLoaded === CONTENT_SCRIPT_VERSION) return;
   window.__ivyJobAutofillLoaded = CONTENT_SCRIPT_VERSION;
 
@@ -1238,21 +1238,23 @@
 
   async function setCombobox(el, value, aliases = []) {
     if (!value || el.disabled) return false;
-    el.click();
     const editableInput = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
-    if (editableInput && !el.readOnly) setText(el, value);
-    await new Promise((resolve) => setTimeout(resolve, 90));
     const candidates = candidateValues(value, aliases);
     const wanted = candidates.map(normalize);
-    const options = Array.from(document.querySelectorAll('[role="option"], [data-automation-id="promptOption"], .select__option'))
-      .filter(visible);
-    let match = options.find((option) => wanted.includes(normalize(option.textContent)));
-    if (!match) match = options.find((option) => candidates.some((candidate) => monthEquivalent(option.textContent, candidate)));
-    if (!match) match = options.find((option) => wanted.some((candidate) => normalize(option.textContent).includes(candidate) || candidate.includes(normalize(option.textContent))));
-    if (match) {
-      match.click();
-      dispatch(el);
-      return true;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      el.click();
+      if (editableInput && !el.readOnly && attempt === 0) setText(el, value);
+      await new Promise((resolve) => setTimeout(resolve, 100 + attempt * 80));
+      const options = Array.from(document.querySelectorAll('[role="option"], [data-automation-id="promptOption"], .select__option'))
+        .filter(visible);
+      let match = options.find((option) => wanted.includes(normalize(option.textContent)));
+      if (!match) match = options.find((option) => candidates.some((candidate) => monthEquivalent(option.textContent, candidate)));
+      if (!match) match = options.find((option) => wanted.some((candidate) => normalize(option.textContent).includes(candidate) || candidate.includes(normalize(option.textContent))));
+      if (match) {
+        match.click();
+        dispatch(el);
+        return true;
+      }
     }
     return Boolean(editableInput && !el.readOnly && el.value);
   }
@@ -1453,9 +1455,9 @@
   function educationDegreeAliases(entry) {
     const source = [entry?.degree_type, entry?.degree, entry?.degree_en].map((value) => String(value || "").trim()).filter(Boolean);
     const text = normalize(source.join(" "));
-    if (/博士|doctor|ph d/.test(text)) source.push("博士", "博士研究生", "PhD", "Doctoral degree");
-    else if (/硕士|master|m s/.test(text)) source.push("硕士", "硕士研究生", "MS", "Master's degree");
-    else if (/学士|本科|bachelor|b s/.test(text)) source.push("本科", "学士", "BS", "Bachelor's degree");
+    if (/博士|doctor|ph d/.test(text)) source.push("博士", "博士研究生", "PhD", "Doctorate", "Doctoral degree", "Doctor of Philosophy");
+    else if (/硕士|master|m s/.test(text)) source.push("硕士", "硕士研究生", "MS", "Master", "Master's degree");
+    else if (/学士|本科|bachelor|b s/.test(text)) source.push("本科", "学士", "BS", "Bachelor", "Bachelor's degree");
     return [...new Set(source)];
   }
 
@@ -1486,10 +1488,10 @@
     return inferred?.startsWith("education.") ? inferred : "";
   }
 
-  function educationRecordValue(entry, key) {
+  function educationRecordValue(entry, key, profileLanguage = "") {
     const startDate = normalizedYearMonth(entry?.start_year, entry?.start_month);
     const endDate = normalizedYearMonth(entry?.end_year, entry?.end_month);
-    const chinese = pageUsesChinese();
+    const chinese = profileLanguage === "zh" || (!profileLanguage && pageUsesChinese());
     const degreeAliases = educationDegreeAliases(entry);
     const degreeValue = localizedProfileText(entry?.degree_type || entry?.degree || entry?.degree_en, chinese);
     const schoolValue = chinese
@@ -1517,7 +1519,7 @@
     return { value: String(values[key] || "").trim(), aliases: aliases.filter(Boolean).map(String) };
   }
 
-  async function fillEducationRecords(generalProfile) {
+  async function fillEducationRecords(generalProfile, profileLanguage = "") {
     if (!globalProfileIsAuthoritative(generalProfile)) return { filled: 0, fields: [] };
     const entries = orderedEducationEntries(generalProfile.education);
     const anchors = sectionIdentityControls("education");
@@ -1529,14 +1531,20 @@
       for (const el of visibleControls(block)) {
         const key = educationControlKey(el, block);
         if (!key) continue;
-        const { value, aliases } = educationRecordValue(entries[index], key);
-        if (await fillMappedControl(el, key, value, aliases)) {
+        const { value, aliases } = educationRecordValue(entries[index], key, profileLanguage);
+        const current = String(el.value || el.getAttribute?.("data-value") || el.textContent || "").trim();
+        const replaceKnownTranslation = current && normalize(current) !== normalize(value)
+          && aliases.some((alias) => normalize(alias) === normalize(current));
+        const changed = replaceKnownTranslation && (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)
+          ? setText(el, value)
+          : await fillMappedControl(el, key, value, aliases);
+        if (changed) {
           filled += 1;
           fields.push(key);
         }
       }
     }
-    if (anchors.length) fields.push("education.recordsBySlot");
+    if (filled) fields.push("education.recordsBySlot");
     return { filled, fields };
   }
 
@@ -1558,12 +1566,45 @@
     return semanticSectionKey(el, { section: "employment", node: block });
   }
 
+  function labeledEmploymentControls() {
+    const slots = new Map();
+    for (const el of visibleControls(document)) {
+      if (["checkbox", "radio"].includes(String(el?.type || "").toLowerCase())) continue;
+      const key = employmentLabelKey(directFieldText(el)) || employmentLabelKey(nearbyLabelText(el));
+      if (!key) continue;
+      if (!slots.has(key)) slots.set(key, []);
+      slots.get(key).push(el);
+    }
+    return slots;
+  }
+
   async function fillEmploymentRecords(applicationPacket) {
     if (!packetIsAuthoritative(applicationPacket)) return { filled: 0, fields: [] };
     const entries = Array.isArray(applicationPacket.experience) ? applicationPacket.experience : [];
     const anchors = sectionIdentityControls("employment");
+    const labeledSlots = labeledEmploymentControls();
     let filled = 0;
     const fields = [];
+    for (let index = 0; index < entries.length; index += 1) {
+      const entry = entries[index];
+      const startDate = normalizedYearMonth(entry?.start_year, entry?.start_month) || String(entry?.start_date || entry?.start || "").trim();
+      const endDate = normalizedYearMonth(entry?.end_year, entry?.end_month) || String(entry?.end_date || entry?.end || "").trim() || (entry?.current ? currentYearMonth() : "");
+      const map = {
+        "employment.employer": entry?.organization || entry?.employer || entry?.company,
+        "employment.title": entry?.title || entry?.role || entry?.position,
+        "employment.location": entry?.location,
+        "employment.startDate": startDate,
+        "employment.endDate": endDate,
+        "employment.description": bulletText(entry),
+      };
+      for (const [key, value] of Object.entries(map)) {
+        const el = labeledSlots.get(key)?.[index];
+        if (el && await fillMappedControl(el, key, String(value || "").trim())) {
+          filled += 1;
+          fields.push(key);
+        }
+      }
+    }
     for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
       const entry = entries[index];
       const block = repeatedRecordBlock(anchors[index], "employment");
@@ -1590,7 +1631,7 @@
         }
       }
     }
-    if (anchors.length) fields.push("employment.recordsBySlot");
+    if (filled) fields.push("employment.recordsBySlot");
     return { filled, fields };
   }
 
@@ -1737,7 +1778,7 @@
       }
     }
 
-    const educationRecords = await fillEducationRecords(generalProfile);
+    const educationRecords = await fillEducationRecords(generalProfile, profileLanguage);
     const publicationRecords = await fillPublicationRecords(generalProfile, profileLanguage);
     const projectRecords = await fillProjectRecords(applicationPacket);
     const employmentRecords = await fillEmploymentRecords(applicationPacket);
@@ -1761,6 +1802,11 @@
       skippedSensitive: [...new Set(skippedSensitive)].slice(0, 10),
       unresolved: unresolvedQuestions(),
       platform: detectPlatform(),
+      sourceRecords: {
+        experience: Array.isArray(applicationPacket?.experience) ? applicationPacket.experience.length : 0,
+        projects: Array.isArray(applicationPacket?.projects) ? applicationPacket.projects.length : 0,
+        education: Array.isArray(generalProfile?.education) ? generalProfile.education.length : 0,
+      },
     };
   }
 
