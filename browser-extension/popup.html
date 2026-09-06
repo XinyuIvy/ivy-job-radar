@@ -34,6 +34,15 @@
       </select>
       <small>姓名、地址、教育等固定资料会使用这里选择的语言。</small>
     </label>
+    <label class="profile-language project-placement">
+      <span>项目填写位置</span>
+      <select id="projectPlacement">
+        <option value="auto">自动判断</option>
+        <option value="project">Project Experience</option>
+        <option value="employment">Work Experience</option>
+      </select>
+      <small>页面没有 Project Experience 时，自动把每个项目逐条填入 Work Experience。</small>
+    </label>
     <button id="fill" class="primary">按照所选来源填写 + 上传 CV</button>
     <button id="questions" class="hidden">复制未填问题</button>
     <button id="import">从当前 Job Radar 页面导入连接</button>
