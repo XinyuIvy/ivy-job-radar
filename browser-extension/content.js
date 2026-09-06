@@ -1,5 +1,5 @@
 (() => {
-  const CONTENT_SCRIPT_VERSION = "0.6.5";
+  const CONTENT_SCRIPT_VERSION = "0.6.6";
   if (window.__ivyJobAutofillLoaded === CONTENT_SCRIPT_VERSION) return;
   window.__ivyJobAutofillLoaded = CONTENT_SCRIPT_VERSION;
 
@@ -313,9 +313,15 @@
     if (section === "employment") {
       const controls = visibleControls(node);
       const dates = controls.filter(dateLikeField);
+      const labeledKey = employmentLabelKey(directFieldText(el) || nearbyLabelText(el));
+      if (labeledKey) return labeledKey;
       if (dateLikeField(el)) return dates.indexOf(el) <= 0 ? "employment.startDate" : "employment.endDate";
       if (el instanceof HTMLTextAreaElement) return "employment.description";
-      const shortText = controls.filter((control) => !dateLikeField(control) && !(control instanceof HTMLTextAreaElement));
+      const shortText = controls.filter((control) => (
+        !dateLikeField(control)
+        && !(control instanceof HTMLTextAreaElement)
+        && !(["checkbox", "radio"].includes(String(control.type || "").toLowerCase()))
+      ));
       const index = shortText.indexOf(el);
       return index === 0 ? "employment.employer" : index === 1 ? "employment.title" : index === 2 ? "employment.location" : null;
     }
@@ -337,6 +343,18 @@
     }
     if (section === "skills" && el instanceof HTMLTextAreaElement) return "cv.skills";
     return null;
+  }
+
+  function employmentLabelKey(text) {
+    const value = normalize(text);
+    if (!value) return "";
+    if (/\b(role description|job description|description of duties|job duties|work responsibilities)\b|工作职责|工作内容|工作描述|岗位职责/.test(value)) return "employment.description";
+    if (/(?:^| )(?:company|employer|organization|organisation|company name|organization name|organisation name|current employer)(?: |$)|公司名称|雇主|任职单位/.test(value)) return "employment.employer";
+    if (/(?:^| )(?:job title|position title|role title|current title|title|position)(?: |$)|职位名称|岗位|职位/.test(value)) return "employment.title";
+    if (/(?:^| )(?:location|employment location|work location)(?: |$)|所在地|工作地点/.test(value)) return "employment.location";
+    if (/(?:^| )(?:from|start|start date)(?: |$)|开始日期|开始时间/.test(value)) return "employment.startDate";
+    if (/(?:^| )(?:to|end|end date)(?: |$)|结束日期|结束时间/.test(value)) return "employment.endDate";
+    return "";
   }
 
   function contextualKey(el, text, projectDateCounters, sectionInfo = null) {
@@ -902,6 +920,14 @@
 
   function dateParts(value) {
     const source = String(value || "").trim();
+    const monthFirst = source.match(/^\s*(1[0-2]|0?[1-9])\D+((?:19|20)\d{2})\s*$/);
+    if (monthFirst) {
+      return {
+        year: monthFirst[2],
+        month: String(monthFirst[1]).padStart(2, "0"),
+        day: "",
+      };
+    }
     const match = source.match(/((?:19|20)\d{2})(?:\D+(1[0-2]|0?[1-9]))?(?:\D+(3[01]|[12]\d|0?[1-9]))?/);
     return match ? {
       year: match[1],
@@ -922,7 +948,7 @@
     const raw = [el?.getAttribute?.("placeholder"), el?.getAttribute?.("aria-label"), el?.getAttribute?.("name"), el?.id]
       .filter(Boolean).join(" ").toLowerCase();
     if (/yyyy\s*[-/.年]\s*mm\s*[-/.月]\s*dd|年\s*月\s*日|选择日期|开始日期|结束日期|publication date|award date|date received/.test(raw)) return "day";
-    if (/yyyy\s*[-/.年]\s*mm|年\s*月|year.?month|月份/.test(raw)) return "month";
+    if (/mm\s*[-/.]\s*yyyy|month\s*[-/.]\s*year|yyyy\s*[-/.年]\s*mm|年\s*月|year.?month|月份/.test(raw)) return "month";
     if (/yyyy|年份|year/.test(raw) || el?.getAttribute?.("maxlength") === "4") return "year";
     return "auto";
   }
@@ -933,9 +959,13 @@
     const month = parts.month || "01";
     const defaultDay = role === "end" ? lastDayOfMonth(parts.year, month) : "01";
     const day = parts.day || defaultDay;
+    const rawHint = [el?.getAttribute?.("placeholder"), el?.getAttribute?.("aria-label"), el?.getAttribute?.("name")]
+      .filter(Boolean).join(" ").toLowerCase();
+    const monthFirst = /mm\s*[-/.]\s*yyyy|month\s*[-/.]\s*year/.test(rawHint)
+      && !["month", "date"].includes(String(el?.type || "").toLowerCase());
     const formats = {
       year: parts.year,
-      month: `${parts.year}-${month}`,
+      month: monthFirst ? `${month}/${parts.year}` : `${parts.year}-${month}`,
       day: `${parts.year}-${month}-${day}`,
     };
     const precision = datePrecision(el);
@@ -1300,6 +1330,11 @@
     const sectionInfo = ancestorSectionInfo(el);
     if (sectionInfo.section !== section) return false;
     const semanticKey = semanticSectionKey(el, sectionInfo);
+    if (section === "employment") {
+      const labeledKey = employmentLabelKey(directText || nearbyLabelText(el));
+      if (labeledKey) return labeledKey === "employment.employer";
+      return semanticKey === "employment.employer";
+    }
     if (identityKeys[section] && semanticKey === identityKeys[section]) return true;
     if (section === "education") {
       return /(?:^| )(?:学校名称|学校|大学|school|university|institution)(?: |$)/.test(directText)
@@ -1379,7 +1414,7 @@
       if (current >= desired) break;
       const buttons = Array.from(document.querySelectorAll('button, [role="button"], input[type="button"]'))
         .filter(visible)
-        .filter((button) => /^(?:\+\s*)?(?:添加|新增|add)(?:\s+publication)?$/i.test(String(button.textContent || button.value || "").trim()))
+        .filter((button) => /^(?:\+\s*)?(?:添加|新增|add(?:\s+(?:another|publication|experience|job|position))?)$/i.test(String(button.textContent || button.value || "").trim()))
         .filter((button) => buttonBelongsToSection(button, section));
       const button = buttons[buttons.length - 1];
       if (!button) break;
@@ -1505,6 +1540,60 @@
     return { filled, fields };
   }
 
+  function employmentControlKey(el, block) {
+    if (["checkbox", "radio"].includes(String(el?.type || "").toLowerCase())) return "";
+    const directText = directFieldText(el);
+    const nearbyText = nearbyLabelText(el);
+    const labeledKey = employmentLabelKey(directText) || employmentLabelKey(nearbyText);
+    if (labeledKey) return labeledKey;
+    const dates = visibleControls(block).filter(dateLikeField);
+    if (dateLikeField(el)) {
+      const index = dates.indexOf(el);
+      if (index === 0) return "employment.startDate";
+      if (index === 1) return "employment.endDate";
+    }
+    if (el instanceof HTMLTextAreaElement) return "employment.description";
+    const inferred = inferKey(directText || nearbyText || fieldText(el));
+    if (inferred?.startsWith("employment.")) return inferred;
+    return semanticSectionKey(el, { section: "employment", node: block });
+  }
+
+  async function fillEmploymentRecords(applicationPacket) {
+    if (!packetIsAuthoritative(applicationPacket)) return { filled: 0, fields: [] };
+    const entries = Array.isArray(applicationPacket.experience) ? applicationPacket.experience : [];
+    const anchors = sectionIdentityControls("employment");
+    let filled = 0;
+    const fields = [];
+    for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
+      const entry = entries[index];
+      const block = repeatedRecordBlock(anchors[index], "employment");
+      const controls = repeatedRecordControls(anchors[index], "employment", anchors[index + 1] || null);
+      if (!controls.length) continue;
+      const startDate = normalizedYearMonth(entry?.start_year, entry?.start_month) || String(entry?.start_date || entry?.start || "").trim();
+      const endDate = normalizedYearMonth(entry?.end_year, entry?.end_month) || String(entry?.end_date || entry?.end || "").trim() || (entry?.current ? currentYearMonth() : "");
+      const map = {
+        "employment.employer": entry?.organization || entry?.employer || entry?.company,
+        "employment.title": entry?.title || entry?.role || entry?.position,
+        "employment.location": entry?.location,
+        "employment.startDate": startDate,
+        "employment.endDate": endDate,
+        "employment.description": bulletText(entry),
+      };
+      const semanticNode = block || { querySelectorAll: () => controls };
+      for (const el of controls) {
+        const key = employmentControlKey(el, semanticNode);
+        if (!key) continue;
+        const value = String(map[key] || "").trim();
+        if (await fillMappedControl(el, key, value)) {
+          filled += 1;
+          fields.push(key);
+        }
+      }
+    }
+    if (anchors.length) fields.push("employment.recordsBySlot");
+    return { filled, fields };
+  }
+
   async function fillProjectRecords(applicationPacket) {
     if (!packetIsAuthoritative(applicationPacket)) return { filled: 0, fields: [] };
     const entries = Array.isArray(applicationPacket.projects) ? applicationPacket.projects : [];
@@ -1601,6 +1690,7 @@
       addedRows[section] = await ensureRepeatedRows(section, desiredRows[section]);
     }
     const structuredProjectRowsAvailable = sectionIdentityControls("project").length > 0;
+    const structuredEmploymentRowsAvailable = sectionIdentityControls("employment").length > 0;
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
     const descriptors = elements.map((el) => ({ el, directText: directFieldText(el), text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
     let filled = 0;
@@ -1636,6 +1726,7 @@
       if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
       if (hasGlobalPublications(generalProfile) && key.startsWith("publication.")) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.") && structuredProjectRowsAvailable) continue;
+      if (packetIsAuthoritative(applicationPacket) && key.startsWith("employment.") && structuredEmploymentRowsAvailable) continue;
       const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters, profileLanguage);
       if (!value) continue;
       const changed = await fillMappedControl(el, key, value, aliases);
@@ -1649,8 +1740,9 @@
     const educationRecords = await fillEducationRecords(generalProfile);
     const publicationRecords = await fillPublicationRecords(generalProfile, profileLanguage);
     const projectRecords = await fillProjectRecords(applicationPacket);
-    filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled;
-    fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields);
+    const employmentRecords = await fillEmploymentRecords(applicationPacket);
+    filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled + employmentRecords.filled;
+    fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields, ...employmentRecords.fields);
 
     const correctedEducationDates = globalProfileIsAuthoritative(generalProfile) ? 0 : await correctEducationPeriods(generalProfile);
     const correctedProjectDates = await correctProjectPeriods(applicationPacket);
