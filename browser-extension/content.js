@@ -1,5 +1,5 @@
 (() => {
-  const CONTENT_SCRIPT_VERSION = "0.6.7";
+  const CONTENT_SCRIPT_VERSION = "0.6.8";
   if (window.__ivyJobAutofillLoaded === CONTENT_SCRIPT_VERSION) return;
   window.__ivyJobAutofillLoaded = CONTENT_SCRIPT_VERSION;
 
@@ -165,6 +165,7 @@
 
     ["employment.description", /\b(job description|role description|description of duties|job duties|work responsibilities)\b|工作职责|工作内容|工作描述|岗位职责/],
     ["employment.employer", /\b(current employer|employer|company name|organization name)\b|雇主|公司名称/],
+    ["employment.type", /\b(employment type|job type|position type|time type|worker type|work schedule)\b|雇佣类型|工作类型|职位类型|用工类型|全职兼职/],
     ["employment.title", /\b(current title|job title|position title|role title)\b|职位名称|职位/],
     ["employment.location", /\b(employment location|work location)\b/],
     ["employment.startMonth", /\b(employment start month|job start month)\b/],
@@ -350,6 +351,7 @@
     if (!value) return "";
     if (/\b(role description|job description|description of duties|job duties|work responsibilities)\b|工作职责|工作内容|工作描述|岗位职责/.test(value)) return "employment.description";
     if (/(?:^| )(?:company|employer|organization|organisation|company name|organization name|organisation name|current employer)(?: |$)|公司名称|雇主|任职单位/.test(value)) return "employment.employer";
+    if (/(?:^| )(?:employment type|job type|position type|time type|worker type|work schedule)(?: |$)|雇佣类型|工作类型|职位类型|用工类型|全职兼职/.test(value)) return "employment.type";
     if (/(?:^| )(?:job title|position title|role title|current title|title|position)(?: |$)|职位名称|岗位|职位/.test(value)) return "employment.title";
     if (/(?:^| )(?:location|employment location|work location)(?: |$)|所在地|工作地点/.test(value)) return "employment.location";
     if (/(?:^| )(?:from|start|start date)(?: |$)|开始日期|开始时间/.test(value)) return "employment.startDate";
@@ -459,6 +461,58 @@
   function bulletText(entry) {
     if (Array.isArray(entry?.bullets)) return entry.bullets.filter(Boolean).join("\n");
     return String(entry?.description || entry?.summary || "").trim();
+  }
+
+  function yearMonthNumber(value) {
+    const match = String(value || "").match(/\b((?:19|20)\d{2})[-/.](0?[1-9]|1[0-2])\b/);
+    return match ? Number(match[1]) * 12 + Number(match[2]) : 0;
+  }
+
+  function projectOrganization(entry, generalProfile, profileLanguage = "") {
+    const preferChinese = profileLanguage === "zh" || (!profileLanguage && pageUsesChinese());
+    const education = orderedEducationEntries(generalProfile?.education);
+    const explicit = entry?.organization || entry?.institution || entry?.company || entry?.affiliation;
+    if (explicit) {
+      const matchingSchool = education.find((item) => [item?.school, item?.school_zh]
+        .filter(Boolean)
+        .some((school) => normalize(school) === normalize(explicit)));
+      if (matchingSchool) {
+        return String(preferChinese
+          ? matchingSchool.school_zh || localizedProfileText(matchingSchool.school, true)
+          : matchingSchool.school || matchingSchool.school_zh).trim();
+      }
+      return localizedProfileText(explicit, preferChinese);
+    }
+
+    const projectDates = projectDateRange(entry);
+    const projectPoint = yearMonthNumber(projectDates.start) || yearMonthNumber(projectDates.end);
+    const matchingEducation = projectPoint
+      ? education.find((item) => {
+        const start = yearMonthNumber(normalizedYearMonth(item?.start_year, item?.start_month) || item?.start_date || item?.start);
+        const end = yearMonthNumber(normalizedYearMonth(item?.end_year, item?.end_month) || item?.end_date || item?.end) || Number.MAX_SAFE_INTEGER;
+        return (!start || start <= projectPoint) && projectPoint <= end;
+      })
+      : education[0];
+    const school = preferChinese
+      ? matchingEducation?.school_zh || localizedProfileText(matchingEducation?.school, true)
+      : matchingEducation?.school || matchingEducation?.school_zh;
+    return String(school || (preferChinese ? "独立项目" : "Independent Project")).trim();
+  }
+
+  function projectAsEmployment(entry, generalProfile, profileLanguage = "") {
+    const dates = projectDateRange(entry);
+    return {
+      organization: projectOrganization(entry, generalProfile, profileLanguage),
+      title: entry?.name || entry?.title || entry?.role || entry?.position,
+      location: entry?.location,
+      start_date: dates.start,
+      end_date: dates.end,
+      current: entry?.current,
+      employment_type: profileLanguage === "zh" || (!profileLanguage && pageUsesChinese()) ? "兼职" : "Part-time",
+      bullets: Array.isArray(entry?.bullets) ? entry.bullets : undefined,
+      description: entry?.description || entry?.summary,
+      ivy_project_record: true,
+    };
   }
 
   function publicationEntry(entry, profileLanguage = "") {
@@ -1578,13 +1632,33 @@
     return slots;
   }
 
-  async function fillEmploymentRecords(applicationPacket) {
+  async function fillEmploymentRecords(applicationPacket, generalProfile = null, profileLanguage = "", includeProjects = false) {
     if (!packetIsAuthoritative(applicationPacket)) return { filled: 0, fields: [] };
-    const entries = Array.isArray(applicationPacket.experience) ? applicationPacket.experience : [];
+    const experienceEntries = Array.isArray(applicationPacket.experience) ? applicationPacket.experience : [];
+    const projectEntries = includeProjects && Array.isArray(applicationPacket.projects)
+      ? applicationPacket.projects.map((entry) => projectAsEmployment(entry, generalProfile, profileLanguage))
+      : [];
+    const entries = [...experienceEntries, ...projectEntries];
     const anchors = sectionIdentityControls("employment");
     const labeledSlots = labeledEmploymentControls();
+    const replaceProjectDates = new Set();
+    for (let index = experienceEntries.length; index < entries.length; index += 1) {
+      const labeledIdentity = [
+        labeledSlots.get("employment.employer")?.[index],
+        labeledSlots.get("employment.title")?.[index],
+      ].filter(Boolean);
+      const controls = anchors[index]
+        ? repeatedRecordControls(anchors[index], "employment", anchors[index + 1] || null)
+        : [];
+      const block = anchors[index] ? repeatedRecordBlock(anchors[index], "employment") : null;
+      const semanticNode = block || { querySelectorAll: () => controls };
+      const blockIdentity = controls.filter((el) => ["employment.employer", "employment.title"].includes(employmentControlKey(el, semanticNode)));
+      const identity = labeledIdentity.length ? labeledIdentity : blockIdentity;
+      if (identity.length && identity.every(isEmpty)) replaceProjectDates.add(index);
+    }
     let filled = 0;
     const fields = [];
+    const filledElements = new Set();
     for (let index = 0; index < entries.length; index += 1) {
       const entry = entries[index];
       const startDate = normalizedYearMonth(entry?.start_year, entry?.start_month) || String(entry?.start_date || entry?.start || "").trim();
@@ -1593,15 +1667,25 @@
         "employment.employer": entry?.organization || entry?.employer || entry?.company,
         "employment.title": entry?.title || entry?.role || entry?.position,
         "employment.location": entry?.location,
+        "employment.type": entry?.employment_type || entry?.job_type || entry?.type,
         "employment.startDate": startDate,
         "employment.endDate": endDate,
         "employment.description": bulletText(entry),
       };
       for (const [key, value] of Object.entries(map)) {
         const el = labeledSlots.get(key)?.[index];
-        if (el && await fillMappedControl(el, key, String(value || "").trim())) {
+        const cleanValue = String(value || "").trim();
+        const aliases = key === "employment.type" && entry?.ivy_project_record
+          ? ["Part-time", "Part time", "兼职", "非全日制"]
+          : [];
+        const replaceDate = replaceProjectDates.has(index) && ["employment.startDate", "employment.endDate"].includes(key);
+        const changed = el && replaceDate && cleanValue
+          ? await setAdaptiveDate(el, cleanValue, key === "employment.startDate" ? "start" : "end")
+          : el ? await fillMappedControl(el, key, cleanValue, aliases) : false;
+        if (changed) {
           filled += 1;
           fields.push(key);
+          filledElements.add(el);
         }
       }
     }
@@ -1616,18 +1700,28 @@
         "employment.employer": entry?.organization || entry?.employer || entry?.company,
         "employment.title": entry?.title || entry?.role || entry?.position,
         "employment.location": entry?.location,
+        "employment.type": entry?.employment_type || entry?.job_type || entry?.type,
         "employment.startDate": startDate,
         "employment.endDate": endDate,
         "employment.description": bulletText(entry),
       };
       const semanticNode = block || { querySelectorAll: () => controls };
       for (const el of controls) {
+        if (filledElements.has(el)) continue;
         const key = employmentControlKey(el, semanticNode);
         if (!key) continue;
         const value = String(map[key] || "").trim();
-        if (await fillMappedControl(el, key, value)) {
+        const aliases = key === "employment.type" && entry?.ivy_project_record
+          ? ["Part-time", "Part time", "兼职", "非全日制"]
+          : [];
+        const replaceDate = replaceProjectDates.has(index) && ["employment.startDate", "employment.endDate"].includes(key);
+        const changed = replaceDate && value
+          ? await setAdaptiveDate(el, value, key === "employment.startDate" ? "start" : "end")
+          : await fillMappedControl(el, key, value, aliases);
+        if (changed) {
           filled += 1;
           fields.push(key);
+          filledElements.add(el);
         }
       }
     }
@@ -1712,12 +1806,24 @@
     return { filled, fields };
   }
 
-  async function fill(profile, generalProfile = null, applicationPacket = null, profileLanguage = "") {
+  async function fill(profile, generalProfile = null, applicationPacket = null, profileLanguage = "", projectPlacement = "auto") {
+    const projectCount = packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects)
+      ? applicationPacket.projects.length
+      : 0;
+    const experienceCount = packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.experience)
+      ? applicationPacket.experience.length
+      : 0;
+    const initialProjectRowsAvailable = sectionIdentityControls("project").length > 0;
+    const initialEmploymentRowsAvailable = sectionIdentityControls("employment").length > 0;
+    const routeProjectsToEmployment = projectCount > 0 && initialEmploymentRowsAvailable && (
+      projectPlacement === "employment"
+      || (projectPlacement !== "project" && !initialProjectRowsAvailable)
+    );
     const desiredRows = {
       publication: Array.isArray(generalProfile?.publications) ? generalProfile.publications.length : 0,
-      project: packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.projects) ? applicationPacket.projects.length : 0,
+      project: routeProjectsToEmployment ? 0 : projectCount,
       education: Array.isArray(generalProfile?.education) ? generalProfile.education.length : 0,
-      employment: packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.experience) ? applicationPacket.experience.length : 0,
+      employment: experienceCount + (routeProjectsToEmployment ? projectCount : 0),
       award: Array.isArray(generalProfile?.awards) ? generalProfile.awards.length : 0,
       language: Array.isArray(generalProfile?.languages) ? generalProfile.languages.length : 0,
       portfolio: Array.isArray(generalProfile?.portfolio) ? generalProfile.portfolio.length : 0,
@@ -1766,6 +1872,7 @@
       }
       if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
       if (hasGlobalPublications(generalProfile) && key.startsWith("publication.")) continue;
+      if (routeProjectsToEmployment && key.startsWith("project.")) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.") && structuredProjectRowsAvailable) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("employment.") && structuredEmploymentRowsAvailable) continue;
       const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters, profileLanguage);
@@ -1780,13 +1887,13 @@
 
     const educationRecords = await fillEducationRecords(generalProfile, profileLanguage);
     const publicationRecords = await fillPublicationRecords(generalProfile, profileLanguage);
-    const projectRecords = await fillProjectRecords(applicationPacket);
-    const employmentRecords = await fillEmploymentRecords(applicationPacket);
+    const projectRecords = routeProjectsToEmployment ? { filled: 0, fields: [] } : await fillProjectRecords(applicationPacket);
+    const employmentRecords = await fillEmploymentRecords(applicationPacket, generalProfile, profileLanguage, routeProjectsToEmployment);
     filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled + employmentRecords.filled;
     fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields, ...employmentRecords.fields);
 
     const correctedEducationDates = globalProfileIsAuthoritative(generalProfile) ? 0 : await correctEducationPeriods(generalProfile);
-    const correctedProjectDates = await correctProjectPeriods(applicationPacket);
+    const correctedProjectDates = routeProjectsToEmployment ? 0 : await correctProjectPeriods(applicationPacket);
     const correctedEmploymentDates = await correctEmploymentPeriods(applicationPacket);
     if (correctedEducationDates) fields.push("education.periodBySchool");
     if (correctedProjectDates) fields.push("project.periodByName");
@@ -1802,6 +1909,7 @@
       skippedSensitive: [...new Set(skippedSensitive)].slice(0, 10),
       unresolved: unresolvedQuestions(),
       platform: detectPlatform(),
+      projectRouting: routeProjectsToEmployment ? "employment" : "project",
       sourceRecords: {
         experience: Array.isArray(applicationPacket?.experience) ? applicationPacket.experience.length : 0,
         projects: Array.isArray(applicationPacket?.projects) ? applicationPacket.projects.length : 0,
@@ -1947,7 +2055,7 @@
     if (message?.type === "IVY_FILL_PAGE") {
       chrome.storage.local.get(["ivyProfile"], (result) => {
         window.__ivyLastApplicationPacket = message.applicationPacket || null;
-        fill(result.ivyProfile || {}, message.generalProfile || null, message.applicationPacket || null, message.profileLanguage || "")
+        fill(result.ivyProfile || {}, message.generalProfile || null, message.applicationPacket || null, message.profileLanguage || "", message.projectPlacement || "auto")
           .then((payload) => sendResponse({ ok: true, ...payload }))
           .catch((error) => sendResponse({ ok: false, error: String(error?.message || error) }));
       });
