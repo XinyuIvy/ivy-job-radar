@@ -381,7 +381,10 @@ fillButton.addEventListener("click", async () => {
     const unresolved = lastQuestions.length ? `；另有 ${lastQuestions.length} 个未填问题` : "";
     const fieldKinds = Array.isArray(fillResult.fields) ? fillResult.fields.length : 0;
     const fieldSummary = fieldKinds ? `（${fieldKinds} 类字段）` : "";
-    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
+    const sourceRecords = fillResult.sourceRecords
+      ? `；来源记录：工作 ${fillResult.sourceRecords.experience || 0}、项目 ${fillResult.sourceRecords.projects || 0}、教育 ${fillResult.sourceRecords.education || 0}`
+      : "";
+    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${sourceRecords}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
   } catch (error) {
     show(`自动填写失败：${error.message || error}`, "error");
   } finally {
