@@ -1,8 +1,10 @@
 (() => {
-  if (window.__ivyJobAutofillLoaded) return;
-  window.__ivyJobAutofillLoaded = true;
+  const CONTENT_SCRIPT_VERSION = "0.6.5";
+  if (window.__ivyJobAutofillLoaded === CONTENT_SCRIPT_VERSION) return;
+  window.__ivyJobAutofillLoaded = CONTENT_SCRIPT_VERSION;
 
   const SENSITIVE_RE = /(race|ethnic|gender|sex(?!ual)|veteran|disability|religion|marital|sexual orientation|pronoun|date of birth|birth date|ssn|social security|demographic|eeo|equal employment|种族|族裔|民族|性别|残障|退伍|宗教|出生日期|社会安全号)/i;
+  const NEVER_AUTOFILL_RE = /(ssn|social security|taxpayer|passport number|bank account|routing number|credit card|password|社会安全号|银行卡|密码)/i;
   const SUBMIT_RE = /(submit|send application|complete application|apply now|finish application|提交申请|完成申请)/i;
   const FINAL_SUBMIT_RE = /^(?:submit(?: application)?|send application|complete application|finish application|提交申请|完成申请)$/i;
   const APPLICATION_ENTRY_RE = /^(?:apply|apply now|start application|continue application|立即申请|马上申请|申请职位)$/i;
@@ -90,6 +92,24 @@
       if (text.length <= 120) pieces.push(text);
     }
     return normalize(pieces.filter(Boolean).join(" "));
+  }
+
+  function nearbyLabelText(el) {
+    const pieces = [];
+    let cursor = el;
+    for (let depth = 0; depth < 6 && cursor?.parentElement; depth += 1) {
+      let sibling = cursor.previousElementSibling;
+      for (let step = 0; step < 2 && sibling; step += 1, sibling = sibling.previousElementSibling) {
+        const containsControl = sibling.matches?.('input, textarea, select, [role="combobox"]')
+          || sibling.querySelector?.('input, textarea, select, [role="combobox"]');
+        if (!containsControl) {
+          const text = String(sibling.textContent || "").trim();
+          if (text && text.length <= 160) pieces.push(text);
+        }
+      }
+      cursor = cursor.parentElement;
+    }
+    return normalize(pieces.join(" "));
   }
 
   function getProfileValue(profile, key) {
@@ -197,9 +217,15 @@
   }
 
   function confirmedSensitiveKey(text) {
+    if (NEVER_AUTOFILL_RE.test(text)) return "";
     if (/\b(date of birth|birth date)\b|出生日期/.test(text)) return "identity.birthDate";
-    if (/\b(ethnicity|ethnic group)\b|民族|族裔/.test(text)) return "identity.ethnicity";
-    if (/\b(gender|sex)\b|性别/.test(text)) return "identity.gender";
+    if (/民族|族裔/.test(text)) return "identity.ethnicity";
+    if (/性别/.test(text)) return "identity.gender";
+    if (/\b(race|ethnicity|ethnic group)\b/.test(text)) return "sensitive.raceUS";
+    if (/\b(gender|sex)\b/.test(text)) return "sensitive.genderUS";
+    if (/\bveteran\b|退伍/.test(text)) return "sensitive.veteranStatusUS";
+    if (/\bdisabilit/.test(text) || /残障/.test(text)) return "sensitive.disabilityStatusUS";
+    if (/\breligion\b|宗教/.test(text)) return "sensitive.religion";
     return "";
   }
 
@@ -349,7 +375,15 @@
   }
 
   function packetIsAuthoritative(packet) {
-    return Boolean(packet && packet.authority === "final_customized_cv_only" && /^APP-\d{4}-/i.test(String(packet.application_id || "")));
+    return Boolean(
+      packet
+      && (
+        (["final_customized_cv_only", "frozen_submitted_template"].includes(packet.authority)
+          && /^APP-\d{4}-/i.test(String(packet.application_id || "")))
+        || (packet.authority === "live_cv_template"
+          && /^TEMPLATE:/i.test(String(packet.application_id || "")))
+      ),
+    );
   }
 
   function globalProfileIsAuthoritative(profile) {
@@ -761,6 +795,11 @@
       "eligibility.remoteWork": fixed.eligibility?.remoteWork,
       "application.availableStartDate": fixed.application?.availableStartDate,
       "application.hearAboutUs": fixed.application?.hearAboutUs,
+      "sensitive.raceUS": fixed.sensitive?.allowAutofill ? fixed.sensitive?.raceUS : "",
+      "sensitive.genderUS": fixed.sensitive?.allowAutofill ? fixed.sensitive?.genderUS : "",
+      "sensitive.veteranStatusUS": fixed.sensitive?.allowAutofill ? fixed.sensitive?.veteranStatusUS : "",
+      "sensitive.disabilityStatusUS": fixed.sensitive?.allowAutofill ? fixed.sensitive?.disabilityStatusUS : "",
+      "sensitive.religion": fixed.sensitive?.allowAutofill ? fixed.sensitive?.religion : "",
     };
     if (!(key in map)) return { handled: false, value: "", aliases: [] };
     const value = String(map[key] || "").trim();
@@ -768,7 +807,12 @@
       : value === "no" ? ["No", "否", "不愿意", "不需要"]
       : key === "identity.ethnicity" && /汉族|han/i.test(value) ? ["汉族", "汉", "Han", "Han Chinese"]
       : key === "identity.gender" && /女|female|woman/i.test(value) ? ["女", "女性", "Female", "Woman"]
-      : key === "identity.gender" && /男|male|man/i.test(value) ? ["男", "男性", "Male", "Man"] : [];
+      : key === "identity.gender" && /男|male|man/i.test(value) ? ["男", "男性", "Male", "Man"]
+      : key === "sensitive.raceUS" && /asian|亚裔/i.test(value) ? ["Asian", "Asian (Not Hispanic or Latino)", "Asian or Pacific Islander", "亚裔"]
+      : key === "sensitive.genderUS" && /female|woman|女/i.test(value) ? ["Female", "Woman", "女", "女性"]
+      : key === "sensitive.veteranStatusUS" && /not|no|不是/i.test(value) ? ["I am not a protected veteran", "Not a protected veteran", "No"]
+      : key === "sensitive.disabilityStatusUS" && /not|no|不是/i.test(value) ? ["No, I do not have a disability and have not had one in the past", "No, I do not have a disability", "No"]
+      : key === "sensitive.religion" && /none|no religion|没有/i.test(value) ? ["None", "No religion", "Not affiliated"] : [];
     return { handled: true, value, aliases };
   }
 
@@ -1250,6 +1294,8 @@
       campus: "campus.organization",
     };
     if (identityKeys[section] && directKey === identityKeys[section]) return true;
+    const nearbyKey = inferKey(nearbyLabelText(el));
+    if (identityKeys[section] && nearbyKey === identityKeys[section]) return true;
     if (section === "publication" && structuralPublicationTitleControl(el)) return true;
     const sectionInfo = ancestorSectionInfo(el);
     if (sectionInfo.section !== section) return false;
@@ -1289,6 +1335,20 @@
       if (identityCount === 1) return node;
     }
     return fallback;
+  }
+
+  function repeatedRecordControls(identityField, section, nextIdentityField = null) {
+    const block = repeatedRecordBlock(identityField, section);
+    if (block) return visibleControls(block);
+    const controls = visibleControls(document);
+    const start = controls.indexOf(identityField);
+    if (start < 0) return [];
+    const next = nextIdentityField ? controls.indexOf(nextIdentityField) : -1;
+    const end = next > start ? next : Math.min(controls.length, start + 16);
+    const candidates = controls.slice(start, end);
+    if (next > start) return candidates;
+    const finalLongText = candidates.findIndex((control) => control instanceof HTMLTextAreaElement);
+    return finalLongText >= 0 ? candidates.slice(0, finalLongText + 1) : candidates;
   }
 
   function buttonBelongsToSection(button, section) {
@@ -1454,7 +1514,8 @@
     for (let index = 0; index < Math.min(entries.length, anchors.length); index += 1) {
       const entry = entries[index];
       const block = repeatedRecordBlock(anchors[index], "project");
-      if (!block) continue;
+      const controls = repeatedRecordControls(anchors[index], "project", anchors[index + 1] || null);
+      if (!controls.length) continue;
       const dates = projectDateRange(entry);
       const map = {
         "project.name": entry.name || entry.title,
@@ -1465,9 +1526,12 @@
         "project.endDate": dates.end,
       };
       const dateCounters = new Map();
-      for (const el of visibleControls(block)) {
+      const semanticNode = block || { querySelectorAll: () => controls };
+      for (const el of controls) {
         const directText = directFieldText(el);
-        const key = contextualKey(el, directText, dateCounters, { section: "project", node: block });
+        const nearbyText = nearbyLabelText(el) || fieldText(el);
+        const keyText = inferKey(directText) ? directText : nearbyText || directText;
+        const key = contextualKey(el, keyText, dateCounters, { section: "project", node: semanticNode });
         if (!key?.startsWith("project.")) continue;
         const value = String(map[key] || "").trim();
         if (await fillMappedControl(el, key, value)) {
@@ -1536,6 +1600,7 @@
     for (const section of ["publication", "project", "education", "employment", "award", "language", "portfolio", "campus"]) {
       addedRows[section] = await ensureRepeatedRows(section, desiredRows[section]);
     }
+    const structuredProjectRowsAvailable = sectionIdentityControls("project").length > 0;
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
     const descriptors = elements.map((el) => ({ el, directText: directFieldText(el), text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
     let filled = 0;
@@ -1551,7 +1616,7 @@
 
     for (const { el, directText, text, sectionInfo } of descriptors) {
       if (!text) continue;
-      const keyText = directText || text;
+      const keyText = inferKey(directText) ? directText : nearbyLabelText(el) || text || directText;
       const explicitSensitiveKey = SENSITIVE_RE.test(keyText) ? confirmedSensitiveKey(keyText) : "";
       if (SENSITIVE_RE.test(keyText) && !explicitSensitiveKey) {
         skippedSensitive.push(text.slice(0, 120));
@@ -1570,7 +1635,7 @@
       }
       if (globalProfileIsAuthoritative(generalProfile) && key.startsWith("education.")) continue;
       if (hasGlobalPublications(generalProfile) && key.startsWith("publication.")) continue;
-      if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.")) continue;
+      if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.") && structuredProjectRowsAvailable) continue;
       const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters, profileLanguage);
       if (!value) continue;
       const changed = await fillMappedControl(el, key, value, aliases);
