@@ -66,7 +66,7 @@ class FakeCombobox extends FakeField {
   }
 }
 
-async function runFill(fields, packet, generalProfile = null, buttons = [], profileLanguage = "", hostname = "example.cn") {
+async function runFill(fields, packet, generalProfile = null, buttons = [], profileLanguage = "", hostname = "example.cn", projectPlacement = "auto", interactiveOptions = []) {
   const body = { tagName: "BODY", textContent: "", innerText: "", parentElement: null };
   let listener;
   const labels = new Map(fields.map((field) => [field.id, { textContent: field.label }]));
@@ -79,6 +79,7 @@ async function runFill(fields, packet, generalProfile = null, buttons = [], prof
     },
     querySelectorAll(selector) {
       if (selector.startsWith("button,")) return buttons;
+      if (selector.startsWith('[role="option"]')) return interactiveOptions;
       return selector.includes("input:not") ? fields : [];
     },
   };
@@ -105,7 +106,7 @@ async function runFill(fields, packet, generalProfile = null, buttons = [], prof
   const source = await readFile(new URL("../browser-extension/content.js", import.meta.url), "utf8");
   vm.runInContext(source, context);
   return new Promise((resolve) => {
-    listener({ type: "IVY_FILL_PAGE", applicationPacket: packet, generalProfile, profileLanguage }, {}, resolve);
+    listener({ type: "IVY_FILL_PAGE", applicationPacket: packet, generalProfile, profileLanguage, projectPlacement }, {}, resolve);
   });
 }
 
@@ -500,6 +501,283 @@ test("infers an employment block from structure when labels use unfamiliar synon
   assert.equal(description.value, "支持真实世界临床研究分析。");
 });
 
+test("fills a Workday employment row from the CV master frozen with the saved job", async () => {
+  const body = { tagName: "BODY", textContent: "", parentElement: null };
+  const workBlock = {
+    tagName: "DIV",
+    textContent: "Work Experience Job Title Company Location I currently work here From To Role Description Add Another",
+    parentElement: body,
+  };
+  const title = new FakeInput({ id: "jobTitle", label: "Job Title", parentElement: workBlock });
+  const company = new FakeInput({ id: "company", label: "Company", parentElement: workBlock });
+  const location = new FakeInput({ id: "location", label: "Location", parentElement: workBlock });
+  const current = new FakeInput({ id: "currentlyWorkHere", label: "I currently work here", parentElement: workBlock, type: "checkbox" });
+  const start = new FakeInput({ id: "startDate", label: "From", placeholder: "MM/YYYY", parentElement: workBlock });
+  const end = new FakeInput({ id: "endDate", label: "To", placeholder: "MM/YYYY", parentElement: workBlock });
+  const description = new FakeTextarea({ id: "roleDescription", label: "Role Description", parentElement: workBlock });
+  workBlock.querySelectorAll = () => [title, company, location, current, start, end, description];
+  const packet = {
+    authority: "final_customized_cv_only",
+    provenance: "frozen_submitted_template",
+    application_id: "APP-2026-IQV-0130",
+    experience: [{
+      organization: "Pfizer",
+      title: "Statistics Intern, Statistical Inflammation and Immunology",
+      location: "Boston, MA",
+      start_year: "2026",
+      start_month: "05",
+      end_year: "2026",
+      end_month: "08",
+      bullets: ["Built a configurable clinical-trial simulation workflow.", "Evaluated operating characteristics with Monte Carlo experiments."],
+    }],
+  };
+
+  const result = await runFill([title, company, location, current, start, end, description], packet, null, [], "en", "iqvia.wd3.myworkdayjobs.com");
+
+  assert.equal(result.ok, true);
+  assert.equal(title.value, "Statistics Intern, Statistical Inflammation and Immunology");
+  assert.equal(company.value, "Pfizer");
+  assert.equal(location.value, "Boston, MA");
+  assert.equal(current.value, "");
+  assert.equal(start.value, "05/2026");
+  assert.equal(end.value, "08/2026");
+  assert.equal(description.value, "Built a configurable clinical-trial simulation workflow.\nEvaluated operating characteristics with Monte Carlo experiments.");
+  assert.equal(result.fields.includes("employment.recordsBySlot"), true);
+  assert.deepEqual(JSON.parse(JSON.stringify(result.sourceRecords)), { experience: 1, projects: 0, education: 0, skills: 0 });
+});
+
+test("routes every project into Workday work experience when no project section exists", async () => {
+  const body = { tagName: "BODY", textContent: "Work Experience Add Another", parentElement: null };
+  const makeRow = (index) => {
+    const block = {
+      tagName: "DIV",
+      textContent: `Work Experience ${index + 1} Job Title Company Location Job Type From To Role Description`,
+      parentElement: body,
+    };
+    const title = new FakeInput({ id: `route-title-${index}`, label: "Job Title", parentElement: block });
+    const company = new FakeInput({ id: `route-company-${index}`, label: "Company", parentElement: block });
+    const location = new FakeInput({ id: `route-location-${index}`, label: "Location", parentElement: block });
+    const type = new FakeSelect({ id: `route-type-${index}`, label: "Job Type", parentElement: block, options: ["Select One", "Full-time", "Part-time"] });
+    const start = new FakeInput({ id: `route-start-${index}`, label: "From", placeholder: "MM/YYYY", parentElement: block });
+    const end = new FakeInput({ id: `route-end-${index}`, label: "To", placeholder: "MM/YYYY", parentElement: block });
+    const description = new FakeTextarea({ id: `route-description-${index}`, label: "Role Description", parentElement: block });
+    const controls = [title, company, location, type, start, end, description];
+    block.querySelectorAll = () => controls;
+    return { controls, title, company, type, start, end, description };
+  };
+  const rows = [makeRow(0), makeRow(1), makeRow(2)];
+  rows[1].start.value = "12/2026";
+  const fields = rows.flatMap((row) => row.controls);
+  const packet = {
+    authority: "final_customized_cv_only",
+    provenance: "frozen_submitted_template",
+    application_id: "APP-2026-IQV-0131",
+    experience: [{
+      organization: "Pfizer",
+      title: "Biostatistics Intern",
+      start_year: "2025",
+      start_month: "05",
+      end_year: "2025",
+      end_month: "08",
+      bullets: ["Supported clinical trial analyses."],
+    }],
+    projects: [{
+      name: "Longitudinal EHR Phenotyping",
+      start_year: "2024",
+      start_month: "01",
+      end_year: "2024",
+      end_month: "11",
+      bullets: ["Built and validated a longitudinal phenotype pipeline."],
+    }, {
+      name: "Clinical Imaging Biomarkers",
+      organization: "Vanderbilt University Medical Center",
+      start_year: "2025",
+      start_month: "02",
+      end_year: "2025",
+      end_month: "12",
+      bullets: ["Evaluated imaging biomarkers in clinical cohorts."],
+    }],
+  };
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [{
+      school: "Vanderbilt University",
+      school_zh: "范德堡大学",
+      start_year: "2022",
+      start_month: "08",
+      end_year: "2027",
+      end_month: "05",
+      degree: "PhD in Biostatistics",
+    }],
+  };
+
+  const result = await runFill(fields, packet, generalProfile, [], "en", "example.myworkdayjobs.com");
+
+  assert.equal(result.ok, true);
+  assert.equal(result.projectRouting, "employment");
+  assert.equal(rows[0].title.value, "Biostatistics Intern");
+  assert.equal(rows[0].company.value, "Pfizer");
+  assert.equal(rows[1].title.value, "Longitudinal EHR Phenotyping");
+  assert.equal(rows[1].company.value, "Vanderbilt University");
+  assert.equal(rows[1].type.value, "Part-time");
+  assert.equal(rows[1].start.value, "01/2024");
+  assert.equal(rows[1].end.value, "11/2024");
+  assert.equal(rows[1].description.value, "Built and validated a longitudinal phenotype pipeline.");
+  assert.equal(rows[2].title.value, "Clinical Imaging Biomarkers");
+  assert.equal(rows[2].company.value, "Vanderbilt University Medical Center");
+  assert.equal(rows[2].type.value, "Part-time");
+  assert.equal(result.fields.includes("project.rowsAdded"), false);
+  assert.deepEqual(JSON.parse(JSON.stringify(result.sourceRecords)), { experience: 1, projects: 2, education: 1, skills: 0 });
+});
+
+test("marks a routed project as Chinese part-time when Chinese profile is selected", async () => {
+  const body = { tagName: "BODY", textContent: "工作经历", parentElement: null };
+  const block = { tagName: "DIV", textContent: "工作经历 职位名称 公司名称 工作类型 工作描述", parentElement: body };
+  const title = new FakeInput({ id: "zh-route-title", label: "职位名称", parentElement: block });
+  const company = new FakeInput({ id: "zh-route-company", label: "公司名称", parentElement: block });
+  const type = new FakeSelect({ id: "zh-route-type", label: "工作类型", parentElement: block, options: ["请选择", "全职", "兼职"] });
+  const description = new FakeTextarea({ id: "zh-route-description", label: "工作描述", parentElement: block });
+  block.querySelectorAll = () => [title, company, type, description];
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-CN-0001",
+    projects: [{ name: "临床数据研究", organization: "范德堡大学", bullets: ["完成纵向临床数据分析。"] }],
+  };
+
+  const result = await runFill([title, company, type, description], packet, null, [], "zh", "example.cn");
+
+  assert.equal(result.ok, true);
+  assert.equal(result.projectRouting, "employment");
+  assert.equal(title.value, "临床数据研究");
+  assert.equal(company.value, "范德堡大学");
+  assert.equal(type.value, "兼职");
+  assert.equal(description.value, "完成纵向临床数据分析。");
+});
+
+test("adds enough work experience rows before routing all projects", async () => {
+  const body = { tagName: "BODY", textContent: "Work Experience Add Another", parentElement: null };
+  const section = { tagName: "DIV", textContent: "Work Experience Job Title Company Job Type Role Description Add Another", parentElement: body };
+  const makeRow = (index) => {
+    const block = { tagName: "DIV", textContent: `Work Experience ${index + 1} Job Title Company Job Type Role Description`, parentElement: section };
+    const title = new FakeInput({ id: `added-title-${index}`, label: "Job Title", parentElement: block });
+    const company = new FakeInput({ id: `added-company-${index}`, label: "Company", parentElement: block });
+    const type = new FakeSelect({ id: `added-type-${index}`, label: "Job Type", parentElement: block, options: ["Select One", "Full-time", "Part-time"] });
+    const description = new FakeTextarea({ id: `added-description-${index}`, label: "Role Description", parentElement: block });
+    const controls = [title, company, type, description];
+    block.querySelectorAll = () => controls;
+    return { controls, title, company, type, description };
+  };
+  const rows = [makeRow(0), makeRow(1)];
+  for (const field of rows[1].controls) {
+    field.offsetParent = null;
+    field.getClientRects = () => [];
+  }
+  const allFields = rows.flatMap((row) => row.controls);
+  section.querySelectorAll = () => allFields;
+  const addButton = {
+    textContent: "Add Another", value: "", parentElement: section, offsetParent: {},
+    getClientRects: () => [1],
+    click() {
+      for (const field of rows[1].controls) {
+        field.offsetParent = {};
+        field.getClientRects = () => [1];
+      }
+    },
+  };
+  const packet = {
+    authority: "final_customized_cv_only",
+    application_id: "APP-2026-US-0002",
+    projects: [
+      { name: "Project One", organization: "Vanderbilt University", bullets: ["First project details."] },
+      { name: "Project Two", organization: "Vanderbilt University", bullets: ["Second project details."] },
+    ],
+  };
+
+  const result = await runFill(allFields, packet, null, [addButton], "en", "example.myworkdayjobs.com");
+
+  assert.equal(result.ok, true);
+  assert.equal(rows[0].title.value, "Project One");
+  assert.equal(rows[1].title.value, "Project Two");
+  assert.equal(rows[1].type.value, "Part-time");
+  assert.equal(result.fields.includes("employment.rowsAdded"), true);
+});
+
+test("fills a standard Skills text area from every selected CV skill category", async () => {
+  const body = { tagName: "BODY", textContent: "Technical Skills", parentElement: null };
+  const block = { tagName: "DIV", textContent: "Technical Skills", parentElement: body };
+  const skills = new FakeTextarea({ id: "skills-text", label: "Technical Skills", parentElement: block });
+  block.querySelectorAll = () => [skills];
+  const packet = {
+    authority: "live_cv_template",
+    application_id: "TEMPLATE:CV_RWE_AI_EN.tex",
+    skills: [
+      { category: "Programming", items: ["R", "Python", "SQL"] },
+      { category: "Statistics", items: ["GEE", "Survival analysis"] },
+    ],
+  };
+
+  const result = await runFill([skills], packet, null, [], "en", "example.com");
+
+  assert.equal(result.ok, true);
+  assert.equal(skills.value, "R, Python, SQL, GEE, Survival analysis");
+  assert.equal(result.sourceRecords.skills, 5);
+  assert.equal(result.fields.includes("cv.skills"), true);
+});
+
+test("adds CV skills individually through a Workday-style skill combobox", async () => {
+  const body = { tagName: "BODY", textContent: "Skills", parentElement: null };
+  const block = { tagName: "DIV", textContent: "Skills Search for a skill", parentElement: body };
+  const picker = new FakeCombobox({ id: "skills-picker", label: "Skills", placeholder: "Search for a skill", parentElement: block });
+  block.querySelectorAll = () => [picker];
+  const selected = [];
+  const options = ["R", "Python", "Survival Analysis"].map((text) => ({
+    textContent: text,
+    offsetParent: {},
+    getClientRects: () => [1],
+    click() {
+      selected.push(text);
+      picker.value = "";
+    },
+  }));
+  const packet = {
+    authority: "live_cv_template",
+    application_id: "TEMPLATE:CV_RWE_AI_EN.tex",
+    skills: [{ category: "Selected CV Skills", items: ["R", "Python", "Survival analysis"] }],
+  };
+
+  const result = await runFill([picker], packet, null, [], "en", "example.myworkdayjobs.com", "auto", options);
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(selected, ["R", "Python", "Survival Analysis"]);
+  assert.equal(result.fields.includes("cv.skillRecords"), true);
+  assert.equal(result.sourceRecords.skills, 3);
+});
+
+test("honors the explicit English profile and replaces known Chinese education translations", async () => {
+  const body = { tagName: "BODY", textContent: "教育 Education", innerText: "教育 Education", parentElement: null };
+  const block = { tagName: "DIV", textContent: "Education School or University Field of Study", parentElement: body };
+  const school = new FakeInput({ id: "school", label: "School or University", parentElement: block });
+  const major = new FakeInput({ id: "major", label: "Field of Study", parentElement: block });
+  school.value = "范德堡大学";
+  major.value = "生物统计学";
+  block.querySelectorAll = () => [school, major];
+  const generalProfile = {
+    schema_version: "global-application-autofill-profile-v1",
+    education: [{
+      school: "Vanderbilt University",
+      school_zh: "范德堡大学",
+      major: "Biostatistics / 生物统计学",
+      degree: "PhD in Biostatistics",
+    }],
+  };
+
+  const result = await runFill([school, major], null, generalProfile, [], "en", "iqvia.wd1.myworkdayjobs.com");
+
+  assert.equal(result.ok, true);
+  assert.equal(school.value, "Vanderbilt University");
+  assert.equal(major.value, "Biostatistics");
+});
+
 test("does not invoke an input value setter on a div-based combobox", async () => {
   const body = { tagName: "BODY", textContent: "", parentElement: null };
   const languageBlock = { tagName: "DIV", textContent: "语言能力 语言 熟练程度", parentElement: body };
@@ -682,7 +960,7 @@ test("clicks Add inside a project section until every APP-selected project has a
     },
   };
   const packet = {
-    authority: "final_customized_cv_only", application_id: "APP-2026-ABC-201",
+    authority: "final_customized_cv_only", provenance: "frozen_submitted_template", application_id: "APP-2026-ABC-201",
     projects: [
       { name: "岗位相关研究项目", role: "第一作者", bullets: ["研究描述。"] },
       { name: "岗位相关应用项目", role: "独立开发者", bullets: ["应用描述。"] },
@@ -695,6 +973,58 @@ test("clicks Add inside a project section until every APP-selected project has a
   assert.equal(rows[0].name.value, "岗位相关研究项目");
   assert.equal(rows[1].name.value, "岗位相关应用项目");
   assert.equal(result.fields.includes("project.rowsAdded"), true);
+});
+
+test("fills a flat project form whose visible labels are not bound to the inputs", async () => {
+  const body = { tagName: "BODY", textContent: "Application", parentElement: null };
+  const form = { tagName: "DIV", textContent: "Application form", parentElement: body };
+  const field = (FieldType, id, label, placeholder = "Please enter") => {
+    const wrapper = { tagName: "DIV", textContent: label, parentElement: form, previousElementSibling: null };
+    const control = new FieldType({ id, label: "", placeholder, parentElement: wrapper });
+    control.previousElementSibling = {
+      textContent: label,
+      previousElementSibling: null,
+      matches: () => false,
+      querySelector: () => null,
+    };
+    wrapper.querySelectorAll = () => [control];
+    return control;
+  };
+  const name = field(FakeInput, "flat-1", "Project name *");
+  const role = field(FakeInput, "flat-2", "Title");
+  const start = field(FakeInput, "flat-3", "Start & end date *", "YYYY-MM");
+  const end = field(FakeInput, "flat-4", "Start & end date *", "YYYY-MM");
+  const url = field(FakeInput, "flat-5", "Project URL");
+  const description = field(FakeTextarea, "flat-6", "Description *");
+  const fillers = Array.from({ length: 30 }, (_, index) => field(FakeInput, `other-${index}`, "Unrelated field"));
+  const fields = [name, role, start, end, url, description, ...fillers];
+  form.querySelectorAll = () => fields;
+  const packet = {
+    authority: "final_customized_cv_only",
+    provenance: "final_customized_cv",
+    application_id: "APP-2026-BYT-0127",
+    projects: [{
+      name: "Agent reliability research",
+      role: "Project lead",
+      start_year: "2026",
+      start_month: "01",
+      end_year: "2026",
+      end_month: "08",
+      links: [{ url: "https://github.com/example/project" }],
+      bullets: ["Designed and validated a reproducible agent workflow."],
+    }],
+  };
+
+  const result = await runFill(fields, packet);
+
+  assert.equal(result.ok, true);
+  assert.equal(name.value, "Agent reliability research");
+  assert.equal(role.value, "Project lead");
+  assert.equal(start.value, "2026-01");
+  assert.equal(end.value, "2026-08");
+  assert.equal(url.value, "https://github.com/example/project");
+  assert.equal(description.value, "Designed and validated a reproducible agent workflow.");
+  assert.equal(fillers.every((item) => item.value === ""), true);
 });
 
 test("auto-adds publication rows and binds every field within the same contaminated card", async () => {
