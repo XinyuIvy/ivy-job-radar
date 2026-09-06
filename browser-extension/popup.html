@@ -1,1 +1,55 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ivy Job Autofill</title><link rel="stylesheet" href="popup.css"></head><body><main><p class="eyebrow">IVY JOB RADAR · AUTOFILL V6.1</p><h1>Application Autofill</h1><p class="help">手动填写继续可用。后台队列会先完成规则字段，再通过 API 逐题理解自定义问题；填写后的页面会保留打开，由你检查并手动提交。</p><section id="automation" class="automation"><strong>自动填写队列</strong><span>正在读取…</span><button id="runAutomation" type="button">立即检查队列</button></section><section id="context" class="context"><strong>正在识别当前申请…</strong><span>如果无法唯一识别，可以从已提交申请中手动选择。</span></section><label id="candidateWrap" class="candidate hidden"><span>选择当前申请</span><select id="candidate"></select></label><label class="profile-language"><span>本次填写资料</span><select id="profileLanguage"><option value="zh">中文资料</option><option value="en">English profile</option></select><small>扩展会记住你的选择，直到你下次切换。</small></label><button id="fill" class="primary">填写当前申请页 + CV</button><button id="questions" class="hidden">复制未填问题</button><button id="import">从当前 Job Radar 页面导入连接</button><button id="options">编辑本地回退资料</button><p id="status" aria-live="polite"></p></main><script src="popup.js"></script><script src="manual-fallback.js"></script></body></html>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ivy Job Autofill</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <p class="eyebrow">IVY JOB RADAR · AUTOFILL V6.2</p>
+    <h1>Application Autofill</h1>
+    <p class="help">先选择一个已申请岗位，或直接选择当前 CV 母版。填写后页面会保持打开，由你检查并手动提交。</p>
+    <section id="automation" class="automation">
+      <strong>自动填写队列</strong>
+      <span>正在读取…</span>
+      <button id="runAutomation" type="button">立即检查队列</button>
+    </section>
+    <section id="context" class="context">
+      <strong>正在识别当前申请…</strong>
+      <span>也可以不使用岗位，直接选择一份实时母版。</span>
+    </section>
+    <label id="candidateWrap" class="candidate">
+      <span>填表与 CV 来源</span>
+      <select id="candidate"><option value="">正在读取岗位和母版…</option></select>
+      <small>岗位使用冻结资料；母版每次读取 GitHub 当前版本。</small>
+    </label>
+    <button id="refreshFreeze" class="secondary-action hidden" type="button">用最新母版更新该岗位的填表项目</button>
+    <label class="profile-language">
+      <span>本次固定资料语言</span>
+      <select id="profileLanguage">
+        <option value="zh">中文资料</option>
+        <option value="en">English profile</option>
+      </select>
+      <small>姓名、地址、教育等固定资料会使用这里选择的语言。</small>
+    </label>
+    <label class="profile-language project-placement">
+      <span>项目填写位置</span>
+      <select id="projectPlacement">
+        <option value="auto">自动判断</option>
+        <option value="project">Project Experience</option>
+        <option value="employment">Work Experience</option>
+      </select>
+      <small>页面没有 Project Experience 时，自动把每个项目逐条填入 Work Experience。</small>
+    </label>
+    <button id="fill" class="primary">按照所选来源填写 + 上传 CV</button>
+    <button id="questions" class="hidden">复制未填问题</button>
+    <button id="import">从当前 Job Radar 页面导入连接</button>
+    <button id="options">编辑本地回退资料</button>
+    <p id="status" aria-live="polite"></p>
+  </main>
+  <script src="popup.js"></script>
+  <script src="manual-fallback.js"></script>
+</body>
+</html>
