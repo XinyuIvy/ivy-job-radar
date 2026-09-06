@@ -185,13 +185,20 @@ function renderContext(context) {
   if (context.matched) {
     const app = context.application || {};
     const resume = context.resume || {};
+    const frozenCvLabel = context.templateFile
+      ? `保存岗位时选择的母版 ${context.templateFile} 已冻结`
+      : resume.source === "submitted"
+        ? "实际提交 CV 已冻结"
+        : resume.source === "template"
+          ? "所选 CV 母版已作为定稿绑定"
+          : "最终定制 CV 已绑定";
     if (Number(app.id) > 0) selectedApplicationRowId = Number(app.id);
     selectedTemplateFile = "";
     if (app.archiveId && context.templateFile && resume.source !== "customized") refreshFreezeButton.classList.remove("hidden");
     showContext(
       `${app.company || "当前申请"} · ${app.title || ""}`,
       resume.available
-        ? `${app.archiveId || app.applicationId} · ${resume.source === "submitted" ? "实际提交 CV 已冻结" : resume.source === "template" ? "所选 CV 母版已作为定稿绑定" : "最终定制 CV 已绑定"}；项目/经历来自对应定稿 CV，固定申请资料来自 global profile`
+        ? `${app.archiveId || app.applicationId} · ${frozenCvLabel}；项目/经历来自这份冻结 CV，固定申请资料来自 global profile`
         : `${app.archiveId || app.applicationId || "尚无 APP-ID"} · ${resume.reason === "final-pdf-not-found" ? "最终 PDF 尚未生成" : "尚未建立可用最终 CV"}`,
       resume.available ? "ok" : "warn",
     );
