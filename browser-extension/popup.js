@@ -8,6 +8,7 @@ const candidateWrap = document.getElementById("candidateWrap");
 const candidateSelect = document.getElementById("candidate");
 const refreshFreezeButton = document.getElementById("refreshFreeze");
 const profileLanguageSelect = document.getElementById("profileLanguage");
+const projectPlacementSelect = document.getElementById("projectPlacement");
 const automationBox = document.getElementById("automation");
 const runAutomationButton = document.getElementById("runAutomation");
 
@@ -41,13 +42,16 @@ async function ensureContentScript(tabId) {
 }
 
 async function getStored() {
-  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig", "ivyAutofillLanguage"]);
+  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig", "ivyAutofillLanguage", "ivyProjectPlacement"]);
 }
 
-async function restoreProfileLanguage() {
-  const { ivyAutofillLanguage } = await getStored();
+async function restoreAutofillPreferences() {
+  const { ivyAutofillLanguage, ivyProjectPlacement } = await getStored();
   if (ivyAutofillLanguage === "zh" || ivyAutofillLanguage === "en") {
     profileLanguageSelect.value = ivyAutofillLanguage;
+  }
+  if (["auto", "project", "employment"].includes(ivyProjectPlacement)) {
+    projectPlacementSelect.value = ivyProjectPlacement;
   }
 }
 
@@ -316,6 +320,10 @@ profileLanguageSelect.addEventListener("change", async () => {
   await chrome.storage.local.set({ ivyAutofillLanguage: profileLanguageSelect.value });
 });
 
+projectPlacementSelect.addEventListener("change", async () => {
+  await chrome.storage.local.set({ ivyProjectPlacement: projectPlacementSelect.value });
+});
+
 fillButton.addEventListener("click", async () => {
   fillButton.disabled = true;
   show("正在读取所选岗位或母版，并填写当前页面…");
@@ -353,6 +361,7 @@ fillButton.addEventListener("click", async () => {
       applicationPacket,
       generalProfile,
       profileLanguage: profileLanguageSelect.value,
+      projectPlacement: projectPlacementSelect.value,
     });
     if (!fillResult?.ok) return show(fillResult?.error || "自动填写失败。", "error");
 
@@ -384,7 +393,10 @@ fillButton.addEventListener("click", async () => {
     const sourceRecords = fillResult.sourceRecords
       ? `；来源记录：工作 ${fillResult.sourceRecords.experience || 0}、项目 ${fillResult.sourceRecords.projects || 0}、教育 ${fillResult.sourceRecords.education || 0}`
       : "";
-    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${sourceRecords}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
+    const projectRouting = fillResult.sourceRecords?.projects
+      ? fillResult.projectRouting === "employment" ? "；项目已逐条填入 Work Experience" : "；项目已填入 Project Experience"
+      : "";
+    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${sourceRecords}${projectRouting}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
   } catch (error) {
     show(`自动填写失败：${error.message || error}`, "error");
   } finally {
@@ -467,6 +479,6 @@ runAutomationButton.addEventListener("click", async () => {
   }
 });
 
-void restoreProfileLanguage();
+void restoreAutofillPreferences();
 void refreshContext(false);
 void refreshAutomation();
