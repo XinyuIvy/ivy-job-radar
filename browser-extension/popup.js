@@ -6,13 +6,16 @@ const questionsButton = document.getElementById("questions");
 const contextBox = document.getElementById("context");
 const candidateWrap = document.getElementById("candidateWrap");
 const candidateSelect = document.getElementById("candidate");
+const refreshFreezeButton = document.getElementById("refreshFreeze");
 const profileLanguageSelect = document.getElementById("profileLanguage");
+const projectPlacementSelect = document.getElementById("projectPlacement");
 const automationBox = document.getElementById("automation");
 const runAutomationButton = document.getElementById("runAutomation");
 
 let lastQuestions = [];
 let currentContext = null;
 let selectedApplicationRowId = 0;
+let selectedTemplateFile = "";
 
 function show(message, tone = "") {
   status.textContent = message;
@@ -39,13 +42,16 @@ async function ensureContentScript(tabId) {
 }
 
 async function getStored() {
-  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig", "ivyAutofillLanguage"]);
+  return chrome.storage.local.get(["ivyProfile", "ivyRadarConfig", "ivyAutofillLanguage", "ivyProjectPlacement"]);
 }
 
-async function restoreProfileLanguage() {
-  const { ivyAutofillLanguage } = await getStored();
+async function restoreAutofillPreferences() {
+  const { ivyAutofillLanguage, ivyProjectPlacement } = await getStored();
   if (ivyAutofillLanguage === "zh" || ivyAutofillLanguage === "en") {
     profileLanguageSelect.value = ivyAutofillLanguage;
+  }
+  if (["auto", "project", "employment"].includes(ivyProjectPlacement)) {
+    projectPlacementSelect.value = ivyProjectPlacement;
   }
 }
 
@@ -62,11 +68,12 @@ async function ensureRadarPermission(config, interactive) {
   return chrome.permissions.request({ origins });
 }
 
-async function fetchContext(config, jobUrl, applicationId = 0) {
+async function fetchContext(config, jobUrl, applicationId = 0, templateFile = "") {
   if (!config?.siteOrigin || !config?.accessKey) return null;
   const endpoint = new URL("/api/autofill/application-context", config.siteOrigin);
   endpoint.searchParams.set("jobUrl", jobUrl || "");
   if (applicationId) endpoint.searchParams.set("applicationId", String(applicationId));
+  if (templateFile) endpoint.searchParams.set("templateFile", templateFile);
   const response = await fetch(endpoint, {
     cache: "no-store",
     headers: { "X-Ivy-Autofill-Key": config.accessKey },
@@ -77,9 +84,11 @@ async function fetchContext(config, jobUrl, applicationId = 0) {
 }
 
 async function fetchApplicationPacket(config, context) {
-  if (!config?.siteOrigin || !config?.accessKey || !context?.matched || !context?.application?.id) return null;
+  if (!config?.siteOrigin || !config?.accessKey || !context?.selected) return null;
   const endpoint = new URL("/api/autofill/application-packet", config.siteOrigin);
-  endpoint.searchParams.set("applicationId", String(context.application.id));
+  if (context.selectionType === "template") endpoint.searchParams.set("templateFile", context.template.filename);
+  else if (context.application?.id) endpoint.searchParams.set("applicationId", String(context.application.id));
+  else return null;
   const response = await fetch(endpoint, {
     cache: "no-store",
     headers: { "X-Ivy-Autofill-Key": config.accessKey },
@@ -127,32 +136,52 @@ async function refreshAutomation() {
   }
 }
 
-function renderCandidates(context) {
+function renderSources(context) {
   const candidates = Array.isArray(context?.candidates) ? context.candidates : [];
+  const templates = Array.isArray(context?.templates) ? context.templates : [];
   candidateSelect.replaceChildren();
-  if (!candidates.length || context?.matched) {
-    candidateWrap.classList.add("hidden");
-    return;
-  }
   const blank = document.createElement("option");
   blank.value = "";
-  blank.textContent = "请选择已提交申请…";
+  blank.textContent = "请选择岗位或 CV 母版…";
   candidateSelect.append(blank);
+
+  const applicationGroup = document.createElement("optgroup");
+  applicationGroup.label = "已申请岗位 · 使用岗位冻结资料";
   for (const candidate of candidates) {
     const option = document.createElement("option");
-    option.value = String(candidate.id);
+    option.value = `application:${candidate.id}`;
     const location = candidate.location ? ` · ${candidate.location}` : "";
-    const appId = candidate.applicationId ? ` · ${candidate.applicationId}` : "";
+    const appId = candidate.archiveId || candidate.applicationId ? ` · ${candidate.archiveId || candidate.applicationId}` : "";
     option.textContent = `${candidate.company} · ${candidate.title}${location}${appId}`;
-    candidateSelect.append(option);
+    applicationGroup.append(option);
+  }
+  if (applicationGroup.children.length) candidateSelect.append(applicationGroup);
+
+  for (const language of ["zh", "en"]) {
+    const group = document.createElement("optgroup");
+    group.label = language === "zh" ? "中文 CV 母版 · 实时最新版" : "English CV templates · live";
+    for (const template of templates.filter((item) => item.language === language)) {
+      const option = document.createElement("option");
+      option.value = `template:${template.filename}`;
+      option.textContent = `${template.label} · ${template.filename}`;
+      group.append(option);
+    }
+    if (group.children.length) candidateSelect.append(group);
+  }
+
+  if (context?.selectionType === "application" && context.application?.id) {
+    candidateSelect.value = `application:${context.application.id}`;
+  } else if (context?.selectionType === "template" && context.template?.filename) {
+    candidateSelect.value = `template:${context.template.filename}`;
   }
   candidateWrap.classList.remove("hidden");
 }
 
 function renderContext(context) {
   currentContext = context;
-  renderCandidates(context);
+  renderSources(context);
   contextBox.dataset.matched = context?.matched ? "true" : "false";
+  refreshFreezeButton.classList.add("hidden");
   if (!context) {
     showContext("尚未连接 Job Radar", "先到 /autofill 保存资料，并用下面的导入按钮同步到扩展。", "warn");
     return;
@@ -160,12 +189,34 @@ function renderContext(context) {
   if (context.matched) {
     const app = context.application || {};
     const resume = context.resume || {};
+    const frozenCvLabel = context.templateFile
+      ? `保存岗位时选择的母版 ${context.templateFile} 已冻结`
+      : resume.source === "submitted"
+        ? "实际提交 CV 已冻结"
+        : resume.source === "template"
+          ? "所选 CV 母版已作为定稿绑定"
+          : "最终定制 CV 已绑定";
     if (Number(app.id) > 0) selectedApplicationRowId = Number(app.id);
+    selectedTemplateFile = "";
+    if (app.archiveId && context.templateFile && resume.source !== "customized") refreshFreezeButton.classList.remove("hidden");
     showContext(
       `${app.company || "当前申请"} · ${app.title || ""}`,
       resume.available
-        ? `${app.archiveId || app.applicationId} · 最终定制 CV 已绑定；项目/经历来自该 APP，固定申请资料来自 global profile`
+        ? `${app.archiveId || app.applicationId} · ${frozenCvLabel}；项目/经历来自这份冻结 CV，固定申请资料来自 global profile`
         : `${app.archiveId || app.applicationId || "尚无 APP-ID"} · ${resume.reason === "final-pdf-not-found" ? "最终 PDF 尚未生成" : "尚未建立可用最终 CV"}`,
+      resume.available ? "ok" : "warn",
+    );
+    return;
+  }
+  if (context.selected && context.selectionType === "template") {
+    selectedApplicationRowId = 0;
+    selectedTemplateFile = context.template?.filename || "";
+    const resume = context.resume || {};
+    showContext(
+      `实时母版 · ${context.template?.label || selectedTemplateFile}`,
+      resume.available
+        ? "填表项目、工作经历和 PDF 每次都从 GitHub 当前母版读取，不绑定任何岗位。"
+        : "已找到母版源文件，但当前同名 PDF 不可用。",
       resume.available ? "ok" : "warn",
     );
     return;
@@ -175,13 +226,13 @@ function renderContext(context) {
     showContext(
       ambiguous ? "自动匹配到多个已提交申请" : "没有自动匹配到已提交申请",
       ambiguous
-        ? "请在下方手动选择当前岗位；不会猜测并上传错误 CV。"
-        : "没关系，可以在下方从已提交申请中手动选择当前岗位。",
+        ? "请在下方选择正确岗位，或直接选择一份 CV 母版。"
+        : "可以在下方选择一个已申请岗位，也可以直接选择 CV 母版。",
       "warn",
     );
     return;
   }
-  showContext("没有可选的已提交申请", "仍可使用 global profile 和本地标准资料填写固定字段，但不会使用 application-specific 项目或 CV。", "warn");
+  showContext("尚未选择填表来源", "请选择一个岗位或 CV 母版。", "warn");
 }
 
 async function refreshContext(interactive = false) {
@@ -223,9 +274,11 @@ function bufferToBase64(buffer) {
 }
 
 async function attachResume(tabId, config, context) {
-  if (!context?.matched || !context?.resume?.available || !context?.application?.id) return { uploaded: 0, reason: "not-available" };
+  if (!context?.selected || !context?.resume?.available) return { uploaded: 0, reason: "not-available" };
   const endpoint = new URL("/api/autofill/resume", config.siteOrigin);
-  endpoint.searchParams.set("applicationId", String(context.application.id));
+  if (context.selectionType === "template") endpoint.searchParams.set("templateFile", context.template.filename);
+  else if (context.application?.id) endpoint.searchParams.set("applicationId", String(context.application.id));
+  else return { uploaded: 0, reason: "not-available" };
   const response = await fetch(endpoint, {
     cache: "no-store",
     headers: { "X-Ivy-Autofill-Key": config.accessKey },
@@ -244,14 +297,19 @@ async function attachResume(tabId, config, context) {
 }
 
 candidateSelect.addEventListener("change", async () => {
-  const applicationId = Number(candidateSelect.value);
-  if (!applicationId) return;
+  const value = candidateSelect.value;
+  if (!value) return;
+  const [kind, rawValue] = value.includes(":") ? value.split(":", 2) : ["application", value];
+  const applicationId = kind === "application" ? Number(rawValue) : 0;
+  const templateFile = kind === "template" ? rawValue : "";
+  if (!applicationId && !templateFile) return;
   selectedApplicationRowId = applicationId;
+  selectedTemplateFile = templateFile;
   const tab = await activeTab();
   const { ivyRadarConfig } = await getStored();
   if (!tab?.url || !ivyRadarConfig) return;
   try {
-    const context = await fetchContext(ivyRadarConfig, tab.url, applicationId);
+    const context = await fetchContext(ivyRadarConfig, tab.url, applicationId, templateFile);
     renderContext(context);
   } catch (error) {
     show(String(error.message || error), "error");
@@ -262,9 +320,13 @@ profileLanguageSelect.addEventListener("change", async () => {
   await chrome.storage.local.set({ ivyAutofillLanguage: profileLanguageSelect.value });
 });
 
+projectPlacementSelect.addEventListener("change", async () => {
+  await chrome.storage.local.set({ ivyProjectPlacement: projectPlacementSelect.value });
+});
+
 fillButton.addEventListener("click", async () => {
   fillButton.disabled = true;
-  show("正在读取 global profile、识别当前 APP 并填写页面…");
+  show("正在读取所选岗位或母版，并填写当前页面…");
   try {
     const tab = await activeTab();
     if (!tab?.id || !/^https?:/i.test(tab.url || "")) return show("请先打开招聘申请页面。", "error");
@@ -276,13 +338,15 @@ fillButton.addEventListener("click", async () => {
     let generalProfile = null;
     let globalProfileWarning = "";
     if (stored.ivyRadarConfig && await ensureRadarPermission(stored.ivyRadarConfig, true)) {
-      const selectedId = Number(
-        currentContext?.matched && currentContext?.application?.id
-          ? currentContext.application.id
-          : selectedApplicationRowId || candidateSelect.value || 0,
-      );
-      context = await fetchContext(stored.ivyRadarConfig, tab.url, selectedId);
+      const selectedId = Number(currentContext?.selectionType === "application" && currentContext?.application?.id
+        ? currentContext.application.id
+        : selectedApplicationRowId || 0);
+      const templateFile = currentContext?.selectionType === "template"
+        ? currentContext.template?.filename || ""
+        : selectedTemplateFile;
+      context = await fetchContext(stored.ivyRadarConfig, tab.url, selectedId, templateFile);
       renderContext(context);
+      if (!context?.selected) return show("请先从下拉菜单选择一个岗位或 CV 母版。", "error");
       applicationPacket = await fetchApplicationPacket(stored.ivyRadarConfig, context);
       try {
         generalProfile = await fetchGlobalProfile(stored.ivyRadarConfig);
@@ -297,6 +361,7 @@ fillButton.addEventListener("click", async () => {
       applicationPacket,
       generalProfile,
       profileLanguage: profileLanguageSelect.value,
+      projectPlacement: projectPlacementSelect.value,
     });
     if (!fillResult?.ok) return show(fillResult?.error || "自动填写失败。", "error");
 
@@ -304,22 +369,65 @@ fillButton.addEventListener("click", async () => {
     questionsButton.classList.toggle("hidden", lastQuestions.length === 0);
 
     let uploadResult = { uploaded: 0, reason: "not-available" };
-    if (stored.ivyRadarConfig && context?.matched && context?.resume?.available) {
+    if (stored.ivyRadarConfig && context?.selected && context?.resume?.available) {
       uploadResult = await attachResume(tab.id, stored.ivyRadarConfig, context);
     }
 
     const sensitive = fillResult.skippedSensitive?.length ? "；敏感/EEO 项已跳过" : "";
-    const cv = uploadResult?.uploaded ? "；已上传对应定制 CV" : context?.matched ? "；未上传 CV（最终 PDF 不可用或页面未找到 Resume 字段）" : "；未绑定 application-specific CV";
-    const appData = applicationPacket ? `；项目/经历来自 ${applicationPacket.application_id || context?.application?.archiveId || "当前 APP"} 最终 CV` : context?.matched ? "；未找到最终 CV 的结构化经历包" : "";
+    const cv = uploadResult?.uploaded
+      ? context?.selectionType === "template" ? "；已上传 GitHub 当前母版 CV" : context?.resume?.source === "submitted" ? "；已上传冻结的实际提交 CV" : context?.resume?.source === "template" ? "；已上传保存岗位时选择的母版 CV" : "；已上传对应定制 CV"
+      : context?.selected ? "；未上传 CV（PDF 不可用或页面未找到 Resume 字段）" : "；未选择 CV 来源";
+    const appData = applicationPacket
+      ? applicationPacket.provenance === "live_template"
+        ? `；项目/经历来自实时母版 ${context?.template?.filename || ""}`
+        : applicationPacket.provenance === "refreshed_template_autofill"
+          ? `；项目/经历来自 ${applicationPacket.application_id || "当前 APP"} 更新后的母版条目`
+          : applicationPacket.provenance === "frozen_submitted_template"
+        ? `；项目/经历来自 ${applicationPacket.application_id || context?.application?.archiveId || "当前 APP"} 冻结母版`
+        : `；项目/经历来自 ${applicationPacket.application_id || context?.application?.archiveId || "当前 APP"} 最终定制 CV`
+      : context?.selected ? "；未找到所选来源的结构化经历包" : "";
     const globalData = generalProfile ? "；固定教育/申请字段已合并 global profile" : "";
     const unresolved = lastQuestions.length ? `；另有 ${lastQuestions.length} 个未填问题` : "";
     const fieldKinds = Array.isArray(fillResult.fields) ? fillResult.fields.length : 0;
     const fieldSummary = fieldKinds ? `（${fieldKinds} 类字段）` : "";
-    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
+    const sourceRecords = fillResult.sourceRecords
+      ? `；来源记录：工作 ${fillResult.sourceRecords.experience || 0}、项目 ${fillResult.sourceRecords.projects || 0}、教育 ${fillResult.sourceRecords.education || 0}`
+      : "";
+    const projectRouting = fillResult.sourceRecords?.projects
+      ? fillResult.projectRouting === "employment" ? "；项目已逐条填入 Work Experience" : "；项目已填入 Project Experience"
+      : "";
+    show(`${fillResult.platform}: 已写入 ${fillResult.filled} 个表单控件${fieldSummary}${sourceRecords}${projectRouting}${globalData}${appData}${cv}${unresolved}${sensitive}${globalProfileWarning}。请逐栏检查后手动提交。`, fillResult.filled || uploadResult?.uploaded ? "ok" : "warn");
   } catch (error) {
     show(`自动填写失败：${error.message || error}`, "error");
   } finally {
     fillButton.disabled = false;
+  }
+});
+
+refreshFreezeButton.addEventListener("click", async () => {
+  const applicationId = Number(currentContext?.application?.id || selectedApplicationRowId || 0);
+  if (!applicationId) return show("请先选择一个已申请岗位。", "error");
+  refreshFreezeButton.disabled = true;
+  show("正在用 GitHub 当前母版更新该岗位的项目和经历条目…");
+  try {
+    const { ivyRadarConfig } = await getStored();
+    if (!ivyRadarConfig?.siteOrigin || !ivyRadarConfig?.accessKey) throw new Error("尚未连接 Job Radar。");
+    const endpoint = new URL("/api/autofill/application-packet", ivyRadarConfig.siteOrigin);
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Ivy-Autofill-Key": ivyRadarConfig.accessKey,
+      },
+      body: JSON.stringify({ applicationId }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.ok) throw new Error(result.error || `更新失败 (${response.status})`);
+    show(`已更新 ${result.experienceCount || 0} 条经历和 ${result.projectCount || 0} 个项目。原来冻结的 JD 和提交 PDF 没有改动。`, "ok");
+  } catch (error) {
+    show(`更新冻结项目失败：${error.message || error}`, "error");
+  } finally {
+    refreshFreezeButton.disabled = false;
   }
 });
 
@@ -371,6 +479,6 @@ runAutomationButton.addEventListener("click", async () => {
   }
 });
 
-void restoreProfileLanguage();
+void restoreAutofillPreferences();
 void refreshContext(false);
 void refreshAutomation();
