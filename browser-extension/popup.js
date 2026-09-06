@@ -391,7 +391,7 @@ fillButton.addEventListener("click", async () => {
     const fieldKinds = Array.isArray(fillResult.fields) ? fillResult.fields.length : 0;
     const fieldSummary = fieldKinds ? `（${fieldKinds} 类字段）` : "";
     const sourceRecords = fillResult.sourceRecords
-      ? `；来源记录：工作 ${fillResult.sourceRecords.experience || 0}、项目 ${fillResult.sourceRecords.projects || 0}、教育 ${fillResult.sourceRecords.education || 0}`
+      ? `；来源记录：工作 ${fillResult.sourceRecords.experience || 0}、项目 ${fillResult.sourceRecords.projects || 0}、教育 ${fillResult.sourceRecords.education || 0}、技能 ${fillResult.sourceRecords.skills || 0}`
       : "";
     const projectRouting = fillResult.sourceRecords?.projects
       ? fillResult.projectRouting === "employment" ? "；项目已逐条填入 Work Experience" : "；项目已填入 Project Experience"
