@@ -1,5 +1,5 @@
 (() => {
-  const CONTENT_SCRIPT_VERSION = "0.6.8";
+  const CONTENT_SCRIPT_VERSION = "0.6.9";
   if (window.__ivyJobAutofillLoaded === CONTENT_SCRIPT_VERSION) return;
   window.__ivyJobAutofillLoaded = CONTENT_SCRIPT_VERSION;
 
@@ -190,7 +190,7 @@
     ["project.description", /\b(project description|project summary|research description)\b|项目描述|项目简介|研究描述/],
     ["project.name", /\b(project name|project title|research project title)\b|项目名称|项目标题/],
     ["project.role", /\b(project role|research role|role in project|project contribution)\b|项目角色|项目职责/],
-    ["cv.skills", /\b(technical skills|key skills|skills)\b|专业技能|技能清单/],
+    ["cv.skills", /\b(technical skills|key skills|skills?)\b|专业技能|技术技能|技能清单|技能名称/],
     ["cv.publications", /\b(selected publications|publications|publication list)\b|论文列表|代表论文/],
     ["publication.title", /\b(publication title|paper title|article title)\b|论文名称|论文题目/],
     ["publication.authorOrder", /\b(author order|authorship|author position)\b|作者顺序|作者位次/],
@@ -342,7 +342,7 @@
       if (el instanceof HTMLTextAreaElement) return "portfolio.description";
       return "portfolio.url";
     }
-    if (section === "skills" && el instanceof HTMLTextAreaElement) return "cv.skills";
+    if (section === "skills") return el instanceof HTMLTextAreaElement ? "cv.skills" : "cv.skillItem";
     return null;
   }
 
@@ -461,6 +461,27 @@
   function bulletText(entry) {
     if (Array.isArray(entry?.bullets)) return entry.bullets.filter(Boolean).join("\n");
     return String(entry?.description || entry?.summary || "").trim();
+  }
+
+  function packetSkillItems(packet) {
+    const categories = Array.isArray(packet?.skills) ? packet.skills : [];
+    const items = categories.flatMap((category) => {
+      if (typeof category === "string") return category.split(/[;；]/);
+      return Array.isArray(category?.items) ? category.items : [];
+    });
+    return [...new Set(items.map((item) => String(item || "").trim()).filter(Boolean))];
+  }
+
+  function skillAliases(value) {
+    const clean = String(value || "").trim();
+    const withoutParenthetical = clean.replace(/\s*[（(][^）)]*[）)]\s*/g, " ").trim();
+    const slashParts = clean.split("/").map((item) => item.trim()).filter(Boolean);
+    const aliases = [withoutParenthetical, ...slashParts];
+    if (/git\s*\/\s*github/i.test(clean)) aliases.push("Git", "GitHub");
+    if (/logistic\s*\/\s*lasso/i.test(clean)) aliases.push("Logistic Regression", "LASSO Regression", "Lasso");
+    if (/real[- ]world evidence|真实世界证据/i.test(clean)) aliases.push("Real World Evidence", "RWE");
+    if (/large language model|大语言模型|\bllm\b/i.test(clean)) aliases.push("Large Language Models", "LLM");
+    return [...new Set(aliases.filter((item) => item && item !== clean))];
   }
 
   function yearMonthNumber(value) {
@@ -665,9 +686,7 @@
     }
 
     if (key === "cv.skills") {
-      const categories = Array.isArray(packet.skills) ? packet.skills : [];
-      const items = categories.flatMap((category) => Array.isArray(category.items) ? category.items : []);
-      return { handled: true, value: [...new Set(items)].join(", ") };
+      return { handled: true, value: packetSkillItems(packet).join(", ") };
     }
 
     if (key === "cv.publications") {
@@ -1313,6 +1332,29 @@
     return Boolean(editableInput && !el.readOnly && el.value);
   }
 
+  async function setSkillCombobox(el, value, aliases = []) {
+    if (!value || !el || el.disabled) return false;
+    const candidates = candidateValues(value, aliases);
+    const wanted = candidates.map(normalize);
+    const editableInput = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      el.click();
+      if (editableInput && !el.readOnly) setText(el, value);
+      await new Promise((resolve) => setTimeout(resolve, 120 + attempt * 120));
+      const options = Array.from(document.querySelectorAll('[role="option"], [data-automation-id="promptOption"], .select__option'))
+        .filter(visible);
+      let match = options.find((option) => wanted.includes(normalize(option.textContent)));
+      if (!match) match = options.find((option) => wanted.some((candidate) => normalize(option.textContent).includes(candidate) || candidate.includes(normalize(option.textContent))));
+      if (match) {
+        match.click();
+        dispatch(el);
+        return true;
+      }
+    }
+    if (editableInput && !el.readOnly) setText(el, "");
+    return false;
+  }
+
   function isEmpty(el) {
     if (el instanceof HTMLInputElement && ["radio", "checkbox"].includes(el.type)) {
       if (!el.name) return !el.checked;
@@ -1378,6 +1420,7 @@
       language: "language.name",
       portfolio: "portfolio.url",
       campus: "campus.organization",
+      skills: "cv.skills",
     };
     if (identityKeys[section] && directKey === identityKeys[section]) return true;
     const nearbyKey = inferKey(nearbyLabelText(el));
@@ -1403,6 +1446,9 @@
     if (section === "project") {
       return /(?:^| )(?:项目题目|项目名称|project name|project title)(?: |$)/.test(directText)
         || semanticKey === "project.name";
+    }
+    if (section === "skills") {
+      return directKey === "cv.skills" || semanticKey === "cv.skillItem";
     }
     return false;
   }
@@ -1465,7 +1511,7 @@
   async function ensureRepeatedRows(section, desired) {
     if (!desired || !sectionIdentityControls(section).length) return 0;
     let added = 0;
-    for (let attempt = 0; attempt < Math.min(desired, 20); attempt += 1) {
+    for (let attempt = 0; attempt < Math.min(desired, 50); attempt += 1) {
       const current = sectionIdentityControls(section).length;
       if (current >= desired) break;
       const buttons = Array.from(document.querySelectorAll('button, [role="button"], input[type="button"]'))
@@ -1571,6 +1617,68 @@
       : ["education.degree", "education.degreeType"].includes(key) ? degreeAliases
         : key === "education.major" ? [entry?.major, localizedProfileText(entry?.major, !chinese)] : [];
     return { value: String(values[key] || "").trim(), aliases: aliases.filter(Boolean).map(String) };
+  }
+
+  function skillEntryControls() {
+    return Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="button"]), select, [role="combobox"]'))
+      .filter(visible)
+      .filter((el) => {
+        if (inferKey(directFieldText(el)) === "cv.skills" || inferKey(nearbyLabelText(el)) === "cv.skills") return true;
+        return ancestorSectionInfo(el).section === "skills";
+      });
+  }
+
+  function isSkillCombobox(el) {
+    return el instanceof HTMLSelectElement
+      || el.getAttribute?.("role") === "combobox"
+      || Boolean(el.getAttribute?.("aria-autocomplete"));
+  }
+
+  async function revealSkillEntryControls() {
+    let controls = skillEntryControls();
+    if (controls.length) return controls;
+    const buttons = Array.from(document.querySelectorAll('button, [role="button"], input[type="button"]'))
+      .filter(visible)
+      .filter((button) => /^(?:\+\s*)?(?:add skills?|add|添加技能|新增技能|添加|新增)$/i.test(String(button.textContent || button.value || "").trim()))
+      .filter((button) => buttonBelongsToSection(button, "skills"));
+    const button = buttons[buttons.length - 1];
+    if (!button) return controls;
+    button.click();
+    for (let attempt = 0; attempt < 16; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 60));
+      controls = skillEntryControls();
+      if (controls.length) break;
+    }
+    return controls;
+  }
+
+  async function fillSkillRecords(applicationPacket) {
+    if (!packetIsAuthoritative(applicationPacket)) return { filled: 0, fields: [] };
+    const items = packetSkillItems(applicationPacket);
+    const controls = skillEntryControls();
+    if (!items.length || !controls.length) return { filled: 0, fields: [] };
+    const comboboxes = controls.filter(isSkillCombobox);
+    let filled = 0;
+    const fields = [];
+    if (comboboxes.length) {
+      for (const item of items) {
+        const currentControls = skillEntryControls().filter(isSkillCombobox);
+        const target = currentControls.find(isEmpty) || currentControls[currentControls.length - 1] || comboboxes[0];
+        if (target && await setSkillCombobox(target, item, skillAliases(item))) {
+          filled += 1;
+          fields.push("cv.skillItem");
+        }
+      }
+    } else if (controls.length > 1) {
+      for (let index = 0; index < Math.min(items.length, controls.length); index += 1) {
+        if (await fillMappedControl(controls[index], "cv.skillItem", items[index], skillAliases(items[index]))) {
+          filled += 1;
+          fields.push("cv.skillItem");
+        }
+      }
+    }
+    if (filled) fields.push("cv.skillRecords");
+    return { filled, fields };
   }
 
   async function fillEducationRecords(generalProfile, profileLanguage = "") {
@@ -1813,6 +1921,8 @@
     const experienceCount = packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.experience)
       ? applicationPacket.experience.length
       : 0;
+    const skillCount = packetIsAuthoritative(applicationPacket) ? packetSkillItems(applicationPacket).length : 0;
+    if (skillCount) await revealSkillEntryControls();
     const initialProjectRowsAvailable = sectionIdentityControls("project").length > 0;
     const initialEmploymentRowsAvailable = sectionIdentityControls("employment").length > 0;
     const routeProjectsToEmployment = projectCount > 0 && initialEmploymentRowsAvailable && (
@@ -1827,17 +1937,20 @@
       award: Array.isArray(generalProfile?.awards) ? generalProfile.awards.length : 0,
       language: Array.isArray(generalProfile?.languages) ? generalProfile.languages.length : 0,
       portfolio: Array.isArray(generalProfile?.portfolio) ? generalProfile.portfolio.length : 0,
+      skills: skillCount,
       campus: Math.max(
         Array.isArray(generalProfile?.campus_experiences) ? generalProfile.campus_experiences.length : 0,
         packetIsAuthoritative(applicationPacket) && Array.isArray(applicationPacket.campus_experiences) ? applicationPacket.campus_experiences.length : 0,
       ),
     };
     const addedRows = {};
-    for (const section of ["publication", "project", "education", "employment", "award", "language", "portfolio", "campus"]) {
+    for (const section of ["publication", "project", "education", "employment", "award", "language", "portfolio", "skills", "campus"]) {
       addedRows[section] = await ensureRepeatedRows(section, desiredRows[section]);
     }
     const structuredProjectRowsAvailable = sectionIdentityControls("project").length > 0;
     const structuredEmploymentRowsAvailable = sectionIdentityControls("employment").length > 0;
+    const skillControls = skillEntryControls();
+    const structuredSkillRecordsAvailable = skillControls.length > 1 || skillControls.some(isSkillCombobox);
     const elements = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select, [role="combobox"]'));
     const descriptors = elements.map((el) => ({ el, directText: directFieldText(el), text: fieldText(el), sectionInfo: ancestorSectionInfo(el) }));
     let filled = 0;
@@ -1875,6 +1988,7 @@
       if (routeProjectsToEmployment && key.startsWith("project.")) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("project.") && structuredProjectRowsAvailable) continue;
       if (packetIsAuthoritative(applicationPacket) && key.startsWith("employment.") && structuredEmploymentRowsAvailable) continue;
+      if (structuredSkillRecordsAvailable && ["cv.skills", "cv.skillItem"].includes(key)) continue;
       const { value, aliases } = resolveValue(profile, generalProfile, applicationPacket, key, packetCounters, globalCounters, generalEntryCounters, profileLanguage);
       if (!value) continue;
       const changed = await fillMappedControl(el, key, value, aliases);
@@ -1889,8 +2003,9 @@
     const publicationRecords = await fillPublicationRecords(generalProfile, profileLanguage);
     const projectRecords = routeProjectsToEmployment ? { filled: 0, fields: [] } : await fillProjectRecords(applicationPacket);
     const employmentRecords = await fillEmploymentRecords(applicationPacket, generalProfile, profileLanguage, routeProjectsToEmployment);
-    filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled + employmentRecords.filled;
-    fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields, ...employmentRecords.fields);
+    const skillRecords = structuredSkillRecordsAvailable ? await fillSkillRecords(applicationPacket) : { filled: 0, fields: [] };
+    filled += educationRecords.filled + publicationRecords.filled + projectRecords.filled + employmentRecords.filled + skillRecords.filled;
+    fields.push(...educationRecords.fields, ...publicationRecords.fields, ...projectRecords.fields, ...employmentRecords.fields, ...skillRecords.fields);
 
     const correctedEducationDates = globalProfileIsAuthoritative(generalProfile) ? 0 : await correctEducationPeriods(generalProfile);
     const correctedProjectDates = routeProjectsToEmployment ? 0 : await correctProjectPeriods(applicationPacket);
@@ -1914,6 +2029,7 @@
         experience: Array.isArray(applicationPacket?.experience) ? applicationPacket.experience.length : 0,
         projects: Array.isArray(applicationPacket?.projects) ? applicationPacket.projects.length : 0,
         education: Array.isArray(generalProfile?.education) ? generalProfile.education.length : 0,
+        skills: packetSkillItems(applicationPacket).length,
       },
     };
   }
