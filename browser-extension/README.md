@@ -1,77 +1,168 @@
-# Ivy Job Radar Application Autofill (V6.1)
+# Ivy Job Radar Application Autofill 0.6.9
 
-Chrome Manifest V3 extension for manual autofill and guarded application-automation pilots.
+Ivy Job Radar Autofill 是一个 Chrome Manifest V3 扩展，用于从 Ivy Job Radar、CV 仓库和私有申请档案中读取已确认资料，填写招聘网站的申请表并上传正确的 CV。
 
-## What it does
+扩展只负责准备表单。它不会点击最终 Submit，也不会绕过验证码、登录或网站的安全验证。
 
-- Fills stable profile fields such as identity, contact, address, professional links, work authorization, sponsorship, relocation and other configured application fields.
-- Uses generic label/name/placeholder matching plus custom combobox support so it works across Greenhouse, Lever, Ashby, Workday and many custom ATS pages.
-- Keeps the manual **填写当前申请页 + CV** flow and also polls Job Radar every five minutes for an approved automation task while Chrome is running.
-- Stores the cross-application profile in `chrome.storage.local` on the user's browser.
-- Imports both the saved profile and a derived Job Radar bridge key from Ivy Job Radar `/autofill`.
-- Matches the current job page to the user's **待提交申请** record using exact URL, stable job ID, or canonical URL. If the page is ambiguous, it asks the user to choose instead of guessing.
-- Uses the matched `APP-ID` as the application-specific source key.
-- After the final customized CV is built, `job-application-archive` generates `application_autofill_<APP-ID>.json` directly from `cv_customized_<APP-ID>.tex`. The packet preserves the final CV's Education, Industry Experience, Research/Projects, Skills and Publications order and wording.
-- Education, employment, project, skills and publication form fields prefer that APP-specific packet. Project date pairs labelled as “起止时间”, project textareas labelled only as “描述”, and project fields labelled only as “角色 / Role” are recognized from their surrounding project block. Role wording such as “第一作者” or “独立开发者” is copied from the finalized packet rather than guessed from the description. The manually maintained standard profile is only a fallback when no finalized packet exists.
-- V4.3 binds the first three education blocks as doctorate, master's and bachelor's entries and overwrites stale parser values as a complete block, so school, degree, major and dates cannot drift into different records.
-- V4.8 fills education inside the primary click handler instead of skipping it and waiting for a supplemental script. Three manually opened blank education cards are bound by DOM order as doctorate, master's, and bachelor's records; dates adapt to month or full-day controls.
-- V4.9 preserves every value already present on the application page and fills only genuinely blank controls across education, projects, employment, publications, awards, and other supported sections.
-- V4.10 recognizes publication cards from their title input, author and venue selectors, date control, and details textarea even when the recruiting site does not associate visible labels with those controls.
-- V4.11 auto-adds verified repeated rows for education, employment/internships, projects, awards, languages, portfolio links, campus activities, and publications. It clicks only the explicit Add button inside the matching section and does not create rows when no authoritative records exist.
-- V4.11 fills a publication Level selector only from the stored per-venue ranking record. The profile keeps the ranking year, JCR/CAS/CCF evidence, selected Level, and source URL; unranked conferences and preprint servers remain blank.
-- V4.14 keeps the explicit Chinese profile / English profile selector and adds bilingual birthplace, native place, gender, awards, publication descriptions, DOI links, and separate verified journal-ranking fields.
-- V5.0 adds a background task runner. It claims only a Job Radar task whose tailored CV and structured application decision are ready, opens the exact job URL, fills blank fields, uploads that task's CV, and performs a final form audit.
-- V6.1 never clicks the final submit button. After an approved batch is ready, it processes up to ten tasks, keeps every application tab open, and leaves the final review and submission to the user.
-- V6.0 adds API-based semantic question handling after deterministic autofill. It sends only unresolved, non-sensitive application questions together with the verified JD and a privacy-reduced career profile, then fills only answers supported with at least 90 percent confidence.
-- V6.0 keeps confirmed salary, relocation, non-compete and selected demographic answers in the private Job Radar profile. Confirmed demographic values are filled locally and are never sent to the model. SSN is not stored or filled.
-- V6.1 processes an approved batch with two guarded workers so multiple forms can be prepared without overwhelming the browser. Every completed or recoverable application tab remains open for manual inspection.
-- Date controls are detected from type, placeholder, surrounding block and accepted-value feedback. Month controls receive `YYYY-MM`; full-date controls receive `YYYY-MM-DD` with the first day for a start/neutral month and the last day for an end month when only month precision is available.
-- Education, employment/internship, project, language, portfolio, skills, awards and publications are inferred from section meaning plus control structure, not only exact labels. In an award block, date/select/textarea controls map to award date/type/details. In a publication block, title/date/select/textarea controls map to title, publication date, author order or venue, and details. Low-confidence fields remain empty instead of being guessed.
-- V4.7 reads each control's direct label before using section structure, so a card containing every publication/project label cannot cross-wire title, date, author, venue, role, or details fields.
-- V4.7 actively clicks the section's explicit Add button and waits for the page to render each new row before continuing. Publication rows use the complete global published/review/revision/preprint list; project rows use only the current APP's finalized project list.
-- V4.7 binds a whole publication or project record to one rendered row. A publication tier selector such as Level 1/2/3 is filled only from an explicit authoritative tier; a journal name is never used to guess the tier. Publication details contain the verified research summary rather than the journal name.
-- V4.7 fills the confirmed phone, native place, ethnicity, date of birth, and WeChat fields from the global profile; sensitive fields remain blocked unless explicitly supported by a confirmed profile key.
-- V4.5 binds every education card to one complete doctorate, master's, or bachelor's record before writing any field; unverified full dates are cleared instead of guessed.
-- V4.5 freezes semantic section classification before writing, isolates employment descriptions from awards, and compensates one-day timezone shifts in full-date controls.
-- V4.4 handles `div`-based ARIA comboboxes without invoking native input setters on non-input elements.
-- Repeated language blocks fill only the language name (`中文 / 普通话`, `英语`). Proficiency remains manual because recruiting-site option labels vary.
-- Repeated award blocks fill the verified year, award name and description. Award attachments remain manual.
-- Repeated portfolio blocks fill AI Usage Dashboard and Ivy Job Radar URLs plus their verified descriptions. Portfolio attachments remain manual.
-- When the matched application already has `cv_customized_<APP-ID>.pdf` in the private archive, downloads it through an authenticated Job Radar endpoint and attaches it only to a Resume/CV file input.
-- Surfaces unresolved required/open-ended questions and lets the user copy them for review or drafting in Chat.
+## 它可以填写什么
 
-## Safety boundaries
+- 中英文姓名、联系方式、地址和职业链接
+- 工作授权、Sponsorship、搬迁意愿和已确认的固定问答
+- 教育经历、工作与实习经历、项目经历
+- 论文、获奖、语言、作品链接和校园经历
+- CV 中的 Skills，既支持整段文本框，也支持需要逐项添加的技能选择控件
+- 规则无法识别的非敏感自定义问题，但只有在事实证据充分且置信度达到配置要求时才填写
+- 与当前申请对应的 PDF CV
 
-- Never clicks a final Submit / Finish action. The user reviews every retained application tab and submits manually.
-- Never sends EEO, race, ethnicity, gender, disability, veteran, religion, date-of-birth, SSN or similar sensitive questions to the model. Only locally stored values explicitly confirmed by the user may fill supported demographic controls.
-- Never stores or auto-fills SSN, financial credentials, passwords, or identity-document numbers.
-- Never guesses which application-specific CV or experience packet to use when multiple pending applications share the same recruiting portal URL.
-- Never fills cover-letter, transcript, portfolio or other non-resume file inputs with the CV.
-- Does not bypass CAPTCHA or anti-bot controls.
-- Open-ended questions are answered only from verified facts and the JD. Missing evidence, ambiguity, or legal attestation sends the task to review.
-- Application-specific CV/packet retrieval requires the derived Job Radar autofill key and private archive server credentials; the private GitHub token is never stored in the extension.
-- The APP-specific packet is generated only from the final customized CV; it does not add projects or claims that are absent from that CV.
+扩展支持常见 input、textarea、select、日期控件、ARIA combobox 和动态重复卡片。它主要面向 Greenhouse、Lever、Ashby、Workday 及具有类似表单结构的自定义 ATS。
 
-## Install locally in Chrome
+## 三类资料来源
 
-1. Clone or download this repository.
-2. Open `chrome://extensions`.
-3. Turn on **Developer mode**.
-4. Click **Load unpacked**.
-5. Select this `browser-extension/` directory.
-6. Open Ivy Job Radar `/autofill`, save the profile, then open the extension and click **从当前 Job Radar 页面导入资料**.
-7. Chrome will ask once for permission to access that Job Radar site origin so the extension can retrieve your own application context and finalized CV data.
+| 来源 | 用途 | 更新方式 |
+|---|---|---|
+| 固定申请资料 | 姓名、地址、联系方式、工作授权、固定问答、论文和获奖等 | 每次填写时从 Job Radar global profile 读取，浏览器本地资料只作为回退 |
+| 已申请岗位冻结资料 | 使用对应 APP-ID 的冻结 JD、最终 CV 和 Autofill packet | 选择“已申请岗位”中的岗位；按私有档案中的实际提交 CV、定制 CV、冻结母版顺序读取 |
+| 实时 CV 母版 | 不绑定岗位，直接按一份母版填写并上传 CV | 每次重新读取 Job Radar context 时从 GitHub `master/template-cv/` 获取当前版本 |
 
-## Usage
+岗位生成的新 CV 不会出现在“实时 CV 母版”分组中。它属于相应岗位的 APP-ID，需要从“已申请岗位”分组选择该岗位。
 
-1. Make sure the target role is in **待提交申请**.
-2. Finalize the application-specific CV. The archive build should contain `cv_customized_<APP-ID>.pdf` and `application_autofill_<APP-ID>.json`.
-3. Open the company's application form.
-4. Click the Ivy Job Radar Autofill extension.
-5. Confirm the detected application; if several roles share one portal URL, choose the correct one from the dropdown.
-6. Click **填写当前申请页 + CV**.
-7. Review every filled field, use **复制未填问题** for anything the extension intentionally leaves unresolved, and submit manually.
+## 0.6.9 的当前行为
 
-## Current scope
+- CV 来源下拉菜单同时提供已申请岗位和实时 CV 母版。
+- 母版列表由 GitHub `master/template-cv/` 自动扫描，不使用写死的文件列表。
+- 直接选择母版时，项目、经历、Skills 和 PDF 都读取该母版的当前 GitHub 版本。
+- 选择岗位时，优先使用私有申请档案中的 `cv_submitted_<APP-ID>.pdf`，其次是 `cv_customized_<APP-ID>.pdf`，最后才使用保存岗位时冻结的母版 PDF。
+- 从 TeX 解析 Skills，并填写普通 Skills 文本框或逐项添加式技能控件。
+- 如果页面有 Project Experience，项目按项目填写。
+- 如果页面没有 Project Experience，项目会逐条写入 Work Experience，并使用 Part-time 或兼职作为类型。
+- “项目填写位置”可以手动选择 Auto、Project Experience 或 Work Experience。
+- 中文资料和 English profile 可在每次填写前独立切换。
+- 只填写真正空白的控件，不覆盖页面已有内容。
+- 重复教育、经历、项目、论文、获奖、语言、链接和技能区块会按已有可靠记录自动添加。
+- 多个已申请岗位共用同一 ATS 域名时，不会只按域名猜测。无法唯一匹配时必须手动选择。
 
-V6.1 preserves guarded semantic answers for custom questions and changes the batch runner to a permanent manual-submit workflow. The extension may open up to ten approved application pages, add repeated rows, fill blank values, call the configured API for unresolved questions, upload each exact prebuilt CV, and audit the form. It never clicks final Submit and never closes the prepared tabs. CAPTCHA, authentication, unconfirmed sensitive fields, unsupported questions, missing required fields, non-resume attachments, an unknown ATS, and ambiguous controls remain visible for the user's review.
+## 安装
+
+### 1. 获取代码
+
+```bash
+git clone https://github.com/XinyuIvy/ivy-job-radar.git
+cd ivy-job-radar
+```
+
+如果已经有仓库，并且当前分支没有未提交修改：
+
+```bash
+git switch main
+git pull --ff-only origin main
+```
+
+### 2. 在 Chrome 中加载
+
+1. 打开 `chrome://extensions`。
+2. 开启 Developer mode。
+3. 点击 Load unpacked。
+4. 选择 `ivy-job-radar/browser-extension/` 文件夹。
+5. 确认扩展卡片上的版本为 `0.6.9`。
+
+扩展不需要 npm 构建，也不需要打包后再安装。
+
+## 首次连接 Job Radar
+
+1. 打开你部署的 Ivy Job Radar `/autofill` 页面。
+2. 保存固定申请资料。
+3. 点击 Chrome 工具栏中的 Ivy Job Radar Autofill。
+4. 点击“从当前 Job Radar 页面导入连接”。
+5. 接受一次站点来源权限。
+
+扩展会保存站点 origin、派生访问 key、默认语言和本地回退资料。GitHub token 只保存在服务端，不会写入扩展。
+
+## 手动填写一个申请
+
+1. 打开公司的具体申请表页面。
+2. 打开扩展。
+3. 在“填表与 CV 来源”中选择一个已申请岗位，或直接选择 CV 母版。
+4. 选择本次固定资料语言。
+5. 保持项目位置为“自动判断”，或手动指定 Project Experience / Work Experience。
+6. 点击“按照所选来源填写 + 上传 CV”。
+7. 检查未填必填项、日期、下拉选项和上传的文件。
+8. 使用“复制未填问题”整理扩展有意留空的内容。
+9. 人工点击招聘网站的最终 Submit。
+
+## 自动填写队列
+
+- Job Radar 的“自动”页面每批最多准备 10 个美国岗位。
+- 用户确认整批后，系统才生成 CV 并把任务交给扩展。
+- 扩展每 5 分钟检查一次队列，也可以点击“立即检查队列”。
+- 最多两个 worker 同时处理，避免一次打开过多页面。
+- 每个处理过的标签页都会保留，等待人工检查和提交。
+- 扩展不会根据页面变化自行确认申请已经提交，必须由用户在 Job Radar 中确认。
+
+## CV 与 Autofill packet
+
+岗位冻结资料通常位于私有申请档案仓库：
+
+```text
+applications/<year>/<APP-ID>/
+├── cv_base.tex
+├── cv_customized_<APP-ID>.tex
+├── cv_customized_<APP-ID>.pdf
+├── cv_submitted_<APP-ID>.pdf
+├── application_autofill_<APP-ID>.json
+└── application_autofill_refresh_<APP-ID>.json
+```
+
+扩展通过 Job Radar 服务端读取这些文件。私有仓库路径、token 和原始文件不会暴露给申请网站。
+
+## 安全边界
+
+- 永远不点击最终 Submit 或 Finish。
+- 不绕过 CAPTCHA、登录、短信验证或反自动化控制。
+- 不保存或填写 SSN、密码、金融凭据和证件号码。
+- EEO、种族、族裔、性别、残障、退伍军人、宗教和出生日期等敏感题不会发送给模型。
+- 只有用户明确保存的敏感答案才可以在浏览器本地规则中填写。
+- 不会把 Resume/CV 文件上传到 Cover Letter、Transcript、Portfolio 或其他附件控件。
+- 证据不足、控件含义不明确或属于法律声明时，扩展会留空。
+- 已有页面值优先，自动填写不会覆盖用户输入。
+
+## 更新扩展
+
+```bash
+cd /path/to/ivy-job-radar
+git switch main
+git pull --ff-only origin main
+```
+
+之后回到 `chrome://extensions`，在 Ivy Job Radar Autofill 卡片上点击 Reload。已经打开的申请页也需要刷新一次，才能加载新的 content script。
+
+## 常见问题
+
+### 新母版没有出现在下拉菜单
+
+确认文件直接位于 CV 仓库的 `master/template-cv/`，扩展名为 `.tex`，并且已经提交到 `main`。关闭再打开扩展会重新读取列表。上传 PDF 时还需要同名 `.pdf`。
+
+### 岗位生成的新 CV 没有出现在母版分组
+
+这是当前数据模型的正常行为。岗位定制 CV 属于 APP-ID，不属于母版。请在“已申请岗位”分组选择对应岗位。该岗位还必须是“已申请”状态，并拥有有效 APP-ID 和可读取的冻结档案。
+
+### 选择了母版但没有上传 PDF
+
+确认 CV 仓库中存在与 `.tex` 同名的 `.pdf`，并确认服务端配置了 `CV_GITHUB_TOKEN`。只有 `.tex` 时可以解析部分填写资料，但无法上传 PDF。
+
+### 填写成了错误语言
+
+“CV 来源”和“本次固定资料语言”是两个独立选择。前者决定项目、经历、Skills 和 PDF；后者决定姓名、地址、教育和其他固定资料使用中文还是英文。
+
+### 项目没有填写
+
+先查看页面是否存在独立 Project Experience。没有时选择 Work Experience；扩展会把项目逐条作为兼职经历填写。如果网站的 Add 按钮或字段结构无法可靠识别，扩展会停止添加，避免写错区块。
+
+### 点击填写后完全没有变化
+
+1. 在 `chrome://extensions` 确认版本和错误状态。
+2. 点击 Reload。
+3. 刷新申请页面。
+4. 重新从 Job Radar `/autofill` 导入连接。
+5. 检查扩展底部的错误信息。
+
+某些招聘网站会在 iframe、封闭 shadow DOM 或登录后的特殊组件中渲染表单。这些页面可能仍需要手动填写。
