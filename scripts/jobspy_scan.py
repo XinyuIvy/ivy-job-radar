@@ -265,7 +265,7 @@ def normalize_row(row: pd.Series, query: str, scanned_at: str) -> dict[str, obje
     sponsorship = infer_sponsorship(description)
     score, details, eligible = score_job(title, description, sponsorship, years)
     phd_targeted = bool(re.search(r"\bph\.?d\.?\b|doctoral|doctorate", description, flags=re.IGNORECASE))
-    if not eligible or not phd_targeted or score < 55:
+    if not eligible or not phd_targeted:
         return None
 
     canonical_url = canonicalize_url(url)
