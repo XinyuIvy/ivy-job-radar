@@ -12,7 +12,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "AbbVie",
@@ -27,22 +27,22 @@
     "jobs_scanned": 100,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Abbott",
     "region": "美国",
-    "career_homepage": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/Germany---Neustadt-am-Rbenberge/XMLNAME--Senior--Controller--m-w-d-_31156693",
-    "final_url": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/Germany---Neustadt-am-Rbenberge/XMLNAME--Senior--Controller--m-w-d-_31156693",
+    "career_homepage": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/Vietnam---Ho-Chi-Minh-City/XMLNAME--Bnh-Thun---Ninh-Thun--Key-Account---Knh-GT-M---B_31160577-1",
+    "final_url": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/Vietnam---Ho-Chi-Minh-City/XMLNAME--Bnh-Thun---Ninh-Thun--Key-Account---Knh-GT-M---B_31160577-1",
     "ats_type": "workday",
     "ats_tenant": "abbott.wd5.myworkdayjobs.com/abbottcareers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 461,
-    "jobs_matched": 3,
+    "jobs_scanned": 468,
+    "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Abridge",
@@ -54,10 +54,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 48,
+    "jobs_scanned": 44,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Acadia Pharmaceuticals",
@@ -72,7 +72,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ActiGraph",
@@ -87,7 +87,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Aetion",
@@ -102,7 +102,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Aidoc",
@@ -117,7 +117,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Airbnb",
@@ -129,10 +129,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 185,
-    "jobs_matched": 2,
+    "jobs_scanned": 162,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Alcon",
@@ -144,10 +144,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 42,
+    "jobs_scanned": 33,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "AliveCor",
@@ -162,7 +162,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Alnylam Pharmaceuticals",
@@ -171,19 +171,19 @@
     "final_url": "https://www.alnylam.com/careers#main-content",
     "ats_type": "generic",
     "ats_tenant": "",
-    "state": "success",
+    "state": "unidentified",
     "http_status": 200,
-    "attempts": 4,
-    "jobs_scanned": 2,
+    "attempts": 2,
+    "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "Career page loaded, but no ATS or job listing structure was identified.",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Amazon",
     "region": "美国",
     "career_homepage": "https://www.amazon.jobs/",
-    "final_url": "https://www.amazon.jobs/en/#main-1787793135",
+    "final_url": "https://www.amazon.jobs/en/#main-1789507426",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -192,13 +192,13 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Amazon Health Services",
     "region": "美国",
     "career_homepage": "https://www.amazon.jobs/",
-    "final_url": "https://www.amazon.jobs/en/#main-1787793134",
+    "final_url": "https://www.amazon.jobs/en/#main-1789507425",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -207,22 +207,22 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Amgen",
     "region": "美国",
-    "career_homepage": "https://amgen.wd1.myworkdayjobs.com/careers/job/Japan---Tokyo/XMLNAME--Senior--Medical-Advisor_R-249615-6",
-    "final_url": "https://amgen.wd1.myworkdayjobs.com/careers/job/Japan---Tokyo/XMLNAME--Senior--Medical-Advisor_R-249615-6",
+    "career_homepage": "https://amgen.wd1.myworkdayjobs.com/careers/job/Taiwan---Taipei/XMLNAME--Sr--Biopharmaceutical-Specialist----South--OHBU_R-254991",
+    "final_url": "https://amgen.wd1.myworkdayjobs.com/careers/job/Taiwan---Taipei/XMLNAME--Sr--Biopharmaceutical-Specialist----South--OHBU_R-254991",
     "ats_type": "workday",
     "ats_tenant": "amgen.wd1.myworkdayjobs.com/careers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 487,
-    "jobs_matched": 2,
+    "jobs_scanned": 513,
+    "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Analysis Group",
@@ -234,10 +234,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 2,
-    "jobs_matched": 2,
+    "jobs_scanned": 3,
+    "jobs_matched": 3,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Apple",
@@ -248,11 +248,11 @@
     "ats_tenant": "",
     "state": "success",
     "http_status": 200,
-    "attempts": 10,
-    "jobs_scanned": 6,
+    "attempts": 9,
+    "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Apple Health",
@@ -263,11 +263,11 @@
     "ats_tenant": "",
     "state": "success",
     "http_status": 200,
-    "attempts": 10,
-    "jobs_scanned": 6,
+    "attempts": 9,
+    "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ArteraAI",
@@ -279,10 +279,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 10,
+    "jobs_scanned": 8,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Astellas Pharma",
@@ -297,7 +297,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "AstraZeneca",
@@ -309,10 +309,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 295,
+    "jobs_scanned": 305,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "BD (Becton, Dickinson and Company)",
@@ -324,10 +324,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 51,
+    "jobs_scanned": 53,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "BGBx Consulting",
@@ -339,10 +339,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 14,
+    "jobs_scanned": 17,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Bank of America",
@@ -357,7 +357,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Baxter",
@@ -369,10 +369,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 37,
+    "jobs_scanned": 32,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Beghou Consulting",
@@ -384,10 +384,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 71,
+    "jobs_scanned": 74,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "BioMarin",
@@ -398,11 +398,11 @@
     "ats_tenant": "biomarin",
     "state": "success",
     "http_status": 200,
-    "attempts": 0,
-    "jobs_scanned": 1,
-    "jobs_matched": 1,
+    "attempts": 9,
+    "jobs_scanned": 8,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Biofourmis",
@@ -417,7 +417,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Biogen",
@@ -429,10 +429,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 38,
+    "jobs_scanned": 44,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Boston Red Sox",
@@ -444,10 +444,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 8,
+    "jobs_scanned": 13,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Boston Scientific",
@@ -462,22 +462,22 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Bristol Myers Squibb",
     "region": "美国",
-    "career_homepage": "https://bristolmyerssquibb.wd5.myworkdayjobs.com/bms/job/Seoul---KR/XMLNAME--Sr--Pricing---Reimbursement-Specialist--Market-Access--Fixed-Term-Contract-_R1605083",
-    "final_url": "https://bristolmyerssquibb.wd5.myworkdayjobs.com/bms/job/Seoul---KR/XMLNAME--Sr--Pricing---Reimbursement-Specialist--Market-Access--Fixed-Term-Contract-_R1605083",
+    "career_homepage": "https://bristolmyerssquibb.wd5.myworkdayjobs.com/bms/job/Zhengzhou---CN/XMLNAME--Sr--Account-Executive---Sr--Medical-Rep-HEMA-_R1604256",
+    "final_url": "https://bristolmyerssquibb.wd5.myworkdayjobs.com/bms/job/Zhengzhou---CN/XMLNAME--Sr--Account-Executive---Sr--Medical-Rep-HEMA-_R1604256",
     "ats_type": "workday",
     "ats_tenant": "bristolmyerssquibb.wd5.myworkdayjobs.com/bms",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 183,
+    "jobs_scanned": 171,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Butterfly Network",
@@ -492,7 +492,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Charles River Associates",
@@ -504,10 +504,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 7,
+    "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Chiesi USA",
@@ -522,7 +522,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Clario",
@@ -537,7 +537,7 @@
     "jobs_scanned": 20,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ClearView Healthcare Partners",
@@ -549,10 +549,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 33,
+    "jobs_scanned": 32,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ClinChoice",
@@ -567,7 +567,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ConcertAI",
@@ -579,10 +579,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 15,
+    "jobs_scanned": 14,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Cytel",
@@ -594,10 +594,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 38,
+    "jobs_scanned": 31,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "D. E. Shaw Research / D. E. Shaw Group",
@@ -612,22 +612,22 @@
     "jobs_scanned": 3,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "DRW",
     "region": "美国",
     "career_homepage": "https://www.drw.com/work-at-drw/listings/",
-    "final_url": "https://www.drw.com/work-at-drw/listings",
+    "final_url": "https://www.drw.com/convexity/updates/viceroy-hotel-chicago-races-toward-september-opening-date",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "unidentified",
     "http_status": 200,
-    "attempts": 1,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Datavant",
@@ -642,7 +642,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Denali Therapeutics",
@@ -657,7 +657,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Dexcom",
@@ -669,10 +669,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 44,
-    "jobs_matched": 1,
+    "jobs_scanned": 39,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "DoubleVerify",
@@ -683,11 +683,11 @@
     "ats_tenant": "doubleverify",
     "state": "success",
     "http_status": 200,
-    "attempts": 0,
-    "jobs_scanned": 33,
+    "attempts": 1,
+    "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Duke University",
@@ -702,7 +702,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Edison Scientific",
@@ -714,10 +714,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 32,
+    "jobs_scanned": 26,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Edwards Lifesciences",
@@ -732,22 +732,22 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Eikon Therapeutics",
     "region": "美国",
     "career_homepage": "https://www.eikontx.com/careers",
-    "final_url": "https://www.eikontx.com/join-us/",
+    "final_url": "https://www.eikontx.com/news/recruitment-fraud-notice/",
     "ats_type": "generic",
     "ats_tenant": "",
-    "state": "unidentified",
+    "state": "success",
     "http_status": 200,
-    "attempts": 1,
-    "jobs_scanned": 0,
+    "attempts": 3,
+    "jobs_scanned": 1,
     "jobs_matched": 0,
-    "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Element Biosciences",
@@ -759,10 +759,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 13,
+    "jobs_scanned": 16,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Eli Lilly",
@@ -774,25 +774,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 178,
+    "jobs_scanned": 195,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Eli Lilly and Company",
     "region": "美国",
     "career_homepage": "https://careers.lilly.com/",
-    "final_url": "https://careers.lilly.com/",
-    "ats_type": "unidentified",
+    "final_url": "https://careers.lilly.com/us/en",
+    "ats_type": "generic",
     "ats_tenant": "",
-    "state": "failed",
-    "http_status": 403,
-    "attempts": 1,
+    "state": "unidentified",
+    "http_status": 200,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "Career page loaded, but no ATS or job listing structure was identified.",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Empatica",
@@ -807,7 +807,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "EpiA Neuro",
@@ -819,10 +819,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 17,
+    "jobs_scanned": 14,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Epic",
@@ -837,7 +837,7 @@
     "jobs_scanned": 5,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Evidation",
@@ -852,7 +852,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Evidera",
@@ -867,22 +867,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP 202",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Exact Sciences",
     "region": "美国",
     "career_homepage": "https://careers.exactsciences.com/",
     "final_url": "https://careers.exactsciences.com/",
-    "ats_type": "workday",
-    "ats_tenant": "exactsciences.wd1.myworkdayjobs.com/Exact_Sciences",
-    "state": "success",
-    "http_status": 200,
-    "attempts": 1,
+    "ats_type": "unidentified",
+    "ats_tenant": "",
+    "state": "failed",
+    "http_status": 0,
+    "attempts": 3,
     "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "The read operation timed out",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Fenix Group",
@@ -897,7 +897,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Flatiron Health",
@@ -912,7 +912,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Formation Bio",
@@ -924,25 +924,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 22,
-    "jobs_matched": 1,
+    "jobs_scanned": 21,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Fortrea",
     "region": "美国",
-    "career_homepage": "https://fortrea.wd1.myworkdayjobs.com/fortrea/job/Shanghai/XMLNAME--Senior--Regional-Recruitment-Specialist_264670",
-    "final_url": "https://fortrea.wd1.myworkdayjobs.com/fortrea/job/Shanghai/XMLNAME--Senior--Regional-Recruitment-Specialist_264670",
+    "career_homepage": "https://fortrea.wd1.myworkdayjobs.com/fortrea/job/Durham/Accounting-Sr-Associate---Durham--NC_264930",
+    "final_url": "https://fortrea.wd1.myworkdayjobs.com/fortrea/job/Durham/Accounting-Sr-Associate---Durham--NC_264930",
     "ats_type": "workday",
     "ats_tenant": "fortrea.wd1.myworkdayjobs.com/fortrea",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 29,
+    "jobs_scanned": 27,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Foundation Medicine",
@@ -957,22 +957,22 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Freenome",
     "region": "美国",
-    "career_homepage": "https://job-boards.greenhouse.io/freenome/jobs/8582750002",
-    "final_url": "https://job-boards.greenhouse.io/freenome/jobs/8582750002",
+    "career_homepage": "https://job-boards.greenhouse.io/freenome/jobs/8451272002",
+    "final_url": "https://job-boards.greenhouse.io/freenome/jobs/8451272002",
     "ats_type": "greenhouse",
     "ats_tenant": "freenome",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 27,
+    "jobs_scanned": 24,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "GE HealthCare",
@@ -984,10 +984,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 105,
+    "jobs_scanned": 117,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "GRAIL",
@@ -999,25 +999,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 31,
+    "jobs_scanned": 22,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "GSK",
     "region": "美国",
-    "career_homepage": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Singapore---Rochester-Park/Account-Manager_444903",
-    "final_url": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Singapore---Rochester-Park/Account-Manager_444903",
+    "career_homepage": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Pakistan---Sindh---Karachi/ACCA-Trainee_447145",
+    "final_url": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Pakistan---Sindh---Karachi/ACCA-Trainee_447145",
     "ats_type": "workday",
     "ats_tenant": "gsk.wd5.myworkdayjobs.com/gskcareers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 156,
+    "jobs_scanned": 149,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Geisinger",
@@ -1032,7 +1032,7 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Genentech",
@@ -1044,10 +1044,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 172,
+    "jobs_scanned": 165,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Genentech/Roche",
@@ -1059,10 +1059,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 172,
+    "jobs_scanned": 165,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Generate Biomedicines",
@@ -1074,10 +1074,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 14,
+    "jobs_scanned": 13,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Genesis Research",
@@ -1092,7 +1092,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Gilead Sciences",
@@ -1104,10 +1104,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 96,
+    "jobs_scanned": 139,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Google",
@@ -1122,7 +1122,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Google/Fitbit",
@@ -1137,7 +1137,7 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Gopuff",
@@ -1152,7 +1152,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Guardant Health",
@@ -1164,10 +1164,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 13,
+    "jobs_scanned": 16,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "HeartFlow",
@@ -1179,10 +1179,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 64,
+    "jobs_scanned": 52,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Hologic",
@@ -1197,7 +1197,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Hudson River Trading",
@@ -1212,22 +1212,22 @@
     "jobs_scanned": 3,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ICON",
     "region": "美国",
-    "career_homepage": "https://icon.wd3.myworkdayjobs.com/broadbean_external/job/Poland-Warsaw/Project-Manager--Feasibility-Site-Activation_JR148219",
-    "final_url": "https://icon.wd3.myworkdayjobs.com/broadbean_external/job/Poland-Warsaw/Project-Manager--Feasibility-Site-Activation_JR148219",
+    "career_homepage": "https://icon.wd3.myworkdayjobs.com/broadbean_external/job/India-Bangalore/XMLNAME--Sr--Project-Manager--Feasibility-Site-Activation_JR156755",
+    "final_url": "https://icon.wd3.myworkdayjobs.com/broadbean_external/job/India-Bangalore/XMLNAME--Sr--Project-Manager--Feasibility-Site-Activation_JR156755",
     "ats_type": "workday",
     "ats_tenant": "icon.wd3.myworkdayjobs.com/broadbean_external",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 210,
+    "jobs_scanned": 213,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ICON plc",
@@ -1242,7 +1242,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "IMC Trading",
@@ -1257,22 +1257,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "IQVIA",
     "region": "美国",
-    "career_homepage": "https://iqvia.wd1.myworkdayjobs.com/iqvia/job/Manila-Philippines/XMLNAME-130---Event-Project-Support-Specialist_R1547820",
-    "final_url": "https://iqvia.wd1.myworkdayjobs.com/iqvia/job/Manila-Philippines/XMLNAME-130---Event-Project-Support-Specialist_R1547820",
+    "career_homepage": "https://iqvia.wd1.myworkdayjobs.com/iqvia/job/New-York-NY-United-States-of-America/XMLNAME--MBA--Consultant--Strategy--Life-Sciences_R1567637",
+    "final_url": "https://iqvia.wd1.myworkdayjobs.com/iqvia/job/New-York-NY-United-States-of-America/XMLNAME--MBA--Consultant--Strategy--Life-Sciences_R1567637",
     "ats_type": "workday",
     "ats_tenant": "iqvia.wd1.myworkdayjobs.com/iqvia",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 381,
-    "jobs_matched": 2,
+    "jobs_scanned": 406,
+    "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Illumina",
@@ -1287,22 +1287,22 @@
     "jobs_scanned": 16,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Insulet",
     "region": "美国",
-    "career_homepage": "https://insulet.wd5.myworkdayjobs.com/insuletcareers/job/London-United-Kingdom/Analytics-Manager---Marketing_REQ-2026-17412",
-    "final_url": "https://insulet.wd5.myworkdayjobs.com/insuletcareers/job/London-United-Kingdom/Analytics-Manager---Marketing_REQ-2026-17412",
+    "career_homepage": "https://insulet.wd5.myworkdayjobs.com/insuletcareers/job/Gelang-Patah-Johor/Associate-Engineer--Maintenance-Operations_REQ-2026-17963",
+    "final_url": "https://insulet.wd5.myworkdayjobs.com/insuletcareers/job/Gelang-Patah-Johor/Associate-Engineer--Maintenance-Operations_REQ-2026-17963",
     "ats_type": "workday",
     "ats_tenant": "insulet.wd5.myworkdayjobs.com/insuletcareers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 16,
+    "jobs_scanned": 12,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Intuitive Surgical",
@@ -1317,7 +1317,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Johnson & Johnson",
@@ -1329,10 +1329,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 417,
+    "jobs_scanned": 441,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Johnson & Johnson Innovative Medicine",
@@ -1344,10 +1344,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 417,
+    "jobs_scanned": 441,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Komodo Health",
@@ -1359,10 +1359,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 35,
+    "jobs_scanned": 29,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Koneksa",
@@ -1377,7 +1377,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Lyft",
@@ -1389,25 +1389,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 165,
+    "jobs_scanned": 180,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Masimo",
     "region": "美国",
     "career_homepage": "https://www.masimo.com/company/careers/",
     "final_url": "https://www.masimo.com/company/careers/",
-    "ats_type": "unidentified",
-    "ats_tenant": "",
-    "state": "failed",
-    "http_status": 403,
+    "ats_type": "oraclecloud",
+    "ats_tenant": "egcu.fa.us6/CX",
+    "state": "success",
+    "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 0,
+    "jobs_scanned": 110,
     "jobs_matched": 0,
-    "error": "HTTP Error 403: Forbidden",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Medable",
@@ -1422,7 +1422,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Medpace",
@@ -1437,22 +1437,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Medtronic",
     "region": "美国",
-    "career_homepage": "https://medtronic.wd1.myworkdayjobs.com/redeploymentmedtroniccareers/job/Ho-Chi-Minh-City-Ho-Chi-Minh-City-Vietnam/Product-Marketing--Specialist_R72127",
-    "final_url": "https://medtronic.wd1.myworkdayjobs.com/redeploymentmedtroniccareers/job/Ho-Chi-Minh-City-Ho-Chi-Minh-City-Vietnam/Product-Marketing--Specialist_R72127",
+    "career_homepage": "https://medtronic.wd1.myworkdayjobs.com/medtroniccareers/job/Shanghai-Shanghai-China/XMLNAME--Sr--Principal-Legal-Counsel_R75462-1",
+    "final_url": "https://medtronic.wd1.myworkdayjobs.com/medtroniccareers/job/Shanghai-Shanghai-China/XMLNAME--Sr--Principal-Legal-Counsel_R75462-1",
     "ats_type": "workday",
-    "ats_tenant": "medtronic.wd1.myworkdayjobs.com/redeploymentmedtroniccareers",
+    "ats_tenant": "medtronic.wd1.myworkdayjobs.com/medtroniccareers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 103,
+    "jobs_scanned": 104,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Merck & Co.",
@@ -1464,10 +1464,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 259,
+    "jobs_scanned": 410,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Merck & Co., Inc.",
@@ -1479,10 +1479,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 259,
+    "jobs_scanned": 410,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Meta",
@@ -1497,22 +1497,22 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Microsoft Health & Life Sciences",
     "region": "美国",
     "career_homepage": "https://careers.microsoft.com/",
-    "final_url": "https://careers.microsoft.com/v2/global/en/home.html",
+    "final_url": "https://careers.microsoft.com/us/en/essentials-flexibility",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "unidentified",
     "http_status": 200,
-    "attempts": 1,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Millennium Management",
@@ -1523,11 +1523,11 @@
     "ats_tenant": "",
     "state": "unidentified",
     "http_status": 200,
-    "attempts": 1,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Muon Space",
@@ -1539,10 +1539,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 104,
+    "jobs_scanned": 119,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "NERA Economic Consulting",
@@ -1557,7 +1557,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "NVIDIA Healthcare",
@@ -1572,7 +1572,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Natera",
@@ -1584,10 +1584,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 210,
+    "jobs_scanned": 218,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Neurocrine Biosciences",
@@ -1599,10 +1599,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 30,
+    "jobs_scanned": 35,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Novartis",
@@ -1614,10 +1614,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 284,
-    "jobs_matched": 6,
+    "jobs_scanned": 278,
+    "jobs_matched": 5,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Novo Nordisk",
@@ -1632,22 +1632,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "OM1",
     "region": "美国",
     "career_homepage": "https://job-boards.greenhouse.io/om1",
     "final_url": "https://job-boards.greenhouse.io/om1",
-    "ats_type": "greenhouse",
-    "ats_tenant": "om1",
-    "state": "success",
-    "http_status": 200,
-    "attempts": 1,
+    "ats_type": "unidentified",
+    "ats_tenant": "",
+    "state": "failed",
+    "http_status": 0,
+    "attempts": 3,
     "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "HTTP 500",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Optiver",
@@ -1662,7 +1662,7 @@
     "jobs_scanned": 5,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Optum",
@@ -1677,7 +1677,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Oracle Health",
@@ -1692,7 +1692,7 @@
     "jobs_scanned": 4,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Owkin",
@@ -1704,10 +1704,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 5,
+    "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "PPD/Thermo Fisher Scientific",
@@ -1722,7 +1722,7 @@
     "jobs_scanned": 7,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Paige",
@@ -1737,28 +1737,28 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Parexel",
     "region": "美国",
-    "career_homepage": "https://parexel.wd1.myworkdayjobs.com/parexel_external_careers/job/Poland-Remote/Associate-Director--Data-Engineering--D-T_R0000042328-1",
-    "final_url": "https://parexel.wd1.myworkdayjobs.com/parexel_external_careers/job/Poland-Remote/Associate-Director--Data-Engineering--D-T_R0000042328-1",
+    "career_homepage": "https://parexel.wd1.myworkdayjobs.com/parexel_external_careers/job/South-Africa-Bloemfontein-Remote/Biometrics-Delivery-Lead---South-Africa_R0000044395",
+    "final_url": "https://parexel.wd1.myworkdayjobs.com/parexel_external_careers/job/South-Africa-Bloemfontein-Remote/Biometrics-Delivery-Lead---South-Africa_R0000044395",
     "ats_type": "workday",
     "ats_tenant": "parexel.wd1.myworkdayjobs.com/parexel_external_careers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 71,
+    "jobs_scanned": 82,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "PathAI",
     "region": "美国",
-    "career_homepage": "https://www.pathai.com/careers/8308240002?gh_jid=8308240002",
-    "final_url": "https://www.pathai.com/career/job-post?gh_jid=8308240002#main-content",
+    "career_homepage": "https://www.pathai.com/careers/8696752002?gh_jid=8696752002",
+    "final_url": "https://www.pathai.com/career/job-post?gh_jid=8696752002#main-content",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "success",
@@ -1767,7 +1767,7 @@
     "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Penumbra",
@@ -1779,40 +1779,40 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 86,
+    "jobs_scanned": 93,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Pfizer",
     "region": "美国",
-    "career_homepage": "https://pfizer.wd1.myworkdayjobs.com/pfizercareers/job/China---Shanghai---Shanghai/XMLNAME--Sr---Manager--Statistics---Sr-Clinical-Statistician_4961146",
-    "final_url": "https://pfizer.wd1.myworkdayjobs.com/pfizercareers/job/China---Shanghai---Shanghai/XMLNAME--Sr---Manager--Statistics---Sr-Clinical-Statistician_4961146",
+    "career_homepage": "https://pfizer.wd1.myworkdayjobs.com/pfizercareers/job/China---Shanghai---Shanghai/XMLNAME--Senior-Patient-Solution-Manager_4962596",
+    "final_url": "https://pfizer.wd1.myworkdayjobs.com/pfizercareers/job/China---Shanghai---Shanghai/XMLNAME--Senior-Patient-Solution-Manager_4962596",
     "ats_type": "workday",
     "ats_tenant": "pfizer.wd1.myworkdayjobs.com/pfizercareers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 122,
+    "jobs_scanned": 138,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Philips",
     "region": "美国",
-    "career_homepage": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Osaka/Account-Manage-IGTD---_588098-1",
-    "final_url": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Osaka/Account-Manage-IGTD---_588098-1",
+    "career_homepage": "https://philips.wd3.myworkdayjobs.com/internal-job-postings-list-for-philips-contingent-workers/job/Germany---Home-Based/Account-Manager--all-genders--Imaging-Systems---Baden-Wrttemberg_585205",
+    "final_url": "https://philips.wd3.myworkdayjobs.com/internal-job-postings-list-for-philips-contingent-workers/job/Germany---Home-Based/Account-Manager--all-genders--Imaging-Systems---Baden-Wrttemberg_585205",
     "ats_type": "workday",
-    "ats_tenant": "philips.wd3.myworkdayjobs.com/jobs-and-careers",
+    "ats_tenant": "philips.wd3.myworkdayjobs.com/internal-job-postings-list-for-philips-contingent-workers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 63,
-    "jobs_matched": 1,
+    "jobs_scanned": 20,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Point72",
@@ -1824,25 +1824,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 236,
+    "jobs_scanned": 231,
     "jobs_matched": 18,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Precision AQ",
     "region": "美国",
-    "career_homepage": "https://job-boards.greenhouse.io/precisionaq/jobs/6105773004",
-    "final_url": "https://job-boards.greenhouse.io/precisionaq/jobs/6105773004",
+    "career_homepage": "https://job-boards.greenhouse.io/precisionaq/jobs/6152268004",
+    "final_url": "https://job-boards.greenhouse.io/precisionaq/jobs/6152268004",
     "ats_type": "greenhouse",
     "ats_tenant": "precisionaq",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 43,
+    "jobs_scanned": 42,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Precision Medicine Group",
@@ -1857,7 +1857,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [Errno -2] Name or service not known>",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Precision for Medicine",
@@ -1869,10 +1869,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 128,
+    "jobs_scanned": 118,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Prior Labs",
@@ -1884,10 +1884,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 23,
+    "jobs_scanned": 24,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Prolaio",
@@ -1899,10 +1899,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 10,
+    "jobs_scanned": 9,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Putnam (Inizio Ignite)",
@@ -1917,7 +1917,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "<urlopen error [Errno -2] Name or service not known>",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Quince",
@@ -1929,10 +1929,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 154,
+    "jobs_scanned": 130,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Qure.ai",
@@ -1947,7 +1947,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "RTI Health Solutions",
@@ -1962,7 +1962,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "RTI International",
@@ -1977,7 +1977,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "RTI International / RTI Health Solutions",
@@ -1992,7 +1992,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "RapidAI",
@@ -2004,10 +2004,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 13,
+    "jobs_scanned": 15,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Recursion",
@@ -2019,40 +2019,40 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 15,
+    "jobs_scanned": 12,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Regeneron",
     "region": "美国",
-    "career_homepage": "https://regeneron.wd1.myworkdayjobs.com/careers/job/Tokyo/Administrative-Coordinator--Regulatory-Affairs_R50068",
-    "final_url": "https://regeneron.wd1.myworkdayjobs.com/careers/job/Tokyo/Administrative-Coordinator--Regulatory-Affairs_R50068",
+    "career_homepage": "https://regeneron.wd1.myworkdayjobs.com/careers/job/SLEEPY-HOLLOW/Accounts-Payable-Coordinator-II--temporary-_R50339-1",
+    "final_url": "https://regeneron.wd1.myworkdayjobs.com/careers/job/SLEEPY-HOLLOW/Accounts-Payable-Coordinator-II--temporary-_R50339-1",
     "ats_type": "workday",
     "ats_tenant": "regeneron.wd1.myworkdayjobs.com/careers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 85,
+    "jobs_scanned": 88,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ResMed",
     "region": "美国",
-    "career_homepage": "https://resmed.wd3.myworkdayjobs.com/brightree_external_careers/job/Peachtree-Corners-GA-United-States/Advanced-Professional-Services-Consultant_JR_051400-1",
-    "final_url": "https://resmed.wd3.myworkdayjobs.com/brightree_external_careers/job/Peachtree-Corners-GA-United-States/Advanced-Professional-Services-Consultant_JR_051400-1",
+    "career_homepage": "https://resmed.wd3.myworkdayjobs.com/resmed_external_careers/job/Mumbai-India/Account-Manager_JR_053138",
+    "final_url": "https://resmed.wd3.myworkdayjobs.com/resmed_external_careers/job/Mumbai-India/Account-Manager_JR_053138",
     "ats_type": "workday",
-    "ats_tenant": "resmed.wd3.myworkdayjobs.com/brightree_external_careers",
+    "ats_tenant": "resmed.wd3.myworkdayjobs.com/resmed_external_careers",
     "state": "success",
     "http_status": 200,
-    "attempts": 1,
-    "jobs_scanned": 0,
+    "attempts": 0,
+    "jobs_scanned": 14,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "SDC (Statistics & Data Corporation)",
@@ -2063,11 +2063,11 @@
     "ats_tenant": "",
     "state": "unidentified",
     "http_status": 200,
-    "attempts": 1,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Sage Therapeutics",
@@ -2082,7 +2082,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Sakata Seed America, Inc.",
@@ -2097,7 +2097,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Samba TV",
@@ -2109,25 +2109,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 61,
+    "jobs_scanned": 56,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Sanofi",
     "region": "美国",
-    "career_homepage": "https://sanofi.wd3.myworkdayjobs.com/sanoficareers/job/Taipei/XMLNAME--Senior--Medical-Science-Liaison---Dupixent_R2850602",
-    "final_url": "https://sanofi.wd3.myworkdayjobs.com/sanoficareers/job/Taipei/XMLNAME--Senior--Medical-Science-Liaison---Dupixent_R2850602",
+    "career_homepage": "https://sanofi.wd3.myworkdayjobs.com/sanoficareers/job/Taipei/XMLNAME--Senior--Product-Manager---GenMed_R2855592",
+    "final_url": "https://sanofi.wd3.myworkdayjobs.com/sanoficareers/job/Taipei/XMLNAME--Senior--Product-Manager---GenMed_R2855592",
     "ats_type": "workday",
     "ats_tenant": "sanofi.wd3.myworkdayjobs.com/sanoficareers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 295,
+    "jobs_scanned": 323,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Schrödinger",
@@ -2139,10 +2139,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 20,
+    "jobs_scanned": 23,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "SentiLink",
@@ -2154,10 +2154,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 56,
+    "jobs_scanned": 55,
     "jobs_matched": 4,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Siemens Healthineers",
@@ -2169,10 +2169,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 221,
+    "jobs_scanned": 219,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Signant Health",
@@ -2187,7 +2187,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Solace Health",
@@ -2202,7 +2202,7 @@
     "jobs_scanned": 25,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Sony Interactive Entertainment",
@@ -2214,10 +2214,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 199,
-    "jobs_matched": 1,
+    "jobs_scanned": 193,
+    "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "St. Jude Children's Research Hospital",
@@ -2229,10 +2229,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 75,
+    "jobs_scanned": 86,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Stryker",
@@ -2244,25 +2244,25 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 54,
+    "jobs_scanned": 89,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Syneos Health",
     "region": "美国",
-    "career_homepage": "https://syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site/job/PHL-Mandaluyong-Hybrid/XMLNAME--Sr--Project-Associate--hybrid---Manila_25111078",
-    "final_url": "https://syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site/job/PHL-Mandaluyong-Hybrid/XMLNAME--Sr--Project-Associate--hybrid---Manila_25111078",
+    "career_homepage": "https://syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site/job/USA-NC-Morrisville-Hybrid/Account-Development-Manager_25112239",
+    "final_url": "https://syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site/job/USA-NC-Morrisville-Hybrid/Account-Development-Manager_25112239",
     "ats_type": "workday",
     "ats_tenant": "syneoshealth.wd12.myworkdayjobs.com/syneos_health_external_site",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 175,
-    "jobs_matched": 2,
+    "jobs_scanned": 193,
+    "jobs_matched": 3,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "SystImmune",
@@ -2277,7 +2277,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "HTTP Error 404: Not Found",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Takeda",
@@ -2292,7 +2292,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Talkiatry",
@@ -2304,10 +2304,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 181,
+    "jobs_scanned": 185,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Tempus AI",
@@ -2322,7 +2322,7 @@
     "jobs_scanned": 41,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Teza Technologies",
@@ -2334,10 +2334,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 11,
+    "jobs_scanned": 9,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Tiny Health",
@@ -2352,22 +2352,22 @@
     "jobs_scanned": 22,
     "jobs_matched": 2,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Too Good To Go",
     "region": "美国",
     "career_homepage": "https://job-boards.greenhouse.io/toogoodtogo",
     "final_url": "https://job-boards.greenhouse.io/toogoodtogo",
-    "ats_type": "greenhouse",
-    "ats_tenant": "toogoodtogo",
-    "state": "success",
-    "http_status": 200,
-    "attempts": 0,
-    "jobs_scanned": 68,
+    "ats_type": "unidentified",
+    "ats_tenant": "",
+    "state": "failed",
+    "http_status": 404,
+    "attempts": 1,
+    "jobs_scanned": 0,
     "jobs_matched": 0,
-    "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "error": "HTTP Error 404: Not Found",
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "TriNetX",
@@ -2382,7 +2382,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Twitch",
@@ -2394,10 +2394,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 59,
+    "jobs_scanned": 52,
     "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Two Sigma",
@@ -2412,22 +2412,22 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "UTHealth Houston",
     "region": "美国",
     "career_homepage": "https://careers.uth.tmc.edu/",
-    "final_url": "https://careers.uth.tmc.edu/us/en",
+    "final_url": "https://careers.uth.tmc.edu/robots.txt",
     "ats_type": "generic",
     "ats_tenant": "",
     "state": "unidentified",
     "http_status": 200,
-    "attempts": 1,
+    "attempts": 2,
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "University of Southern California",
@@ -2439,10 +2439,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 3,
+    "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Variant Bio",
@@ -2457,7 +2457,7 @@
     "jobs_scanned": 2,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Verana Health",
@@ -2472,22 +2472,22 @@
     "jobs_scanned": 6,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Verily",
     "region": "美国",
-    "career_homepage": "https://verily.wd1.myworkdayjobs.com/verily_careers/job/Boston-Massachusetts/Pharmacy-Informaticist_REQ-431",
-    "final_url": "https://verily.wd1.myworkdayjobs.com/verily_careers/job/Boston-Massachusetts/Pharmacy-Informaticist_REQ-431",
+    "career_homepage": "https://verily.wd1.myworkdayjobs.com/verily_careers/job/San-Bruno-California/AI-Applied-Scientist_REQ-949",
+    "final_url": "https://verily.wd1.myworkdayjobs.com/verily_careers/job/San-Bruno-California/AI-Applied-Scientist_REQ-949",
     "ats_type": "workday",
     "ats_tenant": "verily.wd1.myworkdayjobs.com/verily_careers",
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 28,
+    "jobs_scanned": 26,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Veristat",
@@ -2498,11 +2498,11 @@
     "ats_tenant": "veristat.wd503.myworkdayjobs.com/Veristatcareers",
     "state": "success",
     "http_status": 200,
-    "attempts": 1,
-    "jobs_scanned": 0,
+    "attempts": 0,
+    "jobs_scanned": 1,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Vertex Pharmaceuticals",
@@ -2514,10 +2514,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 64,
+    "jobs_scanned": 124,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Viz.ai",
@@ -2529,10 +2529,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 2,
-    "jobs_scanned": 11,
+    "jobs_scanned": 14,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Voyager Therapeutics",
@@ -2547,7 +2547,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Zimmer Biomet",
@@ -2562,7 +2562,7 @@
     "jobs_scanned": 0,
     "jobs_matched": 0,
     "error": "Career page loaded, but no ATS or job listing structure was identified.",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "ZipRecruiter",
@@ -2574,10 +2574,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 40,
-    "jobs_matched": 1,
+    "jobs_scanned": 41,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Zoox",
@@ -2589,10 +2589,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 245,
+    "jobs_scanned": 243,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "iRhythm Technologies",
@@ -2604,10 +2604,10 @@
     "state": "success",
     "http_status": 200,
     "attempts": 1,
-    "jobs_scanned": 8,
-    "jobs_matched": 0,
+    "jobs_scanned": 9,
+    "jobs_matched": 1,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "insitro",
@@ -2622,7 +2622,7 @@
     "jobs_scanned": 15,
     "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   },
   {
     "company": "Ōura",
@@ -2634,9 +2634,9 @@
     "state": "success",
     "http_status": 200,
     "attempts": 0,
-    "jobs_scanned": 104,
-    "jobs_matched": 1,
+    "jobs_scanned": 95,
+    "jobs_matched": 0,
     "error": "",
-    "checked_at": "2026-08-27T01:11:14.192678+00:00"
+    "checked_at": "2026-09-15T21:22:48.055793+00:00"
   }
 ]
