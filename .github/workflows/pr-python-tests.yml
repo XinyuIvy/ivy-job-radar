@@ -3,11 +3,29 @@ name: PR Python tests
 on:
   pull_request:
     paths:
+      - "app/**"
+      - "db/**"
+      - "docs/**"
+      - "browser-extension/**"
       - "scripts/**"
       - "local-collector/**"
       - "tests/**"
       - "requirements-jobscan.txt"
       - ".github/workflows/pr-python-tests.yml"
+      - ".github/workflows/daily-us-jobscan.yml"
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "db/**"
+      - "docs/**"
+      - "browser-extension/**"
+      - "scripts/**"
+      - "local-collector/**"
+      - "tests/**"
+      - "requirements-jobscan.txt"
+      - ".github/workflows/pr-python-tests.yml"
+      - ".github/workflows/daily-us-jobscan.yml"
   workflow_dispatch:
 
 permissions:
