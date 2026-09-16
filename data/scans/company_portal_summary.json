@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-09-15T21:22:48.055793+00:00",
+  "generated_at": "2026-09-16T14:52:18.148166+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
-  "companies_succeeded": 146,
+  "companies_succeeded": 145,
   "companies_failed": 12,
-  "companies_unidentified": 18,
-  "jobs_scanned": 10058,
+  "companies_unidentified": 19,
+  "jobs_scanned": 9963,
   "jobs_matched": 51,
   "ats_counts": {
     "adp": 1,
     "ashby": 12,
     "dayforce": 2,
-    "generic": 38,
+    "generic": 37,
     "greenhouse": 34,
     "icims": 5,
     "jobvite": 2,
@@ -21,14 +21,14 @@
     "successfactors": 3,
     "unidentified": 14,
     "workable": 2,
-    "workday": 50
+    "workday": 51
   },
   "region_counts": {
     "美国": {
       "companies_attempted": 176,
-      "companies_succeeded": 146,
+      "companies_succeeded": 145,
       "companies_failed": 12,
-      "companies_unidentified": 18,
+      "companies_unidentified": 19,
       "jobs_matched": 51
     }
   },
@@ -39,13 +39,13 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sage Therapeutics",
-      "url": "https://www.supernus.com/careers-with-supernus",
+      "company": "Alnylam Pharmaceuticals",
+      "url": "https://www.alnylam.com/careers#main-content",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Alnylam Pharmaceuticals",
-      "url": "https://www.alnylam.com/careers#main-content",
+      "company": "Sage Therapeutics",
+      "url": "https://www.supernus.com/careers-with-supernus",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -69,14 +69,14 @@
       "error": "HTTP 202"
     },
     {
+      "company": "OM1",
+      "url": "https://job-boards.greenhouse.io/om1",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
       "company": "Genesis Research",
       "url": "https://genesisrg.com/careers/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "OM1",
-      "url": "https://job-boards.greenhouse.io/om1",
-      "error": "HTTP 500"
     },
     {
       "company": "Evidation",
@@ -109,9 +109,9 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "DRW",
-      "url": "https://www.drw.com/work-at-drw/listings/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "company": "Fenix Group",
@@ -119,8 +119,13 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Eikon Therapeutics",
+      "url": "https://www.eikontx.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -129,28 +134,23 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Millennium Management",
-      "url": "https://career.mlp.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "NERA Economic Consulting",
       "url": "https://careers.marshmclennan.com/global/en/nera",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Sakata Seed America, Inc.",
-      "url": "https://sakata.com/careers/",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "SDC (Statistics & Data Corporation)",
-      "url": "https://www.sdcclinical.com/careers/",
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "SystImmune",
-      "url": "https://www.systimmune.com/careers",
+      "company": "Meta",
+      "url": "https://www.metacareers.com/jobs/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Sakata Seed America, Inc.",
+      "url": "https://sakata.com/careers/",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -159,9 +159,9 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "company": "SystImmune",
+      "url": "https://www.systimmune.com/careers",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "Two Sigma",
@@ -169,19 +169,24 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "company": "Putnam (Inizio Ignite)",
       "url": "https://careers.inizioengage.com/",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
-      "company": "UTHealth Houston",
-      "url": "https://careers.uth.tmc.edu/",
+      "company": "SDC (Statistics & Data Corporation)",
+      "url": "https://www.sdcclinical.com/careers/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Exact Sciences",
-      "url": "https://careers.exactsciences.com/",
-      "error": "The read operation timed out"
+      "company": "UTHealth Houston",
+      "url": "https://careers.uth.tmc.edu/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     }
   ]
 }
