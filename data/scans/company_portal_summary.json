@@ -1,34 +1,34 @@
 {
-  "generated_at": "2026-09-18T14:23:16.452034+00:00",
+  "generated_at": "2026-09-19T13:54:40.473535+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
-  "companies_succeeded": 145,
-  "companies_failed": 11,
-  "companies_unidentified": 20,
-  "jobs_scanned": 9990,
+  "companies_succeeded": 146,
+  "companies_failed": 12,
+  "companies_unidentified": 18,
+  "jobs_scanned": 10030,
   "jobs_matched": 50,
   "ats_counts": {
     "adp": 1,
-    "ashby": 11,
+    "ashby": 12,
     "dayforce": 2,
-    "generic": 39,
-    "greenhouse": 34,
+    "generic": 38,
+    "greenhouse": 33,
     "icims": 5,
     "jobvite": 2,
     "lever": 9,
     "oraclecloud": 2,
     "smartrecruiters": 2,
     "successfactors": 3,
-    "unidentified": 13,
+    "unidentified": 14,
     "workable": 2,
     "workday": 51
   },
   "region_counts": {
     "美国": {
       "companies_attempted": 176,
-      "companies_succeeded": 145,
-      "companies_failed": 11,
-      "companies_unidentified": 20,
+      "companies_succeeded": 146,
+      "companies_failed": 12,
+      "companies_unidentified": 18,
       "jobs_matched": 50
     }
   },
@@ -99,24 +99,24 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "Qure.ai",
       "url": "https://qure.ai/careers",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "DRW",
-      "url": "https://www.drw.com/work-at-drw/listings/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "company": "DoubleVerify",
+      "url": "https://job-boards.greenhouse.io/doubleverify",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "company": "Fenix Group",
       "url": "https://fenix.group/careers/",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "Eikon Therapeutics",
-      "url": "https://www.eikontx.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "IMC Trading",
@@ -129,8 +129,8 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -139,19 +139,24 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Sakata Seed America, Inc.",
-      "url": "https://sakata.com/careers/",
-      "error": "HTTP Error 404: Not Found"
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "SystImmune",
-      "url": "https://www.systimmune.com/careers",
+      "company": "Sakata Seed America, Inc.",
+      "url": "https://sakata.com/careers/",
       "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "Too Good To Go",
       "url": "https://job-boards.greenhouse.io/toogoodtogo",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "SDC (Statistics & Data Corporation)",
+      "url": "https://www.sdcclinical.com/careers/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Precision Medicine Group",
@@ -169,24 +174,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Millennium Management",
-      "url": "https://career.mlp.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Meta",
-      "url": "https://www.metacareers.com/jobs/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "SDC (Statistics & Data Corporation)",
-      "url": "https://www.sdcclinical.com/careers/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "UTHealth Houston",
       "url": "https://careers.uth.tmc.edu/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "SystImmune",
+      "url": "https://www.systimmune.com/careers",
+      "error": "The read operation timed out"
     }
   ]
 }
