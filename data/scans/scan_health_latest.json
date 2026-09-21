@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-20T14:11:58.303535+00:00",
+  "generated_at": "2026-09-21T16:36:03.457010+00:00",
   "state": "warning",
-  "imported": 397,
-  "fetched": 319,
-  "failed_source_count": 33,
+  "imported": 427,
+  "fetched": 323,
+  "failed_source_count": 31,
   "company_attempted": 176,
-  "company_succeeded": 143,
-  "company_success_rate": 0.8125,
+  "company_succeeded": 145,
+  "company_success_rate": 0.8239,
   "china_matched": 0,
   "china_company_attempted": 0,
   "china_company_succeeded": 0,
@@ -19,7 +19,7 @@
     },
     {
       "type": "source_failures",
-      "count": 33,
+      "count": 31,
       "severity": "warning"
     }
   ]

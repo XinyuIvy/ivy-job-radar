@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-09-20T14:11:55.576182+00:00",
+  "run_started_at": "2026-09-21T16:36:00.090581+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 28,
+    "us_jobs_verified_latest.json": 32,
     "china_jobs_latest.json": 0,
-    "cloud_sources_jobs_latest.json": 1,
+    "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 238,
-    "company_portal_jobs_latest.json": 52
+    "company_portal_jobs_latest.json": 53
   },
-  "fetched": 319,
-  "verified_or_open": 91,
+  "fetched": 323,
+  "verified_or_open": 93,
   "rejected": 6,
-  "deduplicated": 12,
-  "imported": 397,
-  "new": 20,
-  "updated_or_unchanged": 281,
-  "temporarily_retained": 96,
+  "deduplicated": 24,
+  "imported": 427,
+  "new": 30,
+  "updated_or_unchanged": 263,
+  "temporarily_retained": 134,
   "pruned_as_stale": 0,
-  "no_longer_seen": 96,
+  "no_longer_seen": 134,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -25,11 +25,11 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Sage Therapeutics",
-      "error": "Remote end closed connection without response"
+      "source": "company_portal:Alnylam Pharmaceuticals",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Alnylam Pharmaceuticals",
+      "source": "company_portal:Sage Therapeutics",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -45,12 +45,8 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Aetion",
-      "error": "HTTP 202"
-    },
-    {
       "source": "company_portal:OM1",
-      "error": "HTTP Error 403: Forbidden"
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Genesis Research",
@@ -59,6 +55,10 @@
     {
       "source": "company_portal:Evidation",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Aetion",
+      "error": "HTTP 202"
     },
     {
       "source": "company_portal:Hologic",
@@ -73,60 +73,44 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Viz.ai",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "source": "company_portal:Microsoft Health & Life Sciences",
-      "error": "Remote end closed connection without response"
-    },
-    {
       "source": "company_portal:Qure.ai",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "source": "company_portal:ClinChoice",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "source": "company_portal:Eli Lilly and Company",
-      "error": "HTTP Error 403: Forbidden"
-    },
-    {
-      "source": "company_portal:DRW",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "source": "company_portal:Eikon Therapeutics",
-      "error": "Remote end closed connection without response"
     },
     {
       "source": "company_portal:Fenix Group",
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "source": "company_portal:DRW",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Eikon Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Eli Lilly and Company",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:IMC Trading",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "source": "company_portal:Millennium Management",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "source": "company_portal:Meta",
-      "error": "Remote end closed connection without response"
     },
     {
       "source": "company_portal:NERA Economic Consulting",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:SDC (Statistics & Data Corporation)",
-      "error": "Remote end closed connection without response"
-    },
-    {
       "source": "company_portal:Sakata Seed America, Inc.",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Precision Medicine Group",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "source": "company_portal:Putnam (Inizio Ignite)",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "source": "company_portal:SystImmune",
@@ -137,20 +121,28 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Precision Medicine Group",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "source": "company_portal:Two Sigma",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:UTHealth Houston",
-      "error": "Remote end closed connection without response"
+      "source": "company_portal:Meta",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Putnam (Inizio Ignite)",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "source": "company_portal:Millennium Management",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Microsoft Health & Life Sciences",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:SDC (Statistics & Data Corporation)",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:UTHealth Houston",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     }
   ]
 }

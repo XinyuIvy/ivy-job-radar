@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-20T14:09:36.669788+00:00",
-  "matched_jobs": 1,
+  "generated_at": "2026-09-21T16:30:23.929082+00:00",
+  "matched_jobs": 0,
   "sources": [
     {
       "source": "remoteok",
@@ -11,7 +11,7 @@
     {
       "source": "remotive",
       "state": "success",
-      "scanned": 20,
+      "scanned": 18,
       "matched": 0
     },
     {
@@ -30,12 +30,12 @@
       "source": "arbeitnow",
       "state": "success",
       "scanned": 250,
-      "matched": 1
+      "matched": 0
     },
     {
       "source": "weworkremotely",
       "state": "success",
-      "scanned": 84,
+      "scanned": 83,
       "matched": 0
     },
     {

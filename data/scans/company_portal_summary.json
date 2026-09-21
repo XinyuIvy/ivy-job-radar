@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-09-20T14:10:39.993925+00:00",
+  "generated_at": "2026-09-21T16:33:29.484169+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
-  "companies_succeeded": 143,
-  "companies_failed": 22,
-  "companies_unidentified": 11,
-  "jobs_scanned": 10041,
-  "jobs_matched": 52,
+  "companies_succeeded": 145,
+  "companies_failed": 11,
+  "companies_unidentified": 20,
+  "jobs_scanned": 10029,
+  "jobs_matched": 53,
   "ats_counts": {
     "adp": 1,
     "ashby": 11,
     "dayforce": 2,
-    "generic": 28,
+    "generic": 39,
     "greenhouse": 34,
     "icims": 5,
     "jobvite": 2,
@@ -19,24 +19,17 @@
     "oraclecloud": 2,
     "smartrecruiters": 2,
     "successfactors": 3,
-    "unidentified": 24,
+    "unidentified": 13,
     "workable": 2,
     "workday": 51
   },
   "region_counts": {
-    "": {
-      "companies_attempted": 10,
-      "companies_succeeded": 0,
-      "companies_failed": 10,
-      "companies_unidentified": 0,
-      "jobs_matched": 0
-    },
     "美国": {
-      "companies_attempted": 166,
-      "companies_succeeded": 143,
-      "companies_failed": 12,
-      "companies_unidentified": 11,
-      "jobs_matched": 52
+      "companies_attempted": 176,
+      "companies_succeeded": 145,
+      "companies_failed": 11,
+      "companies_unidentified": 20,
+      "jobs_matched": 53
     }
   },
   "failure_companies": [
@@ -46,13 +39,13 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sage Therapeutics",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
       "company": "Alnylam Pharmaceuticals",
       "url": "https://www.alnylam.com/careers#main-content",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Sage Therapeutics",
+      "url": "http://www.sagerx.com/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -71,14 +64,9 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Aetion",
-      "url": "",
-      "error": "HTTP 202"
-    },
-    {
       "company": "OM1",
       "url": "https://job-boards.greenhouse.io/om1",
-      "error": "HTTP Error 403: Forbidden"
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "Genesis Research",
@@ -89,6 +77,11 @@
       "company": "Evidation",
       "url": "https://evidation.com/for-customers/recruit",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Aetion",
+      "url": "",
+      "error": "HTTP 202"
     },
     {
       "company": "Hologic",
@@ -106,39 +99,9 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Viz.ai",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
       "company": "Qure.ai",
       "url": "https://qure.ai/careers",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "ClinChoice",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
-      "error": "HTTP Error 403: Forbidden"
-    },
-    {
-      "company": "DRW",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "company": "Eikon Therapeutics",
-      "url": "",
-      "error": "Remote end closed connection without response"
     },
     {
       "company": "Fenix Group",
@@ -146,19 +109,24 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Eikon Therapeutics",
+      "url": "https://www.eikontx.com/careers",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "Millennium Management",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
-      "company": "Meta",
-      "url": "",
-      "error": "Remote end closed connection without response"
     },
     {
       "company": "NERA Economic Consulting",
@@ -166,14 +134,19 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "SDC (Statistics & Data Corporation)",
-      "url": "",
-      "error": "Remote end closed connection without response"
-    },
-    {
       "company": "Sakata Seed America, Inc.",
       "url": "https://sakata.com/careers/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "company": "Putnam (Inizio Ignite)",
+      "url": "https://careers.inizioengage.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "company": "SystImmune",
@@ -186,24 +159,34 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "UTHealth Houston",
-      "url": "",
-      "error": "Remote end closed connection without response"
+      "company": "Meta",
+      "url": "https://www.metacareers.com/jobs/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Putnam (Inizio Ignite)",
-      "url": "https://careers.inizioengage.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "SDC (Statistics & Data Corporation)",
+      "url": "https://www.sdcclinical.com/careers/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "UTHealth Houston",
+      "url": "https://careers.uth.tmc.edu/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     }
   ]
 }
