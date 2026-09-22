@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-09-21T16:33:29.484169+00:00",
+  "generated_at": "2026-09-22T14:36:55.821325+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
   "companies_succeeded": 145,
-  "companies_failed": 11,
-  "companies_unidentified": 20,
-  "jobs_scanned": 10029,
-  "jobs_matched": 53,
+  "companies_failed": 12,
+  "companies_unidentified": 19,
+  "jobs_scanned": 9947,
+  "jobs_matched": 52,
   "ats_counts": {
     "adp": 1,
     "ashby": 11,
     "dayforce": 2,
-    "generic": 39,
+    "generic": 38,
     "greenhouse": 34,
     "icims": 5,
     "jobvite": 2,
@@ -19,7 +19,7 @@
     "oraclecloud": 2,
     "smartrecruiters": 2,
     "successfactors": 3,
-    "unidentified": 13,
+    "unidentified": 14,
     "workable": 2,
     "workday": 51
   },
@@ -27,9 +27,9 @@
     "美国": {
       "companies_attempted": 176,
       "companies_succeeded": 145,
-      "companies_failed": 11,
-      "companies_unidentified": 20,
-      "jobs_matched": 53
+      "companies_failed": 12,
+      "companies_unidentified": 19,
+      "jobs_matched": 52
     }
   },
   "failure_companies": [
@@ -64,6 +64,11 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "company": "Aetion",
+      "url": "",
+      "error": "HTTP 202"
+    },
+    {
       "company": "OM1",
       "url": "https://job-boards.greenhouse.io/om1",
       "error": "HTTP Error 404: Not Found"
@@ -77,11 +82,6 @@
       "company": "Evidation",
       "url": "https://evidation.com/for-customers/recruit",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Aetion",
-      "url": "",
-      "error": "HTTP 202"
     },
     {
       "company": "Hologic",
@@ -99,9 +99,19 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "Qure.ai",
       "url": "https://qure.ai/careers",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "company": "Fenix Group",
@@ -119,14 +129,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Meta",
+      "url": "https://www.metacareers.com/jobs/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "NERA Economic Consulting",
@@ -134,8 +144,23 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "Sakata Seed America, Inc.",
       "url": "https://sakata.com/careers/",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "SystImmune",
+      "url": "https://www.systimmune.com/careers",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Too Good To Go",
+      "url": "https://job-boards.greenhouse.io/toogoodtogo",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -149,33 +174,8 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
-      "company": "SystImmune",
-      "url": "https://www.systimmune.com/careers",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "Too Good To Go",
-      "url": "https://job-boards.greenhouse.io/toogoodtogo",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Meta",
-      "url": "https://www.metacareers.com/jobs/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Millennium Management",
-      "url": "https://career.mlp.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
