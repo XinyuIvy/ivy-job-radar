@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-09-22T14:38:57.215132+00:00",
+  "run_started_at": "2026-09-23T22:17:46.118007+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 34,
+    "us_jobs_verified_latest.json": 37,
     "china_jobs_latest.json": 0,
-    "cloud_sources_jobs_latest.json": 1,
+    "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 238,
-    "company_portal_jobs_latest.json": 52
+    "company_portal_jobs_latest.json": 50
   },
   "fetched": 325,
-  "verified_or_open": 92,
+  "verified_or_open": 91,
   "rejected": 6,
   "deduplicated": 11,
-  "imported": 453,
-  "new": 26,
-  "updated_or_unchanged": 282,
-  "temporarily_retained": 145,
+  "imported": 483,
+  "new": 30,
+  "updated_or_unchanged": 278,
+  "temporarily_retained": 175,
   "pruned_as_stale": 0,
-  "no_longer_seen": 145,
+  "no_longer_seen": 175,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -25,11 +25,11 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Alnylam Pharmaceuticals",
+      "source": "company_portal:Sage Therapeutics",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Sage Therapeutics",
+      "source": "company_portal:Alnylam Pharmaceuticals",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -50,7 +50,7 @@
     },
     {
       "source": "company_portal:OM1",
-      "error": "HTTP Error 404: Not Found"
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "source": "company_portal:Genesis Research",
@@ -81,14 +81,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Eli Lilly and Company",
-      "error": "HTTP Error 403: Forbidden"
-    },
-    {
-      "source": "company_portal:Fenix Group",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
       "source": "company_portal:DRW",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
@@ -97,11 +89,19 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:Fenix Group",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
       "source": "company_portal:IMC Trading",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Meta",
+      "source": "company_portal:Eli Lilly and Company",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Millennium Management",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -109,19 +109,15 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Millennium Management",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Sakata Seed America, Inc.",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:SystImmune",
-      "error": "HTTP Error 404: Not Found"
+      "source": "company_portal:SDC (Statistics & Data Corporation)",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Too Good To Go",
+      "source": "company_portal:SystImmune",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -129,15 +125,15 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
+      "source": "company_portal:Too Good To Go",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
       "source": "company_portal:Putnam (Inizio Ignite)",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "source": "company_portal:Two Sigma",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:SDC (Statistics & Data Corporation)",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
