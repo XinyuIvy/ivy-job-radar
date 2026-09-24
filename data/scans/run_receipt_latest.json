@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-09-23T22:17:46.118007+00:00",
+  "run_started_at": "2026-09-24T14:57:43.982946+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 37,
+    "us_jobs_verified_latest.json": 39,
     "china_jobs_latest.json": 0,
     "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 238,
     "company_portal_jobs_latest.json": 50
   },
-  "fetched": 325,
-  "verified_or_open": 91,
+  "fetched": 327,
+  "verified_or_open": 92,
   "rejected": 6,
   "deduplicated": 11,
-  "imported": 483,
-  "new": 30,
-  "updated_or_unchanged": 278,
-  "temporarily_retained": 175,
+  "imported": 498,
+  "new": 15,
+  "updated_or_unchanged": 295,
+  "temporarily_retained": 188,
   "pruned_as_stale": 0,
-  "no_longer_seen": 175,
+  "no_longer_seen": 188,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -50,7 +50,7 @@
     },
     {
       "source": "company_portal:OM1",
-      "error": "HTTP Error 403: Forbidden"
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Genesis Research",
@@ -73,11 +73,11 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Microsoft Health & Life Sciences",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:Qure.ai",
+      "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Qure.ai",
+      "source": "company_portal:Fenix Group",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -89,19 +89,15 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Fenix Group",
-      "error": "HTTP Error 404: Not Found"
+      "source": "company_portal:Eli Lilly and Company",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:IMC Trading",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Eli Lilly and Company",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Millennium Management",
+      "source": "company_portal:Microsoft Health & Life Sciences",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -113,10 +109,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:SDC (Statistics & Data Corporation)",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:SystImmune",
       "error": "HTTP Error 404: Not Found"
     },
@@ -125,19 +117,27 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
-      "source": "company_portal:Too Good To Go",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
       "source": "company_portal:Putnam (Inizio Ignite)",
       "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "source": "company_portal:Too Good To Go",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Two Sigma",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:Millennium Management",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:UTHealth Houston",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:SDC (Statistics & Data Corporation)",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     }
   ]
