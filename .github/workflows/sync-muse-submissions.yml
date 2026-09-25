@@ -1,0 +1,78 @@
+name: Sync Muse submissions to Job Radar
+
+# Xinyu's assistant (Muse) maintains data/muse-submissions.json with every
+# submitted application. Any push that touches that file automatically
+# upserts the entries into the deployed Job Radar site via /api/applications
+# (the API dedupes by jobUrl / applicationId / company+title, so re-runs are safe).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/muse-submissions.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Push submissions to Job Radar applications API
+        env:
+          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
+          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+
+          base = "https://ivy-job-radar.rourou1199.chatgpt.site"
+          token_sync = os.environ.get("IVY_JOB_RADAR_SYNC_TOKEN", "")
+          token_bypass = os.environ.get("SITES_SIWC_BYPASS_TOKEN", "")
+          if not token_sync or not token_bypass:
+              raise SystemExit("Website sync credentials are not configured.")
+
+          with open("data/muse-submissions.json", encoding="utf-8") as f:
+              data = json.load(f)
+
+          created, existing, failed = 0, 0, 0
+          for app in data.get("applications", []):
+              body = json.dumps(app, ensure_ascii=False).encode("utf-8")
+              req = urllib.request.Request(
+                  base + "/api/applications",
+                  data=body,
+                  headers={
+                      "Content-Type": "application/json",
+                      "Authorization": f"Bearer {token_sync}",
+                      "OAI-Sites-Authorization": f"Bearer {token_bypass}",
+                  },
+                  method="POST",
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as resp:
+                      if resp.status == 201:
+                          created += 1
+                      else:
+                          existing += 1  # 200 = already tracked, updated in place
+              except urllib.error.HTTPError as e:
+                  failed += 1
+                  print(f"FAILED {app.get('company')} | {app.get('title')}: HTTP {e.code} {e.read()[:200]!r}")
+              except Exception as e:
+                  failed += 1
+                  print(f"FAILED {app.get('company')} | {app.get('title')}: {e}")
+
+          print(f"sync done: created={created} existing={existing} failed={failed}")
+          raise SystemExit(1 if failed else 0)
+          PY
