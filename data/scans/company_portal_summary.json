@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-09-25T14:33:35.582267+00:00",
+  "generated_at": "2026-09-26T14:23:46.278406+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
   "companies_succeeded": 146,
   "companies_failed": 11,
   "companies_unidentified": 19,
-  "jobs_scanned": 9990,
-  "jobs_matched": 43,
+  "jobs_scanned": 9943,
+  "jobs_matched": 42,
   "ats_counts": {
     "adp": 1,
     "ashby": 11,
@@ -29,7 +29,7 @@
       "companies_succeeded": 146,
       "companies_failed": 11,
       "companies_unidentified": 19,
-      "jobs_matched": 43
+      "jobs_matched": 42
     }
   },
   "failure_companies": [
@@ -44,14 +44,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sage Therapeutics",
-      "url": "https://www.supernus.com/careers-with-supernus",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Evidera",
       "url": "",
       "error": "HTTP 202"
+    },
+    {
+      "company": "Sage Therapeutics",
+      "url": "https://www.supernus.com/careers-with-supernus",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Flatiron Health",
@@ -64,23 +64,23 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "OM1",
-      "url": "https://job-boards.greenhouse.io/om1",
-      "error": "HTTP Error 403: Forbidden"
-    },
-    {
       "company": "Aetion",
       "url": "",
       "error": "HTTP 202"
     },
     {
-      "company": "Evidation",
-      "url": "https://evidation.com/for-customers/recruit",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "company": "OM1",
+      "url": "https://job-boards.greenhouse.io/om1",
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "company": "Genesis Research",
       "url": "https://genesisrg.com/careers/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Evidation",
+      "url": "https://evidation.com/for-customers/recruit",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -97,6 +97,11 @@
       "company": "Paige",
       "url": "https://paige.ai/careers/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Qure.ai",
@@ -119,18 +124,18 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -144,16 +149,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "SystImmune",
-      "url": "https://www.systimmune.com/careers",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "company": "Too Good To Go",
       "url": "https://job-boards.greenhouse.io/toogoodtogo",
       "error": "HTTP Error 404: Not Found"
@@ -164,6 +159,16 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "company": "SystImmune",
+      "url": "https://www.systimmune.com/careers",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "company": "Putnam (Inizio Ignite)",
       "url": "https://careers.inizioengage.com/",
       "error": "<urlopen error [Errno -2] Name or service not known>"
@@ -171,11 +176,6 @@
     {
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Millennium Management",
-      "url": "https://career.mlp.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
