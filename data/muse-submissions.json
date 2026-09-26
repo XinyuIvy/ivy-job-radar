@@ -273,9 +273,18 @@
       "source": "Muse 求职助手",
       "status": "已申请",
       "title": "Senior Research Statistician - Immunology (Hybrid)"
+    },
+    {
+      "company": "Trexquant Investment",
+      "title": "Quantitative Researcher - PhD (USA)",
+      "appliedDate": "2026-09-26",
+      "jobUrl": "",
+      "location": "USA",
+      "status": "applied",
+      "notes": "daily-job-screening 2026-09-26 接续；Xinyu 接管浏览器后成功提交，Trexquant 确认页已提交，副本发学校邮箱；本轮补同步。相关经验 4 年，resume_quant_research.pdf，Photo/Summary/Cover letter 留空，EEO survey 未填"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-26T14:05:00-05:00",
-  "sync_note": "daily-job-screening 2026-09-26 第 2 个确认提交（AbbVie Immunology）；累计 23 条"
+  "updated_at": "2026-09-26T16:15:00-05:00",
+  "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
