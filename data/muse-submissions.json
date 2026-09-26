@@ -117,9 +117,141 @@
    "source": "Muse 求职助手",
    "status": "已申请",
    "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "2636",
+   "appliedDate": "2026-09-25",
+   "company": "D. E. Shaw",
+   "jobUrl": "https://www.deshaw.com/careers",
+   "location": "New York, NY",
+   "notes": "2026-09-25 提交（浏览器任务误点 Finish，她确认三处判断都对不撤回）；Quantitative Analyst",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Analyst"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Google",
+   "jobUrl": "https://www.google.com/about/careers/applications/",
+   "location": "Mountain View, CA",
+   "notes": "2026-09-25 她接管时亲自提交；页面显示 You submitted this application on Sep 25；30天内已达3个申请上限",
+   "resumeVersion": "CV_Applied_DS_Internet_EN.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Data Scientist III, Research"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-26",
+   "company": "Citadel",
+   "jobUrl": "https://www.citadel.com/careers/",
+   "location": "Miami, FL",
+   "notes": "2026-09-26 经她授权代点 Submit；确认页 Thank You / You've already applied；本科入学年份用了2019（正确为2017）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Researcher, PhD Graduate"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-26",
+   "company": "Citadel Securities",
+   "jobUrl": "https://www.citadelsecurities.com/careers/",
+   "location": "New York, NY",
+   "notes": "2026-09-26 她接管时亲自提交；确认页 Thank You — You've already applied",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Researcher, PhD Graduate"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-26",
+   "company": "Jump Trading",
+   "jobUrl": "https://www.jumptrading.com/careers",
+   "location": "Chicago, IL",
+   "notes": "2026-09-26 她接管时亲自提交；收到确认邮件 Your details have been added to our database and are under review",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Campus Quantitative Researcher"
+  },
+  {
+   "applicationId": "11017",
+   "appliedDate": "2026-09-26",
+   "company": "SIG (Susquehanna)",
+   "jobUrl": "https://careers.sig.com/",
+   "location": "",
+   "notes": "2026-09-26 任务在Step 2误点Submit直接提交；她说没事不撤回；收到账号设置邮件",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Researcher – PhD: 2027"
+  },
+  {
+   "applicationId": "302821",
+   "appliedDate": "2026-09-26",
+   "company": "Uber",
+   "jobUrl": "https://www.uber.com/careers/",
+   "location": "",
+   "notes": "2026-09-26 经她授权代提交；确认页 Thank you for your job application；状态 Under Consideration；收到确认邮件",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Scientist II, Marketplace"
+  },
+  {
+   "applicationId": "184492",
+   "appliedDate": "2026-09-26",
+   "company": "Goldman Sachs",
+   "jobUrl": "https://higher.gs.com/",
+   "location": "New York, NY",
+   "notes": "2026-09-26 经她授权代提交；F-1剩余月数填36；本科入学用了2019（正确为2017）；收到确认邮件",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Core Engineering, FTP Strats, Associate, Quantitative Engineering"
+  },
+  {
+   "applicationId": "156138",
+   "appliedDate": "2026-09-26",
+   "company": "Goldman Sachs",
+   "jobUrl": "https://higher.gs.com/",
+   "location": "New York, NY",
+   "notes": "2026-09-26 经她授权代提交；F-1剩余月数填36；本科入学用了2019（正确为2017）；收到确认邮件",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Strategist, GCEM"
+  },
+  {
+   "applicationId": "8030406",
+   "appliedDate": "2026-09-26",
+   "company": "DRW",
+   "jobUrl": "https://job-boards.greenhouse.io/drweng/jobs/8030406",
+   "location": "Chicago, IL",
+   "notes": "2026-09-26 上传博士成绩单后提交；SWUFE按她要求删除只留Vanderbilt+Yale；地点Chicago排第一；Offer deadlines=No",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "8036541",
+   "appliedDate": "2026-09-26",
+   "company": "Akuna Capital",
+   "jobUrl": "https://akunacapital.com/careers/job/8036541/?gh_jid=8036541",
+   "location": "Chicago, IL",
+   "notes": "2026-09-26 她用自己浏览器手动提交（隐形reCAPTCHA拦自动化）；收到确认邮件；测评可能经HackerRank/Canditech/Criteria发",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Junior Quantitative Researcher"
   }
  ],
  "source": "muse-jobhunt",
- "updated_at": "2026-09-25T21:30:00Z",
- "sync_note": "trigger initial sync"
+ "updated_at": "2026-09-26T00:55:00Z",
+ "sync_note": "2026-09-26 新增 11 条（D.E. Shaw/Google/Citadel/Citadel Securities/Jump/SIG/Uber/GS×2/DRW/Akuna），累计 21 条"
 }
