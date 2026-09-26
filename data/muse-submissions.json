@@ -144,7 +144,7 @@
   },
   {
    "applicationId": "",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Citadel",
    "jobUrl": "https://www.citadel.com/careers/",
    "location": "Miami, FL",
@@ -156,7 +156,7 @@
   },
   {
    "applicationId": "",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Citadel Securities",
    "jobUrl": "https://www.citadelsecurities.com/careers/",
    "location": "New York, NY",
@@ -168,7 +168,7 @@
   },
   {
    "applicationId": "",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Jump Trading",
    "jobUrl": "https://www.jumptrading.com/careers",
    "location": "Chicago, IL",
@@ -180,7 +180,7 @@
   },
   {
    "applicationId": "11017",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "SIG (Susquehanna)",
    "jobUrl": "https://careers.sig.com/",
    "location": "",
@@ -192,7 +192,7 @@
   },
   {
    "applicationId": "302821",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Uber",
    "jobUrl": "https://www.uber.com/careers/",
    "location": "",
@@ -204,7 +204,7 @@
   },
   {
    "applicationId": "184492",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Goldman Sachs",
    "jobUrl": "https://higher.gs.com/",
    "location": "New York, NY",
@@ -216,7 +216,7 @@
   },
   {
    "applicationId": "156138",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Goldman Sachs",
    "jobUrl": "https://higher.gs.com/",
    "location": "New York, NY",
@@ -228,7 +228,7 @@
   },
   {
    "applicationId": "8030406",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "DRW",
    "jobUrl": "https://job-boards.greenhouse.io/drweng/jobs/8030406",
    "location": "Chicago, IL",
@@ -240,7 +240,7 @@
   },
   {
    "applicationId": "8036541",
-   "appliedDate": "2026-09-26",
+   "appliedDate": "2026-09-25",
    "company": "Akuna Capital",
    "jobUrl": "https://akunacapital.com/careers/job/8036541/?gh_jid=8036541",
    "location": "Chicago, IL",
@@ -253,5 +253,5 @@
  ],
  "source": "muse-jobhunt",
  "updated_at": "2026-09-26T00:55:00Z",
- "sync_note": "2026-09-26 新增 11 条（D.E. Shaw/Google/Citadel/Citadel Securities/Jump/SIG/Uber/GS×2/DRW/Akuna），累计 21 条"
+ "sync_note": "2026-09-26 日期修正：晚间批次 appliedDate 按纳什维尔时区统一为 2026-09-25（9 条），累计 21 条"
 }
