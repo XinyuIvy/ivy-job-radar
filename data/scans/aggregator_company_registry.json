@@ -4,7 +4,7 @@
     "upstream_company": "abbott",
     "ats": "Workday",
     "sample_job_url": "https://abbott.wd5.myworkdayjobs.com/abbottcareers/job/Vietnam---Hanoi/XMLNAME--Senior--Market-Access-Manager--Pharmaceuticals-Division_31163314",
-    "jobs_seen": 1001
+    "jobs_seen": 1004
   },
   {
     "company": "Acadia Pharmaceuticals",
@@ -18,7 +18,7 @@
     "upstream_company": "alcon",
     "ats": "Workday",
     "sample_job_url": "https://alcon.wd5.myworkdayjobs.com/careers_alcon/job/Johns-Creek-Georgia/XMLNAME-2027-Spring-Summer-Co-Op---Electrical-Maintenance_R-2026-49820",
-    "jobs_seen": 355
+    "jobs_seen": 358
   },
   {
     "company": "Amgen",
@@ -32,7 +32,7 @@
     "upstream_company": "astrazeneca",
     "ats": "Workday",
     "sample_job_url": "https://astrazeneca.wd3.myworkdayjobs.com/careers/job/Shanghai---Guilin-Road/XMLNAME--Associate-Director--Principal-Clinical-Pharmacologist--Cell-Therapy-Discovery_R-255457",
-    "jobs_seen": 3092
+    "jobs_seen": 3093
   },
   {
     "company": "Baxter",
@@ -88,7 +88,7 @@
     "upstream_company": "gsk",
     "ats": "Workday",
     "sample_job_url": "https://gsk.wd5.myworkdayjobs.com/gskcareers/job/Pakistan---Sindh---Karachi/ACCA-Trainee_447145",
-    "jobs_seen": 508
+    "jobs_seen": 509
   },
   {
     "company": "Genentech/Roche",
@@ -123,7 +123,7 @@
     "upstream_company": "insulet",
     "ats": "Workday",
     "sample_job_url": "https://insulet.wd5.myworkdayjobs.com/insuletcareers/job/Gelang-Patah-Johor/Asia-Project-Governance_REQ-2026-18340",
-    "jobs_seen": 230
+    "jobs_seen": 232
   },
   {
     "company": "Komodo Health",
@@ -144,14 +144,14 @@
     "upstream_company": "medtronic",
     "ats": "Workday",
     "sample_job_url": "https://medtronic.wd1.myworkdayjobs.com/redeploymentmedtroniccareers/job/Ho-Chi-Minh-City-Ho-Chi-Minh-City-Vietnam/XMLNAME-238040---Assembler-I_R76655",
-    "jobs_seen": 839
+    "jobs_seen": 840
   },
   {
     "company": "Novartis",
     "upstream_company": "novartis",
     "ats": "Workday",
     "sample_job_url": "https://novartis.wd3.myworkdayjobs.com/novartis_careers/job/Hong-Kong/XMLNAME--Senior-Brand-Manager_REQ-10084604",
-    "jobs_seen": 882
+    "jobs_seen": 883
   },
   {
     "company": "Parexel",
@@ -179,7 +179,7 @@
     "upstream_company": "philips",
     "ats": "Workday",
     "sample_job_url": "https://philips.wd3.myworkdayjobs.com/jobs-and-careers/job/Chengdu/Account-Manager_591484",
-    "jobs_seen": 721
+    "jobs_seen": 722
   },
   {
     "company": "Precision AQ",
@@ -207,7 +207,7 @@
     "upstream_company": "resmed",
     "ats": "Workday",
     "sample_job_url": "https://resmed.wd3.myworkdayjobs.com/resmed_external_careers/job/Mumbai-India/Account-Manager_JR_053138",
-    "jobs_seen": 194
+    "jobs_seen": 195
   },
   {
     "company": "Sanofi",
@@ -228,7 +228,7 @@
     "upstream_company": "stryker",
     "ats": "Workday",
     "sample_job_url": "https://stryker.wd1.myworkdayjobs.com/strykercareers/job/Schnkirchen-Germany/XMLNAME--Associate--Manager--m-f-d--Trauma-R-D_R573223",
-    "jobs_seen": 250
+    "jobs_seen": 264
   },
   {
     "company": "Syneos Health",
