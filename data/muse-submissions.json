@@ -322,9 +322,18 @@
       "status": "submitted",
       "notes": "New York, NY; confirmation 'Thank you for applying.'",
       "link": "https://www.3redpartners.com/careers"
+    },
+    {
+      "company": "Jane Street",
+      "title": "Machine Learning Researcher (R-1529)",
+      "applicationId": "janestreet-8576928002",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "New York, NY; confirmation 'THANK YOU FOR YOUR APPLICATION.'; no work-auth questions on form",
+      "link": "https://www.janestreet.com/join-jane-street/apply/8576928002?gh_jid=8576928002"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T18:33:25-05:00",
+  "updated_at": "2026-09-27T18:48:01-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
