@@ -304,9 +304,27 @@
       "status": "submitted",
       "notes": "Remote US; Greenhouse confirmation received",
       "link": "https://job-boards.greenhouse.io/precisionmedicinegroup/jobs/6128935004"
+    },
+    {
+      "company": "Renaissance Technologies",
+      "title": "Research Scientist",
+      "applicationId": "rentec-20260927",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'",
+      "link": "https://www.rentec.com/apply"
+    },
+    {
+      "company": "3Red Partners",
+      "title": "2027 Graduate Quantitative Researcher",
+      "applicationId": "greenhouse-8624128002",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "New York, NY; confirmation 'Thank you for applying.'",
+      "link": "https://www.3redpartners.com/careers"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T18:25:19-05:00",
+  "updated_at": "2026-09-27T18:33:25-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
