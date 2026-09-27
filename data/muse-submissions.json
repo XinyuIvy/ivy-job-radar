@@ -394,9 +394,18 @@
       "status": "submitted",
       "notes": "Confirmation 'Application Submitted / Thank you for applying to Amgen!'; new Workday account created",
       "link": "https://amgen.wd1.myworkdayjobs.com"
+    },
+    {
+      "company": "CVS Health",
+      "title": "Decision Scientist - Utilization Management",
+      "applicationId": "R1050866",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "Confirmation 'Application Submitted. You have successfully applied for this job posting.'; new Workday account",
+      "link": "https://www.cvshealth.com"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T21:47:32-05:00",
+  "updated_at": "2026-09-27T21:48:28-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
