@@ -331,9 +331,27 @@
       "status": "submitted",
       "notes": "New York, NY; confirmation 'THANK YOU FOR YOUR APPLICATION.'; no work-auth questions on form",
       "link": "https://www.janestreet.com/join-jane-street/apply/8576928002?gh_jid=8576928002"
+    },
+    {
+      "company": "fairlife",
+      "title": "Data Scientist (Decision Intelligence)",
+      "applicationId": "greenhouse-5249251007",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "Chicago, IL; $95K-$110K; confirmation 'Thank you for applying.'",
+      "link": "https://fairlife.com/career-opportunities/data-scientist/?gh_jid=5249251007"
+    },
+    {
+      "company": "TextNow",
+      "title": "Data Scientist",
+      "applicationId": "greenhouse-4421318009",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "San Francisco, CA; confirmation 'Thank you for applying.'",
+      "link": "https://job-boards.greenhouse.io/textnowinc/jobs/4421318009"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T18:48:01-05:00",
+  "updated_at": "2026-09-27T19:52:06-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
