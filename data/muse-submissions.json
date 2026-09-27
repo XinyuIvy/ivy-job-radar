@@ -403,9 +403,18 @@
       "status": "submitted",
       "notes": "Confirmation 'Application Submitted. You have successfully applied for this job posting.'; new Workday account",
       "link": "https://www.cvshealth.com"
+    },
+    {
+      "company": "State Street",
+      "title": "Quantitative Analyst, Assistant Vice President / Credit Risk Modeler",
+      "applicationId": "R-790888",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "Clifton NJ Hybrid; confirmation 'Application Submitted — Thank you! You've successfully submitted your application.'",
+      "link": "https://careers.statestreet.com/global/en/job/R-790888/Quantitative-Analyst-Assistant-Vice-President"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T21:48:28-05:00",
+  "updated_at": "2026-09-27T21:49:08-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
