@@ -367,9 +367,18 @@
       "status": "submitted",
       "notes": "New York, NY Hybrid; confirmation 'Thank you for your interest in Lyft!'",
       "link": "https://app.careerpuck.com/job-board/lyft/job/8584688002"
+    },
+    {
+      "company": "Biogen",
+      "title": "Sr. Principal Biostatistician",
+      "applicationId": "REQ22948",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "Confirmation 'Application Submitted'; Candidate Home shows Application Received 2026-09-27",
+      "link": "https://www.biogen.com"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T21:35:11-05:00",
+  "updated_at": "2026-09-27T21:41:23-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
