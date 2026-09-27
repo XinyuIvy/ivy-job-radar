@@ -376,9 +376,27 @@
       "status": "submitted",
       "notes": "Confirmation 'Application Submitted'; Candidate Home shows Application Received 2026-09-27",
       "link": "https://www.biogen.com"
+    },
+    {
+      "company": "Amazon",
+      "title": "Applied Scientist II, US Prime and Marketing Tech",
+      "applicationId": "10440521",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "New York NY; confirmation 'Thank you for applying! Your application for Applied Scientist II... has been submitted.'; CPT=No (STEM OPT post-graduation)",
+      "link": "https://www.amazon.jobs/en-US/applicant/jobs/10440521/summary?result=success"
+    },
+    {
+      "company": "Amgen",
+      "title": "Biostatistics Senior Manager, Biosimilars (US Remote)",
+      "applicationId": "R-242819",
+      "appliedDate": "2026-09-27",
+      "status": "submitted",
+      "notes": "Confirmation 'Application Submitted / Thank you for applying to Amgen!'; new Workday account created",
+      "link": "https://amgen.wd1.myworkdayjobs.com"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-27T21:41:23-05:00",
+  "updated_at": "2026-09-27T21:47:32-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
