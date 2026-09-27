@@ -295,28 +295,6 @@
       "source": "Muse 求职助手",
       "status": "已申请",
       "title": "Senior Manager, Biostatistics"
-    },
-    {
-      "applicationId": "R1002104",
-      "appliedDate": "2026-09-26",
-      "company": "Capital One",
-      "jobUrl": "https://simplify.jobs/jobs/click/000b26fc-c146-454b-bc5e-9d8affb9d00c",
-      "location": "McLean, VA / New York, NY",
-      "notes": "2026-09-26 自动提交（daily-job-screening 接续）。申请后状态 In Progress；三段工作经历均带描述（含 Yale 硕士论文 survival 描述）；H1B Sponsorship Available",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Senior Associate, Data Scientist – Applied AI"
-    },
-    {
-      "applicationId": "R248360-1",
-      "appliedDate": "2026-09-26",
-      "company": "Capital One",
-      "jobUrl": "https://simplify.jobs/jobs/click/181bb074-ca7f-46ca-9b68-71aa7c15b762",
-      "location": "New York, NY",
-      "notes": "2026-09-26 自动提交（daily-job-screening 接续）。三段工作经历均带描述（含 Yale 硕士论文 survival 描述）；H1B Sponsorship Available；risk modeling 对口",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Senior Associate, Data Scientist – Operational Risk Management"
     }
   ],
   "source": "muse-jobhunt",
