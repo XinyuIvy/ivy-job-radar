@@ -100,7 +100,7 @@
       "company": "Optiver",
       "jobUrl": "https://www.optiver.com/join-us/jobs/quantitative-research-and-machine-learning/chicago/graduate-quantitative-researcher-phd-2027-start/",
       "location": "Chicago, IL / New York, NY",
-      "notes": "2026-09-25 Xinyu 在浏览器接管后亲自提交；申请 Chicago + New York，2027.6 可到岗；JD 明确支持 sponsorship",
+      "notes": "2026-09-25 Xinyu 在浏览器接管后亲自提交；申请 Chicago + New York，2027.6 可到岗；JD 明确支持 sponsorship；测评邀请 Invitation for assessments（Fri 2026-09-25 3:50 PM，Optiver assessments 平台；邮件注明截止 2026-10-02，需尽快完成）",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
       "status": "已申请",
@@ -244,7 +244,7 @@
       "company": "Akuna Capital",
       "jobUrl": "https://akunacapital.com/careers/job/8036541/?gh_jid=8036541",
       "location": "Chicago, IL",
-      "notes": "2026-09-26 她用自己浏览器手动提交（隐形reCAPTCHA拦自动化）；收到确认邮件；测评可能经HackerRank/Canditech/Criteria发",
+      "notes": "2026-09-26 她用自己浏览器手动提交（隐形reCAPTCHA拦自动化）；收到确认邮件；测评可能经HackerRank/Canditech/Criteria发；HackerRank 测评邀请已发（Fri 2026-09-25 7:02 PM）",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
       "status": "已申请",
@@ -301,8 +301,8 @@
       "title": "Associate Research Scientist, RWE",
       "applicationId": "greenhouse-6128935004",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Remote US; Greenhouse confirmation received",
+      "status": "已申请",
+      "notes": "Remote US; Greenhouse confirmation received；邮箱确认信 2026-09-27 1:25 PM CDT《Precision AQ: Thank you for your application》（通用模板，按时间归属）",
       "link": "https://job-boards.greenhouse.io/precisionmedicinegroup/jobs/6128935004"
     },
     {
@@ -310,8 +310,8 @@
       "title": "Research Scientist",
       "applicationId": "rentec-20260927",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'",
+      "status": "待确认",
+      "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'；2026-09-27 邮箱全文件夹未收到确认邮件，待确认",
       "link": "https://www.rentec.com/apply"
     },
     {
@@ -319,8 +319,8 @@
       "title": "2027 Graduate Quantitative Researcher",
       "applicationId": "greenhouse-8624128002",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "New York, NY; confirmation 'Thank you for applying.'",
+      "status": "已申请",
+      "notes": "New York, NY; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 1:34 PM CDT《Thank you for applying to 3Red Partners》（通用模板，按时间归属）",
       "link": "https://www.3redpartners.com/careers"
     },
     {
@@ -328,8 +328,8 @@
       "title": "Machine Learning Researcher (R-1529)",
       "applicationId": "janestreet-8576928002",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "New York, NY; confirmation 'THANK YOU FOR YOUR APPLICATION.'; no work-auth questions on form",
+      "status": "已申请",
+      "notes": "New York, NY; confirmation 'THANK YOU FOR YOUR APPLICATION.'; no work-auth questions on form；邮箱确认信 2026-09-27 1:48 PM CDT《Thank you for applying to Jane Street》（通用模板，按时间归属；同邮箱9/25另有该司其他岗位确认信）",
       "link": "https://www.janestreet.com/join-jane-street/apply/8576928002?gh_jid=8576928002"
     },
     {
@@ -337,8 +337,8 @@
       "title": "Data Scientist (Decision Intelligence)",
       "applicationId": "greenhouse-5249251007",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Chicago, IL; $95K-$110K; confirmation 'Thank you for applying.'",
+      "status": "已申请",
+      "notes": "Chicago, IL; $95K-$110K; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 2:50 PM CDT《fairlife, LLC | We've Received Your Application!》（通用模板，按时间归属）",
       "link": "https://fairlife.com/career-opportunities/data-scientist/?gh_jid=5249251007"
     },
     {
@@ -346,8 +346,8 @@
       "title": "Data Scientist",
       "applicationId": "greenhouse-4421318009",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "San Francisco, CA; confirmation 'Thank you for applying.'",
+      "status": "已申请",
+      "notes": "San Francisco, CA; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 2:52 PM CDT《Thank you for applying to TextNow, Inc.》（通用模板，按时间归属）",
       "link": "https://job-boards.greenhouse.io/textnowinc/jobs/4421318009"
     },
     {
@@ -355,8 +355,8 @@
       "title": "Analyst I, Risk & Analytics",
       "applicationId": "greenhouse-7808667003",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Remote US; $115K-$165K; confirmation 'Thank you for applying to Affirm.'",
+      "status": "已申请",
+      "notes": "Remote US; $115K-$165K; confirmation 'Thank you for applying to Affirm.'；邮箱确认信 2026-09-27 2:55 PM CDT《We've received your application for Analyst at Affirm》（主题含 Analyst，与岗位吻合）",
       "link": "https://job-boards.greenhouse.io/affirm/jobs/7808667003"
     },
     {
@@ -364,8 +364,8 @@
       "title": "Senior Data Scientist, Causal Inference",
       "applicationId": "greenhouse-110880",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "New York, NY Hybrid; confirmation 'Thank you for your interest in Lyft!'",
+      "status": "已申请",
+      "notes": "New York, NY Hybrid; confirmation 'Thank you for your interest in Lyft!'；邮箱确认信 2026-09-27 4:33 PM CDT《Thank you for your application for Senior Data Scientist, Causal Inference》（主题点名岗位，归属确切）",
       "link": "https://app.careerpuck.com/job-board/lyft/job/8584688002"
     },
     {
@@ -373,8 +373,8 @@
       "title": "Sr. Principal Biostatistician",
       "applicationId": "REQ22948",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Confirmation 'Application Submitted'; Candidate Home shows Application Received 2026-09-27",
+      "status": "已申请",
+      "notes": "Confirmation 'Application Submitted'; Candidate Home shows Application Received 2026-09-27；邮箱确认信 2026-09-27 4:41 PM CDT《Thank you for applying to Biogen》（正文含 Sr. Principal Biostatistician，归属确切）",
       "link": "https://www.biogen.com"
     },
     {
@@ -382,8 +382,8 @@
       "title": "Applied Scientist II, US Prime and Marketing Tech",
       "applicationId": "10440521",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "New York NY; confirmation 'Thank you for applying! Your application for Applied Scientist II... has been submitted.'; CPT=No (STEM OPT post-graduation)",
+      "status": "已申请",
+      "notes": "New York NY; confirmation 'Thank you for applying! Your application for Applied Scientist II... has been submitted.'; CPT=No (STEM OPT post-graduation)；邮箱确认信 2026-09-27 2:50 PM CDT《Keep track of your application / Thank you for Applying to Amazon!》（正文点名 Applied Scientist II US Prime and Marketing Tech (ID:10440521)，归属确切）",
       "link": "https://www.amazon.jobs/en-US/applicant/jobs/10440521/summary?result=success"
     },
     {
@@ -391,8 +391,8 @@
       "title": "Biostatistics Senior Manager, Biosimilars (US Remote)",
       "applicationId": "R-242819",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Confirmation 'Application Submitted / Thank you for applying to Amgen!'; new Workday account created",
+      "status": "已申请",
+      "notes": "Confirmation 'Application Submitted / Thank you for applying to Amgen!'; new Workday account created；邮箱确认信 2026-09-27 4:46 PM CDT《Amgen Inc. - Thank you for applying》（正文点名 R-242819 Biostatistics Senior Manager，归属确切）",
       "link": "https://amgen.wd1.myworkdayjobs.com"
     },
     {
@@ -400,8 +400,8 @@
       "title": "Decision Scientist - Utilization Management",
       "applicationId": "R1050866",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Confirmation 'Application Submitted. You have successfully applied for this job posting.'; new Workday account",
+      "status": "已申请",
+      "notes": "Confirmation 'Application Submitted. You have successfully applied for this job posting.'; new Workday account；邮箱确认信 2026-09-27 2:49 PM CDT《Your application with CVS Health has been received!》（通用模板，按时间归属）",
       "link": "https://www.cvshealth.com"
     },
     {
@@ -409,8 +409,8 @@
       "title": "Quantitative Analyst, Assistant Vice President / Credit Risk Modeler",
       "applicationId": "R-790888",
       "appliedDate": "2026-09-27",
-      "status": "submitted",
-      "notes": "Clifton NJ Hybrid; confirmation 'Application Submitted — Thank you! You've successfully submitted your application.'",
+      "status": "已申请",
+      "notes": "Clifton NJ Hybrid; confirmation 'Application Submitted — Thank you! You've successfully submitted your application.'；邮箱确认信 2026-09-27 4:48 PM CDT《Thank you for applying to State Street》（预览含 Credit Risk Model，归属确切）",
       "link": "https://careers.statestreet.com/global/en/job/R-790888/Quantitative-Analyst-Assistant-Vice-President"
     }
   ],
