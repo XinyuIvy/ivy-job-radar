@@ -571,9 +571,81 @@
       "notes": "Greenhouse 确认页 'Thank you for applying'；简历 resume_quant_research.pdf；来源 LinkedIn",
       "status": "applied",
       "title": "Entry Level Quantitative Researcher"
+    },
+    {
+      "applicationId": "jumptrading-8209424",
+      "appliedDate": "2026-09-29",
+      "company": "Jump Trading",
+      "link": "https://www.jumptrading.com/hr/job?gh_jid=8209424",
+      "notes": "确认页 'Thank you for applying! Your application has been successfully received.'；简历 resume_quant_research.pdf；来源 LinkedIn",
+      "status": "applied",
+      "title": "Campus Quantitative Researcher (Trading Team PhD/Postdoc)"
+    },
+    {
+      "applicationId": "jumptrading-8052313",
+      "appliedDate": "2026-09-29",
+      "company": "Jump Trading",
+      "link": "https://www.jumptrading.com/hr/job?gh_jid=8052313",
+      "notes": "确认页 'Thank you for applying! Your application has been successfully received.'；简历 resume_ai_research.pdf；JD 注明 sponsor visas；来源 LinkedIn",
+      "status": "applied",
+      "title": "Campus AI Research Engineer"
+    },
+    {
+      "applicationId": "tower-8095921",
+      "appliedDate": "2026-09-29",
+      "company": "Tower Research Capital",
+      "link": "https://www.tower-research.com",
+      "notes": "确认页 'Thank you for applying. You should receive an email confirmation shortly.'；简历 resume_ai_research.pdf；来源 LinkedIn",
+      "status": "applied",
+      "title": "Machine Learning Research Engineer"
+    },
+    {
+      "applicationId": "tower-8024142",
+      "appliedDate": "2026-09-29",
+      "company": "Tower Research Capital",
+      "link": "https://www.tower-research.com",
+      "notes": "确认页 'Thank you for applying. You should receive an email confirmation shortly.'；简历 resume_quant_research.pdf；来源 LinkedIn",
+      "status": "applied",
+      "title": "Quantitative Trader/Researcher - 2027"
+    },
+    {
+      "applicationId": "fiverings-2027-qt",
+      "appliedDate": "2026-09-29",
+      "company": "Five Rings",
+      "link": "",
+      "notes": "确认页 'Thank you for applying. Your application has been received.'（浏览器任务报告原文引用）；简历 resume_quant_research.pdf；来源 LinkedIn",
+      "status": "applied",
+      "title": "Campus Full Time 2027 - Quantitative Trader"
+    },
+    {
+      "applicationId": "loopcv-georgiatek-20260921",
+      "appliedDate": "2026-09-21",
+      "company": "Georgia Tek Systems",
+      "link": "",
+      "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
+      "status": "applied",
+      "title": "Business Data Analyst"
+    },
+    {
+      "applicationId": "loopcv-altatech-20260921",
+      "appliedDate": "2026-09-21",
+      "company": "Alta Technology Group",
+      "link": "",
+      "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
+      "status": "applied",
+      "title": "Data Analyst / BI"
+    },
+    {
+      "applicationId": "loopcv-dako-20260921",
+      "appliedDate": "2026-09-21",
+      "company": "The DAKO Group",
+      "link": "",
+      "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
+      "status": "applied",
+      "title": "Data Specialist"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-29T20:32:28-05:00",
+  "updated_at": "2026-09-29T20:37:34-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
