@@ -643,9 +643,42 @@
       "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
       "status": "applied",
       "title": "Data Specialist"
+    },
+    {
+      "applicationId": "R1521964",
+      "appliedDate": "2026-09-06",
+      "company": "IQVIA艾昆纬",
+      "jobUrl": "",
+      "location": "",
+      "notes": "Xinyu 9/6 经总部 Workday（jobs.iqvia.com）手动申请，申请确认邮件 9/6 16:02。拒信日期 2026-09-08（iqvia@myworkday.com）。2026-09-29 查邮箱补录。",
+      "source": "Xinyu 手动投递（补录）",
+      "status": "拒绝",
+      "title": "Statistician, Real World Solutions"
+    },
+    {
+      "applicationId": "R1522738",
+      "appliedDate": "",
+      "company": "IQVIA艾昆纬",
+      "jobUrl": "",
+      "location": "",
+      "notes": "Xinyu 经总部 Workday 手动申请（申请确认邮件未找到；9/2 拒信证明此前已提交）。拒信日期 2026-09-02（iqvia@myworkday.com）。2026-09-29 查邮箱补录。",
+      "source": "Xinyu 手动投递（补录）",
+      "status": "拒绝",
+      "title": "RWE (Assoc) Consultant - Sr Consultant, Real World Solutions"
+    },
+    {
+      "applicationId": "R1565233",
+      "appliedDate": "",
+      "company": "IQVIA艾昆纬",
+      "jobUrl": "",
+      "location": "北京",
+      "notes": "【校招-北京】岗位，Xinyu 经总部 Workday 手动申请（申请确认邮件未找到；9/8 拒信证明此前已提交）。拒信日期 2026-09-08（iqvia@myworkday.com）。与中国校招站 tupu360 的北京 RWE/RWA 岗为同一职位（tupu360 侧单账号限投 1 岗且 9/24 已投上海 RWD&T，无法重复投递）。2026-09-29 查邮箱补录。",
+      "source": "Xinyu 手动投递（补录）",
+      "status": "拒绝",
+      "title": "【校招-北京】分析师/助理咨询顾问-真实世界证据及高阶分析(RWE/RWA)方向"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-29T20:37:34-05:00",
-  "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
+  "updated_at": "2026-09-29T17:55:00-05:00",
+  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
