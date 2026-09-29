@@ -562,9 +562,18 @@
       "source": "Muse 求职助手",
       "status": "拒绝",
       "title": "Biostatistician, Quantitative Epidemiology（拒信未载明，推定）"
+    },
+    {
+      "applicationId": "schonfeld-8236826",
+      "appliedDate": "2026-09-29",
+      "company": "Schonfeld",
+      "link": "https://job-boards.greenhouse.io/schonfeld/jobs/8236826/confirmation",
+      "notes": "Greenhouse 确认页 'Thank you for applying'；简历 resume_quant_research.pdf；来源 LinkedIn",
+      "status": "applied",
+      "title": "Entry Level Quantitative Researcher"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-29T01:42:25-05:00",
+  "updated_at": "2026-09-29T20:32:28-05:00",
   "sync_note": "daily-job-screening 2026-09-26 接续：补同步 Trexquant（Xinyu 自行提交）；累计 24 条"
 }
