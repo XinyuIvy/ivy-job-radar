@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-09-30T14:44:20.095356+00:00",
+  "generated_at": "2026-09-30T16:29:37.753598+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
   "companies_succeeded": 144,
   "companies_failed": 11,
   "companies_unidentified": 21,
-  "jobs_scanned": 9620,
+  "jobs_scanned": 9647,
   "jobs_matched": 42,
   "ats_counts": {
     "adp": 1,
@@ -69,11 +69,6 @@
       "error": "HTTP 202"
     },
     {
-      "company": "OM1",
-      "url": "https://job-boards.greenhouse.io/om1",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
       "company": "Genesis Research",
       "url": "https://genesisrg.com/careers/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
@@ -82,6 +77,11 @@
       "company": "Evidation",
       "url": "https://evidation.com/for-customers/recruit",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "OM1",
+      "url": "https://job-boards.greenhouse.io/om1",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "Hologic",
@@ -94,14 +94,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Zimmer Biomet",
-      "url": "https://careers.zimmerbiomet.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Paige",
       "url": "https://paige.ai/careers/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Zimmer Biomet",
+      "url": "https://careers.zimmerbiomet.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Qure.ai",
@@ -124,11 +124,6 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
@@ -142,6 +137,16 @@
       "company": "NERA Economic Consulting",
       "url": "https://careers.marshmclennan.com/global/en/nera",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "company": "Putnam (Inizio Ignite)",
+      "url": "https://careers.inizioengage.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "company": "Sakata Seed America, Inc.",
@@ -159,16 +164,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
-      "company": "Putnam (Inizio Ignite)",
-      "url": "https://careers.inizioengage.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
@@ -176,6 +171,11 @@
     {
       "company": "Meta",
       "url": "https://www.metacareers.com/jobs/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
