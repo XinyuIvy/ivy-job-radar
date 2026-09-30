@@ -684,9 +684,18 @@
       "appliedDate": "",
       "status": "拒绝",
       "notes": "拒信日期 2026-09-29；该申请不在 Muse 投递记录中（应为自投），据拒信补记。"
+    },
+    {
+      "company": "DRW",
+      "title": "Quantitative Researcher (Summer 2027 start)",
+      "applicationId": "8030406",
+      "appliedDate": "2026-09-30",
+      "status": "applied",
+      "notes": "Greenhouse; resume_quant_research.pdf + phd_transcript.pdf; JD no sponsorship exclusion",
+      "link": "https://job-boards.greenhouse.io/drweng/jobs/8030406"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-30T00:09:49Z",
+  "updated_at": "2026-09-30T07:45:03-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
