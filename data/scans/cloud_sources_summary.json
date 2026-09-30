@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-29T16:37:00.852026+00:00",
-  "matched_jobs": 1,
+  "generated_at": "2026-09-30T14:43:00.947914+00:00",
+  "matched_jobs": 0,
   "sources": [
     {
       "source": "remoteok",
@@ -18,7 +18,7 @@
       "source": "jobicy",
       "state": "success",
       "scanned": 50,
-      "matched": 1
+      "matched": 0
     },
     {
       "source": "himalayas",
@@ -35,7 +35,7 @@
     {
       "source": "weworkremotely",
       "state": "success",
-      "scanned": 85,
+      "scanned": 89,
       "matched": 0
     },
     {

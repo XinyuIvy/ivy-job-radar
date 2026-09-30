@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-09-29T16:40:48.878814+00:00",
+  "run_started_at": "2026-09-30T14:46:23.540331+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 28,
+    "us_jobs_verified_latest.json": 26,
     "china_jobs_latest.json": 0,
-    "cloud_sources_jobs_latest.json": 1,
+    "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 238,
-    "company_portal_jobs_latest.json": 41
+    "company_portal_jobs_latest.json": 42
   },
-  "fetched": 308,
-  "verified_or_open": 79,
+  "fetched": 306,
+  "verified_or_open": 78,
   "rejected": 8,
   "deduplicated": 10,
-  "imported": 609,
-  "new": 2,
-  "updated_or_unchanged": 288,
-  "temporarily_retained": 319,
-  "pruned_as_stale": 0,
-  "no_longer_seen": 319,
+  "imported": 618,
+  "new": 16,
+  "updated_or_unchanged": 272,
+  "temporarily_retained": 330,
+  "pruned_as_stale": 7,
+  "no_longer_seen": 337,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -31,6 +31,10 @@
     {
       "source": "company_portal:Evidera",
       "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:Sage Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Flatiron Health",
@@ -49,10 +53,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Sage Therapeutics",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Genesis Research",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
@@ -66,7 +66,7 @@
     },
     {
       "source": "company_portal:Masimo",
-      "error": "HTTP Error 403: Forbidden"
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Zimmer Biomet",
@@ -81,23 +81,27 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Eli Lilly and Company",
-      "error": "HTTP Error 403: Forbidden"
+      "source": "company_portal:DRW",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Fenix Group",
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "source": "company_portal:Eikon Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:Microsoft Health & Life Sciences",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:DRW",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:IMC Trading",
+      "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Meta",
+      "source": "company_portal:Eli Lilly and Company",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -117,10 +121,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:SDC (Statistics & Data Corporation)",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Precision Medicine Group",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
@@ -129,19 +129,19 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
-      "source": "company_portal:Eikon Therapeutics",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Two Sigma",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:IMC Trading",
-      "error": "HTTP Error 404: Not Found"
+      "source": "company_portal:Meta",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Millennium Management",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:SDC (Statistics & Data Corporation)",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
