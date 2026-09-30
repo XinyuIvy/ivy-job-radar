@@ -747,9 +747,18 @@
       "status": "applied",
       "notes": "Application ID 759eb96b17de90014f0756c9ab500000; resume_applied_scientist.pdf; remote nationwide, causal inference",
       "link": "https://careers.humana.com/us/en/job/R-421783/Research-Scientist"
+    },
+    {
+      "company": "Tempus AI",
+      "title": "Manager, Biostatistics (JR202600381)",
+      "applicationId": "83f962ba8beb9001503e31c7e7650000",
+      "appliedDate": "2026-09-30",
+      "status": "applied",
+      "notes": "Workday 确认 Congratulations! Thank you for applying；简历 resume_biostat_pharma.pdf；来源 LinkedIn",
+      "link": "https://www.linkedin.com/jobs/view/4407904244"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-30T12:54:29-05:00",
+  "updated_at": "2026-09-30T13:29:00-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
