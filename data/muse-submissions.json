@@ -756,9 +756,18 @@
       "status": "applied",
       "notes": "Workday 确认 Congratulations! Thank you for applying；简历 resume_biostat_pharma.pdf；来源 LinkedIn",
       "link": "https://www.linkedin.com/jobs/view/4407904244"
+    },
+    {
+      "company": "Servier Pharmaceuticals",
+      "title": "Associate Director, Biostatistics (Job ID 12320)",
+      "applicationId": "546052",
+      "appliedDate": "2026-09-30",
+      "status": "applied",
+      "notes": "确认 You have successfully applied；简历 resume_biostat_pharma.pdf；来源 LinkedIn",
+      "link": "https://www.linkedin.com/jobs/view/4465029773"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-09-30T13:29:00-05:00",
+  "updated_at": "2026-09-30T14:11:46-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
