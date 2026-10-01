@@ -854,9 +854,18 @@
       "status": "已投递",
       "notes": "Workday 投递。新账号创建；简历 resume_biostat_pharma.pdf；最高已完成学历按表单口径选 Master's Degree。",
       "link": "https://kenvue.wd1.myworkdayjobs.com/External"
+    },
+    {
+      "company": "Stripe",
+      "title": "Data Scientist",
+      "applicationId": "req 5601879",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "New York, NY。同一雇主第二 req（9-29 已投 Core Infrastructure）。官网表单；简历 resume_applied_scientist.pdf。经验题如实选 None - new grad。",
+      "link": "https://stripe.com/careers/apply/data-scientist/5601879"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:32:01-05:00",
+  "updated_at": "2026-10-01T00:36:34-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
