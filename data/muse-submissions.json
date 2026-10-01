@@ -845,9 +845,18 @@
       "status": "已投递",
       "notes": "官网 Greenhouse 投递。JD 无 sponsorship 排除。简历 resume_biostat_pharma.pdf；reCAPTCHA 未触发图片验证。",
       "link": "https://myome.com/about-us/careers"
+    },
+    {
+      "company": "Kenvue",
+      "title": "Senior Biostatistician",
+      "applicationId": "",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "Workday 投递。新账号创建；简历 resume_biostat_pharma.pdf；最高已完成学历按表单口径选 Master's Degree。",
+      "link": "https://kenvue.wd1.myworkdayjobs.com/External"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:29:26-05:00",
+  "updated_at": "2026-10-01T00:32:01-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
