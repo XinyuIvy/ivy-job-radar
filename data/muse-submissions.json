@@ -863,9 +863,27 @@
       "status": "已投递",
       "notes": "New York, NY。同一雇主第二 req（9-29 已投 Core Infrastructure）。官网表单；简历 resume_applied_scientist.pdf。经验题如实选 None - new grad。",
       "link": "https://stripe.com/careers/apply/data-scientist/5601879"
+    },
+    {
+      "company": "Eli Lilly",
+      "title": "Advisor - Project Statistician in Product Development (R-112033)",
+      "applicationId": "db8be7b2a3d0900183960c3b6bb10000",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "官网投递。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。",
+      "link": "https://careers.lilly.com/us/en/job/R-112033"
+    },
+    {
+      "company": "Eli Lilly",
+      "title": "Advisor - Project Statistician in Product Development (R-110351)",
+      "applicationId": "a69ae34604709001845233b54e990000",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "官网投递。同一雇主第二 req（不同团队）。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。",
+      "link": "https://careers.lilly.com/us/en/job/R-110351"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:36:34-05:00",
+  "updated_at": "2026-10-01T00:55:59-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
