@@ -836,9 +836,18 @@
       "status": "已投递",
       "notes": "Seattle, WA。LinkedIn 投递。简历 resume_applied_scientist.pdf；Cloudflare 人机验证一次通过。",
       "link": "https://www.linkedin.com/jobs/"
+    },
+    {
+      "company": "MyOme",
+      "title": "Senior Scientist, Clinical Biostatistics & Genetic Risk Prediction",
+      "applicationId": "",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "官网 Greenhouse 投递。JD 无 sponsorship 排除。简历 resume_biostat_pharma.pdf；reCAPTCHA 未触发图片验证。",
+      "link": "https://myome.com/about-us/careers"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:28:05-05:00",
+  "updated_at": "2026-10-01T00:29:26-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
