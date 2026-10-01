@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-09-30T16:31:39.891373+00:00",
+  "run_started_at": "2026-10-01T14:37:47.750511+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 28,
+    "us_jobs_verified_latest.json": 47,
     "china_jobs_latest.json": 0,
     "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 238,
-    "company_portal_jobs_latest.json": 42
+    "company_portal_jobs_latest.json": 43
   },
-  "fetched": 308,
-  "verified_or_open": 80,
-  "rejected": 8,
-  "deduplicated": 9,
-  "imported": 602,
-  "new": 5,
-  "updated_or_unchanged": 286,
-  "temporarily_retained": 311,
-  "pruned_as_stale": 21,
-  "no_longer_seen": 332,
+  "fetched": 328,
+  "verified_or_open": 82,
+  "rejected": 9,
+  "deduplicated": 12,
+  "imported": 633,
+  "new": 31,
+  "updated_or_unchanged": 276,
+  "temporarily_retained": 326,
+  "pruned_as_stale": 0,
+  "no_longer_seen": 326,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -33,10 +33,6 @@
       "error": "HTTP 202"
     },
     {
-      "source": "company_portal:Sage Therapeutics",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Flatiron Health",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
@@ -49,16 +45,20 @@
       "error": "HTTP 202"
     },
     {
+      "source": "company_portal:OM1",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Sage Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:Genesis Research",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Evidation",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:OM1",
-      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Hologic",
@@ -69,12 +69,12 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Paige",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
       "source": "company_portal:Zimmer Biomet",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Paige",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Qure.ai",
@@ -89,7 +89,7 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Eikon Therapeutics",
+      "source": "company_portal:Eli Lilly and Company",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -97,20 +97,12 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Eli Lilly and Company",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:NERA Economic Consulting",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Precision Medicine Group",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
-      "source": "company_portal:Putnam (Inizio Ignite)",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "source": "company_portal:Eikon Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Sakata Seed America, Inc.",
@@ -125,15 +117,23 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "source": "company_portal:Precision Medicine Group",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "source": "company_portal:Putnam (Inizio Ignite)",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "source": "company_portal:Two Sigma",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Meta",
+      "source": "company_portal:Microsoft Health & Life Sciences",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Microsoft Health & Life Sciences",
+      "source": "company_portal:Meta",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {

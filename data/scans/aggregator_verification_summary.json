@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-09-30T16:28:47.995418+00:00",
+  "generated_at": "2026-10-01T14:34:57.141386+00:00",
   "received": 250,
-  "open_verified": 41,
-  "closed": 8,
+  "open_verified": 40,
+  "closed": 9,
   "needs_manual_verification": 201,
   "official_urls_found": 239,
-  "full_descriptions_found": 204
+  "full_descriptions_found": 202
 }
