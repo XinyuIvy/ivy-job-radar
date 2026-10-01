@@ -881,9 +881,36 @@
       "status": "已投递",
       "notes": "官网投递。同一雇主第二 req（不同团队）。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。",
       "link": "https://careers.lilly.com/us/en/job/R-110351"
+    },
+    {
+      "company": "Goliath Partners",
+      "title": "Artificial Intelligence Researcher",
+      "applicationId": "linkedin-4473916998",
+      "appliedDate": "2026-09-30",
+      "status": "applied",
+      "notes": "Easy Apply; New York Metro Hybrid; 21:00 round (delayed report)",
+      "link": "https://www.linkedin.com/jobs/search/?currentJobId=4473916998"
+    },
+    {
+      "company": "Precision Medicine Group",
+      "title": "Associate Research Scientist, Real World Evidence",
+      "applicationId": "linkedin-4454282605",
+      "appliedDate": "2026-09-30",
+      "status": "applied",
+      "notes": "Easy Apply Remote; JD said no sponsorship but submitted with honest sponsorship=Yes",
+      "link": "https://www.linkedin.com/jobs/search/?currentJobId=4454282605"
+    },
+    {
+      "company": "SoTalent",
+      "title": "Senior Manager, Statistics",
+      "applicationId": "linkedin-4472131453",
+      "appliedDate": "2026-09-30",
+      "status": "applied",
+      "notes": "Easy Apply; recruiting for leading global pharma; Remote $137K-215K",
+      "link": "https://www.linkedin.com/jobs/view/4472131453"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:55:59-05:00",
+  "updated_at": "2026-10-01T02:58:29-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
