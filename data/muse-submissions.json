@@ -908,9 +908,18 @@
       "status": "applied",
       "notes": "Easy Apply; recruiting for leading global pharma; Remote $137K-215K",
       "link": "https://www.linkedin.com/jobs/view/4472131453"
+    },
+    {
+      "company": "Freenome",
+      "title": "Senior Biostatistician",
+      "applicationId": "",
+      "appliedDate": "2026-09-29",
+      "status": "拒绝",
+      "notes": "拒信 2026-10-01（Greenhouse）：\"After reviewing your background, we've decided to move forward with candidates whose experience is a better fit.\"",
+      "link": "https://job-boards.greenhouse.io/freenome/jobs/8842728002"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T05:35:17-05:00",
+  "updated_at": "2026-10-01T22:29:40-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
