@@ -818,9 +818,27 @@
       "source": "Muse 求职助手（邮箱补录）",
       "status": "拒绝",
       "notes": "申请确认邮件 9/29 18:57（no-reply@ashbyhq.com，'Thank you for applying to Hinge Health!'）；拒信日期 2026-09-30（'After careful consideration, we have decided not to move forward with your application at this time.'）"
+    },
+    {
+      "company": "Tempus AI",
+      "title": "Data Scientist II, Real World Evidence, Life Sciences R&D",
+      "applicationId": "83f962ba8beb90017434ce5128ce0000",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "New York, NY。同一雇主第二 req（同日已投 Manager, Biostatistics）。表单无 Biostatistics 选项，Field of Study 选 Statistics；简历 resume_biostat_pharma.pdf。",
+      "link": "https://tempus.wd1.myworkdayjobs.com/TempusCareers"
+    },
+    {
+      "company": "Opendoor",
+      "title": "Applied Science - Growth",
+      "applicationId": "",
+      "appliedDate": "2026-09-30",
+      "status": "已投递",
+      "notes": "Seattle, WA。LinkedIn 投递。简历 resume_applied_scientist.pdf；Cloudflare 人机验证一次通过。",
+      "link": "https://www.linkedin.com/jobs/"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:27:17-05:00",
+  "updated_at": "2026-10-01T00:28:05-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
