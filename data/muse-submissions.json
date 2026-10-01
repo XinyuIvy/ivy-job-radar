@@ -798,9 +798,18 @@
       "source": "Muse 求职助手",
       "status": "已申请",
       "title": "AIDD实验数据分析科学家"
+    },
+    {
+      "company": "Tellwise",
+      "title": "Data Scientist, Patterns",
+      "applicationId": "",
+      "appliedDate": "2026-09-30",
+      "status": "submitted",
+      "notes": "Confirmation: 'Your application is in. We read every one and reply within five business days either way.' San Francisco hybrid, $150K-$185K + 0.2%-0.4% equity. Form had no resume upload and no work-auth questions; JD has no sponsorship exclusion.",
+      "link": "https://gettellwise.com/careers/data-scientist-patterns"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T00:05:04-05:00",
+  "updated_at": "2026-10-01T00:06:14-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
