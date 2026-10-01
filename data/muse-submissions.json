@@ -518,9 +518,9 @@
       "appliedDate": "2026-09-28",
       "company": "Insmed",
       "link": "https://careers.insmed.com/posting/senior-manager-biostatistics/R3742/",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：insmed@myworkday.com \"Thank you for applying to Insmed\" 9/28 3:07 PM；Fully Remote；简历 resume_biostat_pharma.pdf；Field of Study 选 Statistics（下拉无 Biostatistics）；出差 ≤50%",
+      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：insmed@myworkday.com \"Thank you for applying to Insmed\" 9/28 3:07 PM；Fully Remote；简历 resume_biostat_pharma.pdf；Field of Study 选 Statistics（下拉无 Biostatistics）；出差 ≤50%；拒信 2026-09-30（insmed@myworkday.com：move forward with other candidates）",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Senior Manager, Biostatistics (R3742)"
     },
     {
@@ -538,9 +538,9 @@
       "appliedDate": "2026-09-28",
       "company": "FanDuel",
       "link": "https://fanduel.careers",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页：\"Thank you for applying. Your application has been received.\"；邮箱确认：no-reply@fanduel.com \"Thank you for applying to FanDuel\" 9/28 2:49 PM（明确写 Data Scientist, Market Making 岗）；简历 resume_applied_scientist.pdf；总包期望填 100000。注意：同日 12:00 PM 收到另一封 FanDuel 拒信，但拒信针对的是 Data Scientist, Experimentation 岗（不同岗位），不影响本条。",
+      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页：\"Thank you for applying. Your application has been received.\"；邮箱确认：no-reply@fanduel.com \"Thank you for applying to FanDuel\" 9/28 2:49 PM（明确写 Data Scientist, Market Making 岗）；简历 resume_applied_scientist.pdf；总包期望填 100000。注意：同日 12:00 PM 收到另一封 FanDuel 拒信，但拒信针对的是 Data Scientist, Experimentation 岗（不同岗位），不影响本条。；拒信 2026-09-30（no-reply@fanduel.com：will not move forward）",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Data Scientist, Market Making (Risk & Trading)"
     },
     {
@@ -911,6 +911,6 @@
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T02:58:29-05:00",
+  "updated_at": "2026-10-01T05:35:17-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
