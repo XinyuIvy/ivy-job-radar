@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-02T14:26:05.011482+00:00",
+  "generated_at": "2026-10-02T16:17:40.580155+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
   "companies_succeeded": 145,
   "companies_failed": 11,
   "companies_unidentified": 20,
-  "jobs_scanned": 9657,
+  "jobs_scanned": 9672,
   "jobs_matched": 43,
   "ats_counts": {
     "adp": 1,
@@ -74,13 +74,13 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Evidation",
-      "url": "https://evidation.com/for-customers/recruit",
+      "company": "Sage Therapeutics",
+      "url": "https://www.supernus.com/careers-with-supernus",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sage Therapeutics",
-      "url": "https://www.supernus.com/careers-with-supernus",
+      "company": "Evidation",
+      "url": "https://evidation.com/for-customers/recruit",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -109,14 +109,14 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Eikon Therapeutics",
-      "url": "https://www.eikontx.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Fenix Group",
       "url": "https://fenix.group/careers/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Eli Lilly and Company",
@@ -127,11 +127,6 @@
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "DRW",
-      "url": "https://www.drw.com/work-at-drw/listings/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Millennium Management",
@@ -147,11 +142,6 @@
       "company": "Sakata Seed America, Inc.",
       "url": "https://sakata.com/careers/",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "SystImmune",
@@ -174,18 +164,28 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "UTHealth Houston",
-      "url": "https://careers.uth.tmc.edu/",
+      "company": "Meta",
+      "url": "https://www.metacareers.com/jobs/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Meta",
-      "url": "https://www.metacareers.com/jobs/",
+      "company": "Eikon Therapeutics",
+      "url": "https://www.eikontx.com/careers",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "UTHealth Houston",
+      "url": "https://careers.uth.tmc.edu/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     }
   ]
