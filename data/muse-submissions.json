@@ -17,9 +17,9 @@
       "company": "Regeneron",
       "jobUrl": "https://careers.regeneron.com/en/jobs/r50412/principal-biostatistician-statistical-innovation/",
       "location": "",
-      "notes": "2026-09-23 由 Xinyu 提交；简历版本未记录",
+      "notes": "2026-09-23 由 Xinyu 提交；简历版本未记录；拒信 2026-09-30（workday 邮件 11:20 PM）",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Principal Biostatistician – Statistical Innovation"
     },
     {
@@ -917,9 +917,31 @@
       "status": "拒绝",
       "notes": "拒信 2026-10-01（Greenhouse）：\"After reviewing your background, we've decided to move forward with candidates whose experience is a better fit.\"",
       "link": "https://job-boards.greenhouse.io/freenome/jobs/8842728002"
+    },
+    {
+      "company": "Eli Lilly",
+      "title": "Statistician – Manufacturing (R-112031)",
+      "applicationId": "lilly-r112031-manufacturing",
+      "appliedDate": "2026-09-30",
+      "status": "拒绝",
+      "source": "Muse 求职助手",
+      "link": "https://careers.lilly.com/us/en/job/R-112031/Statistician-Manufacturing",
+      "location": "Indianapolis, IN",
+      "notes": "补录：Xinyu 手动投递（具体投递日期未知，拒信日期代记）；拒信 2026-09-30（lilly@myworkday.com 11:11 PM）"
+    },
+    {
+      "company": "BeOne Medicines",
+      "title": "Senior Statistician (RWD/RWE)",
+      "applicationId": "beigene-r33719-rwd-rwe",
+      "appliedDate": "2026-09-26",
+      "status": "拒绝",
+      "source": "Muse 求职助手",
+      "link": "https://www.linkedin.com/jobs/view/4383286308",
+      "location": "Remote US",
+      "notes": "2026-09-26 经 BeiGene Workday (R33719) 提交，2026-09-29 核验 Application Received；拒信 2026-10-01（beigene@myworkday.com 2:45 PM，RWD/RWE 对口度不足）"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-01T22:29:40-05:00",
+  "updated_at": "2026-10-02T00:19:13-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
 }
