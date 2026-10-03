@@ -880,8 +880,8 @@
       "title": "Advisor - Project Statistician in Product Development (R-110351)",
       "applicationId": "a69ae34604709001845233b54e990000",
       "appliedDate": "2026-09-30",
-      "status": "已投递",
-      "notes": "官网投递。同一雇主第二 req（不同团队）。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。",
+      "status": "拒绝",
+      "notes": "官网投递。同一雇主第二 req（不同团队）。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。拒信 2026-10-02（lilly@myworkday.com；邮件 title 写 \"Advisor – Statistics\"，与 R-110351 的筛选记录对应；R-112033 的 title 为 \"Advisor – Project Statistician in Product Development\"。无法完全排除对应另一份的歧义，如有进一步信息可纠正。）",
       "link": "https://careers.lilly.com/us/en/job/R-110351"
     },
     {
@@ -941,9 +941,25 @@
       "link": "https://www.linkedin.com/jobs/view/4383286308",
       "location": "Remote US",
       "notes": "2026-09-26 经 BeiGene Workday (R33719) 提交，2026-09-29 核验 Application Received；拒信 2026-10-01（beigene@myworkday.com 2:45 PM，RWD/RWE 对口度不足）"
+    },
+    {
+      "company": "Bevi",
+      "title": "Product Data Scientist",
+      "applicationId": "",
+      "appliedDate": "2026-10-02",
+      "status": "拒绝",
+      "notes": "据拒信补记（成功投递不入 radar，此为拒后补录）：10-02 轮 LinkedIn Easy Apply 提交（\"Your application was sent to Bevi!\"）；拒信 2026-10-03（Greenhouse no-reply@us.greenhouse-mail.io）。"
+    },
+    {
+      "company": "Amazon",
+      "title": "Applied Scientist II, Core Shopping Data Science (10490800)",
+      "applicationId": "10490800",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-03（noreply@mail.amazon.jobs）；该申请不在 Muse 投递记录中（seen_jobs.md 无此 req），据拒信补记。"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-02T00:19:13-05:00",
-  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实）"
+  "updated_at": "2026-10-03",
+  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
