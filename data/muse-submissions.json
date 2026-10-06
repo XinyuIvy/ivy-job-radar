@@ -100,10 +100,10 @@
       "company": "Optiver",
       "jobUrl": "https://www.optiver.com/join-us/jobs/quantitative-research-and-machine-learning/chicago/graduate-quantitative-researcher-phd-2027-start/",
       "location": "Chicago, IL / New York, NY",
-      "notes": "2026-09-25 Xinyu 在浏览器接管后亲自提交；申请 Chicago + New York，2027.6 可到岗；JD 明确支持 sponsorship；测评邀请 Invitation for assessments（Fri 2026-09-25 3:50 PM，Optiver assessments 平台；邮件注明截止 2026-10-02，需尽快完成）",
+      "notes": "2026-09-25 Xinyu 在浏览器接管后亲自提交；申请 Chicago + New York，2027.6 可到岗；JD 明确支持 sponsorship；测评邀请 Invitation for assessments（Fri 2026-09-25 3:50 PM，Optiver assessments 平台；邮件注明截止 2026-10-02，需尽快完成）；拒信日期 2026-10-05（测评未通过，她亲口确认）",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Graduate Quantitative Researcher, PhD (2027 Start)"
     },
     {
@@ -957,9 +957,21 @@
       "appliedDate": "",
       "status": "拒绝",
       "notes": "拒信日期 2026-10-03（noreply@mail.amazon.jobs）；该申请不在 Muse 投递记录中（seen_jobs.md 无此 req），据拒信补记。"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-09-29",
+      "company": "Nomura",
+      "jobUrl": "",
+      "location": "Hong Kong",
+      "notes": "2026-09-29 Xinyu 亲自提交（英文简历 resume_quant_research.pdf）；Aon 人才测评 10-02 完成；拒信日期 2026-10-05（\"Unfortunately, your test scores...\" 18:15 CDT）",
+      "resumeVersion": "resume_quant_research.pdf",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "2027 Risk Management Graduate Program - Hong Kong"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-05T12:47:11-05:00",
+  "updated_at": "2026-10-05T20:40:00-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
