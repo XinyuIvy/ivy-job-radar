@@ -21,8 +21,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "real world evidence scientist",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -49,8 +49,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "statistical scientist",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -75,8 +75,8 @@
     "source": "JobSpy · indeed",
     "search_query": "research scientist digital health",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -101,37 +101,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "real world evidence scientist",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "6562f5d19d6629bfde846b26",
-    "company": "Amazon",
-    "title": "Data Scientist, NA Operations",
-    "location": "Bellevue, WA",
-    "region": "美国",
-    "track": "Quant",
-    "score": 54,
-    "visa": "JD 未明确",
-    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：13/30；领域迁移：8/20；工具匹配：12/15；工作授权：JD 未明确",
-    "skills": [
-      "R",
-      "Python",
-      "SQL",
-      "SAS",
-      "Statistics",
-      "Causal inference",
-      "Machine learning"
-    ],
-    "job_url": "https://www.linkedin.com/jobs/view/4466075651",
-    "canonical_url": "https://linkedin.com/jobs/view/4466075651",
-    "application_id": "",
-    "source": "JobSpy · linkedin",
-    "search_query": "statistical scientist",
-    "date_posted": "2026-10-03",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -155,8 +126,33 @@
     "source": "JobSpy · linkedin",
     "search_query": "quantitative researcher",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "1927a4c5387b78021629cd55",
+    "company": "Max Planck Institute of Colloids and Interfaces",
+    "title": "Neural Data Scientist",
+    "location": "Jupiter, FL",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 50,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：13/30；领域迁移：8/20；工具匹配：8/15；工作授权：JD 未明确",
+    "skills": [
+      "Python",
+      "Experimentation",
+      "Machine learning"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4474980482",
+    "canonical_url": "https://linkedin.com/jobs/view/4474980482",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "research scientist neuroscience",
+    "date_posted": "2026-10-06",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -178,10 +174,10 @@
     "canonical_url": "https://linkedin.com/jobs/view/4476319332",
     "application_id": "",
     "source": "JobSpy · linkedin",
-    "search_query": "research scientist health data",
+    "search_query": "research scientist digital health",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -207,8 +203,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "research scientist health data",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -232,8 +228,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "quantitative researcher",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -258,8 +254,8 @@
     "source": "JobSpy · indeed",
     "search_query": "biostatistician",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -285,8 +281,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "statistical scientist",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -313,8 +309,8 @@
     "source": "JobSpy · indeed",
     "search_query": "applied scientist healthcare",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -337,8 +333,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "quantitative researcher",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -361,8 +357,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "algorithm validation scientist",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -385,8 +381,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "algorithm validation scientist",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -410,8 +406,8 @@
     "source": "JobSpy · indeed",
     "search_query": "statistical scientist",
     "date_posted": "2026-07-28",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -435,8 +431,33 @@
     "source": "JobSpy · indeed",
     "search_query": "statistical scientist",
     "date_posted": "2026-07-27",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "287f4855f04277f32ff2aad5",
+    "company": "Numerator",
+    "title": "Data Scientist (Bayesian Inference)",
+    "location": "Chicago, IL",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 40,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：最低要求约 2 年；核心专业：10/30；领域迁移：0/20；工具匹配：5/15；工作授权：JD 未明确",
+    "skills": [
+      "Python",
+      "Statistics",
+      "Model validation"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4469299230",
+    "canonical_url": "https://linkedin.com/jobs/view/4469299230",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "statistical scientist",
+    "date_posted": "2026-10-06",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -458,8 +479,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "research scientist neuroscience",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -483,8 +504,8 @@
     "source": "JobSpy · indeed",
     "search_query": "algorithm validation scientist",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -504,8 +525,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "research scientist neuroscience",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -530,8 +551,8 @@
     "source": "JobSpy · indeed",
     "search_query": "statistical scientist",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -551,8 +572,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "research scientist neuroscience",
     "date_posted": "2026-10-04",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -572,8 +593,8 @@
     "source": "JobSpy · indeed",
     "search_query": "research scientist health data",
     "date_posted": "2026-10-06",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -595,8 +616,8 @@
     "source": "JobSpy · linkedin",
     "search_query": "quantitative researcher",
     "date_posted": "2026-10-04",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -616,8 +637,29 @@
     "source": "JobSpy · linkedin",
     "search_query": "research scientist neuroscience",
     "date_posted": "2026-10-04",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "c28620389a80d3ea7b2ffb2d",
+    "company": "Massachusetts General Hospital",
+    "title": "Research Scientist - Song Lab",
+    "location": "Boston, MA, US",
+    "region": "美国",
+    "track": "Healthcare AI",
+    "score": 29,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：0/30；领域迁移：8/20；工具匹配：0/15；工作授权：JD 未明确",
+    "skills": [],
+    "job_url": "https://massgeneralbrigham.wd1.myworkdayjobs.com/MGBExternal/job/Charlestown-MA/Research-Scientist---Song-Lab_RQ4081475",
+    "canonical_url": "https://massgeneralbrigham.wd1.myworkdayjobs.com/MGBExternal/job/Charlestown-MA/Research-Scientist---Song-Lab_RQ4081475",
+    "application_id": "",
+    "source": "JobSpy · indeed",
+    "search_query": "research scientist neuroscience",
+    "date_posted": "2026-10-06",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   },
   {
@@ -639,8 +681,33 @@
     "source": "JobSpy · linkedin",
     "search_query": "quantitative researcher",
     "date_posted": "2026-10-05",
-    "discovered_at": "2026-10-06T14:49:45.363949+00:00",
-    "checked_at": "2026-10-06T14:49:45.363949+00:00",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "82f36a141e441e07633158eb",
+    "company": "Snorkel AI",
+    "title": "Research Scientist - Human-AI Systems",
+    "location": "New York, NY",
+    "region": "美国",
+    "track": "Technology",
+    "score": 24,
+    "visa": "JD 未明确",
+    "evidence": "聚合平台发现，需打开公司官网确认申请入口；学历：明确接受博士；经验：未写明最低年限；核心专业：13/30；领域迁移：5/20；工具匹配：0/15；工作授权：JD 未明确；硬技能缺口：检测到 1 类未确认的核心研发要求",
+    "skills": [
+      "Experimentation",
+      "Machine learning",
+      "Model validation"
+    ],
+    "job_url": "https://www.linkedin.com/jobs/view/4474081466",
+    "canonical_url": "https://linkedin.com/jobs/view/4474081466",
+    "application_id": "",
+    "source": "JobSpy · linkedin",
+    "search_query": "algorithm validation scientist",
+    "date_posted": "2026-10-06",
+    "discovered_at": "2026-10-06T16:33:27.857311+00:00",
+    "checked_at": "2026-10-06T16:33:27.857311+00:00",
     "status": "待官网核验"
   }
 ]
