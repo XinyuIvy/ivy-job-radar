@@ -6,9 +6,9 @@
       "company": "Regeneron",
       "jobUrl": "https://careers.regeneron.com/en/jobs/r50347/manager-biostatistics-hematology/",
       "location": "",
-      "notes": "2026-09-01 由 Xinyu 提交；简历版本未记录",
+      "notes": "2026-09-01 由 Xinyu 提交；简历版本未记录；拒信日期 2026-10-06",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Manager, Biostatistics – Hematology"
     },
     {
@@ -835,8 +835,8 @@
       "title": "Applied Science - Growth",
       "applicationId": "",
       "appliedDate": "2026-09-30",
-      "status": "已投递",
-      "notes": "Seattle, WA。LinkedIn 投递。简历 resume_applied_scientist.pdf；Cloudflare 人机验证一次通过。",
+      "status": "拒绝",
+      "notes": "Seattle, WA。LinkedIn 投递。简历 resume_applied_scientist.pdf；Cloudflare 人机验证一次通过。；拒信日期 2026-10-06（拒信未注明岗位，账上唯一 Opendoor 申请归属此单）",
       "link": "https://www.linkedin.com/jobs/"
     },
     {
@@ -969,9 +969,18 @@
       "source": "Muse 求职助手",
       "status": "拒绝",
       "title": "2027 Risk Management Graduate Program - Hong Kong"
+    },
+    {
+      "company": "CVS Health",
+      "title": "Senior Decision Scientist - Retail Operations",
+      "applicationId": "R1050829",
+      "appliedDate": "2026-10-05",
+      "status": "拒绝",
+      "notes": "Boston, MA (Remote)。2026-10-05 自动投递（Workday 确认 \"You have successfully applied\"）。简历 resume_general_ds.pdf。拒信日期 2026-10-06",
+      "link": "https://www.linkedin.com/jobs/view/4474205805"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-05T20:40:00-05:00",
+  "updated_at": "2026-10-07T12:57:42-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
