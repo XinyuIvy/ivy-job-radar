@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-06T16:44:01.524251+00:00",
+  "generated_at": "2026-10-07T14:28:24.802107+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
-  "companies_succeeded": 145,
+  "companies_succeeded": 144,
   "companies_failed": 12,
-  "companies_unidentified": 19,
-  "jobs_scanned": 9743,
+  "companies_unidentified": 20,
+  "jobs_scanned": 9755,
   "jobs_matched": 44,
   "ats_counts": {
     "adp": 1,
@@ -26,9 +26,9 @@
   "region_counts": {
     "美国": {
       "companies_attempted": 176,
-      "companies_succeeded": 145,
+      "companies_succeeded": 144,
       "companies_failed": 12,
-      "companies_unidentified": 19,
+      "companies_unidentified": 20,
       "jobs_matched": 44
     }
   },
@@ -114,9 +114,9 @@
       "error": "HTTP 500"
     },
     {
-      "company": "Fenix Group",
-      "url": "https://fenix.group/careers/",
-      "error": "HTTP Error 404: Not Found"
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "DRW",
@@ -129,14 +129,9 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "company": "Fenix Group",
+      "url": "https://fenix.group/careers/",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "IMC Trading",
@@ -144,9 +139,9 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "NERA Economic Consulting",
-      "url": "https://careers.marshmclennan.com/global/en/nera",
-      "error": "HTTP Error 404: Not Found"
+      "company": "Meta",
+      "url": "https://www.metacareers.com/jobs/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Millennium Management",
@@ -154,13 +149,13 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sakata Seed America, Inc.",
-      "url": "https://sakata.com/careers/",
+      "company": "NERA Economic Consulting",
+      "url": "https://careers.marshmclennan.com/global/en/nera",
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "SystImmune",
-      "url": "https://www.systimmune.com/careers",
+      "company": "Sakata Seed America, Inc.",
+      "url": "https://sakata.com/careers/",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -169,8 +164,18 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "SystImmune",
+      "url": "https://www.systimmune.com/careers",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
       "company": "Precision Medicine Group",
       "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "company": "Putnam (Inizio Ignite)",
+      "url": "https://careers.inizioengage.com/",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
@@ -179,9 +184,9 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Putnam (Inizio Ignite)",
-      "url": "https://careers.inizioengage.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "UTHealth Houston",
