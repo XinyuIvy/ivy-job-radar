@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-07T14:28:24.802107+00:00",
+  "generated_at": "2026-10-07T17:31:05.321627+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
   "companies_succeeded": 144,
   "companies_failed": 12,
   "companies_unidentified": 20,
-  "jobs_scanned": 9755,
+  "jobs_scanned": 9778,
   "jobs_matched": 44,
   "ats_counts": {
     "adp": 1,
@@ -44,14 +44,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Sage Therapeutics",
-      "url": "https://www.supernus.com/careers-with-supernus",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Evidera",
       "url": "",
       "error": "HTTP 202"
+    },
+    {
+      "company": "Sage Therapeutics",
+      "url": "https://www.supernus.com/careers-with-supernus",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Flatiron Health",
@@ -71,7 +71,7 @@
     {
       "company": "OM1",
       "url": "https://job-boards.greenhouse.io/om1",
-      "error": "HTTP Error 403: Forbidden"
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "Genesis Research",
@@ -114,16 +114,6 @@
       "error": "HTTP 500"
     },
     {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "DRW",
-      "url": "https://www.drw.com/work-at-drw/listings/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "company": "Eikon Therapeutics",
       "url": "https://www.eikontx.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
@@ -134,9 +124,19 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Meta",
@@ -159,9 +159,9 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Too Good To Go",
-      "url": "https://job-boards.greenhouse.io/toogoodtogo",
-      "error": "HTTP Error 404: Not Found"
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "company": "SystImmune",
@@ -169,9 +169,9 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "company": "Too Good To Go",
+      "url": "https://job-boards.greenhouse.io/toogoodtogo",
+      "error": "HTTP Error 404: Not Found"
     },
     {
       "company": "Putnam (Inizio Ignite)",
@@ -179,13 +179,13 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
-      "company": "Two Sigma",
-      "url": "https://careers.twosigma.com/careers",
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
+      "company": "Two Sigma",
+      "url": "https://careers.twosigma.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
