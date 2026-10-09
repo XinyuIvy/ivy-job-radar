@@ -136,10 +136,10 @@
       "company": "Google",
       "jobUrl": "https://www.google.com/about/careers/applications/",
       "location": "Mountain View, CA",
-      "notes": "2026-09-25 她接管时亲自提交；页面显示 You submitted this application on Sep 25；30天内已达3个申请上限",
+      "notes": "2026-09-25 她接管时亲自提交；页面显示 You submitted this application on Sep 25；30天内已达3个申请上限；拒信日期 2026-10-08",
       "resumeVersion": "CV_Applied_DS_Internet_EN.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Data Scientist III, Research"
     },
     {
@@ -981,6 +981,6 @@
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-07T12:57:42-05:00",
+  "updated_at": "2026-10-09T00:05:46-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
