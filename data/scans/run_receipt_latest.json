@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-10-08T15:16:21.231585+00:00",
+  "run_started_at": "2026-10-09T14:26:23.606459+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 39,
+    "us_jobs_verified_latest.json": 29,
     "china_jobs_latest.json": 0,
-    "cloud_sources_jobs_latest.json": 2,
+    "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 238,
     "company_portal_jobs_latest.json": 44
   },
-  "fetched": 323,
-  "verified_or_open": 80,
-  "rejected": 9,
+  "fetched": 311,
+  "verified_or_open": 81,
+  "rejected": 10,
   "deduplicated": 13,
-  "imported": 603,
-  "new": 18,
-  "updated_or_unchanged": 283,
-  "temporarily_retained": 302,
-  "pruned_as_stale": 38,
-  "no_longer_seen": 340,
+  "imported": 611,
+  "new": 8,
+  "updated_or_unchanged": 280,
+  "temporarily_retained": 323,
+  "pruned_as_stale": 0,
+  "no_longer_seen": 323,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -26,10 +26,6 @@
     },
     {
       "source": "company_portal:Alnylam Pharmaceuticals",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Sage Therapeutics",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -47,6 +43,10 @@
     {
       "source": "company_portal:Aetion",
       "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:Sage Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:OM1",
@@ -85,16 +85,12 @@
       "error": "HTTP 500"
     },
     {
-      "source": "company_portal:Microsoft Health & Life Sciences",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Eikon Therapeutics",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Fenix Group",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Microsoft Health & Life Sciences",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Eli Lilly and Company",
@@ -105,10 +101,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Millennium Management",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:NERA Economic Consulting",
       "error": "HTTP Error 404: Not Found"
     },
@@ -117,12 +109,16 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Meta",
-      "error": "HTTP 429"
+      "source": "company_portal:Eikon Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Sakata Seed America, Inc.",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Precision Medicine Group",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "source": "company_portal:SystImmune",
@@ -133,15 +129,19 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Precision Medicine Group",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "source": "company_portal:Putnam (Inizio Ignite)",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
       "source": "company_portal:Two Sigma",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Millennium Management",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Meta",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
