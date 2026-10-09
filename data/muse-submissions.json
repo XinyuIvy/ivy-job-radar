@@ -28,10 +28,10 @@
       "company": "Veristat",
       "jobUrl": "https://www.linkedin.com/jobs/view/4469243248",
       "location": "Remote",
-      "notes": "2026-09-25 Xinyu 亲自点 Submit；网申状态 In Process",
+      "notes": "2026-09-25 Xinyu 亲自点 Submit；网申状态 In Process；拒信日期 2026-10-05",
       "resumeVersion": "resume_biostat_cro.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Biostatistician"
     },
     {
@@ -256,10 +256,10 @@
       "company": "Marshall Wace",
       "jobUrl": "https://job-boards.greenhouse.io/mw-tech-grad/jobs/8636830002",
       "location": "New York, NY",
-      "notes": "2026-09-26 自动提交（Greenhouse；确认页 Thank you for applying）。SWUFE 不在 Greenhouse 学校库，已从第三段教育删除（简历保留）；Quant Developer consideration 选 No（保守，待她确认）；BS/MS grade 按表格自带换算（3.8→1st Class，4.0→Distinction）",
+      "notes": "2026-09-26 自动提交（Greenhouse；确认页 Thank you for applying）。SWUFE 不在 Greenhouse 学校库，已从第三段教育删除（简历保留）；Quant Developer consideration 选 No（保守，待她确认）；BS/MS grade 按表格自带换算（3.8→1st Class，4.0→Distinction）；拒信日期 2026-10-08",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Quant Research - Quant Associate Programme - 2027"
     },
     {
@@ -310,8 +310,8 @@
       "title": "Research Scientist",
       "applicationId": "rentec-20260927",
       "appliedDate": "2026-09-27",
-      "status": "待确认",
-      "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'；2026-09-27 邮箱全文件夹未收到确认邮件，待确认",
+      "status": "拒绝",
+      "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'；2026-09-27 邮箱全文件夹未收到确认邮件，待确认；拒信日期 2026-10-07",
       "link": "https://www.rentec.com/apply"
     },
     {
@@ -862,8 +862,8 @@
       "title": "Data Scientist",
       "applicationId": "req 5601879",
       "appliedDate": "2026-09-30",
-      "status": "已投递",
-      "notes": "New York, NY。同一雇主第二 req（9-29 已投 Core Infrastructure）。官网表单；简历 resume_applied_scientist.pdf。经验题如实选 None - new grad。",
+      "status": "拒绝",
+      "notes": "New York, NY。同一雇主第二 req（9-29 已投 Core Infrastructure）。官网表单；简历 resume_applied_scientist.pdf。经验题如实选 None - new grad。；拒信日期 2026-10-09",
       "link": "https://stripe.com/careers/apply/data-scientist/5601879"
     },
     {
@@ -978,9 +978,152 @@
       "status": "拒绝",
       "notes": "Boston, MA (Remote)。2026-10-05 自动投递（Workday 确认 \"You have successfully applied\"）。简历 resume_general_ds.pdf。拒信日期 2026-10-06",
       "link": "https://www.linkedin.com/jobs/view/4474205805"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-08",
+      "company": "AmeriHealth Caritas",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4476790758/",
+      "location": "Remote US",
+      "notes": "2026-10-08 自动提交（LinkedIn）；大型健康保险 payor，claims 数据分析；拒信日期 2026-10-09",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Data Scientist"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-05",
+      "company": "AbbVie",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4474637228",
+      "location": "North Chicago, IL",
+      "notes": "Job ID R00151621；2026-10-05 自动提交（SmartRecruiters OneClick）；拒信日期 2026-10-08",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Research Statistician - Exploratory Analysis (Hybrid)"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-08",
+      "company": "Notion",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4458773276/",
+      "location": "San Francisco, CA (Hybrid)",
+      "notes": "2026-10-08 自动提交（Ashby）；Anchor Days 答 Yes；拒信日期 2026-10-08",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Data Scientist, Growth"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-08",
+      "company": "Microsoft",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4477177068/",
+      "location": "Redmond, WA (Hybrid)",
+      "notes": "2026-10-08 自动提交（LinkedIn）；early-career；拒信日期 2026-10-08（按日期推断对应，待她核对）",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Applied ML Engineer"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-05",
+      "company": "Capital One",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4475858512",
+      "location": "New York, NY",
+      "notes": "req R1002964；2026-10-05 自动提交（MyWorkday）；JD 明确 will consider sponsoring；拒信日期 2026-10-08",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Applied Researcher 4 (AI Foundations, LLM Customization and Finetuning)"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-07",
+      "company": "Simon-Kucher",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4433985724/",
+      "location": "Chicago, IL / Boston, MA (Hybrid)",
+      "notes": "2026-10-07 自动提交（Cornerstone）；拒信日期 2026-10-07",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Consultant, Data Science – Elevate – Healthcare & Life Sciences"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-09-25",
+      "company": "Microsoft",
+      "jobUrl": "https://www.linkedin.com/comm/jobs/view/4453121437/",
+      "location": "Remote US",
+      "notes": "2026-09-25 投递；本科起点·大公司；拒信日期 2026-10-07（按日期推断对应，待她核对）",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Data Scientist – FDE"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-05",
+      "company": "AbbVie",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4474252406",
+      "location": "North Chicago, IL (Hybrid)",
+      "notes": "REF49906W；2026-10-05 自动提交（SmartRecruiters）；拒信日期 2026-10-07",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Sr. Clinical Data Scientist (RBQM Analytics)"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-03",
+      "company": "Oruka Therapeutics",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4474786942/",
+      "location": "Boston, MA (Hybrid)",
+      "notes": "2026-10-03 自动提交（Greenhouse req 5442455008）；PhD+5 年；拒信日期 2026-10-07",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Associate Director, Biostatistics"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-06",
+      "company": "DebtBook",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4473688045/",
+      "location": "Charlotte, NC",
+      "notes": "2026-10-06 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-07",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Associate Quantitative Strategist"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-09-29",
+      "company": "Man Group",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4471273455/",
+      "location": "Boston, MA",
+      "notes": "2026-09-29 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-05",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Quantitative Researcher - Equities"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-04",
+      "company": "Duolingo",
+      "jobUrl": "https://careers.duolingo.com/jobs/8610345002",
+      "location": "New York, NY",
+      "notes": "Req R-01168；2026-10-04 自动提交（官网）；拒信日期 2026-10-04",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Staff AI Research Engineer"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-04",
+      "company": "Netspend",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4466389235/",
+      "location": "Austin, TX (Hybrid)",
+      "notes": "2026-10-04 自动提交（Ashby）；拒信日期 2026-10-04",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Data Scientist - AML"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-09T00:05:46-05:00",
+  "updated_at": "2026-10-09T11:43:25-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
