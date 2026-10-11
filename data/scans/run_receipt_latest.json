@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-10-11T14:51:22.542077+00:00",
+  "run_started_at": "2026-10-11T15:07:41.513704+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 23,
+    "us_jobs_verified_latest.json": 20,
     "china_jobs_latest.json": 0,
     "cloud_sources_jobs_latest.json": 1,
     "aggregator_jobs_verified_latest.json": 238,
     "company_portal_jobs_latest.json": 44
   },
-  "fetched": 306,
+  "fetched": 303,
   "verified_or_open": 79,
   "rejected": 7,
   "deduplicated": 12,
-  "imported": 582,
-  "new": 4,
+  "imported": 583,
+  "new": 1,
   "updated_or_unchanged": 283,
-  "temporarily_retained": 295,
-  "pruned_as_stale": 17,
-  "no_longer_seen": 312,
+  "temporarily_retained": 299,
+  "pruned_as_stale": 0,
+  "no_longer_seen": 299,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -65,16 +65,20 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Masimo",
+      "source": "company_portal:Zimmer Biomet",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Zimmer Biomet",
+      "source": "company_portal:Masimo",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Paige",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Microsoft Health & Life Sciences",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Qure.ai",
@@ -85,7 +89,7 @@
       "error": "HTTP 500"
     },
     {
-      "source": "company_portal:DRW",
+      "source": "company_portal:Eli Lilly and Company",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -97,20 +101,12 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "source": "company_portal:DRW",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:IMC Trading",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "source": "company_portal:Eli Lilly and Company",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Millennium Management",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Microsoft Health & Life Sciences",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:NERA Economic Consulting",
@@ -121,6 +117,14 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "source": "company_portal:Precision Medicine Group",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "source": "company_portal:Putnam (Inizio Ignite)",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "source": "company_portal:SystImmune",
       "error": "HTTP Error 404: Not Found"
     },
@@ -129,19 +133,15 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Precision Medicine Group",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "source": "company_portal:Two Sigma",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Putnam (Inizio Ignite)",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
+      "source": "company_portal:Meta",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Meta",
+      "source": "company_portal:Millennium Management",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {

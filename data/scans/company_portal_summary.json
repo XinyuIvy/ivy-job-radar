@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-10-11T14:49:29.814731+00:00",
+  "generated_at": "2026-10-11T15:05:50.746352+00:00",
   "companies_in_pool": 176,
   "companies_attempted": 176,
   "companies_succeeded": 144,
   "companies_failed": 12,
   "companies_unidentified": 20,
-  "jobs_scanned": 9357,
+  "jobs_scanned": 9355,
   "jobs_matched": 44,
   "ats_counts": {
     "adp": 1,
@@ -89,19 +89,24 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Masimo",
-      "url": "https://www.masimo.com/company/careers/",
+      "company": "Zimmer Biomet",
+      "url": "https://careers.zimmerbiomet.com/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Zimmer Biomet",
-      "url": "https://careers.zimmerbiomet.com/",
+      "company": "Masimo",
+      "url": "https://www.masimo.com/company/careers/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Paige",
       "url": "https://paige.ai/careers/",
       "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "company": "Microsoft Health & Life Sciences",
+      "url": "https://careers.microsoft.com/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "Qure.ai",
@@ -114,8 +119,8 @@
       "error": "HTTP 500"
     },
     {
-      "company": "DRW",
-      "url": "https://www.drw.com/work-at-drw/listings/",
+      "company": "Eli Lilly and Company",
+      "url": "https://careers.lilly.com/",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -129,24 +134,14 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
+      "company": "DRW",
+      "url": "https://www.drw.com/work-at-drw/listings/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "company": "IMC Trading",
       "url": "https://www.imc.com/us/careers/jobs/",
       "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "company": "Eli Lilly and Company",
-      "url": "https://careers.lilly.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Millennium Management",
-      "url": "https://career.mlp.com/careers",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "company": "Microsoft Health & Life Sciences",
-      "url": "https://careers.microsoft.com/",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "company": "NERA Economic Consulting",
@@ -159,6 +154,16 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "company": "Precision Medicine Group",
+      "url": "https://careers.precisionmedicinegrp.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
+      "company": "Putnam (Inizio Ignite)",
+      "url": "https://careers.inizioengage.com/",
+      "error": "<urlopen error [Errno -2] Name or service not known>"
+    },
+    {
       "company": "SystImmune",
       "url": "https://www.systimmune.com/careers",
       "error": "HTTP Error 404: Not Found"
@@ -169,23 +174,18 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "company": "Precision Medicine Group",
-      "url": "https://careers.precisionmedicinegrp.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "company": "Two Sigma",
       "url": "https://careers.twosigma.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "company": "Putnam (Inizio Ignite)",
-      "url": "https://careers.inizioengage.com/",
-      "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
       "company": "Meta",
       "url": "https://www.metacareers.com/jobs/",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "company": "Millennium Management",
+      "url": "https://career.mlp.com/careers",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
