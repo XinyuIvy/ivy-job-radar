@@ -16,8 +16,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-08-27T18:31:17.663322Z",
     "aggregator_scraped_at": "2026-10-10T13:57:34.848622Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -36,9 +36,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T21:38:08.868932Z",
-    "aggregator_scraped_at": "2026-10-11T14:34:55.772893Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:16.241655Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -57,9 +57,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T21:38:08.868956Z",
-    "aggregator_scraped_at": "2026-10-11T14:34:55.772910Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:16.241665Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -78,9 +78,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:55.536012Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.214938Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.003864Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -99,9 +99,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:03:56.368255Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:54.482241Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:31.421190Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -120,9 +120,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-01T11:02:04.267227Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:02.617371Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:55.656584Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -141,9 +141,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:43:08.197397Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:06.762791Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:51.500595Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -162,9 +162,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:43:08.197458Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:06.762704Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:51.500664Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -183,9 +183,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:44:23.629160Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:54.040572Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:18.014234Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -204,30 +204,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:44:23.629215Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:54.040661Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "8fbbeb2a78513cd9ce02503c",
-    "company": "fanaticsfbg",
-    "title": "Data Scientist I",
-    "location": "Denver, CO, United States; New York, NY, United States",
-    "region": "美国",
-    "track": "Technology",
-    "score": 68,
-    "visa": "JD 未明确",
-    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
-    "skills": [],
-    "job_url": "https://job-boards.greenhouse.io/fanaticsfbg/jobs/4321320009",
-    "canonical_url": "https://job-boards.greenhouse.io/fanaticsfbg/jobs/4321320009",
-    "application_id": "",
-    "source": "Job Board Aggregator · Greenhouse",
-    "aggregator_first_seen": "2026-07-25T09:20:25.306697Z",
-    "aggregator_scraped_at": "2026-09-11T12:20:24.778341Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:18.014264Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -246,9 +225,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Paylocity",
     "aggregator_first_seen": "2026-07-28T10:12:29.694222Z",
-    "aggregator_scraped_at": "2026-10-11T14:59:31.805624Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:07:58.986321Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -267,9 +246,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-31T10:12:22.701472Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.215698Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.004244Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -288,9 +267,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-08-04T10:15:35.819844Z",
-    "aggregator_scraped_at": "2026-10-11T14:54:01.278169Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:27.517799Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -310,8 +289,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-09T08:24:16.357892Z",
     "aggregator_scraped_at": "2026-09-24T13:12:34.126658Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -331,8 +310,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-12T08:50:23.553432Z",
     "aggregator_scraped_at": "2026-09-13T12:50:06.155931Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -351,9 +330,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-27T18:28:32.404941Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:39.508903Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:43.541072Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -372,30 +351,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-09-04T12:16:47.888312Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:49.061663Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "b6b77f3162e1e2b13ff2623f",
-    "company": "starfish",
-    "title": "Junior Level Data Scientist",
-    "location": "Colorado Springs, CO",
-    "region": "美国",
-    "track": "Technology",
-    "score": 68,
-    "visa": "JD 未明确",
-    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
-    "skills": [],
-    "job_url": "https://starfish.wd501.myworkdayjobs.com/careers/job/Colorado-Springs-CO/Junior-Level-Data-Scientist_R1702",
-    "canonical_url": "https://starfish.wd501.myworkdayjobs.com/careers/job/Colorado-Springs-CO/Junior-Level-Data-Scientist_R1702",
-    "application_id": "",
-    "source": "Job Board Aggregator · Workday",
-    "aggregator_first_seen": "2026-09-10T12:40:08.124346Z",
-    "aggregator_scraped_at": "2026-09-11T12:44:03.275883Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:41.437714Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -415,8 +373,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-12T11:55:06.733532Z",
     "aggregator_scraped_at": "2026-09-13T13:09:01.681407Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -435,9 +393,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-09-14T14:25:37.121905Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:06.919595Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:46.880116Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -457,8 +415,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-15T13:11:17.592737Z",
     "aggregator_scraped_at": "2026-09-15T13:11:17.592737Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -478,8 +436,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-16T12:47:41.354360Z",
     "aggregator_scraped_at": "2026-09-16T12:47:41.354360Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -499,8 +457,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-16T12:54:34.091921Z",
     "aggregator_scraped_at": "2026-09-22T12:57:07.635992Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -520,8 +478,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-22T13:15:08.579618Z",
     "aggregator_scraped_at": "2026-09-24T13:07:38.019938Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -541,8 +499,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-24T12:54:06.160014Z",
     "aggregator_scraped_at": "2026-09-24T12:54:06.160014Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -561,9 +519,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-09-24T12:57:54.599647Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:06.764006Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:51.500629Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -583,8 +541,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-09-28T15:53:32.988799Z",
     "aggregator_scraped_at": "2026-10-05T16:24:23.509889Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -603,9 +561,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-09-29T14:20:13.067449Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:59.546878Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:26.181205Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -624,9 +582,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-09-30T14:11:20.130327Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:00.068252Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:23.736471Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -645,9 +603,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-09-30T14:13:59.568903Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:56.510193Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:55.691598Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -667,8 +625,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-10-02T14:22:03.765469Z",
     "aggregator_scraped_at": "2026-10-04T13:35:21.790856Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -688,8 +646,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-10-03T12:58:50.099148Z",
     "aggregator_scraped_at": "2026-10-08T15:02:45.761652Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -709,8 +667,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-10-07T14:46:48.260444Z",
     "aggregator_scraped_at": "2026-10-07T14:46:48.260444Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -729,9 +687,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-10-09T14:57:30.059795Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:49.588161Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:14:45.734657Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -750,9 +708,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-06-16T22:38:35.600317Z",
-    "aggregator_scraped_at": "2026-10-11T14:44:58.409906Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:10:39.737045Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -772,8 +730,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-08-19T08:19:26.272111Z",
     "aggregator_scraped_at": "2026-09-13T13:08:56.691451Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -793,29 +751,8 @@
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-08-20T08:10:10.849772Z",
     "aggregator_scraped_at": "2026-10-05T16:20:16.892850Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "848cd26e7819bfb5c04b9c63",
-    "company": "worldwide",
-    "title": "Biostatistician II",
-    "location": "Research Triangle Park, North Carolina",
-    "region": "美国",
-    "track": "Pharma",
-    "score": 66,
-    "visa": "JD 未明确",
-    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
-    "skills": [],
-    "job_url": "https://worldwide.wd1.myworkdayjobs.com/external/job/Research-Triangle-Park-North-Carolina/Senior-Biostatistician_JR102332",
-    "canonical_url": "https://worldwide.wd1.myworkdayjobs.com/external/job/Research-Triangle-Park-North-Carolina/Senior-Biostatistician_JR102332",
-    "application_id": "",
-    "source": "Job Board Aggregator · Workday",
-    "aggregator_first_seen": "2026-09-10T12:22:35.219306Z",
-    "aggregator_scraped_at": "2026-09-11T12:35:43.748239Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -835,8 +772,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-11T12:21:22.717361Z",
     "aggregator_scraped_at": "2026-09-22T12:51:46.685950Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -855,9 +792,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-09-16T12:47:56.911667Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:10.240608Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:31.603502Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -876,9 +813,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-09-16T12:47:56.911719Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:10.240681Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:31.603536Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -897,9 +834,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-09-18T12:40:11.660149Z",
-    "aggregator_scraped_at": "2026-10-11T14:43:49.340191Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:09:26.595240Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -918,9 +855,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-10-01T14:46:14.581163Z",
-    "aggregator_scraped_at": "2026-10-11T14:43:10.072903Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:08:45.314954Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -939,9 +876,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-10-01T14:46:19.139189Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:10.240648Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:31.603519Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -961,8 +898,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-10-10T14:17:54.979294Z",
     "aggregator_scraped_at": "2026-10-11T14:24:27.359528Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -982,8 +919,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-03T12:23:37.955745Z",
     "aggregator_scraped_at": "2026-09-15T12:57:22.088236Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1003,8 +940,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-03T12:23:37.955803Z",
     "aggregator_scraped_at": "2026-09-15T12:57:22.088319Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1024,8 +961,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-11T12:02:11.278978Z",
     "aggregator_scraped_at": "2026-09-30T14:10:14.171867Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1045,8 +982,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-12T11:31:29.307067Z",
     "aggregator_scraped_at": "2026-09-18T12:21:31.772307Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1065,9 +1002,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T12:27:29.059559Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:41.573718Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:13.879513Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1087,8 +1024,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T12:30:26.052709Z",
     "aggregator_scraped_at": "2026-09-30T14:10:15.434193Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1108,8 +1045,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T12:39:51.364297Z",
     "aggregator_scraped_at": "2026-09-14T14:52:10.536153Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1128,9 +1065,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:34:06.218271Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:24.717730Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:49.995922Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1149,9 +1086,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:34:26.574455Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:07.828101Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:58.837365Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1170,9 +1107,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T21:34:53.569829Z",
-    "aggregator_scraped_at": "2026-10-11T14:41:42.023243Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:19:45.415144Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1191,9 +1128,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:37:29.372633Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:00.674707Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:09.807480Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1212,9 +1149,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T21:38:08.869072Z",
-    "aggregator_scraped_at": "2026-10-11T14:34:55.772978Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:16.241705Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1233,9 +1170,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T21:38:08.869098Z",
-    "aggregator_scraped_at": "2026-10-11T14:34:55.772996Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:16.241715Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1255,8 +1192,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:38:12.731239Z",
     "aggregator_scraped_at": "2026-09-21T14:34:30.529323Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1275,9 +1212,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:43.504700Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:25.762083Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:30.735473Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1296,9 +1233,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:43.504726Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:25.762124Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:30.735494Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1317,9 +1254,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:55.536253Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.215418Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.004091Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1338,9 +1275,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:55.536292Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.215486Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.004119Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1359,9 +1296,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:55.536337Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.215555Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.004153Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1380,9 +1317,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:55.536377Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.215616Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.004185Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1401,9 +1338,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:40:55.536424Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:53.215761Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:50.004279Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1422,9 +1359,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:41:26.748774Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:20.423789Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:05.979224Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1443,9 +1380,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:42:00.007548Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:52.368094Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:02.904625Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1464,9 +1401,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:42:02.424879Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:24.202712Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:22.033782Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1485,9 +1422,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:42:06.915223Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:50.758640Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:26.567115Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1506,9 +1443,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:42:06.916413Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:50.812865Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:26.568163Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1527,9 +1464,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:42:51.372143Z",
-    "aggregator_scraped_at": "2026-10-11T14:19:41.202176Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:45.175941Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1548,9 +1485,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:43:44.215588Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:43.075371Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:53.762940Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1569,9 +1506,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:43:48.815023Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:50.895790Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:27.260898Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1590,9 +1527,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:43:58.360174Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:29.966658Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:37.228096Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1612,8 +1549,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:44:09.256711Z",
     "aggregator_scraped_at": "2026-09-28T15:54:34.217470Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1632,9 +1569,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:44:14.639082Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:12.587453Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:34.771545Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1653,9 +1590,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:45:09.599110Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:01.592985Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:02.840106Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1674,9 +1611,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:45:12.692649Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:04.728083Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:05.008338Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1695,9 +1632,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:46:41.863884Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:07.653780Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:27.449372Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1716,9 +1653,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:47:23.505360Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:57.240641Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:05.386090Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1737,9 +1674,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:48:25.614123Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:27.359301Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:02.449818Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1758,9 +1695,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:48:27.361232Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:12.089582Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:05.051336Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1779,9 +1716,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:49:19.204621Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:47.562692Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:34.683328Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1801,8 +1738,8 @@
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:49:45.647109Z",
     "aggregator_scraped_at": "2026-10-05T16:21:24.473395Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1821,9 +1758,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:50:07.561799Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:09.082895Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:47.223473Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1842,9 +1779,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-16T21:50:38.299636Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:06.826322Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:51.561340Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1863,9 +1800,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.151867Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.415443Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.526294Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1884,9 +1821,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.152075Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.441622Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.526633Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1905,9 +1842,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.152245Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.441556Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.526572Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1926,9 +1863,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.152778Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.442476Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.559508Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1947,9 +1884,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.152991Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.442879Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.559690Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1968,9 +1905,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.153257Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.443252Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.559873Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -1989,9 +1926,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.154481Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.446200Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.560832Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2010,9 +1947,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.154743Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.470567Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.561057Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2032,8 +1969,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.156409Z",
     "aggregator_scraped_at": "2026-09-24T12:54:20.304552Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2052,9 +1989,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.156601Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.722974Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.562573Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2073,9 +2010,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.156634Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.723101Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.562601Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2094,9 +2031,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.156663Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.723169Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.562682Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2115,9 +2052,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.156701Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.723248Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.562719Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2136,9 +2073,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:04.156733Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:40.723309Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:24.562748Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2157,9 +2094,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:46.058930Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:03.503991Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:49.517856Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2178,9 +2115,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:51:46.059008Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:03.504131Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:49.517927Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2200,8 +2137,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:52:31.980408Z",
     "aggregator_scraped_at": "2026-09-15T12:52:24.387489Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2221,8 +2158,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:52:31.987850Z",
     "aggregator_scraped_at": "2026-09-30T14:14:29.273055Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2241,9 +2178,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:52:47.676717Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:07.812926Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:04.237398Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2262,9 +2199,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:52:51.671668Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:22.416410Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:16.790191Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2284,8 +2221,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:52:58.631240Z",
     "aggregator_scraped_at": "2026-09-23T13:00:56.899950Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2304,9 +2241,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:53:29.256868Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:38.414863Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:23.927052Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2325,9 +2262,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:53:29.256902Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:38.414924Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:23.927078Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2346,9 +2283,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:54:00.159697Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:40.316159Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:13.089671Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2367,9 +2304,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T21:54:25.016617Z",
-    "aggregator_scraped_at": "2026-10-11T14:46:18.021543Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:20:10.657566Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2388,9 +2325,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:54:32.089690Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:41.095944Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:09.579496Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2409,9 +2346,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:55:07.612988Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:00.031768Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:49.145867Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2430,9 +2367,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:55:44.935558Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:25.813565Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:24.290108Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2451,9 +2388,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:55:52.094040Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:06.210574Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:40.356292Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2473,8 +2410,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:56:17.807443Z",
     "aggregator_scraped_at": "2026-09-17T12:45:46.736810Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2494,8 +2431,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:57:10.178277Z",
     "aggregator_scraped_at": "2026-09-13T12:50:06.156066Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2515,8 +2452,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:57:10.178308Z",
     "aggregator_scraped_at": "2026-09-13T12:50:06.155985Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2536,8 +2473,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:57:10.178341Z",
     "aggregator_scraped_at": "2026-09-13T12:50:06.156126Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2556,9 +2493,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:57:11.984915Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:12.428585Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:52.415252Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2577,9 +2514,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:57:11.984956Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:12.428664Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:52.415293Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2599,8 +2536,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:58:00.328325Z",
     "aggregator_scraped_at": "2026-10-05T16:23:32.861700Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2619,9 +2556,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:59:57.675493Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:07.780390Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:33.023330Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2640,9 +2577,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:59:59.829864Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:36.011855Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:05.782207Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2661,9 +2598,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:59:59.829917Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:36.011935Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:05.782262Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2682,9 +2619,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T21:59:59.830002Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:36.012153Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:05.782350Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2703,9 +2640,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:00:16.369319Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:06.357509Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:36.356643Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2725,8 +2662,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:00:28.320035Z",
     "aggregator_scraped_at": "2026-10-07T14:43:10.831229Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2746,8 +2683,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:00:28.320073Z",
     "aggregator_scraped_at": "2026-10-09T14:36:27.599920Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2766,9 +2703,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:00:37.404637Z",
-    "aggregator_scraped_at": "2026-10-11T14:30:23.593885Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:15:44.320104Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2787,9 +2724,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:00:51.878092Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:06.848462Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:51.502662Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2808,9 +2745,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:00:51.883698Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:06.849418Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:51.503076Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2829,30 +2766,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:01:52.494240Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:12.283949Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "b1270d3e8d2a7771b397cd01",
-    "company": "jumptrading",
-    "title": "Data Scientist | Post Trade Analytics",
-    "location": "Shanghai",
-    "region": "中国",
-    "track": "Technology",
-    "score": 60,
-    "visa": "不适用",
-    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
-    "skills": [],
-    "job_url": "https://www.jumptrading.com/hr/job?gh_jid=7483202",
-    "canonical_url": "https://www.jumptrading.com/hr/job?gh_jid=7483202",
-    "application_id": "",
-    "source": "Job Board Aggregator · Greenhouse",
-    "aggregator_first_seen": "2026-06-16T22:02:15.208337Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:34.929908Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:28.996381Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2871,9 +2787,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:03:06.898303Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:41.739129Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:21.261167Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2892,9 +2808,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:07.437497Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:29.780216Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:29.656985Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2913,9 +2829,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:11.629948Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:29.338868Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:09.774664Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2934,9 +2850,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:15.904042Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:17.123738Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:33.810054Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2956,8 +2872,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:28.105624Z",
     "aggregator_scraped_at": "2026-09-24T12:52:26.469938Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2976,9 +2892,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:28.105660Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:00.337982Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:18.816224Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -2997,9 +2913,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:28.105741Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:00.338052Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:18.816261Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3018,9 +2934,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:04:28.105782Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:00.338192Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:18.816809Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3039,9 +2955,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:06:14.584637Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:55.914509Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:04.507325Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3061,8 +2977,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:06:26.033766Z",
     "aggregator_scraped_at": "2026-09-22T12:53:59.237588Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3081,9 +2997,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:06:27.397982Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:54.082301Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:18.027150Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3102,9 +3018,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:06:27.398049Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:54.082429Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:18.027192Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3123,9 +3039,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:06:27.398126Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:54.082579Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:18.027276Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3144,9 +3060,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:06:27.398280Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:54.085261Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:18.027380Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3165,9 +3081,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:07:31.034693Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:11.956146Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:44.861548Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3187,8 +3103,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:07:47.677246Z",
     "aggregator_scraped_at": "2026-09-30T14:13:28.547967Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3208,8 +3124,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:07:47.677314Z",
     "aggregator_scraped_at": "2026-09-30T14:13:28.548006Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3228,9 +3144,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:07:47.677415Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:22.970117Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:23.793815Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3250,8 +3166,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:08:05.063286Z",
     "aggregator_scraped_at": "2026-10-04T13:28:50.514206Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3271,8 +3187,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-16T22:08:18.992575Z",
     "aggregator_scraped_at": "2026-10-01T14:45:31.545247Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3291,9 +3207,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:12:29.112143Z",
-    "aggregator_scraped_at": "2026-10-11T14:38:26.106968Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:15:13.765370Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3313,8 +3229,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:13:50.829320Z",
     "aggregator_scraped_at": "2026-09-15T13:15:52.428302Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3333,9 +3249,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-06-16T22:22:33.967784Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:24.581891Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:16:39.790374Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3354,9 +3270,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-06-16T22:22:33.967813Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:24.581949Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:16:39.790389Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3375,9 +3291,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:23:47.720802Z",
-    "aggregator_scraped_at": "2026-10-11T14:43:40.555909Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:08:02.900859Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3396,9 +3312,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:24:54.792035Z",
-    "aggregator_scraped_at": "2026-10-11T14:36:36.492300Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:24.503350Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3417,9 +3333,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:26:20.579633Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:08.438316Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:48.479786Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3438,9 +3354,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:26:43.559914Z",
-    "aggregator_scraped_at": "2026-10-11T14:29:37.660916Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:34.183504Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3459,9 +3375,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-06-16T22:29:22.188589Z",
-    "aggregator_scraped_at": "2026-10-11T14:35:51.409053Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:08:38.482759Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3481,8 +3397,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:31:22.571916Z",
     "aggregator_scraped_at": "2026-09-13T13:03:16.183542Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3501,9 +3417,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:31:36.595615Z",
-    "aggregator_scraped_at": "2026-10-11T14:46:49.440515Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:58.059433Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3522,9 +3438,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:37:56.138726Z",
-    "aggregator_scraped_at": "2026-10-11T14:49:16.185151Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:14:24.207573Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3544,8 +3460,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:38:24.977194Z",
     "aggregator_scraped_at": "2026-10-01T15:07:29.625336Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3564,9 +3480,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-06-16T22:42:24.747007Z",
-    "aggregator_scraped_at": "2026-10-11T14:40:25.070471Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:17:32.100480Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3586,8 +3502,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-06-16T22:48:42.496985Z",
     "aggregator_scraped_at": "2026-10-08T14:56:34.157184Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3607,8 +3523,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-06-16T23:03:41.733988Z",
     "aggregator_scraped_at": "2026-10-11T14:43:11.496840Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3627,9 +3543,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-06-16T23:06:30.239789Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:14.266283Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:16:43.118819Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3648,9 +3564,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-19T11:53:37.194146Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:21.160285Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:26.540312Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3669,9 +3585,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-19T11:56:29.771349Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:50.682078Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:36.935113Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3690,9 +3606,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-24T10:39:04.071809Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:07.812659Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:04.237338Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3712,8 +3628,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-06-24T10:50:53.714513Z",
     "aggregator_scraped_at": "2026-09-28T16:05:57.421967Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3732,9 +3648,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-25T10:27:11.309506Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:47.853831Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:44.325372Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3753,9 +3669,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Paylocity",
     "aggregator_first_seen": "2026-06-25T11:00:52.974415Z",
-    "aggregator_scraped_at": "2026-10-11T14:43:30.634097Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:05:30.232831Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3774,9 +3690,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-26T10:41:17.297736Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:00.549029Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:18.956112Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3795,9 +3711,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-06-26T11:02:32.204555Z",
-    "aggregator_scraped_at": "2026-10-11T14:55:27.747359Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:07:37.631237Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3816,9 +3732,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-27T09:40:17.846721Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:06.468560Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:24.303561Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3838,8 +3754,8 @@
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-06-27T09:43:36.520013Z",
     "aggregator_scraped_at": "2026-10-08T14:54:23.133593Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3858,9 +3774,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-27T09:45:53.923795Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:10.293833Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:25.426924Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3879,9 +3795,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-30T10:45:39.311972Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:22.970045Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:23.793745Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3900,9 +3816,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-06-30T10:48:59.524418Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:07.109181Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:01:13.570028Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3922,8 +3838,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:38:54.775459Z",
     "aggregator_scraped_at": "2026-10-07T14:44:31.611401Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3942,9 +3858,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:41:52.524679Z",
-    "aggregator_scraped_at": "2026-10-11T14:19:48.994557Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:51.026242Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3964,8 +3880,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-02T14:44:17.414801Z",
     "aggregator_scraped_at": "2026-09-22T12:48:12.908967Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -3984,9 +3900,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-08T10:01:31.597129Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:16.196204Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:49.527512Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4005,9 +3921,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-09T10:41:18.626748Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:40.326013Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:28.162480Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4026,9 +3942,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-09T10:43:03.456357Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:27.728465Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:34.728667Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4047,9 +3963,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-09T10:43:54.066770Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:56.386260Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:54.388745Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4068,9 +3984,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-10T10:39:42.851494Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:22.969978Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:23.793694Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4089,9 +4005,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-10T10:40:54.215487Z",
-    "aggregator_scraped_at": "2026-10-11T14:19:54.323904Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:40.452924Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4110,9 +4026,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-10T10:42:07.963423Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:33.118780Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:27.364095Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4131,9 +4047,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-07-11T09:10:40.776670Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:42.900270Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:35.944713Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4152,9 +4068,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-14T09:33:45.791991Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:55.914465Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:04.507353Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4173,9 +4089,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-14T09:34:20.426625Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:53.828388Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:44.921486Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4194,9 +4110,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-15T09:32:47.681354Z",
-    "aggregator_scraped_at": "2026-10-11T14:25:05.917204Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:08.626676Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4216,8 +4132,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-07-15T09:47:19.548213Z",
     "aggregator_scraped_at": "2026-09-27T13:35:28.629196Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4236,9 +4152,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-16T09:40:41.181129Z",
-    "aggregator_scraped_at": "2026-10-11T14:19:53.234774Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:04.792060Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4257,9 +4173,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-16T09:41:46.450083Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:22.969947Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:23.793672Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4278,9 +4194,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-07-18T09:10:00.676526Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:19.141337Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:52.080068Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4299,9 +4215,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-07-18T09:13:12.395975Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:49.754332Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:07.722004Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4320,9 +4236,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-21T10:06:01.606658Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:29.604667Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:57.710565Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4342,8 +4258,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-23T10:03:39.107768Z",
     "aggregator_scraped_at": "2026-09-17T12:45:27.744093Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4362,9 +4278,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-23T10:03:47.324330Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:34.481424Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:22.989162Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4384,8 +4300,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-07-23T10:11:09.282603Z",
     "aggregator_scraped_at": "2026-09-17T12:47:31.054865Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4405,8 +4321,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-07-23T10:16:02.064363Z",
     "aggregator_scraped_at": "2026-10-07T15:09:45.348751Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4426,8 +4342,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-24T10:01:24.933945Z",
     "aggregator_scraped_at": "2026-09-24T12:57:46.094904Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4447,8 +4363,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-24T10:04:41.475020Z",
     "aggregator_scraped_at": "2026-09-28T15:50:34.196017Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4467,9 +4383,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-28T10:12:28.303787Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:22.970080Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:23.793783Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4489,8 +4405,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-07-29T10:14:42.805370Z",
     "aggregator_scraped_at": "2026-09-30T14:19:14.700148Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4509,9 +4425,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-07-29T10:25:43.124691Z",
-    "aggregator_scraped_at": "2026-10-11T14:26:17.833156Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:15:31.571048Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4531,8 +4447,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-30T10:06:09.494743Z",
     "aggregator_scraped_at": "2026-09-15T12:57:22.088141Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4552,8 +4468,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-30T10:06:09.494781Z",
     "aggregator_scraped_at": "2026-09-15T12:57:22.088181Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4573,8 +4489,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-30T10:06:09.494806Z",
     "aggregator_scraped_at": "2026-09-15T12:57:22.088278Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4593,9 +4509,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-30T10:08:22.219215Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:21.909269Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:08.893824Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4615,8 +4531,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-30T10:10:16.761805Z",
     "aggregator_scraped_at": "2026-09-21T14:30:54.414560Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4635,9 +4551,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-31T10:14:39.003858Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:29.149967Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:30.914718Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4656,9 +4572,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-31T10:14:39.003965Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:29.150019Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:30.914821Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4677,9 +4593,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-07-31T10:14:39.004017Z",
-    "aggregator_scraped_at": "2026-10-11T14:24:29.149757Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:30.914794Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4698,30 +4614,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-01T09:34:31.792576Z",
-    "aggregator_scraped_at": "2026-10-11T14:32:13.065511Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
-    "status": "待官网核验"
-  },
-  {
-    "job_key": "1fa0bc36d20234b2da3f7895",
-    "company": "medeloop",
-    "title": "Healthcare Data Scientist (RWD)",
-    "location": "San Francisco, California, United States; United States - Remote",
-    "region": "美国",
-    "track": "Technology",
-    "score": 60,
-    "visa": "JD 未明确",
-    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
-    "skills": [],
-    "job_url": "https://job-boards.greenhouse.io/medeloop/jobs/4342286009",
-    "canonical_url": "https://job-boards.greenhouse.io/medeloop/jobs/4342286009",
-    "application_id": "",
-    "source": "Job Board Aggregator · Greenhouse",
-    "aggregator_first_seen": "2026-08-01T09:35:22.914683Z",
-    "aggregator_scraped_at": "2026-09-11T12:23:48.108809Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:31.032787Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4741,8 +4636,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-08-04T10:17:01.139992Z",
     "aggregator_scraped_at": "2026-10-08T15:11:37.985933Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4761,9 +4656,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-08-05T10:14:19.354129Z",
-    "aggregator_scraped_at": "2026-10-11T14:20:05.521287Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:49.159001Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4782,9 +4677,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-05T10:18:38.308430Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:24.187383Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:51.895888Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4803,9 +4698,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-08-06T10:14:11.260060Z",
-    "aggregator_scraped_at": "2026-10-11T14:22:04.424509Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:57:04.878545Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4825,8 +4720,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-06T10:16:15.586674Z",
     "aggregator_scraped_at": "2026-09-25T12:59:36.395907Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4845,9 +4740,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-07T08:36:20.551448Z",
-    "aggregator_scraped_at": "2026-10-11T14:19:49.766568Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:56:30.983278Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4867,8 +4762,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-07T08:37:03.273021Z",
     "aggregator_scraped_at": "2026-09-28T15:50:39.464207Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4887,9 +4782,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-07T08:37:12.509861Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:46.092659Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:34.678075Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4909,8 +4804,8 @@
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-08-07T08:40:43.572765Z",
     "aggregator_scraped_at": "2026-09-24T12:51:49.526744Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4929,9 +4824,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-07T08:44:51.860431Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:57.961963Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:08.239662Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4951,8 +4846,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-08T08:08:39.098226Z",
     "aggregator_scraped_at": "2026-09-23T12:58:44.211303Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4971,9 +4866,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Lever",
     "aggregator_first_seen": "2026-08-08T08:13:49.682736Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:59.238304Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:00:12.339394Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -4993,8 +4888,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-09T08:24:16.357480Z",
     "aggregator_scraped_at": "2026-09-24T13:12:34.126082Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5014,8 +4909,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-09T08:24:16.357926Z",
     "aggregator_scraped_at": "2026-09-24T13:12:34.126699Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5035,8 +4930,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-11T08:38:26.937514Z",
     "aggregator_scraped_at": "2026-10-01T14:48:19.570427Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5055,9 +4950,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · BambooHR",
     "aggregator_first_seen": "2026-08-11T08:48:44.864455Z",
-    "aggregator_scraped_at": "2026-10-11T14:47:49.222124Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:28:51.380544Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5076,9 +4971,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-12T08:49:59.387963Z",
-    "aggregator_scraped_at": "2026-10-11T14:21:21.806112Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:59:52.220391Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5097,9 +4992,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-12T09:01:32.225154Z",
-    "aggregator_scraped_at": "2026-10-11T14:35:38.393160Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:17:48.575463Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5119,8 +5014,8 @@
     "source": "Job Board Aggregator · Workday",
     "aggregator_first_seen": "2026-08-12T09:04:18.926874Z",
     "aggregator_scraped_at": "2026-09-16T13:04:57.000525Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5139,9 +5034,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-12T09:16:59.455780Z",
-    "aggregator_scraped_at": "2026-10-11T14:29:37.660930Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T17:03:34.183513Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5160,9 +5055,9 @@
     "application_id": "",
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-13T08:55:45.755389Z",
-    "aggregator_scraped_at": "2026-10-11T14:23:28.468196Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "aggregator_scraped_at": "2026-10-12T16:58:47.788744Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5182,8 +5077,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-13T08:58:53.204584Z",
     "aggregator_scraped_at": "2026-10-04T13:26:37.386966Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5203,8 +5098,8 @@
     "source": "Job Board Aggregator · Ashby",
     "aggregator_first_seen": "2026-08-13T09:05:38.629886Z",
     "aggregator_scraped_at": "2026-09-24T13:12:34.126127Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5224,8 +5119,8 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-14T08:48:59.652597Z",
     "aggregator_scraped_at": "2026-09-22T12:52:28.686525Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   },
   {
@@ -5245,8 +5140,113 @@
     "source": "Job Board Aggregator · Greenhouse",
     "aggregator_first_seen": "2026-08-14T08:48:59.652659Z",
     "aggregator_scraped_at": "2026-09-22T12:52:28.686659Z",
-    "discovered_at": "2026-10-11T16:19:59.467086+00:00",
-    "checked_at": "2026-10-11T16:19:59.467086+00:00",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "c1e42d17bfc2bdfa33fc582a",
+    "company": "squarepointcapital",
+    "title": "Quantitative Researcher - Volatility (II)",
+    "location": "New York",
+    "region": "美国",
+    "track": "Quant",
+    "score": 60,
+    "visa": "JD 未明确",
+    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
+    "skills": [],
+    "job_url": "https://www.squarepoint-capital.com/open-opportunities?id=8122132&gh_jid=8122132",
+    "canonical_url": "https://www.squarepoint-capital.com/open-opportunities?id=8122132&gh_jid=8122132",
+    "application_id": "",
+    "source": "Job Board Aggregator · Greenhouse",
+    "aggregator_first_seen": "2026-08-14T08:48:59.652721Z",
+    "aggregator_scraped_at": "2026-09-22T12:52:28.686729Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "aa940f83dc829419d56730e5",
+    "company": "shakepay",
+    "title": "Data Scientist en chef, Croissance",
+    "location": "Remote, Canada",
+    "region": "美国",
+    "track": "Technology",
+    "score": 60,
+    "visa": "JD 未明确",
+    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
+    "skills": [],
+    "job_url": "https://job-boards.greenhouse.io/shakepay/jobs/4723804005",
+    "canonical_url": "https://job-boards.greenhouse.io/shakepay/jobs/4723804005",
+    "application_id": "",
+    "source": "Job Board Aggregator · Greenhouse",
+    "aggregator_first_seen": "2026-08-14T08:49:55.430360Z",
+    "aggregator_scraped_at": "2026-09-30T14:11:45.871806Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "ac8f21d27b0a056735ddb3c9",
+    "company": "great-gray-group",
+    "title": "Data Scientist",
+    "location": "Remote, USA",
+    "region": "美国",
+    "track": "Technology",
+    "score": 60,
+    "visa": "JD 未明确",
+    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
+    "skills": [],
+    "job_url": "https://jobs.lever.co/great-gray-group/f4aeeab3-5a08-4959-b734-4aef7f2597ba",
+    "canonical_url": "https://jobs.lever.co/great-gray-group/f4aeeab3-5a08-4959-b734-4aef7f2597ba",
+    "application_id": "",
+    "source": "Job Board Aggregator · Lever",
+    "aggregator_first_seen": "2026-08-14T08:50:53.580342Z",
+    "aggregator_scraped_at": "2026-09-16T12:47:20.872479Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "d4b3611fc2603d6228ff492f",
+    "company": "evio",
+    "title": "Applied Real World Data Scientist",
+    "location": "Denver (Remote)",
+    "region": "美国",
+    "track": "Technology",
+    "score": 60,
+    "visa": "JD 未明确",
+    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
+    "skills": [],
+    "job_url": "https://job-boards.greenhouse.io/evio/jobs/4723802005",
+    "canonical_url": "https://job-boards.greenhouse.io/evio/jobs/4723802005",
+    "application_id": "",
+    "source": "Job Board Aggregator · Greenhouse",
+    "aggregator_first_seen": "2026-08-14T08:52:03.064714Z",
+    "aggregator_scraped_at": "2026-10-12T17:00:36.329740Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
+    "status": "待官网核验"
+  },
+  {
+    "job_key": "c37764e61c9a1a16ccad37a6",
+    "company": "jumptrading",
+    "title": "Derivatives Quantitative Researcher | Trading Team",
+    "location": "London, New York",
+    "region": "美国",
+    "track": "Quant",
+    "score": 60,
+    "visa": "JD 未明确",
+    "evidence": "Job Board Aggregator 全量分片发现；来源为公司官方 ATS URL，学历、经验、开放状态与完整 JD 仍需下一步页面核验。",
+    "skills": [],
+    "job_url": "https://www.jumptrading.com/hr/job?gh_jid=7557793",
+    "canonical_url": "https://www.jumptrading.com/hr/job?gh_jid=7557793",
+    "application_id": "",
+    "source": "Job Board Aggregator · Greenhouse",
+    "aggregator_first_seen": "2026-08-14T08:53:40.445610Z",
+    "aggregator_scraped_at": "2026-10-12T17:01:13.371152Z",
+    "discovered_at": "2026-10-12T19:46:31.987352+00:00",
+    "checked_at": "2026-10-12T19:46:31.987352+00:00",
     "status": "待官网核验"
   }
 ]
