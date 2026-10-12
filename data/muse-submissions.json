@@ -1121,9 +1121,27 @@
       "source": "Muse 求职助手",
       "status": "拒绝",
       "title": "Senior Data Scientist - AML"
+    },
+    {
+      "company": "Man Group",
+      "title": "Junior Quant - PM Analytics",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-12（手动申请补录）；Greenhouse 拒信：we won't be moving forward with your application at this time",
+      "link": ""
+    },
+    {
+      "company": "Global Lending Services",
+      "title": "Data Scientist",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-12（手动申请补录）；Lever 拒信：Thanks for your interest in Global Lending Services",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-09T11:43:25-05:00",
+  "updated_at": "2026-10-12T13:41:43-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
