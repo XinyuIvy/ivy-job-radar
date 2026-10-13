@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-12T19:46:28.301590+00:00",
+  "generated_at": "2026-10-13T17:31:26.714579+00:00",
   "matched_jobs": 5,
   "sources": [
     {
@@ -11,14 +11,14 @@
     {
       "source": "remotive",
       "state": "success",
-      "scanned": 15,
+      "scanned": 16,
       "matched": 0
     },
     {
       "source": "jobicy",
       "state": "success",
       "scanned": 50,
-      "matched": 1
+      "matched": 2
     },
     {
       "source": "himalayas",
@@ -29,8 +29,8 @@
     {
       "source": "arbeitnow",
       "state": "success",
-      "scanned": 325,
-      "matched": 3
+      "scanned": 300,
+      "matched": 2
     },
     {
       "source": "weworkremotely",
