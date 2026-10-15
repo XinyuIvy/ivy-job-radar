@@ -1139,9 +1139,119 @@
       "status": "拒绝",
       "notes": "拒信日期 2026-10-12（手动申请补录）；Lever 拒信：Thanks for your interest in Global Lending Services",
       "link": ""
+    },
+    {
+      "applicationId": "JR98989",
+      "appliedDate": "2026-10-06",
+      "company": "Micron",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4474944634/",
+      "location": "Boise, ID",
+      "notes": "2026-10-06 自动提交；拒信日期 2026-10-10",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Sr Data Scientist"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-09-29",
+      "company": "PDT Partners",
+      "jobUrl": "",
+      "location": "",
+      "notes": "拒信日期 2026-10-12",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Quantitative Researcher"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-08",
+      "company": "Arrowhead Pharmaceuticals",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4391930911/",
+      "location": "San Diego, CA",
+      "notes": "2026-10-08 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-13",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Sr. Scientist I, Translational Genetics & Real-World Evidence"
+    },
+    {
+      "applicationId": "8256064",
+      "appliedDate": "2026-10-08",
+      "company": "Engineers Gate",
+      "jobUrl": "https://job-boards.greenhouse.io/engineersgate/jobs/8256064",
+      "location": "New York, NY",
+      "notes": "2026-10-08 自动提交（Greenhouse）；拒信日期 2026-10-13",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Quantitative Researcher"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-06",
+      "company": "Wayve",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4474099180/",
+      "location": "Sunnyvale, CA",
+      "notes": "2026-10-06 自动提交（Ashby）；拒信日期 2026-10-14",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Data Scientist"
+    },
+    {
+      "applicationId": "26194",
+      "appliedDate": "2026-10-08",
+      "company": "Pearson",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4475731337/",
+      "location": "Remote",
+      "notes": "2026-10-08 自动提交；拒信日期 2026-10-14",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Specialist, Psychometrician"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-08",
+      "company": "Pave",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4477431497/",
+      "location": "San Francisco, CA",
+      "notes": "2026-10-08 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-14",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Data Scientist"
+    },
+    {
+      "applicationId": "R1002104",
+      "appliedDate": "2026-09-26",
+      "company": "Capital One",
+      "jobUrl": "",
+      "location": "",
+      "notes": "req R1002104；拒信日期 2026-10-15",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Associate, Data Scientist - Applied AI"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-07",
+      "company": "Lila Sciences",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4467462123/",
+      "location": "",
+      "notes": "拒信日期 2026-10-15",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Scientist II / Senior Scientist, BioML"
+    },
+    {
+      "applicationId": "2273430550",
+      "appliedDate": "2026-10-10",
+      "company": "MongoDB",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4413123345/",
+      "location": "Palo Alto, CA",
+      "notes": "2026-10-10 自动提交（Greenhouse）；拒信日期 2026-10-15（拒信未写岗位，按名下唯一 MongoDB 申请对应）",
+      "source": "Muse 求职助手",
+      "status": "拒绝",
+      "title": "Senior Research Scientist"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-12T13:41:43-05:00",
+  "updated_at": "2026-10-15",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
