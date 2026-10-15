@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-10-14T15:01:43.868435+00:00",
+  "generated_at": "2026-10-15T14:55:07.628221+00:00",
   "state": "warning",
-  "imported": 587,
-  "fetched": 300,
+  "imported": 584,
+  "fetched": 315,
   "failed_source_count": 32,
   "company_attempted": 176,
   "company_succeeded": 144,
