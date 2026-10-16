@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-10-15T14:55:06.246166+00:00",
+  "run_started_at": "2026-10-16T14:50:02.092979+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 33,
+    "us_jobs_verified_latest.json": 39,
     "china_jobs_latest.json": 0,
     "cloud_sources_jobs_latest.json": 1,
     "aggregator_jobs_verified_latest.json": 239,
     "company_portal_jobs_latest.json": 42
   },
-  "fetched": 315,
-  "verified_or_open": 81,
+  "fetched": 321,
+  "verified_or_open": 82,
   "rejected": 10,
-  "deduplicated": 10,
-  "imported": 584,
-  "new": 25,
-  "updated_or_unchanged": 270,
-  "temporarily_retained": 289,
-  "pruned_as_stale": 28,
-  "no_longer_seen": 317,
+  "deduplicated": 8,
+  "imported": 583,
+  "new": 26,
+  "updated_or_unchanged": 277,
+  "temporarily_retained": 280,
+  "pruned_as_stale": 27,
+  "no_longer_seen": 307,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -85,7 +85,19 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "source": "company_portal:DRW",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:Fenix Group",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:Microsoft Health & Life Sciences",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:IMC Trading",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -93,16 +105,12 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Microsoft Health & Life Sciences",
+      "source": "company_portal:Meta",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Eikon Therapeutics",
+      "source": "company_portal:Millennium Management",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:IMC Trading",
-      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:NERA Economic Consulting",
@@ -113,20 +121,16 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:DRW",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
+      "source": "company_portal:SystImmune",
+      "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:SystImmune",
+      "source": "company_portal:Too Good To Go",
       "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Precision Medicine Group",
       "error": "<urlopen error [Errno -2] Name or service not known>"
-    },
-    {
-      "source": "company_portal:Too Good To Go",
-      "error": "HTTP Error 404: Not Found"
     },
     {
       "source": "company_portal:Putnam (Inizio Ignite)",
@@ -137,11 +141,7 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Meta",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Millennium Management",
+      "source": "company_portal:Eikon Therapeutics",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
