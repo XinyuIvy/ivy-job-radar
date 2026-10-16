@@ -1249,9 +1249,18 @@
       "source": "Muse 求职助手",
       "status": "拒绝",
       "title": "Senior Research Scientist"
+    },
+    {
+      "company": "Flow Traders",
+      "title": "PhD Graduate Quantitative Researcher",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-16（手动申请补录）",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-16T12:46:23-05:00",
+  "updated_at": "2026-10-16T12:46:36-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
