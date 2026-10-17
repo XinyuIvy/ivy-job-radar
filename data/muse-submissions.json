@@ -1258,9 +1258,81 @@
       "status": "拒绝",
       "notes": "拒信日期 2026-10-16（手动申请补录）",
       "link": ""
+    },
+    {
+      "company": "Danaher",
+      "title": "Lead AI Scientist",
+      "applicationId": "R1319117",
+      "appliedDate": "2026-10-10",
+      "status": "拒绝",
+      "notes": "Boston, MA；2026-10-10 提交（Workday 确认页已核，Job_Application_ID=ca0d0a8ca69d90002f597545d82b0000）；拒信日期 2026-10-15",
+      "link": "https://www.linkedin.com/jobs/view/4475242868/"
+    },
+    {
+      "company": "BetterHelp",
+      "title": "Data Scientist",
+      "applicationId": "greenhouse-5268359008",
+      "appliedDate": "2026-10-13",
+      "status": "拒绝",
+      "notes": "US Remote；2026-10-13 用户手动完成最终提交、确认页已核（自申 #107）；拒信日期 2026-10-15",
+      "link": "https://job-boards.greenhouse.io/betterhelpcom/jobs/5268359008"
+    },
+    {
+      "company": "Revolution Medicines",
+      "title": "Machine Learning Scientist II",
+      "applicationId": "greenhouse-8020357003",
+      "appliedDate": "2026-10-09",
+      "status": "拒绝",
+      "notes": "San Francisco Bay Area Hybrid；2026-10-09 提交（Greenhouse 确认页已核）；拒信日期 2026-10-16",
+      "link": "https://www.linkedin.com/jobs/view/4476845796/"
+    },
+    {
+      "company": "insitro",
+      "title": "Senior Data Scientist, CompBio",
+      "applicationId": "ashby-ec4a278a-dd78-4e9c-a203-87e3e2f59e60",
+      "appliedDate": "2026-10-11",
+      "status": "拒绝",
+      "notes": "South San Francisco, CA Hybrid；2026-10-11 提交（Ashby）；拒信日期 2026-10-16",
+      "link": "https://jobs.ashbyhq.com/insitro/ec4a278a-dd78-4e9c-a203-87e3e2f59e60/application"
+    },
+    {
+      "company": "Novartis",
+      "title": "AI/ML for Biology Scientist",
+      "applicationId": "REQ-10089087",
+      "appliedDate": "2026-10-15",
+      "status": "拒绝",
+      "notes": "La Jolla, CA；2026-10-15 提交（Workday Screening Phase In Process）；拒信日期 2026-10-16",
+      "link": ""
+    },
+    {
+      "company": "Novartis",
+      "title": "Scientific AI Platform Lead, Data Science, Disease Area X",
+      "applicationId": "REQ-10088821",
+      "appliedDate": "2026-10-16",
+      "status": "拒绝",
+      "notes": "Cambridge, MA；2026-10-16 提交（08:33 确认邮件），同日 08:52 收到拒信；拒信日期 2026-10-16",
+      "link": ""
+    },
+    {
+      "company": "Genentech",
+      "title": "Senior Data Scientist (AI-assisted Clinical Development)",
+      "applicationId": "202610-125652",
+      "appliedDate": "2026-10-15",
+      "status": "拒绝",
+      "notes": "Boston, MA；2026-10-15 提交（成功页已核，自申 #250）；拒信日期 2026-10-16（Roche Workday 发出）",
+      "link": "https://careers.gene.com/us/en/job/GENEUS202610125652EXTERNALENUS"
+    },
+    {
+      "company": "Man Group",
+      "title": "Quant Researcher",
+      "applicationId": "linkedin-4479832183",
+      "appliedDate": "2026-10-15",
+      "status": "拒绝",
+      "notes": "New York, NY，Strategic Alpha Research；2026-10-15 LinkedIn Easy Apply 提交；同雇主另两份申请（QR-Equities 4471273455、Junior Quant 4477658881）此前已分别拒信归档，本封按排除法归属本单；拒信日期 2026-10-16",
+      "link": "https://www.linkedin.com/jobs/view/4479832183/"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-16T12:46:36-05:00",
+  "updated_at": "2026-10-17T01:36:19-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
