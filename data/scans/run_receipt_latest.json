@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-10-16T14:50:02.092979+00:00",
+  "run_started_at": "2026-10-17T13:38:20.389435+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 39,
+    "us_jobs_verified_latest.json": 27,
     "china_jobs_latest.json": 0,
-    "cloud_sources_jobs_latest.json": 1,
+    "cloud_sources_jobs_latest.json": 0,
     "aggregator_jobs_verified_latest.json": 239,
-    "company_portal_jobs_latest.json": 42
+    "company_portal_jobs_latest.json": 43
   },
-  "fetched": 321,
+  "fetched": 309,
   "verified_or_open": 82,
   "rejected": 10,
   "deduplicated": 8,
-  "imported": 583,
-  "new": 26,
+  "imported": 584,
+  "new": 14,
   "updated_or_unchanged": 277,
-  "temporarily_retained": 280,
-  "pruned_as_stale": 27,
-  "no_longer_seen": 307,
+  "temporarily_retained": 293,
+  "pruned_as_stale": 13,
+  "no_longer_seen": 306,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -31,6 +31,10 @@
     {
       "source": "company_portal:Evidera",
       "error": "HTTP 202"
+    },
+    {
+      "source": "company_portal:Sage Therapeutics",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
       "source": "company_portal:Flatiron Health",
@@ -57,10 +61,6 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Sage Therapeutics",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Hologic",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
@@ -78,10 +78,18 @@
     },
     {
       "source": "company_portal:1910 Genetics",
-      "error": "HTTP Error 404: Not Found"
+      "error": "HTTP Error 403: Forbidden"
     },
     {
       "source": "company_portal:Qure.ai",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:DoubleVerify",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "source": "company_portal:Fenix Group",
       "error": "HTTP Error 404: Not Found"
     },
     {
@@ -89,11 +97,7 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Fenix Group",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "source": "company_portal:Microsoft Health & Life Sciences",
+      "source": "company_portal:Eikon Therapeutics",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -101,15 +105,11 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
+      "source": "company_portal:Microsoft Health & Life Sciences",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
       "source": "company_portal:Eli Lilly and Company",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Meta",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
-      "source": "company_portal:Millennium Management",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -141,7 +141,11 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Eikon Therapeutics",
+      "source": "company_portal:Meta",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Millennium Management",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
