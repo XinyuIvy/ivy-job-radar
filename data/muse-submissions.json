@@ -196,10 +196,10 @@
       "company": "Uber",
       "jobUrl": "https://www.uber.com/careers/",
       "location": "",
-      "notes": "2026-09-26 经她授权代提交；确认页 Thank you for your job application；状态 Under Consideration；收到确认邮件",
+      "notes": "2026-09-26 经她授权代提交；确认页 Thank you for your job application；状态 Under Consideration；收到确认邮件；拒信日期 2026-10-17",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Scientist II, Marketplace"
     },
     {
@@ -1333,6 +1333,6 @@
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-17T01:36:19-05:00",
+  "updated_at": "2026-10-18T07:26:10-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
