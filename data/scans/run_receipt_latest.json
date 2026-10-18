@@ -1,23 +1,23 @@
 {
-  "run_started_at": "2026-10-17T13:38:20.389435+00:00",
+  "run_started_at": "2026-10-18T13:58:30.945935+00:00",
   "terminal_state": "completed",
   "source_counts": {
-    "us_jobs_verified_latest.json": 27,
+    "us_jobs_verified_latest.json": 34,
     "china_jobs_latest.json": 0,
-    "cloud_sources_jobs_latest.json": 0,
+    "cloud_sources_jobs_latest.json": 1,
     "aggregator_jobs_verified_latest.json": 239,
     "company_portal_jobs_latest.json": 43
   },
-  "fetched": 309,
-  "verified_or_open": 82,
-  "rejected": 10,
+  "fetched": 317,
+  "verified_or_open": 80,
+  "rejected": 9,
   "deduplicated": 8,
-  "imported": 584,
-  "new": 14,
-  "updated_or_unchanged": 277,
-  "temporarily_retained": 293,
-  "pruned_as_stale": 13,
-  "no_longer_seen": 306,
+  "imported": 588,
+  "new": 24,
+  "updated_or_unchanged": 276,
+  "temporarily_retained": 288,
+  "pruned_as_stale": 20,
+  "no_longer_seen": 308,
   "stale_policy_days": 14,
   "failed_sources": [
     {
@@ -105,10 +105,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:Microsoft Health & Life Sciences",
-      "error": "Career page loaded, but no ATS or job listing structure was identified."
-    },
-    {
       "source": "company_portal:Eli Lilly and Company",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
@@ -121,14 +117,6 @@
       "error": "HTTP Error 404: Not Found"
     },
     {
-      "source": "company_portal:SystImmune",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
-      "source": "company_portal:Too Good To Go",
-      "error": "HTTP Error 404: Not Found"
-    },
-    {
       "source": "company_portal:Precision Medicine Group",
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
@@ -137,7 +125,19 @@
       "error": "<urlopen error [Errno -2] Name or service not known>"
     },
     {
+      "source": "company_portal:Too Good To Go",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "source": "company_portal:SystImmune",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
       "source": "company_portal:Two Sigma",
+      "error": "Career page loaded, but no ATS or job listing structure was identified."
+    },
+    {
+      "source": "company_portal:Millennium Management",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
@@ -145,7 +145,7 @@
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
-      "source": "company_portal:Millennium Management",
+      "source": "company_portal:Microsoft Health & Life Sciences",
       "error": "Career page loaded, but no ATS or job listing structure was identified."
     },
     {
