@@ -1330,9 +1330,27 @@
       "status": "拒绝",
       "notes": "New York, NY，Strategic Alpha Research；2026-10-15 LinkedIn Easy Apply 提交；同雇主另两份申请（QR-Equities 4471273455、Junior Quant 4477658881）此前已分别拒信归档，本封按排除法归属本单；拒信日期 2026-10-16",
       "link": "https://www.linkedin.com/jobs/view/4479832183/"
+    },
+    {
+      "company": "IQVIA",
+      "title": "FSP Principal Biostatistician, Study Powering and Design",
+      "applicationId": "R1572965",
+      "appliedDate": "2026-10-15",
+      "status": "拒绝",
+      "notes": "Durham NC (remote US)；2026-10-15 提交（TRIAGED §2，#187，CV Biostatistician）；拒信 2026-10-17 04:46（iqvia@myworkday.com，主题作 R1572965 FSP Principal Biostatistician, Phase 2 and 3）；拒信日期 2026-10-17",
+      "link": "https://www.linkedin.com/jobs/view/4475460491/"
+    },
+    {
+      "company": "AtriCure",
+      "title": "Senior Principal Statistician",
+      "applicationId": "",
+      "appliedDate": "2026-10-07",
+      "status": "拒绝",
+      "notes": "Remote US；2026-10-07 提交（LinkedIn Easy Apply，确认页已核，TRIAGED §2）；拒信 2026-10-17 14:03（no-reply@atricure.com）；拒信日期 2026-10-17",
+      "link": "https://www.linkedin.com/jobs/view/4459197347/"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-18T07:26:10-05:00",
+  "updated_at": "2026-10-18T07:26:22-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
