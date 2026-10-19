@@ -1375,9 +1375,18 @@
       "status": "拒绝",
       "notes": "Remote US；2026-10-16 提交（TRIAGED §2，Greenhouse 6004385004，确认邮件已收）；拒信 2026-10-18 10:00（no-reply@natera.com，主题 Important information about your application to Natera，正文 decided to move forward with other candidates；该公司唯一已提交 req 即本岗）；拒信日期 2026-10-18",
       "link": ""
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "",
+      "company": "Eli Lilly",
+      "link": "",
+      "notes": "拒信日期 2026-10-17（手动申请补录）；lilly@myworkday.com 2026-10-17 06:46 拒信：We have decided to pursue other candidate(s) at this time；JSON 中无对应条目（名下另有 R-112033/R-110351/R-112031 三条不同岗位）",
+      "status": "拒绝",
+      "title": "Sr. Advisor - Statistics (RWE)"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-19T01:56:58-05:00",
+  "updated_at": "2026-10-19T02:30:35-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
