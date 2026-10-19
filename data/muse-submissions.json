@@ -1348,9 +1348,36 @@
       "status": "拒绝",
       "notes": "Remote US；2026-10-07 提交（LinkedIn Easy Apply，确认页已核，TRIAGED §2）；拒信 2026-10-17 14:03（no-reply@atricure.com）；拒信日期 2026-10-17",
       "link": "https://www.linkedin.com/jobs/view/4459197347/"
+    },
+    {
+      "company": "BlackEdge Capital",
+      "title": "Graduate Quantitative Researcher 2027",
+      "applicationId": "4732320005",
+      "appliedDate": "2026-10-17",
+      "status": "已申请",
+      "notes": "Chicago, IL；2026-10-17 提交（TRIAGED §2 pipeline，成功页已核，简历 resume_quant_research.pdf）；拒信 2026-10-18 07:30（no-reply@us.greenhouse-mail.io，主题 BlackEdge Capital Update，正文称不提供 visa assistance、unable to move forward）",
+      "link": "https://job-boards.greenhouse.io/blackedgecapital/jobs/4732320005"
+    },
+    {
+      "company": "Eikon Therapeutics",
+      "title": "Scientist, Computational Biology",
+      "applicationId": "5248834007",
+      "appliedDate": "2026-10-16",
+      "status": "已申请",
+      "notes": "Millbrae CA；2026-10-16 提交（TRIAGED §2，CV AIDD）；拒信 2026-10-18 08:30（no-reply@us.greenhouse-mail.io，主题 Application Update: Scientist, Computational Biology at Eikon Therapeutics，正文 we will not be progressing your candidacy）",
+      "link": ""
+    },
+    {
+      "company": "Natera",
+      "title": "Machine Learning Scientist, Multimodal AI",
+      "applicationId": "6004385004",
+      "appliedDate": "2026-10-16",
+      "status": "已申请",
+      "notes": "Remote US；2026-10-16 提交（TRIAGED §2，Greenhouse 6004385004，确认邮件已收）；拒信 2026-10-18 10:00（no-reply@natera.com，主题 Important information about your application to Natera，正文 decided to move forward with other candidates；该公司唯一已提交 req 即本岗）",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-18T07:26:22-05:00",
+  "updated_at": "2026-10-19T01:56:55-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
