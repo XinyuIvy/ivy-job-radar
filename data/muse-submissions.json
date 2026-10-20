@@ -1384,9 +1384,53 @@
       "notes": "拒信日期 2026-10-17（手动申请补录）；lilly@myworkday.com 2026-10-17 06:46 拒信：We have decided to pursue other candidate(s) at this time；JSON 中无对应条目（名下另有 R-112033/R-110351/R-112031 三条不同岗位）",
       "status": "拒绝",
       "title": "Sr. Advisor - Statistics (RWE)"
+    },
+    {
+      "company": "Johnson & Johnson",
+      "title": "Senior Scientist, AI Lead",
+      "applicationId": "R-102296",
+      "appliedDate": "2026-10-18",
+      "status": "已申请",
+      "location": "",
+      "jobUrl": "",
+      "source": "Muse 求职助手",
+      "notes": "2026-10-18 提交（TRIAGED §2 清单渠道，Workday）；拒信 2026-10-19 14:11 jj@myworkday.com，正文 you were not selected for the role"
+    },
+    {
+      "company": "Veeva Systems",
+      "title": "Senior Data Analyst",
+      "applicationId": "e38ab928-18d3-4907-901e-e3dc889aab1c",
+      "appliedDate": "2026-10-17",
+      "status": "已申请",
+      "location": "Boston / Remote US",
+      "jobUrl": "",
+      "source": "Muse 求职助手",
+      "notes": "2026-10-17 提交（TRIAGED §2 清单 #88，Lever 成功页已核）；拒信 2026-10-19 13:45 via Lever，正文 after careful consideration, we have decided not to move forward"
+    },
+    {
+      "company": "Blue Cross Blue Shield of Michigan",
+      "title": "Biostatistician",
+      "applicationId": "14937",
+      "appliedDate": "2026-10-14",
+      "status": "已申请",
+      "location": "Detroit, MI",
+      "jobUrl": "https://ejko.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_3/job/14937",
+      "source": "Muse 求职助手",
+      "notes": "2026-10-14 提交（TRIAGED §2 #348，Oracle 14937，10-15 登录核实已投）；拒信 2026-10-19 09:18 Oracle workflow，正文 moving forward with other candidates（岗位 Biostatistician - 14937）"
+    },
+    {
+      "company": "Sanofi",
+      "title": "E4A Systemic Mastocytosis/Emerging Indication HEOR Strategy Specialist",
+      "applicationId": "R2872719",
+      "appliedDate": "2026-10-10",
+      "status": "已申请",
+      "location": "Cambridge, MA / Morristown, NJ",
+      "jobUrl": "",
+      "source": "Muse 求职助手",
+      "notes": "2026-10-10 提交（TRIAGED §2，Workday 确认页已核）；拒信 2026-10-19 02:23 Sanofi@myworkday.com（req R2872719），正文 after careful consideration, we have decided not to proceed with your candidacy"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-19T02:30:35-05:00",
+  "updated_at": "2026-10-20T00:40:32-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
