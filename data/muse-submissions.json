@@ -148,10 +148,10 @@
       "company": "Citadel",
       "jobUrl": "https://www.citadel.com/careers/",
       "location": "Miami, FL",
-      "notes": "2026-09-26 经她授权代点 Submit；确认页 Thank You / You've already applied；本科入学年份用了2019（正确为2017）",
+      "notes": "2026-09-26 经她授权代点 Submit；确认页 Thank You / You've already applied；本科入学年份用了2019（正确为2017）；拒信日期 2026-10-19",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Quantitative Researcher, PhD Graduate"
     },
     {
@@ -160,10 +160,10 @@
       "company": "Citadel Securities",
       "jobUrl": "https://www.citadelsecurities.com/careers/",
       "location": "New York, NY",
-      "notes": "2026-09-26 她接管时亲自提交；确认页 Thank You — You've already applied",
+      "notes": "2026-09-26 她接管时亲自提交；确认页 Thank You — You've already applied；拒信日期 2026-10-19",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Quantitative Researcher, PhD Graduate"
     },
     {
@@ -1390,47 +1390,47 @@
       "title": "Senior Scientist, AI Lead",
       "applicationId": "R-102296",
       "appliedDate": "2026-10-18",
-      "status": "已申请",
+      "status": "拒绝",
       "location": "",
       "jobUrl": "",
       "source": "Muse 求职助手",
-      "notes": "2026-10-18 提交（TRIAGED §2 清单渠道，Workday）；拒信 2026-10-19 14:11 jj@myworkday.com，正文 you were not selected for the role"
+      "notes": "2026-10-18 提交（TRIAGED §2 清单渠道，Workday）；拒信 2026-10-19 14:11 jj@myworkday.com，正文 you were not selected for the role；拒信日期 2026-10-19"
     },
     {
       "company": "Veeva Systems",
       "title": "Senior Data Analyst",
       "applicationId": "e38ab928-18d3-4907-901e-e3dc889aab1c",
       "appliedDate": "2026-10-17",
-      "status": "已申请",
+      "status": "拒绝",
       "location": "Boston / Remote US",
       "jobUrl": "",
       "source": "Muse 求职助手",
-      "notes": "2026-10-17 提交（TRIAGED §2 清单 #88，Lever 成功页已核）；拒信 2026-10-19 13:45 via Lever，正文 after careful consideration, we have decided not to move forward"
+      "notes": "2026-10-17 提交（TRIAGED §2 清单 #88，Lever 成功页已核）；拒信 2026-10-19 13:45 via Lever，正文 after careful consideration, we have decided not to move forward；拒信日期 2026-10-19"
     },
     {
       "company": "Blue Cross Blue Shield of Michigan",
       "title": "Biostatistician",
       "applicationId": "14937",
       "appliedDate": "2026-10-14",
-      "status": "已申请",
+      "status": "拒绝",
       "location": "Detroit, MI",
       "jobUrl": "https://ejko.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_3/job/14937",
       "source": "Muse 求职助手",
-      "notes": "2026-10-14 提交（TRIAGED §2 #348，Oracle 14937，10-15 登录核实已投）；拒信 2026-10-19 09:18 Oracle workflow，正文 moving forward with other candidates（岗位 Biostatistician - 14937）"
+      "notes": "2026-10-14 提交（TRIAGED §2 #348，Oracle 14937，10-15 登录核实已投）；拒信 2026-10-19 09:18 Oracle workflow，正文 moving forward with other candidates（岗位 Biostatistician - 14937）；拒信日期 2026-10-19"
     },
     {
       "company": "Sanofi",
       "title": "E4A Systemic Mastocytosis/Emerging Indication HEOR Strategy Specialist",
       "applicationId": "R2872719",
       "appliedDate": "2026-10-10",
-      "status": "已申请",
+      "status": "拒绝",
       "location": "Cambridge, MA / Morristown, NJ",
       "jobUrl": "",
       "source": "Muse 求职助手",
-      "notes": "2026-10-10 提交（TRIAGED §2，Workday 确认页已核）；拒信 2026-10-19 02:23 Sanofi@myworkday.com（req R2872719），正文 after careful consideration, we have decided not to proceed with your candidacy"
+      "notes": "2026-10-10 提交（TRIAGED §2，Workday 确认页已核）；拒信 2026-10-19 02:23 Sanofi@myworkday.com（req R2872719），正文 after careful consideration, we have decided not to proceed with your candidacy；拒信日期 2026-10-19"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-20T00:40:32-05:00",
+  "updated_at": "2026-10-20T00:40:52-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
