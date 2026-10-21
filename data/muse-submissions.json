@@ -1428,9 +1428,141 @@
       "jobUrl": "",
       "source": "Muse 求职助手",
       "notes": "2026-10-10 提交（TRIAGED §2，Workday 确认页已核）；拒信 2026-10-19 02:23 Sanofi@myworkday.com（req R2872719），正文 after careful consideration, we have decided not to proceed with your candidacy；拒信日期 2026-10-19"
+    },
+    {
+      "applicationId": "4475621984",
+      "appliedDate": "2026-10-11",
+      "company": "Domino's",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4475621984/",
+      "location": "Ann Arbor, MI",
+      "notes": "2026-10-11 提交（seen_jobs 记录，LinkedIn Easy Apply 确认页 Application submitted）；拒信 2026-10-20 08:36 notifications@smartrecruiters.com，正文 will not be moving forward with your application",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Data Scientist"
+    },
+    {
+      "applicationId": "R-795276",
+      "appliedDate": "2026-10-13",
+      "company": "State Street",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4478571116/",
+      "location": "Stamford, CT",
+      "notes": "2026-10-13 提交（TRIAGED §2，确认页 Application Submitted，Candidate Home Application Received）；拒信 2026-10-20 16:20 statestreet@myworkday.com，正文 decided not to move forward with your application",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Market Risk Stress Testing and Scenario Design"
+    },
+    {
+      "applicationId": "R00151760",
+      "appliedDate": "2026-10-15",
+      "company": "AbbVie",
+      "jobUrl": "",
+      "location": "North Chicago, IL",
+      "notes": "2026-10-15 提交（TRIAGED §2，SmartRecruiters 3743990015995376）；拒信 2026-10-20 12:15 notifications@talentacquisition.abbvie.com，正文 after careful consideration... move forward with other candidates",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Manager, Statistics - Oncology (Hybrid)"
+    },
+    {
+      "applicationId": "R00149942",
+      "appliedDate": "2026-10-15",
+      "company": "AbbVie",
+      "jobUrl": "https://jobs.smartrecruiters.com/AbbVie/3743990016149987-senior-research-statistician-statistical-innovation-hybrid-",
+      "location": "North Chicago, IL",
+      "notes": "2026-10-15 提交（TRIAGED §2，SmartRecruiters 成功页 Application submitted）；拒信 2026-10-20 12:05 notifications@talentacquisition.abbvie.com，正文 after careful consideration... move forward with other candidates",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Senior Research Statistician - Statistical Innovation (Hybrid)"
+    },
+    {
+      "applicationId": "R-1672",
+      "appliedDate": "2026-10-15",
+      "company": "Denali Therapeutics",
+      "jobUrl": "",
+      "location": "South San Francisco, CA",
+      "notes": "2026-10-15 提交（TRIAGED §2 pipeline，Workday My Applications Active）；拒信 2026-10-20 02:07 dnli@myworkday.com，正文 after careful consideration we are moving forward with candidates whose skills align more closely",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Senior Biostatistician"
+    },
+    {
+      "applicationId": "JR17486",
+      "appliedDate": "2026-10-12",
+      "company": "Freddie Mac",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4453270106/",
+      "location": "McLean, VA",
+      "notes": "2026-10-12 提交（TRIAGED §2，官网确认页 Thank you for applying）；拒信 2026-10-20 07:08 freddiemac@myworkday.com，正文 hiring team has decided to move forward with another candidate",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Quantitative Analytics Senior"
+    },
+    {
+      "applicationId": "7206325",
+      "appliedDate": "2026-10-18",
+      "company": "BGBx Consulting",
+      "jobUrl": "",
+      "location": "Washington, DC / NYC / Boston",
+      "notes": "Kx Advisors（BGBx Consulting）TRIAGED #363，2026-10-18 提交（Greenhouse 7206325 确认页）；拒信 2026-10-20 08:00 no-reply@bgbgroup.com，正文 decided not to move forward with your candidacy",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Consultant"
+    },
+    {
+      "applicationId": "210781710",
+      "appliedDate": "2026-10-17",
+      "company": "JPMorgan Chase",
+      "jobUrl": "",
+      "location": "",
+      "notes": "TRIAGED #182，2026-10-17 提交（My Applications Under Consideration，Applied on 10/17/2026）；拒信 2026-10-20 09:05 Oracle workflow（Job number 210781710），正文 moving forward with other candidates",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Quant Analytics Associate"
+    },
+    {
+      "applicationId": "8730538002",
+      "appliedDate": "2026-10-14",
+      "company": "Komodo Health",
+      "jobUrl": "https://job-boards.greenhouse.io/komodohealth/jobs/8730538002",
+      "location": "US Remote",
+      "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-19 15:45 no-reply@us.greenhouse-mail.io，正文未点名岗位（decided not to proceed with your candidacy for that position），按唯一 Komodo 在途申请对应本岗",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Senior Consultant, Analytics Consulting"
+    },
+    {
+      "applicationId": "",
+      "appliedDate": "2026-10-08",
+      "company": "Abridge",
+      "jobUrl": "https://jobs.ashbyhq.com/Abridge/03a3231f-8361-405e-87a6-192d710ca912/application",
+      "location": "New York, NY",
+      "notes": "2026-10-08 提交（TRIAGED §2）；拒信 2026-10-19 13:08 no-reply@ashbyhq.com，正文 decided not to proceed with your candidacy",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Member of Technical Staff, Research Science"
+    },
+    {
+      "applicationId": "R-260596",
+      "appliedDate": "2026-10-15",
+      "company": "AstraZeneca (Alexion)",
+      "jobUrl": "",
+      "location": "Boston, MA",
+      "notes": "2026-10-15 提交（TRIAGED §2 pipeline，Eightfold pid 563877691554470）；拒信 2026-10-19 08:02 noreply@az-recruitment.com（Alexion 名义），正文 decided not to proceed with your application。与 Radar 既有 Senior Manager, Biostatistics（2026-09-26）为不同 req",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Senior Biostatistician"
+    },
+    {
+      "applicationId": "R-257153",
+      "appliedDate": "2026-10-15",
+      "company": "Amgen",
+      "jobUrl": "https://amgen.wd1.myworkdayjobs.com/Careers/job/United-States---Remote/Observational-Research-Manager---Inflammation---Rare-Disease_R-257153",
+      "location": "Remote, US",
+      "notes": "2026-10-15 提交（TRIAGED §2 pipeline 对应 #146，Workday Candidate Home Application Received）；拒信 2026-10-20 02:12 amgen@myworkday.com，正文 decided to move forward with candidates whose background is a better match",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Observational Research Manager - Inflammation / Rare Disease"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-20T00:40:52-05:00",
+  "updated_at": "2026-10-21T04:57:55-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
