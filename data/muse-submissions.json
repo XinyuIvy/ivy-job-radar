@@ -184,10 +184,10 @@
       "company": "SIG (Susquehanna)",
       "jobUrl": "https://careers.sig.com/",
       "location": "",
-      "notes": "2026-09-26 任务在Step 2误点Submit直接提交；她说没事不撤回；收到账号设置邮件",
+      "notes": "2026-09-26 任务在Step 2误点Submit直接提交；她说没事不撤回；收到账号设置邮件；拒信日期 2026-10-21",
       "resumeVersion": "resume_quant_research.pdf",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Quantitative Researcher – PhD: 2027"
     },
     {
@@ -1639,9 +1639,9 @@
       "company": "Datadog",
       "jobUrl": "https://careers.datadoghq.com/detail/8164181/?gh_jid=8164181",
       "location": "New York, NY",
-      "notes": "2026-10-10 提交（TRIAGED §2，官方 req R5560/Greenhouse 8164181，确认页 Thank you for applying）；拒信 2026-10-21 07:18 no-reply@datadoghq.com，正文 decided not to move forward with your application",
+      "notes": "2026-10-10 提交（TRIAGED §2，官方 req R5560/Greenhouse 8164181，确认页 Thank you for applying）；拒信 2026-10-21 07:18 no-reply@datadoghq.com，正文 decided not to move forward with your application；拒信日期 2026-10-21",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Senior Applied Scientist"
     },
     {
@@ -1650,9 +1650,9 @@
       "company": "Duolingo",
       "jobUrl": "https://job-boards.greenhouse.io/duolingounirecruitment/jobs/8883870002",
       "location": "Pittsburgh, PA / New York, NY",
-      "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-21 13:40 jaylyn@duolingo.com，正文点名 AI Research Engineer, New PhD Graduate，decided not to move forward。与 Radar 既有 Staff AI Research Engineer（2026-10-04 已拒）为不同岗位",
+      "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-21 13:40 jaylyn@duolingo.com，正文点名 AI Research Engineer, New PhD Graduate，decided not to move forward。与 Radar 既有 Staff AI Research Engineer（2026-10-04 已拒）为不同岗位；拒信日期 2026-10-21",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "AI Research Engineer, New PhD Graduate"
     },
     {
@@ -1661,9 +1661,9 @@
       "company": "Cambia Health Solutions",
       "jobUrl": "https://cambiahealth.wd504.myworkdayjobs.com/en-US/External/job/Salt-Lake-City%2C-UT/Healthcare-Decision-Scientist_R-6849/apply",
       "location": "Salt Lake City, UT",
-      "notes": "2026-10-18 提交（TRIAGED §2 #68，Workday 成功对话框 Application Submitted，Candidate Home In Process）；拒信 2026-10-21 14:22 cambiahealth@myworkday.com，正文点名 Healthcare Decision Scientist，other candidates better meet the current needs",
+      "notes": "2026-10-18 提交（TRIAGED §2 #68，Workday 成功对话框 Application Submitted，Candidate Home In Process）；拒信 2026-10-21 14:22 cambiahealth@myworkday.com，正文点名 Healthcare Decision Scientist，other candidates better meet the current needs；拒信日期 2026-10-21",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Healthcare Decision Scientist"
     },
     {
@@ -1672,13 +1672,13 @@
       "company": "Genentech",
       "jobUrl": "",
       "location": "South San Francisco, CA",
-      "notes": "2026-10-15 提交（TRIAGED §2，req 202607-119719，确认页 offline-success）；拒信 2026-10-21 17:36 Roche-Workday-DoNotReply@roche.com，岗位名 Senior Machine Learning Scientist, AI for Biology & Translation (AIBT)，正文 decided to move ahead with other candidates；按 §2 唯一 AIBT 申请对应本条",
+      "notes": "2026-10-15 提交（TRIAGED §2，req 202607-119719，确认页 offline-success）；拒信 2026-10-21 17:36 Roche-Workday-DoNotReply@roche.com，岗位名 Senior Machine Learning Scientist, AI for Biology & Translation (AIBT)，正文 decided to move ahead with other candidates；按 §2 唯一 AIBT 申请对应本条；拒信日期 2026-10-21",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Senior ML Scientist, AI for Biology & Translation"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-22T16:14:50-05:00",
+  "updated_at": "2026-10-22T16:15:11-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
