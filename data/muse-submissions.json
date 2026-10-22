@@ -1676,9 +1676,99 @@
       "source": "Muse 求职助手",
       "status": "拒绝",
       "title": "Senior ML Scientist, AI for Biology & Translation"
+    },
+    {
+      "company": "AstraZeneca",
+      "title": "Senior Statistician II (R-261294)",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：chosen to interview other candidates",
+      "link": ""
+    },
+    {
+      "company": "AstraZeneca",
+      "title": "Senior Statistician (R-255015)",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信（西英双语）：chosen to interview other candidates",
+      "link": ""
+    },
+    {
+      "company": "AstraZeneca",
+      "title": "Senior Statistician",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；az-recruitment 拒信：decided not to proceed；邮件未给 req，可能与 R-261294/R-255015 之一对应",
+      "link": ""
+    },
+    {
+      "company": "Trinity Life Sciences",
+      "title": "岗位未注明（申请更新）",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：impressed but moving forward with other candidates；邮件未注明岗位",
+      "link": ""
+    },
+    {
+      "company": "Eli Lilly",
+      "title": "Applied AI Engineer, Clinical Informatics",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：pursue other candidates",
+      "link": ""
+    },
+    {
+      "company": "Regeneron",
+      "title": "Senior Quantitative Biomarker Scientist",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：decided to pursue other candidates",
+      "link": ""
+    },
+    {
+      "company": "Caris Life Sciences",
+      "title": "Data Scientist - Innovation - PhD",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：moving forward with other candidates",
+      "link": ""
+    },
+    {
+      "company": "Walmart",
+      "title": "Staff, Data Scientist",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；拒信：we have decided not to move forward with your application",
+      "link": ""
+    },
+    {
+      "company": "Caterpillar Inc.",
+      "title": "Senior Statistician – AI Product Assurance (R0000375085)",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：Unfortunately, our team did not select you",
+      "link": ""
+    },
+    {
+      "company": "MiniMed",
+      "title": "AI/Data Science Engineer II (R-802158)",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：decided to move forward with other candidates",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-22T16:15:11-05:00",
+  "updated_at": "2026-10-22T06:00:00-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
