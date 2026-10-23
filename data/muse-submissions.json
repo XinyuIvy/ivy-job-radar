@@ -1766,9 +1766,20 @@
       "status": "拒绝",
       "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：decided to move forward with other candidates",
       "link": ""
+    },
+    {
+      "applicationId": "req390",
+      "appliedDate": "2026-10-19",
+      "company": "Mathematica",
+      "jobUrl": "https://www.linkedin.com/jobs/view/4478611910/",
+      "location": "Princeton, NJ (Remote)",
+      "notes": "2026-10-19 提交（TRIAGED §2 pipeline，官方 Cornerstone req390，成功页 You have successfully applied；简历 resume_applied_scientist.pdf）；拒信 2026-10-22 15:56 aruedger@acceleratecontent.recruitmail.com，正文 will not be moving forward with your candidacy",
+      "source": "Muse 求职助手",
+      "status": "已申请",
+      "title": "Data Scientist (Remote Eligible)"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-23T00:32:07-05:00",
+  "updated_at": "2026-10-23T01:07:25-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
