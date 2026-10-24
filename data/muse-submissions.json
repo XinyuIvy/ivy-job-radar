@@ -1804,63 +1804,9 @@
       "status": "拒绝",
       "notes": "2026-10-15 提交（TRIAGED §2，Workday 提交成功，Candidate Home Application Received，手动申请补录）；拒信 2026-10-23 09:04 statestreet@myworkday.com，正文点名 Quantitative Analyst, Officer, Hybrid，decided not to move forward；与在途的 Quantitative Analyst AVP / Credit Risk Modeler (R-790888) 为不同岗位；拒信日期 2026-10-23",
       "link": "https://www.linkedin.com/jobs/view/4480189081/"
-    },
-    {
-      "company": "Milliman",
-      "title": "Health Research Analyst",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信（Milliman Recruiting，Milwaukee Health Practice）：another candidate whose background more closely aligns",
-      "link": ""
-    },
-    {
-      "company": "Nine Mile Financial",
-      "title": "Quantitative Research Intern 2026/2027",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-23（手动申请补录）；Nine M 拒信：will not be progressing your application",
-      "link": ""
-    },
-    {
-      "company": "Mariner",
-      "title": "Data Analyst, Business Intelligence",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-23（手动申请补录）；Mariner（Allison Pine）拒信：another candidate more closely aligned，Overland Park 岗",
-      "link": ""
-    },
-    {
-      "company": "Whoop",
-      "title": "Senior Research Scientist (Algorithms)",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-23（手动申请补录）；Whoop Talent Acquisition 拒信：decided not to move forward",
-      "link": ""
-    },
-    {
-      "company": "Headlands Technologies",
-      "title": "Quantitative Researcher (Python)",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-20（手动申请补录）；Greenhouse 拒信：decided not to move forward",
-      "link": ""
-    },
-    {
-      "company": "KKR",
-      "title": "Senior Research Analyst, Global Macro & Asset Allocation",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-20（手动申请补录）；KKR Recruiting 原文：unlikely to advance your candidacy at this time",
-      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-24T06:20:00-05:00",
-  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep：新增 6 条拒信（Milliman 10-22、Nine Mile Financial 10-23、Mariner 10-23、Whoop 10-23、Headlands Technologies 10-20、KKR 10-20，均为手动申请补录）。"
+  "updated_at": "2026-10-24T02:03:10-05:00",
+  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
