@@ -1777,9 +1777,36 @@
       "source": "Muse 求职助手",
       "status": "拒绝",
       "title": "Data Scientist (Remote Eligible)"
+    },
+    {
+      "company": "Amgen",
+      "title": "Data Scientist (R-246583)",
+      "applicationId": "R-246583",
+      "appliedDate": "2026-08-30",
+      "status": "拒绝",
+      "notes": "2026-08-30 提交（Amgen Workday Candidate Home Application Received，TRIAGED 去重记录在案，手动申请补录）；拒信 2026-10-23 02:13 amgen@myworkday.com，正文点名 Data Scientist，decided to move forward with candidates whose background is a better match；拒信日期 2026-10-23",
+      "link": "https://careers.amgen.com/en/job/washington/data-scientist/87/99087184432"
+    },
+    {
+      "company": "Lila Sciences",
+      "title": "Senior ML Scientist, Biological Systems",
+      "applicationId": "",
+      "appliedDate": "2026-10-07",
+      "status": "拒绝",
+      "notes": "2026-10-07 提交（TRIAGED §2，手动申请补录）；拒信 2026-10-23 09:45 no-reply@us.greenhouse-mail.io，正文点名 Senior ML Scientist, Biological Systems，decided not to move forward；拒信日期 2026-10-23",
+      "link": "https://www.linkedin.com/jobs/view/4467449291/"
+    },
+    {
+      "company": "State Street",
+      "title": "Quantitative Analyst, Officer (R-799704)",
+      "applicationId": "R-799704",
+      "appliedDate": "2026-10-15",
+      "status": "拒绝",
+      "notes": "2026-10-15 提交（TRIAGED §2，Workday 提交成功，Candidate Home Application Received，手动申请补录）；拒信 2026-10-23 09:04 statestreet@myworkday.com，正文点名 Quantitative Analyst, Officer, Hybrid，decided not to move forward；与在途的 Quantitative Analyst AVP / Credit Risk Modeler (R-790888) 为不同岗位；拒信日期 2026-10-23",
+      "link": "https://www.linkedin.com/jobs/view/4480189081/"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-23T01:07:28-05:00",
+  "updated_at": "2026-10-24T02:03:10-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
 }
