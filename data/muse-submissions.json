@@ -1804,9 +1804,54 @@
       "status": "拒绝",
       "notes": "2026-10-15 提交（TRIAGED §2，Workday 提交成功，Candidate Home Application Received，手动申请补录）；拒信 2026-10-23 09:04 statestreet@myworkday.com，正文点名 Quantitative Analyst, Officer, Hybrid，decided not to move forward；与在途的 Quantitative Analyst AVP / Credit Risk Modeler (R-790888) 为不同岗位；拒信日期 2026-10-23",
       "link": "https://www.linkedin.com/jobs/view/4480189081/"
+    },
+    {
+      "company": "东阳光",
+      "title": "计算化学研究员（CADD）",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-24（手动申请补录）；东阳光应聘反馈通知（noreply@italent.cn，10-24 02:50）：本岗位未能进入下一环节",
+      "link": ""
+    },
+    {
+      "company": "Roche",
+      "title": "RWD Data Scientist",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；Roche Workday 拒信（10-22 17:36）：move ahead with other candidates",
+      "link": ""
+    },
+    {
+      "company": "Roche",
+      "title": "Biostatistician/Data Scientist in Personalized Healthcare",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；Roche Workday 拒信（10-22 17:36）：move ahead with other candidates",
+      "link": ""
+    },
+    {
+      "company": "Eikon Therapeutics",
+      "title": "Manager, Biostatistics",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-22（手动申请补录）；Eikon 更新（10-22 10:45）：position has now been filled, requisition closed；与 Scientist, Computational Biology（10-18 拒绝）为不同岗位",
+      "link": ""
+    },
+    {
+      "company": "Eli Lilly",
+      "title": "Campus: Research Advisor - Statistics",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-24（手动申请补录）；Eli Lilly Application Update（10-24 00:04）：pursue other candidates",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-24T02:03:10-05:00",
-  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。"
+  "updated_at": "2026-10-24T07:00:00-05:00",
+  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
