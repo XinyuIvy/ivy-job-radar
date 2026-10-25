@@ -1867,9 +1867,27 @@
       "status": "拒绝",
       "notes": "总部 Workday 申请（申请确认信 2026-10-22 22:06 iqvia@myworkday.com）；中国校招表 CN322 为同岗，2026-10-24 已移入已拒绝；拒信 2026-10-24 03:16 iqvia@myworkday.com，主题点名 R1566150，decided not to move forward；与北京线 HireVue 在途申请（校招表 CN129 RWD&T 上海）无关；拒信日期 2026-10-24（手动申请补录）",
       "link": "https://jobs.iqvia.cn/jobs/R1566150-1"
+    },
+    {
+      "company": "Lila Sciences",
+      "title": "Senior Data Scientist, AI Research",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-24（手动申请补录）",
+      "link": ""
+    },
+    {
+      "company": "Klaviyo",
+      "title": "Senior Data Scientist, Marketing",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-24（手动申请补录）",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-25T03:32:35-05:00",
+  "updated_at": "2026-10-25T11:00:57-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
