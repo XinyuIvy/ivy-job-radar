@@ -1849,9 +1849,27 @@
       "status": "拒绝",
       "notes": "拒信日期 2026-10-24（手动申请补录）；Eli Lilly Application Update（10-24 00:04）：pursue other candidates",
       "link": ""
+    },
+    {
+      "company": "UCB",
+      "title": "Senior Real World Evidence Expert (United States)",
+      "applicationId": "850497",
+      "appliedDate": "2026-09-30",
+      "status": "拒绝",
+      "notes": "2026-09-30 提交（官网 careers.ucb.com，job 93916，Atlanta GA hybrid，确认页 successfully applied，简历 resume_biostat_pharma.pdf；手动申请补录——seen_jobs 曾记已推 Radar 但远端核查无此条目，本轮补录）；拒信 2026-10-24 10:16 recruiting@jobalerts.ucb.com，正文点名 Senior Real World Evidence Expert (United States)，pursuing other candidates at this time；拒信日期 2026-10-24",
+      "link": ""
+    },
+    {
+      "company": "IQVIA艾昆纬",
+      "title": "分析师/助理咨询顾问 - 真实世界证据及高阶分析（RWE/RWA）方向 Analyst / Associate Consultant, Real World Solutions (R1566150)",
+      "applicationId": "R1566150",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "总部 Workday 申请（申请确认信 2026-10-22 22:06 iqvia@myworkday.com）；中国校招表 CN322 为同岗，2026-10-24 已移入已拒绝；拒信 2026-10-24 03:16 iqvia@myworkday.com，主题点名 R1566150，decided not to move forward；与北京线 HireVue 在途申请（校招表 CN129 RWD&T 上海）无关；拒信日期 2026-10-24（手动申请补录）",
+      "link": "https://jobs.iqvia.cn/jobs/R1566150-1"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-24T07:00:00-05:00",
+  "updated_at": "2026-10-25T03:32:35-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
