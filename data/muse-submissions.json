@@ -1,1893 +1,1884 @@
 {
-  "applications": [
-    {
-      "applicationId": "R50347",
-      "appliedDate": "2026-09-01",
-      "company": "Regeneron",
-      "jobUrl": "https://careers.regeneron.com/en/jobs/r50347/manager-biostatistics-hematology/",
-      "location": "",
-      "notes": "2026-09-01 由 Xinyu 提交；简历版本未记录；拒信日期 2026-10-06",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Manager, Biostatistics – Hematology"
-    },
-    {
-      "applicationId": "R50412",
-      "appliedDate": "2026-09-23",
-      "company": "Regeneron",
-      "jobUrl": "https://careers.regeneron.com/en/jobs/r50412/principal-biostatistician-statistical-innovation/",
-      "location": "",
-      "notes": "2026-09-23 由 Xinyu 提交；简历版本未记录；拒信 2026-09-30（workday 邮件 11:20 PM）",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Principal Biostatistician – Statistical Innovation"
-    },
-    {
-      "applicationId": "R-202608859",
-      "appliedDate": "2026-09-25",
-      "company": "Veristat",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4469243248",
-      "location": "Remote",
-      "notes": "2026-09-25 Xinyu 亲自点 Submit；网申状态 In Process；拒信日期 2026-10-05",
-      "resumeVersion": "resume_biostat_cro.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Biostatistician"
-    },
-    {
-      "applicationId": "REQ-29803",
-      "appliedDate": "2026-09-25",
-      "company": "Vertex",
-      "jobUrl": "https://vrtx.wd501.myworkdayjobs.com/en-US/vertex_careers/details/Sr-Biostatistician-II_REQ-29803",
-      "location": "",
-      "notes": "2026-09-25 Xinyu 接管亲自点 Submit",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Sr. Biostatistician II"
-    },
-    {
-      "applicationId": "R-095119",
-      "appliedDate": "2026-09-25",
-      "company": "Johnson & Johnson",
-      "jobUrl": "https://www.careers.jnj.com/en/jobs/r-095119/senior-scientist-biostatistics/",
-      "location": "",
-      "notes": "2026-09-25 Xinyu 接管亲自点 Submit；Yale MS 专业因 J&J 列表无 Biostatistics 选项填为 Statistics",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Senior Scientist, Biostatistics"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Systimmune",
-      "jobUrl": "https://www.systimmune.com/",
-      "location": "Princeton, NJ",
-      "notes": "2026-09-25 提交，JazzHR 确认页 'Your application has been received'；双语岗；拒信日期 2026-10-15",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Biostatistician, Bilingual Mandarin"
-    },
-    {
-      "applicationId": "R1606428",
-      "appliedDate": "2026-09-25",
-      "company": "Bristol Myers Squibb",
-      "jobUrl": "https://app.eightfold.ai/careers/job/137483568270?domain=bms.com&hl=en",
-      "location": "Princeton, NJ",
-      "notes": "2026-09-25 Xinyu 检查后亲自点 Submit",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Senior Manager, RWE Biostatistics"
-    },
-    {
-      "applicationId": "R00147712",
-      "appliedDate": "2026-09-25",
-      "company": "AbbVie",
-      "jobUrl": "https://careers.abbvie.com/en/job/senior-research-statistician-hybrid-in-north-chicago-il-jid-32413",
-      "location": "North Chicago, IL (Hybrid)",
-      "notes": "2026-09-25 Xinyu 检查后亲自点 Submit；原 On-Site 版 jid-5196 已过期，改投最接近的 Hybrid 在招版；拒信日期 2026-09-30（notifications@talentacquisition.abbvie.com，R00147712 Senior Research Statistician (Hybrid)）",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Research Statistician"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Optiver",
-      "jobUrl": "https://www.optiver.com/join-us/jobs/quantitative-research-and-machine-learning/chicago/graduate-quantitative-researcher-phd-2027-start/",
-      "location": "Chicago, IL / New York, NY",
-      "notes": "2026-09-25 Xinyu 在浏览器接管后亲自提交；申请 Chicago + New York，2027.6 可到岗；JD 明确支持 sponsorship；测评邀请 Invitation for assessments（Fri 2026-09-25 3:50 PM，Optiver assessments 平台；邮件注明截止 2026-10-02，需尽快完成）；拒信日期 2026-10-05（测评未通过，她亲口确认）",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Graduate Quantitative Researcher, PhD (2027 Start)"
-    },
-    {
-      "applicationId": "6302325002",
-      "appliedDate": "2026-09-25",
-      "company": "Jane Street",
-      "jobUrl": "https://www.janestreet.com/join-jane-street/position/6302325002/",
-      "location": "New York, NY",
-      "notes": "2026-09-25 Xinyu 检查后亲自点 Submit；拒信日期 2026-10-02（jobs@janestreet.com）",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher"
-    },
-    {
-      "applicationId": "2636",
-      "appliedDate": "2026-09-25",
-      "company": "D. E. Shaw",
-      "jobUrl": "https://www.deshaw.com/careers",
-      "location": "New York, NY",
-      "notes": "2026-09-25 提交（浏览器任务误点 Finish，她确认三处判断都对不撤回）；Quantitative Analyst；拒信 2026-10-05（recruiting@deshaw.com，\"From the D. E. Shaw group\" 7:36 AM；注：同雇主 DESIM Technical Strategist Associate 10-05 曾派发、结果未知，此拒信按时间归属 2636 申请）",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Analyst"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Google",
-      "jobUrl": "https://www.google.com/about/careers/applications/",
-      "location": "Mountain View, CA",
-      "notes": "2026-09-25 她接管时亲自提交；页面显示 You submitted this application on Sep 25；30天内已达3个申请上限；拒信日期 2026-10-08",
-      "resumeVersion": "CV_Applied_DS_Internet_EN.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist III, Research"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Citadel",
-      "jobUrl": "https://www.citadel.com/careers/",
-      "location": "Miami, FL",
-      "notes": "2026-09-26 经她授权代点 Submit；确认页 Thank You / You've already applied；本科入学年份用了2019（正确为2017）；拒信日期 2026-10-19",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher, PhD Graduate"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Citadel Securities",
-      "jobUrl": "https://www.citadelsecurities.com/careers/",
-      "location": "New York, NY",
-      "notes": "2026-09-26 她接管时亲自提交；确认页 Thank You — You've already applied；拒信日期 2026-10-19",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher, PhD Graduate"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Jump Trading",
-      "jobUrl": "https://www.jumptrading.com/careers",
-      "location": "Chicago, IL",
-      "notes": "2026-09-26 她接管时亲自提交；收到确认邮件 Your details have been added to our database and are under review",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Campus Quantitative Researcher"
-    },
-    {
-      "applicationId": "11017",
-      "appliedDate": "2026-09-25",
-      "company": "SIG (Susquehanna)",
-      "jobUrl": "https://careers.sig.com/",
-      "location": "",
-      "notes": "2026-09-26 任务在Step 2误点Submit直接提交；她说没事不撤回；收到账号设置邮件；拒信日期 2026-10-21",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher – PhD: 2027"
-    },
-    {
-      "applicationId": "302821",
-      "appliedDate": "2026-09-25",
-      "company": "Uber",
-      "jobUrl": "https://www.uber.com/careers/",
-      "location": "",
-      "notes": "2026-09-26 经她授权代提交；确认页 Thank you for your job application；状态 Under Consideration；收到确认邮件；拒信日期 2026-10-17",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Scientist II, Marketplace"
-    },
-    {
-      "applicationId": "184492",
-      "appliedDate": "2026-09-25",
-      "company": "Goldman Sachs",
-      "jobUrl": "https://higher.gs.com/",
-      "location": "New York, NY",
-      "notes": "2026-09-26 经她授权代提交；F-1剩余月数填36；本科入学用了2019（正确为2017）；收到确认邮件",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Core Engineering, FTP Strats, Associate, Quantitative Engineering"
-    },
-    {
-      "applicationId": "156138",
-      "appliedDate": "2026-09-25",
-      "company": "Goldman Sachs",
-      "jobUrl": "https://higher.gs.com/",
-      "location": "New York, NY",
-      "notes": "2026-09-26 经她授权代提交；F-1剩余月数填36；本科入学用了2019（正确为2017）；收到确认邮件",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Quantitative Strategist, GCEM"
-    },
-    {
-      "applicationId": "8030406",
-      "appliedDate": "2026-09-25",
-      "company": "DRW",
-      "jobUrl": "https://job-boards.greenhouse.io/drweng/jobs/8030406",
-      "location": "Chicago, IL",
-      "notes": "2026-09-26 上传博士成绩单后提交；SWUFE按她要求删除只留Vanderbilt+Yale；地点Chicago排第一；Offer deadlines=No；拒信日期 2026-09-29（\"will not be moving forward with your application\"）",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher"
-    },
-    {
-      "applicationId": "8036541",
-      "appliedDate": "2026-09-25",
-      "company": "Akuna Capital",
-      "jobUrl": "https://akunacapital.com/careers/job/8036541/?gh_jid=8036541",
-      "location": "Chicago, IL",
-      "notes": "2026-09-26 她用自己浏览器手动提交（隐形reCAPTCHA拦自动化）；收到确认邮件；测评可能经HackerRank/Canditech/Criteria发；HackerRank 测评邀请已发（Fri 2026-09-25 7:02 PM）",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Junior Quantitative Researcher"
-    },
-    {
-      "applicationId": "8636830002",
-      "appliedDate": "2026-09-26",
-      "company": "Marshall Wace",
-      "jobUrl": "https://job-boards.greenhouse.io/mw-tech-grad/jobs/8636830002",
-      "location": "New York, NY",
-      "notes": "2026-09-26 自动提交（Greenhouse；确认页 Thank you for applying）。SWUFE 不在 Greenhouse 学校库，已从第三段教育删除（简历保留）；Quant Developer consideration 选 No（保守，待她确认）；BS/MS grade 按表格自带换算（3.8→1st Class，4.0→Distinction）；拒信日期 2026-10-08",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quant Research - Quant Associate Programme - 2027"
-    },
-    {
-      "applicationId": "R00150607",
-      "appliedDate": "2026-09-26",
-      "company": "AbbVie",
-      "jobUrl": "https://careers.abbvie.com/en/job/senior-research-statistician-immunology-hybrid-based-in-north-chicago-il-jid-5194",
-      "location": "North Chicago, IL (hybrid)",
-      "notes": "2026-09-26 自动提交（SmartRecruiters；确认页 Application submitted）。原目标 Florham Park 岗 R00109119 已过期，此为同岗同职级 Immunology variant 替代投递；拒信日期 2026-09-30（notifications@talentacquisition.abbvie.com，R00150607 Senior Research Statistician - Immunology (Hybrid)）",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Research Statistician - Immunology (Hybrid)"
-    },
-    {
-      "company": "Trexquant Investment",
-      "title": "Quantitative Researcher - PhD (USA)",
-      "appliedDate": "2026-09-25",
-      "jobUrl": "",
-      "location": "USA",
-      "status": "已申请",
-      "notes": "daily-job-screening 2026-09-26 接续；Xinyu 接管浏览器后成功提交，Trexquant 确认页已提交，副本发学校邮箱；本轮补同步。相关经验 4 年，resume_quant_research.pdf，Photo/Summary/Cover letter 留空，EEO survey 未填",
-      "source": "Muse 求职助手"
-    },
-    {
-      "applicationId": "R-256969",
-      "appliedDate": "2026-09-26",
-      "company": "AstraZeneca (Alexion)",
-      "jobUrl": "https://careers.astrazeneca.com/job/boston/senior-manager-biostatistics/43991/98186038960",
-      "location": "Boston, MA (office-based)",
-      "notes": "2026-09-26 自动提交（daily-job-screening 接续）。R-256969，9/14 发布，9/29 截止；三段工作经历均带描述",
-      "resumeVersion": "resume_biostat_pharma.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Senior Manager, Biostatistics"
-    },
-    {
-      "company": "Precision AQ",
-      "title": "Associate Research Scientist, RWE",
-      "applicationId": "greenhouse-6128935004",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "Remote US; Greenhouse confirmation received；邮箱确认信 2026-09-27 1:25 PM CDT《Precision AQ: Thank you for your application》（通用模板，按时间归属）",
-      "link": "https://job-boards.greenhouse.io/precisionmedicinegroup/jobs/6128935004"
-    },
-    {
-      "company": "Renaissance Technologies",
-      "title": "Research Scientist",
-      "applicationId": "rentec-20260927",
-      "appliedDate": "2026-09-27",
-      "status": "拒绝",
-      "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'；2026-09-27 邮箱全文件夹未收到确认邮件，待确认；拒信日期 2026-10-07",
-      "link": "https://www.rentec.com/apply"
-    },
-    {
-      "company": "3Red Partners",
-      "title": "2027 Graduate Quantitative Researcher",
-      "applicationId": "greenhouse-8624128002",
-      "appliedDate": "2026-09-27",
-      "status": "拒绝",
-      "notes": "New York, NY; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 1:34 PM CDT《Thank you for applying to 3Red Partners》（通用模板，按时间归属）；拒信日期 2026-09-28（\"decided not to proceed\"）",
-      "link": "https://www.3redpartners.com/careers"
-    },
-    {
-      "company": "Jane Street",
-      "title": "Machine Learning Researcher (R-1529)",
-      "applicationId": "janestreet-8576928002",
-      "appliedDate": "2026-09-27",
-      "status": "拒绝",
-      "notes": "New York, NY; confirmation 'THANK YOU FOR YOUR APPLICATION.'; no work-auth questions on form；邮箱确认信 2026-09-27 1:48 PM CDT《Thank you for applying to Jane Street》（通用模板，按时间归属；同邮箱9/25另有该司其他岗位确认信）；拒信 2026-10-02 08:00 CDT (jobs@janestreet.com)；注意：该拒信为通用模板未指明岗位，同雇主 9-25 QR(6302325002) 申请亦存在，无法完全排除是那一份，待进一步确认",
-      "link": "https://www.janestreet.com/join-jane-street/apply/8576928002?gh_jid=8576928002",
-      "rejectedDate": "2026-10-02"
-    },
-    {
-      "company": "fairlife",
-      "title": "Data Scientist (Decision Intelligence)",
-      "applicationId": "greenhouse-5249251007",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "Chicago, IL; $95K-$110K; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 2:50 PM CDT《fairlife, LLC | We've Received Your Application!》（通用模板，按时间归属）",
-      "link": "https://fairlife.com/career-opportunities/data-scientist/?gh_jid=5249251007"
-    },
-    {
-      "company": "TextNow",
-      "title": "Data Scientist",
-      "applicationId": "greenhouse-4421318009",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "San Francisco, CA; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 2:52 PM CDT《Thank you for applying to TextNow, Inc.》（通用模板，按时间归属）",
-      "link": "https://job-boards.greenhouse.io/textnowinc/jobs/4421318009"
-    },
-    {
-      "company": "Affirm",
-      "title": "Analyst I, Risk & Analytics",
-      "applicationId": "greenhouse-7808667003",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "Remote US; $115K-$165K; confirmation 'Thank you for applying to Affirm.'；邮箱确认信 2026-09-27 2:55 PM CDT《We've received your application for Analyst at Affirm》（主题含 Analyst，与岗位吻合）",
-      "link": "https://job-boards.greenhouse.io/affirm/jobs/7808667003"
-    },
-    {
-      "company": "Lyft",
-      "title": "Senior Data Scientist, Causal Inference",
-      "applicationId": "greenhouse-110880",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "New York, NY Hybrid; confirmation 'Thank you for your interest in Lyft!'；邮箱确认信 2026-09-27 4:33 PM CDT《Thank you for your application for Senior Data Scientist, Causal Inference》（主题点名岗位，归属确切）",
-      "link": "https://app.careerpuck.com/job-board/lyft/job/8584688002"
-    },
-    {
-      "company": "Biogen",
-      "title": "Sr. Principal Biostatistician",
-      "applicationId": "REQ22948",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "Confirmation 'Application Submitted'; Candidate Home shows Application Received 2026-09-27；邮箱确认信 2026-09-27 4:41 PM CDT《Thank you for applying to Biogen》（正文含 Sr. Principal Biostatistician，归属确切）",
-      "link": "https://www.biogen.com"
-    },
-    {
-      "company": "Amazon",
-      "title": "Applied Scientist II, US Prime and Marketing Tech",
-      "applicationId": "10440521",
-      "appliedDate": "2026-09-27",
-      "status": "拒绝",
-      "notes": "New York NY; confirmation 'Thank you for applying! Your application for Applied Scientist II... has been submitted.'; CPT=No (STEM OPT post-graduation)；邮箱确认信 2026-09-27 2:50 PM CDT《Keep track of your application / Thank you for Applying to Amazon!》（正文点名 Applied Scientist II US Prime and Marketing Tech (ID:10440521)，归属确切）；拒信日期 2026-10-03（noreply@mail.amazon.jobs）",
-      "link": "https://www.amazon.jobs/en-US/applicant/jobs/10440521/summary?result=success"
-    },
-    {
-      "company": "Amgen",
-      "title": "Biostatistics Senior Manager, Biosimilars (US Remote)",
-      "applicationId": "R-242819",
-      "appliedDate": "2026-09-27",
-      "status": "拒绝",
-      "notes": "Confirmation 'Application Submitted / Thank you for applying to Amgen!'; new Workday account created；邮箱确认信 2026-09-27 4:46 PM CDT《Amgen Inc. - Thank you for applying》（正文点名 R-242819 Biostatistics Senior Manager，归属确切）；拒信 2026-10-02 02:46 AM CDT (careers@mail.amgen.com)",
-      "link": "https://amgen.wd1.myworkdayjobs.com",
-      "rejectedDate": "2026-10-02"
-    },
-    {
-      "company": "CVS Health",
-      "title": "Decision Scientist - Utilization Management",
-      "applicationId": "R1050866",
-      "appliedDate": "2026-09-27",
-      "status": "拒绝",
-      "notes": "Confirmation 'Application Submitted. You have successfully applied for this job posting.'; new Workday account；邮箱确认信 2026-09-27 2:49 PM CDT《Your application with CVS Health has been received!》（通用模板，按时间归属）；拒信日期 2026-09-29（cvshealth@myworkday.com，R1050866 Decision Scientist - Utilization Management，'we will not be moving forward with your application for this role'）",
-      "link": "https://www.cvshealth.com"
-    },
-    {
-      "company": "State Street",
-      "title": "Quantitative Analyst, Assistant Vice President / Credit Risk Modeler",
-      "applicationId": "R-790888",
-      "appliedDate": "2026-09-27",
-      "status": "已申请",
-      "notes": "Clifton NJ Hybrid; confirmation 'Application Submitted — Thank you! You've successfully submitted your application.'；邮箱确认信 2026-09-27 4:48 PM CDT《Thank you for applying to State Street》（预览含 Credit Risk Model，归属确切）",
-      "link": "https://careers.statestreet.com/global/en/job/R-790888/Quantitative-Analyst-Assistant-Vice-President"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Old Mission Capital",
-      "link": "https://www.oldmissioncapital.com/careers/?gh_jid=7814534003",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页已收到；邮箱确认：no-reply@oldmissioncapital.com \"Thank you for applying to Old Mission\" 9/28 2:47 PM；Chicago；简历 resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Quantitative Researcher (Ph.D.), 2027 Graduate Program"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Old Mission Capital",
-      "link": "https://www.oldmissioncapital.com/careers/?gh_jid=6309652003",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页已收到；邮箱确认：no-reply@oldmissioncapital.com \"Thank you for applying to Old Mission\" 9/28 2:48 PM；Chicago；简历 resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Junior Quantitative Researcher (Ph.D.)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Figma",
-      "link": "https://job-boards.greenhouse.io/figma/jobs/5707966004",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Greenhouse 确认页已收到；邮箱确认：no-reply@figma.com \"Thank you for your application to Figma\" 9/28 2:51 PM（AI Applied Scientist）；简历 resume_ai_research.pdf；意向 Remote (Nashville)，可 relocate SF/NY/Seattle",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "AI Applied Scientist"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "BridgeBio Pharma",
-      "link": "https://job-boards.greenhouse.io/bridgebio/jobs/5136136007",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Greenhouse 确认页已收到；邮箱确认：no-reply@bridgebio.com \"Thank you for applying to BridgeBio Pharma!\" 9/28 2:55 PM；Remote US；简历 resume_biostat_pharma.pdf；学校下拉无西南财经大学，选了 Other",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Associate Director, Biostatistics & AI"
-    },
-    {
-      "applicationId": "25066716436359390",
-      "appliedDate": "2026-09-28",
-      "company": "Meta",
-      "link": "https://www.metacareers.com/",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页 \"Application Received\"；邮箱确认：do-not-reply@recruiting.facebook.com \"Thank you for applying to Meta\" 9/28 2:56 PM；Menlo Park；简历 resume_applied_scientist.pdf；未建 Meta Career Profile 账号",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Research Scientist, Demography and Survey Sciences"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Meta",
-      "link": "https://www.metacareers.com/profile/job_details/4639028663082379/",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页 \"Application Received\"；邮箱确认：do-not-reply@recruiting.facebook.com \"Thank you for applying to Meta\" 9/28 2:58 PM；Menlo Park；简历 resume_applied_scientist.pdf；未建 Meta Career Profile 账号",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Data Scientist, Meta Superintelligence Labs (Safety)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Harvey",
-      "link": "https://jobs.ashbyhq.com/harvey/1321b20d-d6f8-4bdb-b2de-ec33c0948b53",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑，昨日卡住今日重试）。Ashby 确认页提交成功；邮箱确认：Harvey Hiring Team (no-reply@ashbyhq.com) \"Thank You for Applying to Harvey\" 9/28 2:51 PM（Data Scientist, Product）；简历 resume_ai_research.pdf；hybrid 3天/周 SF，可 relocate",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Data Scientist, Product"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Tubi",
-      "link": "https://job-boards.greenhouse.io/tubitv/jobs/8232190",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑，昨日卡住今日重试）。Greenhouse 确认页已收到；邮箱确认：no-reply@us.greenhouse-mail.io \"Thank you for applying to Tubi!\" 9/28 2:56 PM；简历 resume_applied_scientist.pdf；office hub 选 Chicago",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Data Scientist (USA - Remote)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Voleon",
-      "link": "https://www.voleon.com/jobs/?ashby_jid=2aed0eac-34cf-4920-aac1-5cf6a9b434c2",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑，昨日卡住今日重试）。Ashby 确认页提交成功；邮箱确认：recruiting-noreply@voleon.com \"Thank you for applying to The Voleon Group\" 9/28 2:59 PM；⚠️ recruiter Rosa Kwak (rkwak@voleon.com) 9/28 5:38 PM 来信邀请 informal chat，需跟进回复；简历 resume_quant_research.pdf；$250K–$275K base",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Member of Research Staff"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Arrowstreet Capital",
-      "link": "https://arrowstreetcapital.wd5.myworkdayjobs.com/en-US/arrowstreet/job/Boston/Quantitative-Researcher_R1066-3",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：arrowstreetcapital@myworkday.com \"Application Received\" 9/28 3:01 PM；Boston；简历 resume_quant_research.pdf；phd_transcript.pdf 已补传，待办清零",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Quantitative Researcher"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Insmed",
-      "link": "https://careers.insmed.com/posting/senior-manager-biostatistics/R3742/",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：insmed@myworkday.com \"Thank you for applying to Insmed\" 9/28 3:07 PM；Fully Remote；简历 resume_biostat_pharma.pdf；Field of Study 选 Statistics（下拉无 Biostatistics）；出差 ≤50%；拒信 2026-09-30（insmed@myworkday.com：move forward with other candidates）",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Manager, Biostatistics (R3742)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "Bank of America",
-      "link": "https://careers.bankofamerica.com/",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页 \"Application Submitted\"；邮箱确认：Global HR Workday (ghr@myworkday.com) \"ACTION NEEDED: We've received your application for the Data Scientist II position\" 9/28 5:35 PM；New York；简历 resume_applied_scientist.pdf；教育栏只有 PhD+MS（SWUFE 无 Other 选项）；后续待办 Provide SSN 需本人补",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Data Scientist II (Job ID 26020552)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-28",
-      "company": "FanDuel",
-      "link": "https://fanduel.careers",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页：\"Thank you for applying. Your application has been received.\"；邮箱确认：no-reply@fanduel.com \"Thank you for applying to FanDuel\" 9/28 2:49 PM（明确写 Data Scientist, Market Making 岗）；简历 resume_applied_scientist.pdf；总包期望填 100000。注意：同日 12:00 PM 收到另一封 FanDuel 拒信，但拒信针对的是 Data Scientist, Experimentation 岗（不同岗位），不影响本条。；拒信 2026-09-30（no-reply@fanduel.com：will not move forward）",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist, Market Making (Risk & Trading)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-26",
-      "company": "FanDuel",
-      "link": "https://fanduel.careers",
-      "notes": "该申请未在 seen 去重表/仓库中登记，appliedDate 按确认邮件（Sat 9/26 5:43 PM）推定为 2026-09-26。拒信：FanDuel Recruitment Team (no-reply@fanduel.com) \"Important information about your application to FanDuel\"，拒信日期 2026-09-28，原话：\"We regret to inform you that we have decided not to move forward with your candidacy for the Data Scientist, Experimentation position at this time.\" 与 9/28 当日新投的 Market Making 岗无关。",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist, Experimentation"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-26",
-      "company": "Hinge Health",
-      "link": "https://www.hingehealth.com/careers",
-      "notes": "该申请 9/27 曾记为 in-flight（状态未知），9/26 筛选中唯一 Hinge Health 候选为 Biostatistician, Quantitative Epidemiology；拒信未载明岗位，岗位为推定。拒信：Hinge Health Hiring Team (no-reply@ashbyhq.com) \"Thanks for your interest in Hinge Health\"，拒信日期 2026-09-28，原话：\"After careful consideration, we have decided not to move forward with your application at this time.\"",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Biostatistician, Quantitative Epidemiology（拒信未载明，推定）"
-    },
-    {
-      "applicationId": "schonfeld-8236826",
-      "appliedDate": "2026-09-29",
-      "company": "Schonfeld",
-      "link": "https://job-boards.greenhouse.io/schonfeld/jobs/8236826/confirmation",
-      "notes": "Greenhouse 确认页 'Thank you for applying'；简历 resume_quant_research.pdf；来源 LinkedIn",
-      "status": "applied",
-      "title": "Entry Level Quantitative Researcher"
-    },
-    {
-      "applicationId": "jumptrading-8209424",
-      "appliedDate": "2026-09-29",
-      "company": "Jump Trading",
-      "link": "https://www.jumptrading.com/hr/job?gh_jid=8209424",
-      "notes": "确认页 'Thank you for applying! Your application has been successfully received.'；简历 resume_quant_research.pdf；来源 LinkedIn",
-      "status": "applied",
-      "title": "Campus Quantitative Researcher (Trading Team PhD/Postdoc)"
-    },
-    {
-      "applicationId": "jumptrading-8052313",
-      "appliedDate": "2026-09-29",
-      "company": "Jump Trading",
-      "link": "https://www.jumptrading.com/hr/job?gh_jid=8052313",
-      "notes": "确认页 'Thank you for applying! Your application has been successfully received.'；简历 resume_ai_research.pdf；JD 注明 sponsor visas；来源 LinkedIn",
-      "status": "applied",
-      "title": "Campus AI Research Engineer"
-    },
-    {
-      "applicationId": "tower-8095921",
-      "appliedDate": "2026-09-29",
-      "company": "Tower Research Capital",
-      "link": "https://www.tower-research.com",
-      "notes": "确认页 'Thank you for applying. You should receive an email confirmation shortly.'；简历 resume_ai_research.pdf；来源 LinkedIn",
-      "status": "applied",
-      "title": "Machine Learning Research Engineer"
-    },
-    {
-      "applicationId": "tower-8024142",
-      "appliedDate": "2026-09-29",
-      "company": "Tower Research Capital",
-      "link": "https://www.tower-research.com",
-      "notes": "确认页 'Thank you for applying. You should receive an email confirmation shortly.'；简历 resume_quant_research.pdf；来源 LinkedIn",
-      "status": "applied",
-      "title": "Quantitative Trader/Researcher - 2027"
-    },
-    {
-      "applicationId": "fiverings-2027-qt",
-      "appliedDate": "2026-09-29",
-      "company": "Five Rings",
-      "link": "",
-      "notes": "确认页 'Thank you for applying. Your application has been received.'（浏览器任务报告原文引用）；简历 resume_quant_research.pdf；来源 LinkedIn",
-      "status": "applied",
-      "title": "Campus Full Time 2027 - Quantitative Trader"
-    },
-    {
-      "applicationId": "loopcv-georgiatek-20260921",
-      "appliedDate": "2026-09-21",
-      "company": "Georgia Tek Systems",
-      "link": "",
-      "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
-      "status": "applied",
-      "title": "Business Data Analyst"
-    },
-    {
-      "applicationId": "loopcv-altatech-20260921",
-      "appliedDate": "2026-09-21",
-      "company": "Alta Technology Group",
-      "link": "",
-      "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
-      "status": "applied",
-      "title": "Data Analyst / BI"
-    },
-    {
-      "applicationId": "loopcv-dako-20260921",
-      "appliedDate": "2026-09-21",
-      "company": "The DAKO Group",
-      "link": "",
-      "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
-      "status": "applied",
-      "title": "Data Specialist"
-    },
-    {
-      "applicationId": "R1521964",
-      "appliedDate": "2026-09-06",
-      "company": "IQVIA艾昆纬",
-      "jobUrl": "",
-      "location": "",
-      "notes": "Xinyu 9/6 经总部 Workday（jobs.iqvia.com）手动申请，申请确认邮件 9/6 16:02。拒信日期 2026-09-08（iqvia@myworkday.com）。2026-09-29 查邮箱补录。",
-      "source": "Xinyu 手动投递（补录）",
-      "status": "拒绝",
-      "title": "Statistician, Real World Solutions"
-    },
-    {
-      "applicationId": "R1522738",
-      "appliedDate": "",
-      "company": "IQVIA艾昆纬",
-      "jobUrl": "",
-      "location": "",
-      "notes": "Xinyu 经总部 Workday 手动申请（申请确认邮件未找到；9/2 拒信证明此前已提交）。拒信日期 2026-09-02（iqvia@myworkday.com）。2026-09-29 查邮箱补录。",
-      "source": "Xinyu 手动投递（补录）",
-      "status": "拒绝",
-      "title": "RWE (Assoc) Consultant - Sr Consultant, Real World Solutions"
-    },
-    {
-      "applicationId": "R1565233",
-      "appliedDate": "",
-      "company": "IQVIA艾昆纬",
-      "jobUrl": "",
-      "location": "北京",
-      "notes": "【校招-北京】岗位，Xinyu 经总部 Workday 手动申请（申请确认邮件未找到；9/8 拒信证明此前已提交）。拒信日期 2026-09-08（iqvia@myworkday.com）。与中国校招站 tupu360 的北京 RWE/RWA 岗为同一职位（tupu360 侧单账号限投 1 岗且 9/24 已投上海 RWD&T，无法重复投递）。2026-09-29 查邮箱补录。",
-      "source": "Xinyu 手动投递（补录）",
-      "status": "拒绝",
-      "title": "【校招-北京】分析师/助理咨询顾问-真实世界证据及高阶分析(RWE/RWA)方向"
-    },
-    {
-      "company": "Amazon",
-      "title": "Research Scientist, Special Projects",
-      "applicationId": "10522268",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-09-29；该申请不在 Muse 投递记录中（应为自投），据拒信补记。"
-    },
-    {
-      "company": "DRW",
-      "title": "Quantitative Researcher (Summer 2027 start)",
-      "applicationId": "8030406",
-      "appliedDate": "2026-09-30",
-      "status": "已申请",
-      "notes": "Greenhouse; resume_quant_research.pdf + phd_transcript.pdf; JD no sponsorship exclusion；确认邮件 9/30 02:45（no-reply@drwholdings.com，'Thank you for applying to DRW'）。2026-09-30 邮箱核对确认。",
-      "link": "https://job-boards.greenhouse.io/drweng/jobs/8030406"
-    },
-    {
-      "company": "Stealth Startup (Ever)",
-      "title": "Data Scientist",
-      "applicationId": "4469721124",
-      "appliedDate": "2026-09-30",
-      "status": "待确认",
-      "notes": "LinkedIn Easy Apply; resume_applied_scientist.pdf; SF Bay Area on-site/hybrid；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
-      "link": "https://www.linkedin.com/jobs/view/4469721124/"
-    },
-    {
-      "company": "Collabera",
-      "title": "Biostatistician",
-      "applicationId": "4471959450",
-      "appliedDate": "2026-09-30",
-      "status": "待确认",
-      "notes": "LinkedIn Easy Apply; resume_biostat_pharma.pdf; remote contract $34-36/hr (below target, recorded)；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
-      "link": "https://www.linkedin.com/jobs/view/4471959450/"
-    },
-    {
-      "company": "ConsultNet Technology Services and Solutions",
-      "title": "Biostatistician",
-      "applicationId": "4471697586",
-      "appliedDate": "2026-09-30",
-      "status": "待确认",
-      "notes": "LinkedIn Easy Apply; resume_biostat_pharma.pdf; Salt Lake City hybrid contract $35-45/hr；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
-      "link": "https://www.linkedin.com/jobs/view/4471697586/"
-    },
-    {
-      "company": "Genpact",
-      "title": "Data Scientist (Assistant Manager, healthcare analytics)",
-      "applicationId": "4459513866",
-      "appliedDate": "2026-09-30",
-      "status": "待确认",
-      "notes": "LinkedIn Easy Apply; resume_applied_scientist.pdf; Morris Plains NJ hybrid $90K-100K；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
-      "link": "https://www.linkedin.com/jobs/view/4459513866/"
-    },
-    {
-      "company": "Strategic Employment Partners",
-      "title": "Data Scientist",
-      "applicationId": "4462466327",
-      "appliedDate": "2026-09-30",
-      "status": "待确认",
-      "notes": "LinkedIn Easy Apply; resume_applied_scientist.pdf; remote $150K-200K; recruiting for fintech client；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
-      "link": "https://www.linkedin.com/jobs/view/4462466327/"
-    },
-    {
-      "company": "Humana",
-      "title": "Research Scientist 2",
-      "applicationId": "R-421783",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "notes": "Application ID 759eb96b17de90014f0756c9ab500000; resume_applied_scientist.pdf; remote nationwide, causal inference；确认邮件 9/30 07:50（humana@myworkday.com，'Your Humana application: Next Steps'）。2026-09-30 邮箱核对确认。；拒信日期 2026-10-22",
-      "link": "https://careers.humana.com/us/en/job/R-421783/Research-Scientist"
-    },
-    {
-      "company": "Tempus AI",
-      "title": "Manager, Biostatistics (JR202600381)",
-      "applicationId": "83f962ba8beb9001503e31c7e7650000",
-      "appliedDate": "2026-09-30",
-      "status": "已申请",
-      "notes": "Workday 确认 Congratulations! Thank you for applying；简历 resume_biostat_pharma.pdf；来源 LinkedIn；确认邮件 9/30 08:28（tempus@myworkday.com，'Thank you for applying to Tempus!'）。2026-09-30 邮箱核对确认。",
-      "link": "https://www.linkedin.com/jobs/view/4407904244"
-    },
-    {
-      "company": "Servier Pharmaceuticals",
-      "title": "Associate Director, Biostatistics (Job ID 12320)",
-      "applicationId": "546052",
-      "appliedDate": "2026-09-30",
-      "status": "已申请",
-      "notes": "确认 You have successfully applied；简历 resume_biostat_pharma.pdf；来源 LinkedIn；确认邮件 9/30 09:11（noreply.share2-servier@successfactors.com）。2026-09-30 邮箱核对确认。",
-      "link": "https://www.linkedin.com/jobs/view/4465029773"
-    },
-    {
-      "applicationId": "liepin-1985886393",
-      "appliedDate": "2026-09-30",
-      "company": "康龙化成（北京）新药技术股份有限公司",
-      "link": "https://www.liepin.com/job/1985886393.shtml",
-      "location": "上海-长宁区",
-      "notes": "2026-09-30 经猎聘自动投递（在线简历+附件 CV_医药临床_张馨予.pdf）；猎聘投递记录页已核验共5条无误。上海/宁波，30-45k，应届博士。",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "2027届-博士-临床研发高级AI工程师"
-    },
-    {
-      "applicationId": "liepin-1985730081",
-      "appliedDate": "2026-09-30",
-      "company": "金斯瑞生物科技股份有限公司（HK.1548）",
-      "link": "https://www.liepin.com/job/1985730081.shtml",
-      "location": "南京-江宁区",
-      "notes": "2026-09-30 经猎聘自动投递（在线简历+附件 CV_医药临床_张馨予.pdf）；猎聘投递记录页已核验共5条无误。20-40k，应届博士。",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "Gen-X R&D AI for Science (A75380)"
-    },
-    {
-      "applicationId": "liepin-1985840205",
-      "appliedDate": "2026-09-30",
-      "company": "金斯瑞生物科技股份有限公司",
-      "link": "https://www.liepin.com/job/1985840205.shtml",
-      "location": "南京-淳化",
-      "notes": "2026-09-30 经猎聘自动投递（在线简历+附件 CV_医药临床_张馨予.pdf）；猎聘投递记录页已核验共5条无误。25-45k，经验不限·博士。",
-      "source": "Muse 求职助手",
-      "status": "已申请",
-      "title": "AIDD实验数据分析科学家"
-    },
-    {
-      "company": "Tellwise",
-      "title": "Data Scientist, Patterns",
-      "applicationId": "",
-      "appliedDate": "2026-09-30",
-      "status": "submitted",
-      "notes": "Confirmation: 'Your application is in. We read every one and reply within five business days either way.' San Francisco hybrid, $150K-$185K + 0.2%-0.4% equity. Form had no resume upload and no work-auth questions; JD has no sponsorship exclusion.",
-      "link": "https://gettellwise.com/careers/data-scientist-patterns"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-29",
-      "company": "Hinge Health",
-      "title": "Biostatistician, Quantitative Epidemiology",
-      "location": "",
-      "link": "",
-      "source": "Muse 求职助手（邮箱补录）",
-      "status": "拒绝",
-      "notes": "申请确认邮件 9/29 18:57（no-reply@ashbyhq.com，'Thank you for applying to Hinge Health!'）；拒信日期 2026-09-30（'After careful consideration, we have decided not to move forward with your application at this time.'）"
-    },
-    {
-      "company": "Tempus AI",
-      "title": "Data Scientist II, Real World Evidence, Life Sciences R&D",
-      "applicationId": "83f962ba8beb90017434ce5128ce0000",
-      "appliedDate": "2026-09-30",
-      "status": "已投递",
-      "notes": "New York, NY。同一雇主第二 req（同日已投 Manager, Biostatistics）。表单无 Biostatistics 选项，Field of Study 选 Statistics；简历 resume_biostat_pharma.pdf。",
-      "link": "https://tempus.wd1.myworkdayjobs.com/TempusCareers"
-    },
-    {
-      "company": "Opendoor",
-      "title": "Applied Science - Growth",
-      "applicationId": "",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "notes": "Seattle, WA。LinkedIn 投递。简历 resume_applied_scientist.pdf；Cloudflare 人机验证一次通过。；拒信日期 2026-10-06（拒信未注明岗位，账上唯一 Opendoor 申请归属此单）",
-      "link": "https://www.linkedin.com/jobs/"
-    },
-    {
-      "company": "MyOme",
-      "title": "Senior Scientist, Clinical Biostatistics & Genetic Risk Prediction",
-      "applicationId": "",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "notes": "官网 Greenhouse 投递。JD 无 sponsorship 排除。简历 resume_biostat_pharma.pdf；reCAPTCHA 未触发图片验证。；拒信日期 2026-10-03（deanna.rose@myome.com (DeAnna Lamoureux)）",
-      "link": "https://myome.com/about-us/careers"
-    },
-    {
-      "company": "Kenvue",
-      "title": "Senior Biostatistician",
-      "applicationId": "",
-      "appliedDate": "2026-09-30",
-      "status": "已投递",
-      "notes": "Workday 投递。新账号创建；简历 resume_biostat_pharma.pdf；最高已完成学历按表单口径选 Master's Degree。",
-      "link": "https://kenvue.wd1.myworkdayjobs.com/External"
-    },
-    {
-      "company": "Stripe",
-      "title": "Data Scientist",
-      "applicationId": "req 5601879",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "notes": "New York, NY。同一雇主第二 req（9-29 已投 Core Infrastructure）。官网表单；简历 resume_applied_scientist.pdf。经验题如实选 None - new grad。；拒信日期 2026-10-09",
-      "link": "https://stripe.com/careers/apply/data-scientist/5601879"
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "Advisor - Project Statistician in Product Development (R-112033)",
-      "applicationId": "db8be7b2a3d0900183960c3b6bb10000",
-      "appliedDate": "2026-09-30",
-      "status": "已投递",
-      "notes": "官网投递。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。",
-      "link": "https://careers.lilly.com/us/en/job/R-112033"
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "Advisor - Project Statistician in Product Development (R-110351)",
-      "applicationId": "a69ae34604709001845233b54e990000",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "notes": "官网投递。同一雇主第二 req（不同团队）。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。拒信 2026-10-02（lilly@myworkday.com；邮件 title 写 \"Advisor – Statistics\"，与 R-110351 的筛选记录对应；R-112033 的 title 为 \"Advisor – Project Statistician in Product Development\"。无法完全排除对应另一份的歧义，如有进一步信息可纠正。）",
-      "link": "https://careers.lilly.com/us/en/job/R-110351"
-    },
-    {
-      "company": "Goliath Partners",
-      "title": "Artificial Intelligence Researcher",
-      "applicationId": "linkedin-4473916998",
-      "appliedDate": "2026-09-30",
-      "status": "applied",
-      "notes": "Easy Apply; New York Metro Hybrid; 21:00 round (delayed report)",
-      "link": "https://www.linkedin.com/jobs/search/?currentJobId=4473916998"
-    },
-    {
-      "company": "Precision Medicine Group",
-      "title": "Associate Research Scientist, Real World Evidence",
-      "applicationId": "linkedin-4454282605",
-      "appliedDate": "2026-09-30",
-      "status": "applied",
-      "notes": "Easy Apply Remote; JD said no sponsorship but submitted with honest sponsorship=Yes",
-      "link": "https://www.linkedin.com/jobs/search/?currentJobId=4454282605"
-    },
-    {
-      "company": "SoTalent",
-      "title": "Senior Manager, Statistics",
-      "applicationId": "linkedin-4472131453",
-      "appliedDate": "2026-09-30",
-      "status": "applied",
-      "notes": "Easy Apply; recruiting for leading global pharma; Remote $137K-215K",
-      "link": "https://www.linkedin.com/jobs/view/4472131453"
-    },
-    {
-      "company": "Freenome",
-      "title": "Senior Biostatistician",
-      "applicationId": "",
-      "appliedDate": "2026-09-29",
-      "status": "拒绝",
-      "notes": "拒信 2026-10-01（Greenhouse）：\"After reviewing your background, we've decided to move forward with candidates whose experience is a better fit.\"",
-      "link": "https://job-boards.greenhouse.io/freenome/jobs/8842728002"
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "Statistician – Manufacturing (R-112031)",
-      "applicationId": "lilly-r112031-manufacturing",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "source": "Muse 求职助手",
-      "link": "https://careers.lilly.com/us/en/job/R-112031/Statistician-Manufacturing",
-      "location": "Indianapolis, IN",
-      "notes": "补录：Xinyu 手动投递（具体投递日期未知，拒信日期代记）；拒信 2026-09-30（lilly@myworkday.com 11:11 PM）"
-    },
-    {
-      "company": "BeOne Medicines",
-      "title": "Senior Statistician (RWD/RWE)",
-      "applicationId": "beigene-r33719-rwd-rwe",
-      "appliedDate": "2026-09-26",
-      "status": "拒绝",
-      "source": "Muse 求职助手",
-      "link": "https://www.linkedin.com/jobs/view/4383286308",
-      "location": "Remote US",
-      "notes": "2026-09-26 经 BeiGene Workday (R33719) 提交，2026-09-29 核验 Application Received；拒信 2026-10-01（beigene@myworkday.com 2:45 PM，RWD/RWE 对口度不足）"
-    },
-    {
-      "company": "Bevi",
-      "title": "Product Data Scientist",
-      "applicationId": "",
-      "appliedDate": "2026-10-02",
-      "status": "拒绝",
-      "notes": "据拒信补记（成功投递不入 radar，此为拒后补录）：10-02 轮 LinkedIn Easy Apply 提交（\"Your application was sent to Bevi!\"）；拒信 2026-10-03（Greenhouse no-reply@us.greenhouse-mail.io）。"
-    },
-    {
-      "company": "Amazon",
-      "title": "Applied Scientist II, Core Shopping Data Science (10490800)",
-      "applicationId": "10490800",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-03（noreply@mail.amazon.jobs）；该申请不在 Muse 投递记录中（seen_jobs.md 无此 req），据拒信补记。"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-29",
-      "company": "Nomura",
-      "jobUrl": "",
-      "location": "Hong Kong",
-      "notes": "2026-09-29 Xinyu 亲自提交（英文简历 resume_quant_research.pdf）；Aon 人才测评 10-02 完成；拒信日期 2026-10-05（\"Unfortunately, your test scores...\" 18:15 CDT）",
-      "resumeVersion": "resume_quant_research.pdf",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "2027 Risk Management Graduate Program - Hong Kong"
-    },
-    {
-      "company": "CVS Health",
-      "title": "Senior Decision Scientist - Retail Operations",
-      "applicationId": "R1050829",
-      "appliedDate": "2026-10-05",
-      "status": "拒绝",
-      "notes": "Boston, MA (Remote)。2026-10-05 自动投递（Workday 确认 \"You have successfully applied\"）。简历 resume_general_ds.pdf。拒信日期 2026-10-06",
-      "link": "https://www.linkedin.com/jobs/view/4474205805"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-08",
-      "company": "AmeriHealth Caritas",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4476790758/",
-      "location": "Remote US",
-      "notes": "2026-10-08 自动提交（LinkedIn）；大型健康保险 payor，claims 数据分析；拒信日期 2026-10-09",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-05",
-      "company": "AbbVie",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4474637228",
-      "location": "North Chicago, IL",
-      "notes": "Job ID R00151621；2026-10-05 自动提交（SmartRecruiters OneClick）；拒信日期 2026-10-08",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Research Statistician - Exploratory Analysis (Hybrid)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-08",
-      "company": "Notion",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4458773276/",
-      "location": "San Francisco, CA (Hybrid)",
-      "notes": "2026-10-08 自动提交（Ashby）；Anchor Days 答 Yes；拒信日期 2026-10-08",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist, Growth"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-08",
-      "company": "Microsoft",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4477177068/",
-      "location": "Redmond, WA (Hybrid)",
-      "notes": "2026-10-08 自动提交（LinkedIn）；early-career；拒信日期 2026-10-08（按日期推断对应，待她核对）",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Applied ML Engineer"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-05",
-      "company": "Capital One",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4475858512",
-      "location": "New York, NY",
-      "notes": "req R1002964；2026-10-05 自动提交（MyWorkday）；JD 明确 will consider sponsoring；拒信日期 2026-10-08",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Applied Researcher 4 (AI Foundations, LLM Customization and Finetuning)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-07",
-      "company": "Simon-Kucher",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4433985724/",
-      "location": "Chicago, IL / Boston, MA (Hybrid)",
-      "notes": "2026-10-07 自动提交（Cornerstone）；拒信日期 2026-10-07",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Consultant, Data Science – Elevate – Healthcare & Life Sciences"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-25",
-      "company": "Microsoft",
-      "jobUrl": "https://www.linkedin.com/comm/jobs/view/4453121437/",
-      "location": "Remote US",
-      "notes": "2026-09-25 投递；本科起点·大公司；拒信日期 2026-10-07（按日期推断对应，待她核对）",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Data Scientist – FDE"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-05",
-      "company": "AbbVie",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4474252406",
-      "location": "North Chicago, IL (Hybrid)",
-      "notes": "REF49906W；2026-10-05 自动提交（SmartRecruiters）；拒信日期 2026-10-07",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Sr. Clinical Data Scientist (RBQM Analytics)"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-03",
-      "company": "Oruka Therapeutics",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4474786942/",
-      "location": "Boston, MA (Hybrid)",
-      "notes": "2026-10-03 自动提交（Greenhouse req 5442455008）；PhD+5 年；拒信日期 2026-10-07",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Associate Director, Biostatistics"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-06",
-      "company": "DebtBook",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4473688045/",
-      "location": "Charlotte, NC",
-      "notes": "2026-10-06 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-07",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Associate Quantitative Strategist"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-29",
-      "company": "Man Group",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4471273455/",
-      "location": "Boston, MA",
-      "notes": "2026-09-29 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-05",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher - Equities"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-04",
-      "company": "Duolingo",
-      "jobUrl": "https://careers.duolingo.com/jobs/8610345002",
-      "location": "New York, NY",
-      "notes": "Req R-01168；2026-10-04 自动提交（官网）；拒信日期 2026-10-04",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Staff AI Research Engineer"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-04",
-      "company": "Netspend",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4466389235/",
-      "location": "Austin, TX (Hybrid)",
-      "notes": "2026-10-04 自动提交（Ashby）；拒信日期 2026-10-04",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Data Scientist - AML"
-    },
-    {
-      "company": "Man Group",
-      "title": "Junior Quant - PM Analytics",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-12（手动申请补录）；Greenhouse 拒信：we won't be moving forward with your application at this time",
-      "link": ""
-    },
-    {
-      "company": "Global Lending Services",
-      "title": "Data Scientist",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-12（手动申请补录）；Lever 拒信：Thanks for your interest in Global Lending Services",
-      "link": ""
-    },
-    {
-      "applicationId": "JR98989",
-      "appliedDate": "2026-10-06",
-      "company": "Micron",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4474944634/",
-      "location": "Boise, ID",
-      "notes": "2026-10-06 自动提交；拒信日期 2026-10-10",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Sr Data Scientist"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-09-29",
-      "company": "PDT Partners",
-      "jobUrl": "",
-      "location": "",
-      "notes": "拒信日期 2026-10-12",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-08",
-      "company": "Arrowhead Pharmaceuticals",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4391930911/",
-      "location": "San Diego, CA",
-      "notes": "2026-10-08 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-13",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Sr. Scientist I, Translational Genetics & Real-World Evidence"
-    },
-    {
-      "applicationId": "8256064",
-      "appliedDate": "2026-10-08",
-      "company": "Engineers Gate",
-      "jobUrl": "https://job-boards.greenhouse.io/engineersgate/jobs/8256064",
-      "location": "New York, NY",
-      "notes": "2026-10-08 自动提交（Greenhouse）；拒信日期 2026-10-13",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Researcher"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-06",
-      "company": "Wayve",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4474099180/",
-      "location": "Sunnyvale, CA",
-      "notes": "2026-10-06 自动提交（Ashby）；拒信日期 2026-10-14",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Data Scientist"
-    },
-    {
-      "applicationId": "26194",
-      "appliedDate": "2026-10-08",
-      "company": "Pearson",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4475731337/",
-      "location": "Remote",
-      "notes": "2026-10-08 自动提交；拒信日期 2026-10-14",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Specialist, Psychometrician"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-08",
-      "company": "Pave",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4477431497/",
-      "location": "San Francisco, CA",
-      "notes": "2026-10-08 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-14",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist"
-    },
-    {
-      "applicationId": "R1002104",
-      "appliedDate": "2026-09-26",
-      "company": "Capital One",
-      "jobUrl": "",
-      "location": "",
-      "notes": "req R1002104；拒信日期 2026-10-15",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Associate, Data Scientist - Applied AI"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-07",
-      "company": "Lila Sciences",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4467462123/",
-      "location": "",
-      "notes": "拒信日期 2026-10-15",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Scientist II / Senior Scientist, BioML"
-    },
-    {
-      "applicationId": "2273430550",
-      "appliedDate": "2026-10-10",
-      "company": "MongoDB",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4413123345/",
-      "location": "Palo Alto, CA",
-      "notes": "2026-10-10 自动提交（Greenhouse）；拒信日期 2026-10-15（拒信未写岗位，按名下唯一 MongoDB 申请对应）",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Research Scientist"
-    },
-    {
-      "company": "Flow Traders",
-      "title": "PhD Graduate Quantitative Researcher",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-16（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Danaher",
-      "title": "Lead AI Scientist",
-      "applicationId": "R1319117",
-      "appliedDate": "2026-10-10",
-      "status": "拒绝",
-      "notes": "Boston, MA；2026-10-10 提交（Workday 确认页已核，Job_Application_ID=ca0d0a8ca69d90002f597545d82b0000）；拒信日期 2026-10-15",
-      "link": "https://www.linkedin.com/jobs/view/4475242868/"
-    },
-    {
-      "company": "BetterHelp",
-      "title": "Data Scientist",
-      "applicationId": "greenhouse-5268359008",
-      "appliedDate": "2026-10-13",
-      "status": "拒绝",
-      "notes": "US Remote；2026-10-13 用户手动完成最终提交、确认页已核（自申 #107）；拒信日期 2026-10-15",
-      "link": "https://job-boards.greenhouse.io/betterhelpcom/jobs/5268359008"
-    },
-    {
-      "company": "Revolution Medicines",
-      "title": "Machine Learning Scientist II",
-      "applicationId": "greenhouse-8020357003",
-      "appliedDate": "2026-10-09",
-      "status": "拒绝",
-      "notes": "San Francisco Bay Area Hybrid；2026-10-09 提交（Greenhouse 确认页已核）；拒信日期 2026-10-16",
-      "link": "https://www.linkedin.com/jobs/view/4476845796/"
-    },
-    {
-      "company": "insitro",
-      "title": "Senior Data Scientist, CompBio",
-      "applicationId": "ashby-ec4a278a-dd78-4e9c-a203-87e3e2f59e60",
-      "appliedDate": "2026-10-11",
-      "status": "拒绝",
-      "notes": "South San Francisco, CA Hybrid；2026-10-11 提交（Ashby）；拒信日期 2026-10-16",
-      "link": "https://jobs.ashbyhq.com/insitro/ec4a278a-dd78-4e9c-a203-87e3e2f59e60/application"
-    },
-    {
-      "company": "Novartis",
-      "title": "AI/ML for Biology Scientist",
-      "applicationId": "REQ-10089087",
-      "appliedDate": "2026-10-15",
-      "status": "拒绝",
-      "notes": "La Jolla, CA；2026-10-15 提交（Workday Screening Phase In Process）；拒信日期 2026-10-16",
-      "link": ""
-    },
-    {
-      "company": "Novartis",
-      "title": "Scientific AI Platform Lead, Data Science, Disease Area X",
-      "applicationId": "REQ-10088821",
-      "appliedDate": "2026-10-16",
-      "status": "拒绝",
-      "notes": "Cambridge, MA；2026-10-16 提交（08:33 确认邮件），同日 08:52 收到拒信；拒信日期 2026-10-16",
-      "link": ""
-    },
-    {
-      "company": "Genentech",
-      "title": "Senior Data Scientist (AI-assisted Clinical Development)",
-      "applicationId": "202610-125652",
-      "appliedDate": "2026-10-15",
-      "status": "拒绝",
-      "notes": "Boston, MA；2026-10-15 提交（成功页已核，自申 #250）；拒信日期 2026-10-16（Roche Workday 发出）",
-      "link": "https://careers.gene.com/us/en/job/GENEUS202610125652EXTERNALENUS"
-    },
-    {
-      "company": "Man Group",
-      "title": "Quant Researcher",
-      "applicationId": "linkedin-4479832183",
-      "appliedDate": "2026-10-15",
-      "status": "拒绝",
-      "notes": "New York, NY，Strategic Alpha Research；2026-10-15 LinkedIn Easy Apply 提交；同雇主另两份申请（QR-Equities 4471273455、Junior Quant 4477658881）此前已分别拒信归档，本封按排除法归属本单；拒信日期 2026-10-16",
-      "link": "https://www.linkedin.com/jobs/view/4479832183/"
-    },
-    {
-      "company": "IQVIA",
-      "title": "FSP Principal Biostatistician, Study Powering and Design",
-      "applicationId": "R1572965",
-      "appliedDate": "2026-10-15",
-      "status": "拒绝",
-      "notes": "Durham NC (remote US)；2026-10-15 提交（TRIAGED §2，#187，CV Biostatistician）；拒信 2026-10-17 04:46（iqvia@myworkday.com，主题作 R1572965 FSP Principal Biostatistician, Phase 2 and 3）；拒信日期 2026-10-17",
-      "link": "https://www.linkedin.com/jobs/view/4475460491/"
-    },
-    {
-      "company": "AtriCure",
-      "title": "Senior Principal Statistician",
-      "applicationId": "",
-      "appliedDate": "2026-10-07",
-      "status": "拒绝",
-      "notes": "Remote US；2026-10-07 提交（LinkedIn Easy Apply，确认页已核，TRIAGED §2）；拒信 2026-10-17 14:03（no-reply@atricure.com）；拒信日期 2026-10-17",
-      "link": "https://www.linkedin.com/jobs/view/4459197347/"
-    },
-    {
-      "company": "BlackEdge Capital",
-      "title": "Graduate Quantitative Researcher 2027",
-      "applicationId": "4732320005",
-      "appliedDate": "2026-10-17",
-      "status": "拒绝",
-      "notes": "Chicago, IL；2026-10-17 提交（TRIAGED §2 pipeline，成功页已核，简历 resume_quant_research.pdf）；拒信 2026-10-18 07:30（no-reply@us.greenhouse-mail.io，主题 BlackEdge Capital Update，正文称不提供 visa assistance、unable to move forward）；拒信日期 2026-10-18",
-      "link": "https://job-boards.greenhouse.io/blackedgecapital/jobs/4732320005"
-    },
-    {
-      "company": "Eikon Therapeutics",
-      "title": "Scientist, Computational Biology",
-      "applicationId": "5248834007",
-      "appliedDate": "2026-10-16",
-      "status": "拒绝",
-      "notes": "Millbrae CA；2026-10-16 提交（TRIAGED §2，CV AIDD）；拒信 2026-10-18 08:30（no-reply@us.greenhouse-mail.io，主题 Application Update: Scientist, Computational Biology at Eikon Therapeutics，正文 we will not be progressing your candidacy）；拒信日期 2026-10-18",
-      "link": ""
-    },
-    {
-      "company": "Natera",
-      "title": "Machine Learning Scientist, Multimodal AI",
-      "applicationId": "6004385004",
-      "appliedDate": "2026-10-16",
-      "status": "拒绝",
-      "notes": "Remote US；2026-10-16 提交（TRIAGED §2，Greenhouse 6004385004，确认邮件已收）；拒信 2026-10-18 10:00（no-reply@natera.com，主题 Important information about your application to Natera，正文 decided to move forward with other candidates；该公司唯一已提交 req 即本岗）；拒信日期 2026-10-18",
-      "link": ""
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "",
-      "company": "Eli Lilly",
-      "link": "",
-      "notes": "拒信日期 2026-10-17（手动申请补录）；lilly@myworkday.com 2026-10-17 06:46 拒信：We have decided to pursue other candidate(s) at this time；JSON 中无对应条目（名下另有 R-112033/R-110351/R-112031 三条不同岗位）",
-      "status": "拒绝",
-      "title": "Sr. Advisor - Statistics (RWE)"
-    },
-    {
-      "company": "Johnson & Johnson",
-      "title": "Senior Scientist, AI Lead",
-      "applicationId": "R-102296",
-      "appliedDate": "2026-10-18",
-      "status": "拒绝",
-      "location": "",
-      "jobUrl": "",
-      "source": "Muse 求职助手",
-      "notes": "2026-10-18 提交（TRIAGED §2 清单渠道，Workday）；拒信 2026-10-19 14:11 jj@myworkday.com，正文 you were not selected for the role；拒信日期 2026-10-19"
-    },
-    {
-      "company": "Veeva Systems",
-      "title": "Senior Data Analyst",
-      "applicationId": "e38ab928-18d3-4907-901e-e3dc889aab1c",
-      "appliedDate": "2026-10-17",
-      "status": "拒绝",
-      "location": "Boston / Remote US",
-      "jobUrl": "",
-      "source": "Muse 求职助手",
-      "notes": "2026-10-17 提交（TRIAGED §2 清单 #88，Lever 成功页已核）；拒信 2026-10-19 13:45 via Lever，正文 after careful consideration, we have decided not to move forward；拒信日期 2026-10-19"
-    },
-    {
-      "company": "Blue Cross Blue Shield of Michigan",
-      "title": "Biostatistician",
-      "applicationId": "14937",
-      "appliedDate": "2026-10-14",
-      "status": "拒绝",
-      "location": "Detroit, MI",
-      "jobUrl": "https://ejko.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_3/job/14937",
-      "source": "Muse 求职助手",
-      "notes": "2026-10-14 提交（TRIAGED §2 #348，Oracle 14937，10-15 登录核实已投）；拒信 2026-10-19 09:18 Oracle workflow，正文 moving forward with other candidates（岗位 Biostatistician - 14937）；拒信日期 2026-10-19"
-    },
-    {
-      "company": "Sanofi",
-      "title": "E4A Systemic Mastocytosis/Emerging Indication HEOR Strategy Specialist",
-      "applicationId": "R2872719",
-      "appliedDate": "2026-10-10",
-      "status": "拒绝",
-      "location": "Cambridge, MA / Morristown, NJ",
-      "jobUrl": "",
-      "source": "Muse 求职助手",
-      "notes": "2026-10-10 提交（TRIAGED §2，Workday 确认页已核）；拒信 2026-10-19 02:23 Sanofi@myworkday.com（req R2872719），正文 after careful consideration, we have decided not to proceed with your candidacy；拒信日期 2026-10-19"
-    },
-    {
-      "applicationId": "4475621984",
-      "appliedDate": "2026-10-11",
-      "company": "Domino's",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4475621984/",
-      "location": "Ann Arbor, MI",
-      "notes": "2026-10-11 提交（seen_jobs 记录，LinkedIn Easy Apply 确认页 Application submitted）；拒信 2026-10-20 08:36 notifications@smartrecruiters.com，正文 will not be moving forward with your application；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist"
-    },
-    {
-      "applicationId": "R-795276",
-      "appliedDate": "2026-10-13",
-      "company": "State Street",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4478571116/",
-      "location": "Stamford, CT",
-      "notes": "2026-10-13 提交（TRIAGED §2，确认页 Application Submitted，Candidate Home Application Received）；拒信 2026-10-20 16:20 statestreet@myworkday.com，正文 decided not to move forward with your application；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Market Risk Stress Testing and Scenario Design"
-    },
-    {
-      "applicationId": "R00151760",
-      "appliedDate": "2026-10-15",
-      "company": "AbbVie",
-      "jobUrl": "",
-      "location": "North Chicago, IL",
-      "notes": "2026-10-15 提交（TRIAGED §2，SmartRecruiters 3743990015995376）；拒信 2026-10-20 12:15 notifications@talentacquisition.abbvie.com，正文 after careful consideration... move forward with other candidates；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Manager, Statistics - Oncology (Hybrid)"
-    },
-    {
-      "applicationId": "R00149942",
-      "appliedDate": "2026-10-15",
-      "company": "AbbVie",
-      "jobUrl": "https://jobs.smartrecruiters.com/AbbVie/3743990016149987-senior-research-statistician-statistical-innovation-hybrid-",
-      "location": "North Chicago, IL",
-      "notes": "2026-10-15 提交（TRIAGED §2，SmartRecruiters 成功页 Application submitted）；拒信 2026-10-20 12:05 notifications@talentacquisition.abbvie.com，正文 after careful consideration... move forward with other candidates；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Research Statistician - Statistical Innovation (Hybrid)"
-    },
-    {
-      "applicationId": "R-1672",
-      "appliedDate": "2026-10-15",
-      "company": "Denali Therapeutics",
-      "jobUrl": "",
-      "location": "South San Francisco, CA",
-      "notes": "2026-10-15 提交（TRIAGED §2 pipeline，Workday My Applications Active）；拒信 2026-10-20 02:07 dnli@myworkday.com，正文 after careful consideration we are moving forward with candidates whose skills align more closely；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Biostatistician"
-    },
-    {
-      "applicationId": "JR17486",
-      "appliedDate": "2026-10-12",
-      "company": "Freddie Mac",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4453270106/",
-      "location": "McLean, VA",
-      "notes": "2026-10-12 提交（TRIAGED §2，官网确认页 Thank you for applying）；拒信 2026-10-20 07:08 freddiemac@myworkday.com，正文 hiring team has decided to move forward with another candidate；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quantitative Analytics Senior"
-    },
-    {
-      "applicationId": "7206325",
-      "appliedDate": "2026-10-18",
-      "company": "BGBx Consulting",
-      "jobUrl": "",
-      "location": "Washington, DC / NYC / Boston",
-      "notes": "Kx Advisors（BGBx Consulting）TRIAGED #363，2026-10-18 提交（Greenhouse 7206325 确认页）；拒信 2026-10-20 08:00 no-reply@bgbgroup.com，正文 decided not to move forward with your candidacy；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Consultant"
-    },
-    {
-      "applicationId": "210781710",
-      "appliedDate": "2026-10-17",
-      "company": "JPMorgan Chase",
-      "jobUrl": "",
-      "location": "",
-      "notes": "TRIAGED #182，2026-10-17 提交（My Applications Under Consideration，Applied on 10/17/2026）；拒信 2026-10-20 09:05 Oracle workflow（Job number 210781710），正文 moving forward with other candidates；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Quant Analytics Associate"
-    },
-    {
-      "applicationId": "8730538002",
-      "appliedDate": "2026-10-14",
-      "company": "Komodo Health",
-      "jobUrl": "https://job-boards.greenhouse.io/komodohealth/jobs/8730538002",
-      "location": "US Remote",
-      "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-19 15:45 no-reply@us.greenhouse-mail.io，正文未点名岗位（decided not to proceed with your candidacy for that position），按唯一 Komodo 在途申请对应本岗；拒信日期 2026-10-19",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Consultant, Analytics Consulting"
-    },
-    {
-      "applicationId": "",
-      "appliedDate": "2026-10-08",
-      "company": "Abridge",
-      "jobUrl": "https://jobs.ashbyhq.com/Abridge/03a3231f-8361-405e-87a6-192d710ca912/application",
-      "location": "New York, NY",
-      "notes": "2026-10-08 提交（TRIAGED §2）；拒信 2026-10-19 13:08 no-reply@ashbyhq.com，正文 decided not to proceed with your candidacy；拒信日期 2026-10-19",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Member of Technical Staff, Research Science"
-    },
-    {
-      "applicationId": "R-260596",
-      "appliedDate": "2026-10-15",
-      "company": "AstraZeneca (Alexion)",
-      "jobUrl": "",
-      "location": "Boston, MA",
-      "notes": "2026-10-15 提交（TRIAGED §2 pipeline，Eightfold pid 563877691554470）；拒信 2026-10-19 08:02 noreply@az-recruitment.com（Alexion 名义），正文 decided not to proceed with your application。与 Radar 既有 Senior Manager, Biostatistics（2026-09-26）为不同 req；拒信日期 2026-10-19",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Biostatistician"
-    },
-    {
-      "applicationId": "R-257153",
-      "appliedDate": "2026-10-15",
-      "company": "Amgen",
-      "jobUrl": "https://amgen.wd1.myworkdayjobs.com/Careers/job/United-States---Remote/Observational-Research-Manager---Inflammation---Rare-Disease_R-257153",
-      "location": "Remote, US",
-      "notes": "2026-10-15 提交（TRIAGED §2 pipeline 对应 #146，Workday Candidate Home Application Received）；拒信 2026-10-20 02:12 amgen@myworkday.com，正文 decided to move forward with candidates whose background is a better match；拒信日期 2026-10-20",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Observational Research Manager - Inflammation / Rare Disease"
-    },
-    {
-      "company": "Expedia Group",
-      "title": "Machine Learning Scientist III - Customer Lifetime Value",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-19（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "佳期投资",
-      "title": "2027量化策略研究员 - 上海",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-20（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Imagine Pediatrics",
-      "title": "Data Scientist",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "岗位已招满关闭；拒信日期 2026-10-20（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "PANTHERx Rare Pharmacy",
-      "title": "Principal HEOR Researcher",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-20（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Upstart",
-      "title": "Applied Scientist",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "recruiter Jemini Jhaveri 来信拒绝；拒信日期 2026-10-20（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "HEOR COA/PRO Advisor",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-20（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "Sr. Computational Statistician",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-20（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Gilead Sciences",
-      "title": "Senior Manager, Biostatistics",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "req R0055488；拒信日期 2026-10-21（手动申请补录）",
-      "link": ""
-    },
-    {
-      "applicationId": "8164181",
-      "appliedDate": "2026-10-10",
-      "company": "Datadog",
-      "jobUrl": "https://careers.datadoghq.com/detail/8164181/?gh_jid=8164181",
-      "location": "New York, NY",
-      "notes": "2026-10-10 提交（TRIAGED §2，官方 req R5560/Greenhouse 8164181，确认页 Thank you for applying）；拒信 2026-10-21 07:18 no-reply@datadoghq.com，正文 decided not to move forward with your application；拒信日期 2026-10-21",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior Applied Scientist"
-    },
-    {
-      "applicationId": "8883870002",
-      "appliedDate": "2026-10-14",
-      "company": "Duolingo",
-      "jobUrl": "https://job-boards.greenhouse.io/duolingounirecruitment/jobs/8883870002",
-      "location": "Pittsburgh, PA / New York, NY",
-      "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-21 13:40 jaylyn@duolingo.com，正文点名 AI Research Engineer, New PhD Graduate，decided not to move forward。与 Radar 既有 Staff AI Research Engineer（2026-10-04 已拒）为不同岗位；拒信日期 2026-10-21",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "AI Research Engineer, New PhD Graduate"
-    },
-    {
-      "applicationId": "R-6849",
-      "appliedDate": "2026-10-18",
-      "company": "Cambia Health Solutions",
-      "jobUrl": "https://cambiahealth.wd504.myworkdayjobs.com/en-US/External/job/Salt-Lake-City%2C-UT/Healthcare-Decision-Scientist_R-6849/apply",
-      "location": "Salt Lake City, UT",
-      "notes": "2026-10-18 提交（TRIAGED §2 #68，Workday 成功对话框 Application Submitted，Candidate Home In Process）；拒信 2026-10-21 14:22 cambiahealth@myworkday.com，正文点名 Healthcare Decision Scientist，other candidates better meet the current needs；拒信日期 2026-10-21",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Healthcare Decision Scientist"
-    },
-    {
-      "applicationId": "202607-119719",
-      "appliedDate": "2026-10-15",
-      "company": "Genentech",
-      "jobUrl": "",
-      "location": "South San Francisco, CA",
-      "notes": "2026-10-15 提交（TRIAGED §2，req 202607-119719，确认页 offline-success）；拒信 2026-10-21 17:36 Roche-Workday-DoNotReply@roche.com，岗位名 Senior Machine Learning Scientist, AI for Biology & Translation (AIBT)，正文 decided to move ahead with other candidates；按 §2 唯一 AIBT 申请对应本条；拒信日期 2026-10-21",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Senior ML Scientist, AI for Biology & Translation"
-    },
-    {
-      "company": "AstraZeneca",
-      "title": "Senior Statistician II (R-261294)",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：chosen to interview other candidates",
-      "link": ""
-    },
-    {
-      "company": "AstraZeneca",
-      "title": "Senior Statistician (R-255015)",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信（西英双语）：chosen to interview other candidates",
-      "link": ""
-    },
-    {
-      "company": "AstraZeneca",
-      "title": "Senior Statistician",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；az-recruitment 拒信：decided not to proceed；邮件未给 req，可能与 R-261294/R-255015 之一对应",
-      "link": ""
-    },
-    {
-      "company": "Trinity Life Sciences",
-      "title": "岗位未注明（申请更新）",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：impressed but moving forward with other candidates；邮件未注明岗位",
-      "link": ""
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "Applied AI Engineer, Clinical Informatics",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：pursue other candidates",
-      "link": ""
-    },
-    {
-      "company": "Regeneron",
-      "title": "Senior Quantitative Biomarker Scientist",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：decided to pursue other candidates",
-      "link": ""
-    },
-    {
-      "company": "Caris Life Sciences",
-      "title": "Data Scientist - Innovation - PhD",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：moving forward with other candidates",
-      "link": ""
-    },
-    {
-      "company": "Walmart",
-      "title": "Staff, Data Scientist",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；拒信：we have decided not to move forward with your application",
-      "link": ""
-    },
-    {
-      "company": "Caterpillar Inc.",
-      "title": "Senior Statistician – AI Product Assurance (R0000375085)",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：Unfortunately, our team did not select you",
-      "link": ""
-    },
-    {
-      "company": "MiniMed",
-      "title": "AI/Data Science Engineer II (R-802158)",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：decided to move forward with other candidates",
-      "link": ""
-    },
-    {
-      "applicationId": "req390",
-      "appliedDate": "2026-10-19",
-      "company": "Mathematica",
-      "jobUrl": "https://www.linkedin.com/jobs/view/4478611910/",
-      "location": "Princeton, NJ (Remote)",
-      "notes": "2026-10-19 提交（TRIAGED §2 pipeline，官方 Cornerstone req390，成功页 You have successfully applied；简历 resume_applied_scientist.pdf）；拒信 2026-10-22 15:56 aruedger@acceleratecontent.recruitmail.com，正文 will not be moving forward with your candidacy；拒信日期 2026-10-22",
-      "source": "Muse 求职助手",
-      "status": "拒绝",
-      "title": "Data Scientist (Remote Eligible)"
-    },
-    {
-      "company": "Amgen",
-      "title": "Data Scientist (R-246583)",
-      "applicationId": "R-246583",
-      "appliedDate": "2026-08-30",
-      "status": "拒绝",
-      "notes": "2026-08-30 提交（Amgen Workday Candidate Home Application Received，TRIAGED 去重记录在案，手动申请补录）；拒信 2026-10-23 02:13 amgen@myworkday.com，正文点名 Data Scientist，decided to move forward with candidates whose background is a better match；拒信日期 2026-10-23",
-      "link": "https://careers.amgen.com/en/job/washington/data-scientist/87/99087184432"
-    },
-    {
-      "company": "Lila Sciences",
-      "title": "Senior ML Scientist, Biological Systems",
-      "applicationId": "",
-      "appliedDate": "2026-10-07",
-      "status": "拒绝",
-      "notes": "2026-10-07 提交（TRIAGED §2，手动申请补录）；拒信 2026-10-23 09:45 no-reply@us.greenhouse-mail.io，正文点名 Senior ML Scientist, Biological Systems，decided not to move forward；拒信日期 2026-10-23",
-      "link": "https://www.linkedin.com/jobs/view/4467449291/"
-    },
-    {
-      "company": "State Street",
-      "title": "Quantitative Analyst, Officer (R-799704)",
-      "applicationId": "R-799704",
-      "appliedDate": "2026-10-15",
-      "status": "拒绝",
-      "notes": "2026-10-15 提交（TRIAGED §2，Workday 提交成功，Candidate Home Application Received，手动申请补录）；拒信 2026-10-23 09:04 statestreet@myworkday.com，正文点名 Quantitative Analyst, Officer, Hybrid，decided not to move forward；与在途的 Quantitative Analyst AVP / Credit Risk Modeler (R-790888) 为不同岗位；拒信日期 2026-10-23",
-      "link": "https://www.linkedin.com/jobs/view/4480189081/"
-    },
-    {
-      "company": "东阳光",
-      "title": "计算化学研究员（CADD）",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-24（手动申请补录）；东阳光应聘反馈通知（noreply@italent.cn，10-24 02:50）：本岗位未能进入下一环节",
-      "link": ""
-    },
-    {
-      "company": "Roche",
-      "title": "RWD Data Scientist",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Roche Workday 拒信（10-22 17:36）：move ahead with other candidates",
-      "link": ""
-    },
-    {
-      "company": "Roche",
-      "title": "Biostatistician/Data Scientist in Personalized Healthcare",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Roche Workday 拒信（10-22 17:36）：move ahead with other candidates",
-      "link": ""
-    },
-    {
-      "company": "Eikon Therapeutics",
-      "title": "Manager, Biostatistics",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-22（手动申请补录）；Eikon 更新（10-22 10:45）：position has now been filled, requisition closed；与 Scientist, Computational Biology（10-18 拒绝）为不同岗位",
-      "link": ""
-    },
-    {
-      "company": "Eli Lilly",
-      "title": "Campus: Research Advisor - Statistics",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-24（手动申请补录）；Eli Lilly Application Update（10-24 00:04）：pursue other candidates",
-      "link": ""
-    },
-    {
-      "company": "UCB",
-      "title": "Senior Real World Evidence Expert (United States)",
-      "applicationId": "850497",
-      "appliedDate": "2026-09-30",
-      "status": "拒绝",
-      "notes": "2026-09-30 提交（官网 careers.ucb.com，job 93916，Atlanta GA hybrid，确认页 successfully applied，简历 resume_biostat_pharma.pdf；手动申请补录——seen_jobs 曾记已推 Radar 但远端核查无此条目，本轮补录）；拒信 2026-10-24 10:16 recruiting@jobalerts.ucb.com，正文点名 Senior Real World Evidence Expert (United States)，pursuing other candidates at this time；拒信日期 2026-10-24",
-      "link": ""
-    },
-    {
-      "company": "IQVIA艾昆纬",
-      "title": "分析师/助理咨询顾问 - 真实世界证据及高阶分析（RWE/RWA）方向 Analyst / Associate Consultant, Real World Solutions (R1566150)",
-      "applicationId": "R1566150",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "总部 Workday 申请（申请确认信 2026-10-22 22:06 iqvia@myworkday.com）；中国校招表 CN322 为同岗，2026-10-24 已移入已拒绝；拒信 2026-10-24 03:16 iqvia@myworkday.com，主题点名 R1566150，decided not to move forward；与北京线 HireVue 在途申请（校招表 CN129 RWD&T 上海）无关；拒信日期 2026-10-24（手动申请补录）",
-      "link": "https://jobs.iqvia.cn/jobs/R1566150-1"
-    },
-    {
-      "company": "Lila Sciences",
-      "title": "Senior Data Scientist, AI Research",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-24（手动申请补录）",
-      "link": ""
-    },
-    {
-      "company": "Klaviyo",
-      "title": "Senior Data Scientist, Marketing",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-24（手动申请补录）",
-      "link": ""
-    }
-  ],
-  "source": "muse-jobhunt",
-  "updated_at": "2026-10-25T11:00:57-05:00",
-  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
+ "applications": [
+  {
+   "applicationId": "R50347",
+   "appliedDate": "2026-09-01",
+   "company": "Regeneron",
+   "jobUrl": "https://careers.regeneron.com/en/jobs/r50347/manager-biostatistics-hematology/",
+   "location": "",
+   "notes": "2026-09-01 由 Xinyu 提交；简历版本未记录；拒信日期 2026-10-06",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Manager, Biostatistics – Hematology"
+  },
+  {
+   "applicationId": "R50412",
+   "appliedDate": "2026-09-23",
+   "company": "Regeneron",
+   "jobUrl": "https://careers.regeneron.com/en/jobs/r50412/principal-biostatistician-statistical-innovation/",
+   "location": "",
+   "notes": "2026-09-23 由 Xinyu 提交；简历版本未记录；拒信 2026-09-30（workday 邮件 11:20 PM）",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Principal Biostatistician – Statistical Innovation"
+  },
+  {
+   "applicationId": "R-202608859",
+   "appliedDate": "2026-09-25",
+   "company": "Veristat",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4469243248",
+   "location": "Remote",
+   "notes": "2026-09-25 Xinyu 亲自点 Submit；网申状态 In Process；拒信日期 2026-10-05",
+   "resumeVersion": "resume_biostat_cro.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Biostatistician"
+  },
+  {
+   "applicationId": "REQ-29803",
+   "appliedDate": "2026-09-25",
+   "company": "Vertex",
+   "jobUrl": "https://vrtx.wd501.myworkdayjobs.com/en-US/vertex_careers/details/Sr-Biostatistician-II_REQ-29803",
+   "location": "",
+   "notes": "2026-09-25 Xinyu 接管亲自点 Submit",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Sr. Biostatistician II"
+  },
+  {
+   "applicationId": "R-095119",
+   "appliedDate": "2026-09-25",
+   "company": "Johnson & Johnson",
+   "jobUrl": "https://www.careers.jnj.com/en/jobs/r-095119/senior-scientist-biostatistics/",
+   "location": "",
+   "notes": "2026-09-25 Xinyu 接管亲自点 Submit；Yale MS 专业因 J&J 列表无 Biostatistics 选项填为 Statistics",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Senior Scientist, Biostatistics"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Systimmune",
+   "jobUrl": "https://www.systimmune.com/",
+   "location": "Princeton, NJ",
+   "notes": "2026-09-25 提交，JazzHR 确认页 'Your application has been received'；双语岗；拒信日期 2026-10-15",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Biostatistician, Bilingual Mandarin"
+  },
+  {
+   "applicationId": "R1606428",
+   "appliedDate": "2026-09-25",
+   "company": "Bristol Myers Squibb",
+   "jobUrl": "https://app.eightfold.ai/careers/job/137483568270?domain=bms.com&hl=en",
+   "location": "Princeton, NJ",
+   "notes": "2026-09-25 Xinyu 检查后亲自点 Submit",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Senior Manager, RWE Biostatistics"
+  },
+  {
+   "applicationId": "R00147712",
+   "appliedDate": "2026-09-25",
+   "company": "AbbVie",
+   "jobUrl": "https://careers.abbvie.com/en/job/senior-research-statistician-hybrid-in-north-chicago-il-jid-32413",
+   "location": "North Chicago, IL (Hybrid)",
+   "notes": "2026-09-25 Xinyu 检查后亲自点 Submit；原 On-Site 版 jid-5196 已过期，改投最接近的 Hybrid 在招版；拒信日期 2026-09-30（notifications@talentacquisition.abbvie.com，R00147712 Senior Research Statistician (Hybrid)）",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Research Statistician"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Optiver",
+   "jobUrl": "https://www.optiver.com/join-us/jobs/quantitative-research-and-machine-learning/chicago/graduate-quantitative-researcher-phd-2027-start/",
+   "location": "Chicago, IL / New York, NY",
+   "notes": "2026-09-25 Xinyu 在浏览器接管后亲自提交；申请 Chicago + New York，2027.6 可到岗；JD 明确支持 sponsorship；测评邀请 Invitation for assessments（Fri 2026-09-25 3:50 PM，Optiver assessments 平台；邮件注明截止 2026-10-02，需尽快完成）；拒信日期 2026-10-05（测评未通过，她亲口确认）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Graduate Quantitative Researcher, PhD (2027 Start)"
+  },
+  {
+   "applicationId": "6302325002",
+   "appliedDate": "2026-09-25",
+   "company": "Jane Street",
+   "jobUrl": "https://www.janestreet.com/join-jane-street/position/6302325002/",
+   "location": "New York, NY",
+   "notes": "2026-09-25 Xinyu 检查后亲自点 Submit；拒信日期 2026-10-02（jobs@janestreet.com）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "2636",
+   "appliedDate": "2026-09-25",
+   "company": "D. E. Shaw",
+   "jobUrl": "https://www.deshaw.com/careers",
+   "location": "New York, NY",
+   "notes": "2026-09-25 提交（浏览器任务误点 Finish，她确认三处判断都对不撤回）；Quantitative Analyst；拒信 2026-10-05（recruiting@deshaw.com，\"From the D. E. Shaw group\" 7:36 AM；注：同雇主 DESIM Technical Strategist Associate 10-05 曾派发、结果未知，此拒信按时间归属 2636 申请）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Analyst"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Google",
+   "jobUrl": "https://www.google.com/about/careers/applications/",
+   "location": "Mountain View, CA",
+   "notes": "2026-09-25 她接管时亲自提交；页面显示 You submitted this application on Sep 25；30天内已达3个申请上限；拒信日期 2026-10-08",
+   "resumeVersion": "CV_Applied_DS_Internet_EN.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist III, Research"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Citadel",
+   "jobUrl": "https://www.citadel.com/careers/",
+   "location": "Miami, FL",
+   "notes": "2026-09-26 经她授权代点 Submit；确认页 Thank You / You've already applied；本科入学年份用了2019（正确为2017）；拒信日期 2026-10-19",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher, PhD Graduate"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Citadel Securities",
+   "jobUrl": "https://www.citadelsecurities.com/careers/",
+   "location": "New York, NY",
+   "notes": "2026-09-26 她接管时亲自提交；确认页 Thank You — You've already applied；拒信日期 2026-10-19",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher, PhD Graduate"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Jump Trading",
+   "jobUrl": "https://www.jumptrading.com/careers",
+   "location": "Chicago, IL",
+   "notes": "2026-09-26 她接管时亲自提交；收到确认邮件 Your details have been added to our database and are under review",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Campus Quantitative Researcher"
+  },
+  {
+   "applicationId": "11017",
+   "appliedDate": "2026-09-25",
+   "company": "SIG (Susquehanna)",
+   "jobUrl": "https://careers.sig.com/",
+   "location": "",
+   "notes": "2026-09-26 任务在Step 2误点Submit直接提交；她说没事不撤回；收到账号设置邮件；拒信日期 2026-10-21",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher – PhD: 2027"
+  },
+  {
+   "applicationId": "302821",
+   "appliedDate": "2026-09-25",
+   "company": "Uber",
+   "jobUrl": "https://www.uber.com/careers/",
+   "location": "",
+   "notes": "2026-09-26 经她授权代提交；确认页 Thank you for your job application；状态 Under Consideration；收到确认邮件；拒信日期 2026-10-17",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Scientist II, Marketplace"
+  },
+  {
+   "applicationId": "184492",
+   "appliedDate": "2026-09-25",
+   "company": "Goldman Sachs",
+   "jobUrl": "https://higher.gs.com/",
+   "location": "New York, NY",
+   "notes": "2026-09-26 经她授权代提交；F-1剩余月数填36；本科入学用了2019（正确为2017）；收到确认邮件",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Core Engineering, FTP Strats, Associate, Quantitative Engineering"
+  },
+  {
+   "applicationId": "156138",
+   "appliedDate": "2026-09-25",
+   "company": "Goldman Sachs",
+   "jobUrl": "https://higher.gs.com/",
+   "location": "New York, NY",
+   "notes": "2026-09-26 经她授权代提交；F-1剩余月数填36；本科入学用了2019（正确为2017）；收到确认邮件",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Strategist, GCEM"
+  },
+  {
+   "applicationId": "8030406",
+   "appliedDate": "2026-09-25",
+   "company": "DRW",
+   "jobUrl": "https://job-boards.greenhouse.io/drweng/jobs/8030406",
+   "location": "Chicago, IL",
+   "notes": "2026-09-26 上传博士成绩单后提交；SWUFE按她要求删除只留Vanderbilt+Yale；地点Chicago排第一；Offer deadlines=No；拒信日期 2026-09-29（\"will not be moving forward with your application\"）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "8036541",
+   "appliedDate": "2026-09-25",
+   "company": "Akuna Capital",
+   "jobUrl": "https://akunacapital.com/careers/job/8036541/?gh_jid=8036541",
+   "location": "Chicago, IL",
+   "notes": "2026-09-26 她用自己浏览器手动提交（隐形reCAPTCHA拦自动化）；收到确认邮件；测评可能经HackerRank/Canditech/Criteria发；HackerRank 测评邀请已发（Fri 2026-09-25 7:02 PM）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Junior Quantitative Researcher"
+  },
+  {
+   "applicationId": "8636830002",
+   "appliedDate": "2026-09-26",
+   "company": "Marshall Wace",
+   "jobUrl": "https://job-boards.greenhouse.io/mw-tech-grad/jobs/8636830002",
+   "location": "New York, NY",
+   "notes": "2026-09-26 自动提交（Greenhouse；确认页 Thank you for applying）。SWUFE 不在 Greenhouse 学校库，已从第三段教育删除（简历保留）；Quant Developer consideration 选 No（保守，待她确认）；BS/MS grade 按表格自带换算（3.8→1st Class，4.0→Distinction）；拒信日期 2026-10-08",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quant Research - Quant Associate Programme - 2027"
+  },
+  {
+   "applicationId": "R00150607",
+   "appliedDate": "2026-09-26",
+   "company": "AbbVie",
+   "jobUrl": "https://careers.abbvie.com/en/job/senior-research-statistician-immunology-hybrid-based-in-north-chicago-il-jid-5194",
+   "location": "North Chicago, IL (hybrid)",
+   "notes": "2026-09-26 自动提交（SmartRecruiters；确认页 Application submitted）。原目标 Florham Park 岗 R00109119 已过期，此为同岗同职级 Immunology variant 替代投递；拒信日期 2026-09-30（notifications@talentacquisition.abbvie.com，R00150607 Senior Research Statistician - Immunology (Hybrid)）",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Research Statistician - Immunology (Hybrid)"
+  },
+  {
+   "company": "Trexquant Investment",
+   "title": "Quantitative Researcher - PhD (USA)",
+   "appliedDate": "2026-09-25",
+   "jobUrl": "",
+   "location": "USA",
+   "status": "已申请",
+   "notes": "daily-job-screening 2026-09-26 接续；Xinyu 接管浏览器后成功提交，Trexquant 确认页已提交，副本发学校邮箱；本轮补同步。相关经验 4 年，resume_quant_research.pdf，Photo/Summary/Cover letter 留空，EEO survey 未填",
+   "source": "Muse 求职助手"
+  },
+  {
+   "applicationId": "R-256969",
+   "appliedDate": "2026-09-26",
+   "company": "AstraZeneca (Alexion)",
+   "jobUrl": "https://careers.astrazeneca.com/job/boston/senior-manager-biostatistics/43991/98186038960",
+   "location": "Boston, MA (office-based)",
+   "notes": "2026-09-26 自动提交（daily-job-screening 接续）。R-256969，9/14 发布，9/29 截止；三段工作经历均带描述",
+   "resumeVersion": "resume_biostat_pharma.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Senior Manager, Biostatistics"
+  },
+  {
+   "company": "Precision AQ",
+   "title": "Associate Research Scientist, RWE",
+   "applicationId": "greenhouse-6128935004",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "Remote US; Greenhouse confirmation received；邮箱确认信 2026-09-27 1:25 PM CDT《Precision AQ: Thank you for your application》（通用模板，按时间归属）",
+   "link": "https://job-boards.greenhouse.io/precisionmedicinegroup/jobs/6128935004"
+  },
+  {
+   "company": "Renaissance Technologies",
+   "title": "Research Scientist",
+   "applicationId": "rentec-20260927",
+   "appliedDate": "2026-09-27",
+   "status": "拒绝",
+   "notes": "East Setauket, NY; confirmation 'Your application has been submitted.'；2026-09-27 邮箱全文件夹未收到确认邮件，待确认；拒信日期 2026-10-07",
+   "link": "https://www.rentec.com/apply"
+  },
+  {
+   "company": "3Red Partners",
+   "title": "2027 Graduate Quantitative Researcher",
+   "applicationId": "greenhouse-8624128002",
+   "appliedDate": "2026-09-27",
+   "status": "拒绝",
+   "notes": "New York, NY; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 1:34 PM CDT《Thank you for applying to 3Red Partners》（通用模板，按时间归属）；拒信日期 2026-09-28（\"decided not to proceed\"）",
+   "link": "https://www.3redpartners.com/careers"
+  },
+  {
+   "company": "Jane Street",
+   "title": "Machine Learning Researcher (R-1529)",
+   "applicationId": "janestreet-8576928002",
+   "appliedDate": "2026-09-27",
+   "status": "拒绝",
+   "notes": "New York, NY; confirmation 'THANK YOU FOR YOUR APPLICATION.'; no work-auth questions on form；邮箱确认信 2026-09-27 1:48 PM CDT《Thank you for applying to Jane Street》（通用模板，按时间归属；同邮箱9/25另有该司其他岗位确认信）；拒信 2026-10-02 08:00 CDT (jobs@janestreet.com)；注意：该拒信为通用模板未指明岗位，同雇主 9-25 QR(6302325002) 申请亦存在，无法完全排除是那一份，待进一步确认",
+   "link": "https://www.janestreet.com/join-jane-street/apply/8576928002?gh_jid=8576928002",
+   "rejectedDate": "2026-10-02"
+  },
+  {
+   "company": "fairlife",
+   "title": "Data Scientist (Decision Intelligence)",
+   "applicationId": "greenhouse-5249251007",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "Chicago, IL; $95K-$110K; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 2:50 PM CDT《fairlife, LLC | We've Received Your Application!》（通用模板，按时间归属）",
+   "link": "https://fairlife.com/career-opportunities/data-scientist/?gh_jid=5249251007"
+  },
+  {
+   "company": "TextNow",
+   "title": "Data Scientist",
+   "applicationId": "greenhouse-4421318009",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "San Francisco, CA; confirmation 'Thank you for applying.'；邮箱确认信 2026-09-27 2:52 PM CDT《Thank you for applying to TextNow, Inc.》（通用模板，按时间归属）",
+   "link": "https://job-boards.greenhouse.io/textnowinc/jobs/4421318009"
+  },
+  {
+   "company": "Affirm",
+   "title": "Analyst I, Risk & Analytics",
+   "applicationId": "greenhouse-7808667003",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "Remote US; $115K-$165K; confirmation 'Thank you for applying to Affirm.'；邮箱确认信 2026-09-27 2:55 PM CDT《We've received your application for Analyst at Affirm》（主题含 Analyst，与岗位吻合）",
+   "link": "https://job-boards.greenhouse.io/affirm/jobs/7808667003"
+  },
+  {
+   "company": "Lyft",
+   "title": "Senior Data Scientist, Causal Inference",
+   "applicationId": "greenhouse-110880",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "New York, NY Hybrid; confirmation 'Thank you for your interest in Lyft!'；邮箱确认信 2026-09-27 4:33 PM CDT《Thank you for your application for Senior Data Scientist, Causal Inference》（主题点名岗位，归属确切）",
+   "link": "https://app.careerpuck.com/job-board/lyft/job/8584688002"
+  },
+  {
+   "company": "Biogen",
+   "title": "Sr. Principal Biostatistician",
+   "applicationId": "REQ22948",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "Confirmation 'Application Submitted'; Candidate Home shows Application Received 2026-09-27；邮箱确认信 2026-09-27 4:41 PM CDT《Thank you for applying to Biogen》（正文含 Sr. Principal Biostatistician，归属确切）",
+   "link": "https://www.biogen.com"
+  },
+  {
+   "company": "Amazon",
+   "title": "Applied Scientist II, US Prime and Marketing Tech",
+   "applicationId": "10440521",
+   "appliedDate": "2026-09-27",
+   "status": "拒绝",
+   "notes": "New York NY; confirmation 'Thank you for applying! Your application for Applied Scientist II... has been submitted.'; CPT=No (STEM OPT post-graduation)；邮箱确认信 2026-09-27 2:50 PM CDT《Keep track of your application / Thank you for Applying to Amazon!》（正文点名 Applied Scientist II US Prime and Marketing Tech (ID:10440521)，归属确切）；拒信日期 2026-10-03（noreply@mail.amazon.jobs）",
+   "link": "https://www.amazon.jobs/en-US/applicant/jobs/10440521/summary?result=success"
+  },
+  {
+   "company": "Amgen",
+   "title": "Biostatistics Senior Manager, Biosimilars (US Remote)",
+   "applicationId": "R-242819",
+   "appliedDate": "2026-09-27",
+   "status": "拒绝",
+   "notes": "Confirmation 'Application Submitted / Thank you for applying to Amgen!'; new Workday account created；邮箱确认信 2026-09-27 4:46 PM CDT《Amgen Inc. - Thank you for applying》（正文点名 R-242819 Biostatistics Senior Manager，归属确切）；拒信 2026-10-02 02:46 AM CDT (careers@mail.amgen.com)",
+   "link": "https://amgen.wd1.myworkdayjobs.com",
+   "rejectedDate": "2026-10-02"
+  },
+  {
+   "company": "CVS Health",
+   "title": "Decision Scientist - Utilization Management",
+   "applicationId": "R1050866",
+   "appliedDate": "2026-09-27",
+   "status": "拒绝",
+   "notes": "Confirmation 'Application Submitted. You have successfully applied for this job posting.'; new Workday account；邮箱确认信 2026-09-27 2:49 PM CDT《Your application with CVS Health has been received!》（通用模板，按时间归属）；拒信日期 2026-09-29（cvshealth@myworkday.com，R1050866 Decision Scientist - Utilization Management，'we will not be moving forward with your application for this role'）",
+   "link": "https://www.cvshealth.com"
+  },
+  {
+   "company": "State Street",
+   "title": "Quantitative Analyst, Assistant Vice President / Credit Risk Modeler",
+   "applicationId": "R-790888",
+   "appliedDate": "2026-09-27",
+   "status": "已申请",
+   "notes": "Clifton NJ Hybrid; confirmation 'Application Submitted — Thank you! You've successfully submitted your application.'；邮箱确认信 2026-09-27 4:48 PM CDT《Thank you for applying to State Street》（预览含 Credit Risk Model，归属确切）",
+   "link": "https://careers.statestreet.com/global/en/job/R-790888/Quantitative-Analyst-Assistant-Vice-President"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Old Mission Capital",
+   "link": "https://www.oldmissioncapital.com/careers/?gh_jid=7814534003",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页已收到；邮箱确认：no-reply@oldmissioncapital.com \"Thank you for applying to Old Mission\" 9/28 2:47 PM；Chicago；简历 resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Researcher (Ph.D.), 2027 Graduate Program"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Old Mission Capital",
+   "link": "https://www.oldmissioncapital.com/careers/?gh_jid=6309652003",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页已收到；邮箱确认：no-reply@oldmissioncapital.com \"Thank you for applying to Old Mission\" 9/28 2:48 PM；Chicago；简历 resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Junior Quantitative Researcher (Ph.D.)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Figma",
+   "link": "https://job-boards.greenhouse.io/figma/jobs/5707966004",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Greenhouse 确认页已收到；邮箱确认：no-reply@figma.com \"Thank you for your application to Figma\" 9/28 2:51 PM（AI Applied Scientist）；简历 resume_ai_research.pdf；意向 Remote (Nashville)，可 relocate SF/NY/Seattle",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "AI Applied Scientist"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "BridgeBio Pharma",
+   "link": "https://job-boards.greenhouse.io/bridgebio/jobs/5136136007",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Greenhouse 确认页已收到；邮箱确认：no-reply@bridgebio.com \"Thank you for applying to BridgeBio Pharma!\" 9/28 2:55 PM；Remote US；简历 resume_biostat_pharma.pdf；学校下拉无西南财经大学，选了 Other",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Associate Director, Biostatistics & AI"
+  },
+  {
+   "applicationId": "25066716436359390",
+   "appliedDate": "2026-09-28",
+   "company": "Meta",
+   "link": "https://www.metacareers.com/",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页 \"Application Received\"；邮箱确认：do-not-reply@recruiting.facebook.com \"Thank you for applying to Meta\" 9/28 2:56 PM；Menlo Park；简历 resume_applied_scientist.pdf；未建 Meta Career Profile 账号",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Research Scientist, Demography and Survey Sciences"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Meta",
+   "link": "https://www.metacareers.com/profile/job_details/4639028663082379/",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页 \"Application Received\"；邮箱确认：do-not-reply@recruiting.facebook.com \"Thank you for applying to Meta\" 9/28 2:58 PM；Menlo Park；简历 resume_applied_scientist.pdf；未建 Meta Career Profile 账号",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Data Scientist, Meta Superintelligence Labs (Safety)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Harvey",
+   "link": "https://jobs.ashbyhq.com/harvey/1321b20d-d6f8-4bdb-b2de-ec33c0948b53",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑，昨日卡住今日重试）。Ashby 确认页提交成功；邮箱确认：Harvey Hiring Team (no-reply@ashbyhq.com) \"Thank You for Applying to Harvey\" 9/28 2:51 PM（Data Scientist, Product）；简历 resume_ai_research.pdf；hybrid 3天/周 SF，可 relocate",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Data Scientist, Product"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Tubi",
+   "link": "https://job-boards.greenhouse.io/tubitv/jobs/8232190",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑，昨日卡住今日重试）。Greenhouse 确认页已收到；邮箱确认：no-reply@us.greenhouse-mail.io \"Thank you for applying to Tubi!\" 9/28 2:56 PM；简历 resume_applied_scientist.pdf；office hub 选 Chicago",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Data Scientist (USA - Remote)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Voleon",
+   "link": "https://www.voleon.com/jobs/?ashby_jid=2aed0eac-34cf-4920-aac1-5cf6a9b434c2",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑，昨日卡住今日重试）。Ashby 确认页提交成功；邮箱确认：recruiting-noreply@voleon.com \"Thank you for applying to The Voleon Group\" 9/28 2:59 PM；⚠️ recruiter Rosa Kwak (rkwak@voleon.com) 9/28 5:38 PM 来信邀请 informal chat，需跟进回复；简历 resume_quant_research.pdf；$250K–$275K base",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Member of Research Staff"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Arrowstreet Capital",
+   "link": "https://arrowstreetcapital.wd5.myworkdayjobs.com/en-US/arrowstreet/job/Boston/Quantitative-Researcher_R1066-3",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：arrowstreetcapital@myworkday.com \"Application Received\" 9/28 3:01 PM；Boston；简历 resume_quant_research.pdf；phd_transcript.pdf 已补传，待办清零",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Insmed",
+   "link": "https://careers.insmed.com/posting/senior-manager-biostatistics/R3742/",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：insmed@myworkday.com \"Thank you for applying to Insmed\" 9/28 3:07 PM；Fully Remote；简历 resume_biostat_pharma.pdf；Field of Study 选 Statistics（下拉无 Biostatistics）；出差 ≤50%；拒信 2026-09-30（insmed@myworkday.com：move forward with other candidates）",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Manager, Biostatistics (R3742)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "Bank of America",
+   "link": "https://careers.bankofamerica.com/",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页 \"Application Submitted\"；邮箱确认：Global HR Workday (ghr@myworkday.com) \"ACTION NEEDED: We've received your application for the Data Scientist II position\" 9/28 5:35 PM；New York；简历 resume_applied_scientist.pdf；教育栏只有 PhD+MS（SWUFE 无 Other 选项）；后续待办 Provide SSN 需本人补",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Data Scientist II (Job ID 26020552)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-28",
+   "company": "FanDuel",
+   "link": "https://fanduel.careers",
+   "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。确认页：\"Thank you for applying. Your application has been received.\"；邮箱确认：no-reply@fanduel.com \"Thank you for applying to FanDuel\" 9/28 2:49 PM（明确写 Data Scientist, Market Making 岗）；简历 resume_applied_scientist.pdf；总包期望填 100000。注意：同日 12:00 PM 收到另一封 FanDuel 拒信，但拒信针对的是 Data Scientist, Experimentation 岗（不同岗位），不影响本条。；拒信 2026-09-30（no-reply@fanduel.com：will not move forward）",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist, Market Making (Risk & Trading)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-26",
+   "company": "FanDuel",
+   "link": "https://fanduel.careers",
+   "notes": "该申请未在 seen 去重表/仓库中登记，appliedDate 按确认邮件（Sat 9/26 5:43 PM）推定为 2026-09-26。拒信：FanDuel Recruitment Team (no-reply@fanduel.com) \"Important information about your application to FanDuel\"，拒信日期 2026-09-28，原话：\"We regret to inform you that we have decided not to move forward with your candidacy for the Data Scientist, Experimentation position at this time.\" 与 9/28 当日新投的 Market Making 岗无关。",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist, Experimentation"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-26",
+   "company": "Hinge Health",
+   "link": "https://www.hingehealth.com/careers",
+   "notes": "该申请 9/27 曾记为 in-flight（状态未知），9/26 筛选中唯一 Hinge Health 候选为 Biostatistician, Quantitative Epidemiology；拒信未载明岗位，岗位为推定。拒信：Hinge Health Hiring Team (no-reply@ashbyhq.com) \"Thanks for your interest in Hinge Health\"，拒信日期 2026-09-28，原话：\"After careful consideration, we have decided not to move forward with your application at this time.\"",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Biostatistician, Quantitative Epidemiology（拒信未载明，推定）"
+  },
+  {
+   "applicationId": "schonfeld-8236826",
+   "appliedDate": "2026-09-29",
+   "company": "Schonfeld",
+   "link": "https://job-boards.greenhouse.io/schonfeld/jobs/8236826/confirmation",
+   "notes": "Greenhouse 确认页 'Thank you for applying'；简历 resume_quant_research.pdf；来源 LinkedIn",
+   "status": "applied",
+   "title": "Entry Level Quantitative Researcher"
+  },
+  {
+   "applicationId": "jumptrading-8209424",
+   "appliedDate": "2026-09-29",
+   "company": "Jump Trading",
+   "link": "https://www.jumptrading.com/hr/job?gh_jid=8209424",
+   "notes": "确认页 'Thank you for applying! Your application has been successfully received.'；简历 resume_quant_research.pdf；来源 LinkedIn",
+   "status": "applied",
+   "title": "Campus Quantitative Researcher (Trading Team PhD/Postdoc)"
+  },
+  {
+   "applicationId": "jumptrading-8052313",
+   "appliedDate": "2026-09-29",
+   "company": "Jump Trading",
+   "link": "https://www.jumptrading.com/hr/job?gh_jid=8052313",
+   "notes": "确认页 'Thank you for applying! Your application has been successfully received.'；简历 resume_ai_research.pdf；JD 注明 sponsor visas；来源 LinkedIn",
+   "status": "applied",
+   "title": "Campus AI Research Engineer"
+  },
+  {
+   "applicationId": "tower-8095921",
+   "appliedDate": "2026-09-29",
+   "company": "Tower Research Capital",
+   "link": "https://www.tower-research.com",
+   "notes": "确认页 'Thank you for applying. You should receive an email confirmation shortly.'；简历 resume_ai_research.pdf；来源 LinkedIn",
+   "status": "applied",
+   "title": "Machine Learning Research Engineer"
+  },
+  {
+   "applicationId": "tower-8024142",
+   "appliedDate": "2026-09-29",
+   "company": "Tower Research Capital",
+   "link": "https://www.tower-research.com",
+   "notes": "确认页 'Thank you for applying. You should receive an email confirmation shortly.'；简历 resume_quant_research.pdf；来源 LinkedIn",
+   "status": "applied",
+   "title": "Quantitative Trader/Researcher - 2027"
+  },
+  {
+   "applicationId": "fiverings-2027-qt",
+   "appliedDate": "2026-09-29",
+   "company": "Five Rings",
+   "link": "",
+   "notes": "确认页 'Thank you for applying. Your application has been received.'（浏览器任务报告原文引用）；简历 resume_quant_research.pdf；来源 LinkedIn",
+   "status": "applied",
+   "title": "Campus Full Time 2027 - Quantitative Trader"
+  },
+  {
+   "applicationId": "loopcv-georgiatek-20260921",
+   "appliedDate": "2026-09-21",
+   "company": "Georgia Tek Systems",
+   "link": "",
+   "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
+   "status": "applied",
+   "title": "Business Data Analyst"
+  },
+  {
+   "applicationId": "loopcv-altatech-20260921",
+   "appliedDate": "2026-09-21",
+   "company": "Alta Technology Group",
+   "link": "",
+   "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
+   "status": "applied",
+   "title": "Data Analyst / BI"
+  },
+  {
+   "applicationId": "loopcv-dako-20260921",
+   "appliedDate": "2026-09-21",
+   "company": "The DAKO Group",
+   "link": "",
+   "notes": "LoopCV 自动投递（Applied Automatically，matched 2026-09-21）；去重补记",
+   "status": "applied",
+   "title": "Data Specialist"
+  },
+  {
+   "applicationId": "R1521964",
+   "appliedDate": "2026-09-06",
+   "company": "IQVIA艾昆纬",
+   "jobUrl": "",
+   "location": "",
+   "notes": "Xinyu 9/6 经总部 Workday（jobs.iqvia.com）手动申请，申请确认邮件 9/6 16:02。拒信日期 2026-09-08（iqvia@myworkday.com）。2026-09-29 查邮箱补录。",
+   "source": "Xinyu 手动投递（补录）",
+   "status": "拒绝",
+   "title": "Statistician, Real World Solutions"
+  },
+  {
+   "applicationId": "R1522738",
+   "appliedDate": "",
+   "company": "IQVIA艾昆纬",
+   "jobUrl": "",
+   "location": "",
+   "notes": "Xinyu 经总部 Workday 手动申请（申请确认邮件未找到；9/2 拒信证明此前已提交）。拒信日期 2026-09-02（iqvia@myworkday.com）。2026-09-29 查邮箱补录。",
+   "source": "Xinyu 手动投递（补录）",
+   "status": "拒绝",
+   "title": "RWE (Assoc) Consultant - Sr Consultant, Real World Solutions"
+  },
+  {
+   "applicationId": "R1565233",
+   "appliedDate": "",
+   "company": "IQVIA艾昆纬",
+   "jobUrl": "",
+   "location": "北京",
+   "notes": "【校招-北京】岗位，Xinyu 经总部 Workday 手动申请（申请确认邮件未找到；9/8 拒信证明此前已提交）。拒信日期 2026-09-08（iqvia@myworkday.com）。与中国校招站 tupu360 的北京 RWE/RWA 岗为同一职位（tupu360 侧单账号限投 1 岗且 9/24 已投上海 RWD&T，无法重复投递）。2026-09-29 查邮箱补录。",
+   "source": "Xinyu 手动投递（补录）",
+   "status": "拒绝",
+   "title": "【校招-北京】分析师/助理咨询顾问-真实世界证据及高阶分析(RWE/RWA)方向"
+  },
+  {
+   "company": "Amazon",
+   "title": "Research Scientist, Special Projects",
+   "applicationId": "10522268",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-09-29；该申请不在 Muse 投递记录中（应为自投），据拒信补记。"
+  },
+  {
+   "company": "DRW",
+   "title": "Quantitative Researcher (Summer 2027 start)",
+   "applicationId": "8030406",
+   "appliedDate": "2026-09-30",
+   "status": "已申请",
+   "notes": "Greenhouse; resume_quant_research.pdf + phd_transcript.pdf; JD no sponsorship exclusion；确认邮件 9/30 02:45（no-reply@drwholdings.com，'Thank you for applying to DRW'）。2026-09-30 邮箱核对确认。",
+   "link": "https://job-boards.greenhouse.io/drweng/jobs/8030406"
+  },
+  {
+   "company": "Stealth Startup (Ever)",
+   "title": "Data Scientist",
+   "applicationId": "4469721124",
+   "appliedDate": "2026-09-30",
+   "status": "待确认",
+   "notes": "LinkedIn Easy Apply; resume_applied_scientist.pdf; SF Bay Area on-site/hybrid；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
+   "link": "https://www.linkedin.com/jobs/view/4469721124/"
+  },
+  {
+   "company": "Collabera",
+   "title": "Biostatistician",
+   "applicationId": "4471959450",
+   "appliedDate": "2026-09-30",
+   "status": "待确认",
+   "notes": "LinkedIn Easy Apply; resume_biostat_pharma.pdf; remote contract $34-36/hr (below target, recorded)；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
+   "link": "https://www.linkedin.com/jobs/view/4471959450/"
+  },
+  {
+   "company": "ConsultNet Technology Services and Solutions",
+   "title": "Biostatistician",
+   "applicationId": "4471697586",
+   "appliedDate": "2026-09-30",
+   "status": "待确认",
+   "notes": "LinkedIn Easy Apply; resume_biostat_pharma.pdf; Salt Lake City hybrid contract $35-45/hr；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
+   "link": "https://www.linkedin.com/jobs/view/4471697586/"
+  },
+  {
+   "company": "Genpact",
+   "title": "Data Scientist (Assistant Manager, healthcare analytics)",
+   "applicationId": "4459513866",
+   "appliedDate": "2026-09-30",
+   "status": "待确认",
+   "notes": "LinkedIn Easy Apply; resume_applied_scientist.pdf; Morris Plains NJ hybrid $90K-100K；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
+   "link": "https://www.linkedin.com/jobs/view/4459513866/"
+  },
+  {
+   "company": "Strategic Employment Partners",
+   "title": "Data Scientist",
+   "applicationId": "4462466327",
+   "appliedDate": "2026-09-30",
+   "status": "待确认",
+   "notes": "LinkedIn Easy Apply; resume_applied_scientist.pdf; remote $150K-200K; recruiting for fintech client；2026-09-30 邮箱全文件夹（收件箱+垃圾邮件）未找到确认邮件，待确认。",
+   "link": "https://www.linkedin.com/jobs/view/4462466327/"
+  },
+  {
+   "company": "Humana",
+   "title": "Research Scientist 2",
+   "applicationId": "R-421783",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "notes": "Application ID 759eb96b17de90014f0756c9ab500000; resume_applied_scientist.pdf; remote nationwide, causal inference；确认邮件 9/30 07:50（humana@myworkday.com，'Your Humana application: Next Steps'）。2026-09-30 邮箱核对确认。；拒信日期 2026-10-22",
+   "link": "https://careers.humana.com/us/en/job/R-421783/Research-Scientist"
+  },
+  {
+   "company": "Tempus AI",
+   "title": "Manager, Biostatistics (JR202600381)",
+   "applicationId": "83f962ba8beb9001503e31c7e7650000",
+   "appliedDate": "2026-09-30",
+   "status": "已申请",
+   "notes": "Workday 确认 Congratulations! Thank you for applying；简历 resume_biostat_pharma.pdf；来源 LinkedIn；确认邮件 9/30 08:28（tempus@myworkday.com，'Thank you for applying to Tempus!'）。2026-09-30 邮箱核对确认。",
+   "link": "https://www.linkedin.com/jobs/view/4407904244"
+  },
+  {
+   "company": "Servier Pharmaceuticals",
+   "title": "Associate Director, Biostatistics (Job ID 12320)",
+   "applicationId": "546052",
+   "appliedDate": "2026-09-30",
+   "status": "已申请",
+   "notes": "确认 You have successfully applied；简历 resume_biostat_pharma.pdf；来源 LinkedIn；确认邮件 9/30 09:11（noreply.share2-servier@successfactors.com）。2026-09-30 邮箱核对确认。",
+   "link": "https://www.linkedin.com/jobs/view/4465029773"
+  },
+  {
+   "applicationId": "liepin-1985886393",
+   "appliedDate": "2026-09-30",
+   "company": "康龙化成（北京）新药技术股份有限公司",
+   "link": "https://www.liepin.com/job/1985886393.shtml",
+   "location": "上海-长宁区",
+   "notes": "2026-09-30 经猎聘自动投递（在线简历+附件 CV_医药临床_张馨予.pdf）；猎聘投递记录页已核验共5条无误。上海/宁波，30-45k，应届博士。",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "2027届-博士-临床研发高级AI工程师"
+  },
+  {
+   "applicationId": "liepin-1985730081",
+   "appliedDate": "2026-09-30",
+   "company": "金斯瑞生物科技股份有限公司（HK.1548）",
+   "link": "https://www.liepin.com/job/1985730081.shtml",
+   "location": "南京-江宁区",
+   "notes": "2026-09-30 经猎聘自动投递（在线简历+附件 CV_医药临床_张馨予.pdf）；猎聘投递记录页已核验共5条无误。20-40k，应届博士。",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "Gen-X R&D AI for Science (A75380)"
+  },
+  {
+   "applicationId": "liepin-1985840205",
+   "appliedDate": "2026-09-30",
+   "company": "金斯瑞生物科技股份有限公司",
+   "link": "https://www.liepin.com/job/1985840205.shtml",
+   "location": "南京-淳化",
+   "notes": "2026-09-30 经猎聘自动投递（在线简历+附件 CV_医药临床_张馨予.pdf）；猎聘投递记录页已核验共5条无误。25-45k，经验不限·博士。",
+   "source": "Muse 求职助手",
+   "status": "已申请",
+   "title": "AIDD实验数据分析科学家"
+  },
+  {
+   "company": "Tellwise",
+   "title": "Data Scientist, Patterns",
+   "applicationId": "",
+   "appliedDate": "2026-09-30",
+   "status": "submitted",
+   "notes": "Confirmation: 'Your application is in. We read every one and reply within five business days either way.' San Francisco hybrid, $150K-$185K + 0.2%-0.4% equity. Form had no resume upload and no work-auth questions; JD has no sponsorship exclusion.",
+   "link": "https://gettellwise.com/careers/data-scientist-patterns"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-29",
+   "company": "Hinge Health",
+   "title": "Biostatistician, Quantitative Epidemiology",
+   "location": "",
+   "link": "",
+   "source": "Muse 求职助手（邮箱补录）",
+   "status": "拒绝",
+   "notes": "申请确认邮件 9/29 18:57（no-reply@ashbyhq.com，'Thank you for applying to Hinge Health!'）；拒信日期 2026-09-30（'After careful consideration, we have decided not to move forward with your application at this time.'）"
+  },
+  {
+   "company": "Tempus AI",
+   "title": "Data Scientist II, Real World Evidence, Life Sciences R&D",
+   "applicationId": "83f962ba8beb90017434ce5128ce0000",
+   "appliedDate": "2026-09-30",
+   "status": "已投递",
+   "notes": "New York, NY。同一雇主第二 req（同日已投 Manager, Biostatistics）。表单无 Biostatistics 选项，Field of Study 选 Statistics；简历 resume_biostat_pharma.pdf。",
+   "link": "https://tempus.wd1.myworkdayjobs.com/TempusCareers"
+  },
+  {
+   "company": "Opendoor",
+   "title": "Applied Science - Growth",
+   "applicationId": "",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "notes": "Seattle, WA。LinkedIn 投递。简历 resume_applied_scientist.pdf；Cloudflare 人机验证一次通过。；拒信日期 2026-10-06（拒信未注明岗位，账上唯一 Opendoor 申请归属此单）",
+   "link": "https://www.linkedin.com/jobs/"
+  },
+  {
+   "company": "MyOme",
+   "title": "Senior Scientist, Clinical Biostatistics & Genetic Risk Prediction",
+   "applicationId": "",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "notes": "官网 Greenhouse 投递。JD 无 sponsorship 排除。简历 resume_biostat_pharma.pdf；reCAPTCHA 未触发图片验证。；拒信日期 2026-10-03（deanna.rose@myome.com (DeAnna Lamoureux)）",
+   "link": "https://myome.com/about-us/careers"
+  },
+  {
+   "company": "Kenvue",
+   "title": "Senior Biostatistician",
+   "applicationId": "",
+   "appliedDate": "2026-09-30",
+   "status": "已投递",
+   "notes": "Workday 投递。新账号创建；简历 resume_biostat_pharma.pdf；最高已完成学历按表单口径选 Master's Degree。",
+   "link": "https://kenvue.wd1.myworkdayjobs.com/External"
+  },
+  {
+   "company": "Stripe",
+   "title": "Data Scientist",
+   "applicationId": "req 5601879",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "notes": "New York, NY。同一雇主第二 req（9-29 已投 Core Infrastructure）。官网表单；简历 resume_applied_scientist.pdf。经验题如实选 None - new grad。；拒信日期 2026-10-09",
+   "link": "https://stripe.com/careers/apply/data-scientist/5601879"
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "Advisor - Project Statistician in Product Development (R-112033)",
+   "applicationId": "db8be7b2a3d0900183960c3b6bb10000",
+   "appliedDate": "2026-09-30",
+   "status": "已投递",
+   "notes": "官网投递。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。",
+   "link": "https://careers.lilly.com/us/en/job/R-112033"
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "Advisor - Project Statistician in Product Development (R-110351)",
+   "applicationId": "a69ae34604709001845233b54e990000",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "notes": "官网投递。同一雇主第二 req（不同团队）。Candidate ID CAND-3033576。简历 resume_biostat_pharma.pdf。拒信 2026-10-02（lilly@myworkday.com；邮件 title 写 \"Advisor – Statistics\"，与 R-110351 的筛选记录对应；R-112033 的 title 为 \"Advisor – Project Statistician in Product Development\"。无法完全排除对应另一份的歧义，如有进一步信息可纠正。）",
+   "link": "https://careers.lilly.com/us/en/job/R-110351"
+  },
+  {
+   "company": "Goliath Partners",
+   "title": "Artificial Intelligence Researcher",
+   "applicationId": "linkedin-4473916998",
+   "appliedDate": "2026-09-30",
+   "status": "applied",
+   "notes": "Easy Apply; New York Metro Hybrid; 21:00 round (delayed report)",
+   "link": "https://www.linkedin.com/jobs/search/?currentJobId=4473916998"
+  },
+  {
+   "company": "Precision Medicine Group",
+   "title": "Associate Research Scientist, Real World Evidence",
+   "applicationId": "linkedin-4454282605",
+   "appliedDate": "2026-09-30",
+   "status": "applied",
+   "notes": "Easy Apply Remote; JD said no sponsorship but submitted with honest sponsorship=Yes",
+   "link": "https://www.linkedin.com/jobs/search/?currentJobId=4454282605"
+  },
+  {
+   "company": "SoTalent",
+   "title": "Senior Manager, Statistics",
+   "applicationId": "linkedin-4472131453",
+   "appliedDate": "2026-09-30",
+   "status": "applied",
+   "notes": "Easy Apply; recruiting for leading global pharma; Remote $137K-215K",
+   "link": "https://www.linkedin.com/jobs/view/4472131453"
+  },
+  {
+   "company": "Freenome",
+   "title": "Senior Biostatistician",
+   "applicationId": "",
+   "appliedDate": "2026-09-29",
+   "status": "拒绝",
+   "notes": "拒信 2026-10-01（Greenhouse）：\"After reviewing your background, we've decided to move forward with candidates whose experience is a better fit.\"",
+   "link": "https://job-boards.greenhouse.io/freenome/jobs/8842728002"
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "Statistician – Manufacturing (R-112031)",
+   "applicationId": "lilly-r112031-manufacturing",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "source": "Muse 求职助手",
+   "link": "https://careers.lilly.com/us/en/job/R-112031/Statistician-Manufacturing",
+   "location": "Indianapolis, IN",
+   "notes": "补录：Xinyu 手动投递（具体投递日期未知，拒信日期代记）；拒信 2026-09-30（lilly@myworkday.com 11:11 PM）"
+  },
+  {
+   "company": "BeOne Medicines",
+   "title": "Senior Statistician (RWD/RWE)",
+   "applicationId": "beigene-r33719-rwd-rwe",
+   "appliedDate": "2026-09-26",
+   "status": "拒绝",
+   "source": "Muse 求职助手",
+   "link": "https://www.linkedin.com/jobs/view/4383286308",
+   "location": "Remote US",
+   "notes": "2026-09-26 经 BeiGene Workday (R33719) 提交，2026-09-29 核验 Application Received；拒信 2026-10-01（beigene@myworkday.com 2:45 PM，RWD/RWE 对口度不足）"
+  },
+  {
+   "company": "Bevi",
+   "title": "Product Data Scientist",
+   "applicationId": "",
+   "appliedDate": "2026-10-02",
+   "status": "拒绝",
+   "notes": "据拒信补记（成功投递不入 radar，此为拒后补录）：10-02 轮 LinkedIn Easy Apply 提交（\"Your application was sent to Bevi!\"）；拒信 2026-10-03（Greenhouse no-reply@us.greenhouse-mail.io）。"
+  },
+  {
+   "company": "Amazon",
+   "title": "Applied Scientist II, Core Shopping Data Science (10490800)",
+   "applicationId": "10490800",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-03（noreply@mail.amazon.jobs）；该申请不在 Muse 投递记录中（seen_jobs.md 无此 req），据拒信补记。"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-29",
+   "company": "Nomura",
+   "jobUrl": "",
+   "location": "Hong Kong",
+   "notes": "2026-09-29 Xinyu 亲自提交（英文简历 resume_quant_research.pdf）；Aon 人才测评 10-02 完成；拒信日期 2026-10-05（\"Unfortunately, your test scores...\" 18:15 CDT）",
+   "resumeVersion": "resume_quant_research.pdf",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "2027 Risk Management Graduate Program - Hong Kong"
+  },
+  {
+   "company": "CVS Health",
+   "title": "Senior Decision Scientist - Retail Operations",
+   "applicationId": "R1050829",
+   "appliedDate": "2026-10-05",
+   "status": "拒绝",
+   "notes": "Boston, MA (Remote)。2026-10-05 自动投递（Workday 确认 \"You have successfully applied\"）。简历 resume_general_ds.pdf。拒信日期 2026-10-06",
+   "link": "https://www.linkedin.com/jobs/view/4474205805"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-08",
+   "company": "AmeriHealth Caritas",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4476790758/",
+   "location": "Remote US",
+   "notes": "2026-10-08 自动提交（LinkedIn）；大型健康保险 payor，claims 数据分析；拒信日期 2026-10-09",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-05",
+   "company": "AbbVie",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4474637228",
+   "location": "North Chicago, IL",
+   "notes": "Job ID R00151621；2026-10-05 自动提交（SmartRecruiters OneClick）；拒信日期 2026-10-08",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Research Statistician - Exploratory Analysis (Hybrid)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-08",
+   "company": "Notion",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4458773276/",
+   "location": "San Francisco, CA (Hybrid)",
+   "notes": "2026-10-08 自动提交（Ashby）；Anchor Days 答 Yes；拒信日期 2026-10-08",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist, Growth"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-08",
+   "company": "Microsoft",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4477177068/",
+   "location": "Redmond, WA (Hybrid)",
+   "notes": "2026-10-08 自动提交（LinkedIn）；early-career；拒信日期 2026-10-08（按日期推断对应，待她核对）",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Applied ML Engineer"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-05",
+   "company": "Capital One",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4475858512",
+   "location": "New York, NY",
+   "notes": "req R1002964；2026-10-05 自动提交（MyWorkday）；JD 明确 will consider sponsoring；拒信日期 2026-10-08",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Applied Researcher 4 (AI Foundations, LLM Customization and Finetuning)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-07",
+   "company": "Simon-Kucher",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4433985724/",
+   "location": "Chicago, IL / Boston, MA (Hybrid)",
+   "notes": "2026-10-07 自动提交（Cornerstone）；拒信日期 2026-10-07",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Consultant, Data Science – Elevate – Healthcare & Life Sciences"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-25",
+   "company": "Microsoft",
+   "jobUrl": "https://www.linkedin.com/comm/jobs/view/4453121437/",
+   "location": "Remote US",
+   "notes": "2026-09-25 投递；本科起点·大公司；拒信日期 2026-10-07（按日期推断对应，待她核对）",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Data Scientist – FDE"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-05",
+   "company": "AbbVie",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4474252406",
+   "location": "North Chicago, IL (Hybrid)",
+   "notes": "REF49906W；2026-10-05 自动提交（SmartRecruiters）；拒信日期 2026-10-07",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Sr. Clinical Data Scientist (RBQM Analytics)"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-03",
+   "company": "Oruka Therapeutics",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4474786942/",
+   "location": "Boston, MA (Hybrid)",
+   "notes": "2026-10-03 自动提交（Greenhouse req 5442455008）；PhD+5 年；拒信日期 2026-10-07",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Associate Director, Biostatistics"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-06",
+   "company": "DebtBook",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4473688045/",
+   "location": "Charlotte, NC",
+   "notes": "2026-10-06 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-07",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Associate Quantitative Strategist"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-29",
+   "company": "Man Group",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4471273455/",
+   "location": "Boston, MA",
+   "notes": "2026-09-29 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-05",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher - Equities"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-04",
+   "company": "Duolingo",
+   "jobUrl": "https://careers.duolingo.com/jobs/8610345002",
+   "location": "New York, NY",
+   "notes": "Req R-01168；2026-10-04 自动提交（官网）；拒信日期 2026-10-04",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Staff AI Research Engineer"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-04",
+   "company": "Netspend",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4466389235/",
+   "location": "Austin, TX (Hybrid)",
+   "notes": "2026-10-04 自动提交（Ashby）；拒信日期 2026-10-04",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Data Scientist - AML"
+  },
+  {
+   "company": "Man Group",
+   "title": "Junior Quant - PM Analytics",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-12（手动申请补录）；Greenhouse 拒信：we won't be moving forward with your application at this time",
+   "link": ""
+  },
+  {
+   "company": "Global Lending Services",
+   "title": "Data Scientist",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-12（手动申请补录）；Lever 拒信：Thanks for your interest in Global Lending Services",
+   "link": ""
+  },
+  {
+   "applicationId": "JR98989",
+   "appliedDate": "2026-10-06",
+   "company": "Micron",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4474944634/",
+   "location": "Boise, ID",
+   "notes": "2026-10-06 自动提交；拒信日期 2026-10-10",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Sr Data Scientist"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-09-29",
+   "company": "PDT Partners",
+   "jobUrl": "",
+   "location": "",
+   "notes": "拒信日期 2026-10-12",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-08",
+   "company": "Arrowhead Pharmaceuticals",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4391930911/",
+   "location": "San Diego, CA",
+   "notes": "2026-10-08 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-13",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Sr. Scientist I, Translational Genetics & Real-World Evidence"
+  },
+  {
+   "applicationId": "8256064",
+   "appliedDate": "2026-10-08",
+   "company": "Engineers Gate",
+   "jobUrl": "https://job-boards.greenhouse.io/engineersgate/jobs/8256064",
+   "location": "New York, NY",
+   "notes": "2026-10-08 自动提交（Greenhouse）；拒信日期 2026-10-13",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Researcher"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-06",
+   "company": "Wayve",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4474099180/",
+   "location": "Sunnyvale, CA",
+   "notes": "2026-10-06 自动提交（Ashby）；拒信日期 2026-10-14",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Data Scientist"
+  },
+  {
+   "applicationId": "26194",
+   "appliedDate": "2026-10-08",
+   "company": "Pearson",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4475731337/",
+   "location": "Remote",
+   "notes": "2026-10-08 自动提交；拒信日期 2026-10-14",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Specialist, Psychometrician"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-08",
+   "company": "Pave",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4477431497/",
+   "location": "San Francisco, CA",
+   "notes": "2026-10-08 自动提交（LinkedIn Easy Apply）；拒信日期 2026-10-14",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist"
+  },
+  {
+   "applicationId": "R1002104",
+   "appliedDate": "2026-09-26",
+   "company": "Capital One",
+   "jobUrl": "",
+   "location": "",
+   "notes": "req R1002104；拒信日期 2026-10-15",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Associate, Data Scientist - Applied AI"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-07",
+   "company": "Lila Sciences",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4467462123/",
+   "location": "",
+   "notes": "拒信日期 2026-10-15",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Scientist II / Senior Scientist, BioML"
+  },
+  {
+   "applicationId": "2273430550",
+   "appliedDate": "2026-10-10",
+   "company": "MongoDB",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4413123345/",
+   "location": "Palo Alto, CA",
+   "notes": "2026-10-10 自动提交（Greenhouse）；拒信日期 2026-10-15（拒信未写岗位，按名下唯一 MongoDB 申请对应）",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Research Scientist"
+  },
+  {
+   "company": "Flow Traders",
+   "title": "PhD Graduate Quantitative Researcher",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-16（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "Danaher",
+   "title": "Lead AI Scientist",
+   "applicationId": "R1319117",
+   "appliedDate": "2026-10-10",
+   "status": "拒绝",
+   "notes": "Boston, MA；2026-10-10 提交（Workday 确认页已核，Job_Application_ID=ca0d0a8ca69d90002f597545d82b0000）；拒信日期 2026-10-15",
+   "link": "https://www.linkedin.com/jobs/view/4475242868/"
+  },
+  {
+   "company": "BetterHelp",
+   "title": "Data Scientist",
+   "applicationId": "greenhouse-5268359008",
+   "appliedDate": "2026-10-13",
+   "status": "拒绝",
+   "notes": "US Remote；2026-10-13 用户手动完成最终提交、确认页已核（自申 #107）；拒信日期 2026-10-15",
+   "link": "https://job-boards.greenhouse.io/betterhelpcom/jobs/5268359008"
+  },
+  {
+   "company": "Revolution Medicines",
+   "title": "Machine Learning Scientist II",
+   "applicationId": "greenhouse-8020357003",
+   "appliedDate": "2026-10-09",
+   "status": "拒绝",
+   "notes": "San Francisco Bay Area Hybrid；2026-10-09 提交（Greenhouse 确认页已核）；拒信日期 2026-10-16",
+   "link": "https://www.linkedin.com/jobs/view/4476845796/"
+  },
+  {
+   "company": "insitro",
+   "title": "Senior Data Scientist, CompBio",
+   "applicationId": "ashby-ec4a278a-dd78-4e9c-a203-87e3e2f59e60",
+   "appliedDate": "2026-10-11",
+   "status": "拒绝",
+   "notes": "South San Francisco, CA Hybrid；2026-10-11 提交（Ashby）；拒信日期 2026-10-16",
+   "link": "https://jobs.ashbyhq.com/insitro/ec4a278a-dd78-4e9c-a203-87e3e2f59e60/application"
+  },
+  {
+   "company": "Novartis",
+   "title": "AI/ML for Biology Scientist",
+   "applicationId": "REQ-10089087",
+   "appliedDate": "2026-10-15",
+   "status": "拒绝",
+   "notes": "La Jolla, CA；2026-10-15 提交（Workday Screening Phase In Process）；拒信日期 2026-10-16",
+   "link": ""
+  },
+  {
+   "company": "Novartis",
+   "title": "Scientific AI Platform Lead, Data Science, Disease Area X",
+   "applicationId": "REQ-10088821",
+   "appliedDate": "2026-10-16",
+   "status": "拒绝",
+   "notes": "Cambridge, MA；2026-10-16 提交（08:33 确认邮件），同日 08:52 收到拒信；拒信日期 2026-10-16",
+   "link": ""
+  },
+  {
+   "company": "Genentech",
+   "title": "Senior Data Scientist (AI-assisted Clinical Development)",
+   "applicationId": "202610-125652",
+   "appliedDate": "2026-10-15",
+   "status": "拒绝",
+   "notes": "Boston, MA；2026-10-15 提交（成功页已核，自申 #250）；拒信日期 2026-10-16（Roche Workday 发出）",
+   "link": "https://careers.gene.com/us/en/job/GENEUS202610125652EXTERNALENUS"
+  },
+  {
+   "company": "Man Group",
+   "title": "Quant Researcher",
+   "applicationId": "linkedin-4479832183",
+   "appliedDate": "2026-10-15",
+   "status": "拒绝",
+   "notes": "New York, NY，Strategic Alpha Research；2026-10-15 LinkedIn Easy Apply 提交；同雇主另两份申请（QR-Equities 4471273455、Junior Quant 4477658881）此前已分别拒信归档，本封按排除法归属本单；拒信日期 2026-10-16",
+   "link": "https://www.linkedin.com/jobs/view/4479832183/"
+  },
+  {
+   "company": "IQVIA",
+   "title": "FSP Principal Biostatistician, Study Powering and Design",
+   "applicationId": "R1572965",
+   "appliedDate": "2026-10-15",
+   "status": "拒绝",
+   "notes": "Durham NC (remote US)；2026-10-15 提交（TRIAGED §2，#187，CV Biostatistician）；拒信 2026-10-17 04:46（iqvia@myworkday.com，主题作 R1572965 FSP Principal Biostatistician, Phase 2 and 3）；拒信日期 2026-10-17",
+   "link": "https://www.linkedin.com/jobs/view/4475460491/"
+  },
+  {
+   "company": "AtriCure",
+   "title": "Senior Principal Statistician",
+   "applicationId": "",
+   "appliedDate": "2026-10-07",
+   "status": "拒绝",
+   "notes": "Remote US；2026-10-07 提交（LinkedIn Easy Apply，确认页已核，TRIAGED §2）；拒信 2026-10-17 14:03（no-reply@atricure.com）；拒信日期 2026-10-17",
+   "link": "https://www.linkedin.com/jobs/view/4459197347/"
+  },
+  {
+   "company": "BlackEdge Capital",
+   "title": "Graduate Quantitative Researcher 2027",
+   "applicationId": "4732320005",
+   "appliedDate": "2026-10-17",
+   "status": "拒绝",
+   "notes": "Chicago, IL；2026-10-17 提交（TRIAGED §2 pipeline，成功页已核，简历 resume_quant_research.pdf）；拒信 2026-10-18 07:30（no-reply@us.greenhouse-mail.io，主题 BlackEdge Capital Update，正文称不提供 visa assistance、unable to move forward）；拒信日期 2026-10-18",
+   "link": "https://job-boards.greenhouse.io/blackedgecapital/jobs/4732320005"
+  },
+  {
+   "company": "Eikon Therapeutics",
+   "title": "Scientist, Computational Biology",
+   "applicationId": "5248834007",
+   "appliedDate": "2026-10-16",
+   "status": "拒绝",
+   "notes": "Millbrae CA；2026-10-16 提交（TRIAGED §2，CV AIDD）；拒信 2026-10-18 08:30（no-reply@us.greenhouse-mail.io，主题 Application Update: Scientist, Computational Biology at Eikon Therapeutics，正文 we will not be progressing your candidacy）；拒信日期 2026-10-18",
+   "link": ""
+  },
+  {
+   "company": "Natera",
+   "title": "Machine Learning Scientist, Multimodal AI",
+   "applicationId": "6004385004",
+   "appliedDate": "2026-10-16",
+   "status": "拒绝",
+   "notes": "Remote US；2026-10-16 提交（TRIAGED §2，Greenhouse 6004385004，确认邮件已收）；拒信 2026-10-18 10:00（no-reply@natera.com，主题 Important information about your application to Natera，正文 decided to move forward with other candidates；该公司唯一已提交 req 即本岗）；拒信日期 2026-10-18",
+   "link": ""
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "",
+   "company": "Eli Lilly",
+   "link": "",
+   "notes": "拒信日期 2026-10-17（手动申请补录）；lilly@myworkday.com 2026-10-17 06:46 拒信：We have decided to pursue other candidate(s) at this time；JSON 中无对应条目（名下另有 R-112033/R-110351/R-112031 三条不同岗位）",
+   "status": "拒绝",
+   "title": "Sr. Advisor - Statistics (RWE)"
+  },
+  {
+   "company": "Johnson & Johnson",
+   "title": "Senior Scientist, AI Lead",
+   "applicationId": "R-102296",
+   "appliedDate": "2026-10-18",
+   "status": "拒绝",
+   "location": "",
+   "jobUrl": "",
+   "source": "Muse 求职助手",
+   "notes": "2026-10-18 提交（TRIAGED §2 清单渠道，Workday）；拒信 2026-10-19 14:11 jj@myworkday.com，正文 you were not selected for the role；拒信日期 2026-10-19"
+  },
+  {
+   "company": "Veeva Systems",
+   "title": "Senior Data Analyst",
+   "applicationId": "e38ab928-18d3-4907-901e-e3dc889aab1c",
+   "appliedDate": "2026-10-17",
+   "status": "拒绝",
+   "location": "Boston / Remote US",
+   "jobUrl": "",
+   "source": "Muse 求职助手",
+   "notes": "2026-10-17 提交（TRIAGED §2 清单 #88，Lever 成功页已核）；拒信 2026-10-19 13:45 via Lever，正文 after careful consideration, we have decided not to move forward；拒信日期 2026-10-19"
+  },
+  {
+   "company": "Blue Cross Blue Shield of Michigan",
+   "title": "Biostatistician",
+   "applicationId": "14937",
+   "appliedDate": "2026-10-14",
+   "status": "拒绝",
+   "location": "Detroit, MI",
+   "jobUrl": "https://ejko.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_3/job/14937",
+   "source": "Muse 求职助手",
+   "notes": "2026-10-14 提交（TRIAGED §2 #348，Oracle 14937，10-15 登录核实已投）；拒信 2026-10-19 09:18 Oracle workflow，正文 moving forward with other candidates（岗位 Biostatistician - 14937）；拒信日期 2026-10-19"
+  },
+  {
+   "company": "Sanofi",
+   "title": "E4A Systemic Mastocytosis/Emerging Indication HEOR Strategy Specialist",
+   "applicationId": "R2872719",
+   "appliedDate": "2026-10-10",
+   "status": "拒绝",
+   "location": "Cambridge, MA / Morristown, NJ",
+   "jobUrl": "",
+   "source": "Muse 求职助手",
+   "notes": "2026-10-10 提交（TRIAGED §2，Workday 确认页已核）；拒信 2026-10-19 02:23 Sanofi@myworkday.com（req R2872719），正文 after careful consideration, we have decided not to proceed with your candidacy；拒信日期 2026-10-19"
+  },
+  {
+   "applicationId": "4475621984",
+   "appliedDate": "2026-10-11",
+   "company": "Domino's",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4475621984/",
+   "location": "Ann Arbor, MI",
+   "notes": "2026-10-11 提交（seen_jobs 记录，LinkedIn Easy Apply 确认页 Application submitted）；拒信 2026-10-20 08:36 notifications@smartrecruiters.com，正文 will not be moving forward with your application；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist"
+  },
+  {
+   "applicationId": "R-795276",
+   "appliedDate": "2026-10-13",
+   "company": "State Street",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4478571116/",
+   "location": "Stamford, CT",
+   "notes": "2026-10-13 提交（TRIAGED §2，确认页 Application Submitted，Candidate Home Application Received）；拒信 2026-10-20 16:20 statestreet@myworkday.com，正文 decided not to move forward with your application；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Market Risk Stress Testing and Scenario Design"
+  },
+  {
+   "applicationId": "R00151760",
+   "appliedDate": "2026-10-15",
+   "company": "AbbVie",
+   "jobUrl": "",
+   "location": "North Chicago, IL",
+   "notes": "2026-10-15 提交（TRIAGED §2，SmartRecruiters 3743990015995376）；拒信 2026-10-20 12:15 notifications@talentacquisition.abbvie.com，正文 after careful consideration... move forward with other candidates；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Manager, Statistics - Oncology (Hybrid)"
+  },
+  {
+   "applicationId": "R00149942",
+   "appliedDate": "2026-10-15",
+   "company": "AbbVie",
+   "jobUrl": "https://jobs.smartrecruiters.com/AbbVie/3743990016149987-senior-research-statistician-statistical-innovation-hybrid-",
+   "location": "North Chicago, IL",
+   "notes": "2026-10-15 提交（TRIAGED §2，SmartRecruiters 成功页 Application submitted）；拒信 2026-10-20 12:05 notifications@talentacquisition.abbvie.com，正文 after careful consideration... move forward with other candidates；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Research Statistician - Statistical Innovation (Hybrid)"
+  },
+  {
+   "applicationId": "R-1672",
+   "appliedDate": "2026-10-15",
+   "company": "Denali Therapeutics",
+   "jobUrl": "",
+   "location": "South San Francisco, CA",
+   "notes": "2026-10-15 提交（TRIAGED §2 pipeline，Workday My Applications Active）；拒信 2026-10-20 02:07 dnli@myworkday.com，正文 after careful consideration we are moving forward with candidates whose skills align more closely；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Biostatistician"
+  },
+  {
+   "applicationId": "JR17486",
+   "appliedDate": "2026-10-12",
+   "company": "Freddie Mac",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4453270106/",
+   "location": "McLean, VA",
+   "notes": "2026-10-12 提交（TRIAGED §2，官网确认页 Thank you for applying）；拒信 2026-10-20 07:08 freddiemac@myworkday.com，正文 hiring team has decided to move forward with another candidate；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quantitative Analytics Senior"
+  },
+  {
+   "applicationId": "7206325",
+   "appliedDate": "2026-10-18",
+   "company": "BGBx Consulting",
+   "jobUrl": "",
+   "location": "Washington, DC / NYC / Boston",
+   "notes": "Kx Advisors（BGBx Consulting）TRIAGED #363，2026-10-18 提交（Greenhouse 7206325 确认页）；拒信 2026-10-20 08:00 no-reply@bgbgroup.com，正文 decided not to move forward with your candidacy；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Consultant"
+  },
+  {
+   "applicationId": "210781710",
+   "appliedDate": "2026-10-17",
+   "company": "JPMorgan Chase",
+   "jobUrl": "",
+   "location": "",
+   "notes": "TRIAGED #182，2026-10-17 提交（My Applications Under Consideration，Applied on 10/17/2026）；拒信 2026-10-20 09:05 Oracle workflow（Job number 210781710），正文 moving forward with other candidates；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Quant Analytics Associate"
+  },
+  {
+   "applicationId": "8730538002",
+   "appliedDate": "2026-10-14",
+   "company": "Komodo Health",
+   "jobUrl": "https://job-boards.greenhouse.io/komodohealth/jobs/8730538002",
+   "location": "US Remote",
+   "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-19 15:45 no-reply@us.greenhouse-mail.io，正文未点名岗位（decided not to proceed with your candidacy for that position），按唯一 Komodo 在途申请对应本岗；拒信日期 2026-10-19",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Consultant, Analytics Consulting"
+  },
+  {
+   "applicationId": "",
+   "appliedDate": "2026-10-08",
+   "company": "Abridge",
+   "jobUrl": "https://jobs.ashbyhq.com/Abridge/03a3231f-8361-405e-87a6-192d710ca912/application",
+   "location": "New York, NY",
+   "notes": "2026-10-08 提交（TRIAGED §2）；拒信 2026-10-19 13:08 no-reply@ashbyhq.com，正文 decided not to proceed with your candidacy；拒信日期 2026-10-19",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Member of Technical Staff, Research Science"
+  },
+  {
+   "applicationId": "R-260596",
+   "appliedDate": "2026-10-15",
+   "company": "AstraZeneca (Alexion)",
+   "jobUrl": "",
+   "location": "Boston, MA",
+   "notes": "2026-10-15 提交（TRIAGED §2 pipeline，Eightfold pid 563877691554470）；拒信 2026-10-19 08:02 noreply@az-recruitment.com（Alexion 名义），正文 decided not to proceed with your application。与 Radar 既有 Senior Manager, Biostatistics（2026-09-26）为不同 req；拒信日期 2026-10-19",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Biostatistician"
+  },
+  {
+   "applicationId": "R-257153",
+   "appliedDate": "2026-10-15",
+   "company": "Amgen",
+   "jobUrl": "https://amgen.wd1.myworkdayjobs.com/Careers/job/United-States---Remote/Observational-Research-Manager---Inflammation---Rare-Disease_R-257153",
+   "location": "Remote, US",
+   "notes": "2026-10-15 提交（TRIAGED §2 pipeline 对应 #146，Workday Candidate Home Application Received）；拒信 2026-10-20 02:12 amgen@myworkday.com，正文 decided to move forward with candidates whose background is a better match；拒信日期 2026-10-20",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Observational Research Manager - Inflammation / Rare Disease"
+  },
+  {
+   "company": "Expedia Group",
+   "title": "Machine Learning Scientist III - Customer Lifetime Value",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-19（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "佳期投资",
+   "title": "2027量化策略研究员 - 上海",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-20（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "Imagine Pediatrics",
+   "title": "Data Scientist",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "岗位已招满关闭；拒信日期 2026-10-20（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "PANTHERx Rare Pharmacy",
+   "title": "Principal HEOR Researcher",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-20（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "Upstart",
+   "title": "Applied Scientist",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "recruiter Jemini Jhaveri 来信拒绝；拒信日期 2026-10-20（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "HEOR COA/PRO Advisor",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-20（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "Sr. Computational Statistician",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-20（手动申请补录）",
+   "link": ""
+  },
+  {
+   "company": "Gilead Sciences",
+   "title": "Senior Manager, Biostatistics",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "req R0055488；拒信日期 2026-10-21（手动申请补录）",
+   "link": ""
+  },
+  {
+   "applicationId": "8164181",
+   "appliedDate": "2026-10-10",
+   "company": "Datadog",
+   "jobUrl": "https://careers.datadoghq.com/detail/8164181/?gh_jid=8164181",
+   "location": "New York, NY",
+   "notes": "2026-10-10 提交（TRIAGED §2，官方 req R5560/Greenhouse 8164181，确认页 Thank you for applying）；拒信 2026-10-21 07:18 no-reply@datadoghq.com，正文 decided not to move forward with your application；拒信日期 2026-10-21",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior Applied Scientist"
+  },
+  {
+   "applicationId": "8883870002",
+   "appliedDate": "2026-10-14",
+   "company": "Duolingo",
+   "jobUrl": "https://job-boards.greenhouse.io/duolingounirecruitment/jobs/8883870002",
+   "location": "Pittsburgh, PA / New York, NY",
+   "notes": "2026-10-14 提交（TRIAGED §2，Greenhouse 确认页 Thank you for applying）；拒信 2026-10-21 13:40 jaylyn@duolingo.com，正文点名 AI Research Engineer, New PhD Graduate，decided not to move forward。与 Radar 既有 Staff AI Research Engineer（2026-10-04 已拒）为不同岗位；拒信日期 2026-10-21",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "AI Research Engineer, New PhD Graduate"
+  },
+  {
+   "applicationId": "R-6849",
+   "appliedDate": "2026-10-18",
+   "company": "Cambia Health Solutions",
+   "jobUrl": "https://cambiahealth.wd504.myworkdayjobs.com/en-US/External/job/Salt-Lake-City%2C-UT/Healthcare-Decision-Scientist_R-6849/apply",
+   "location": "Salt Lake City, UT",
+   "notes": "2026-10-18 提交（TRIAGED §2 #68，Workday 成功对话框 Application Submitted，Candidate Home In Process）；拒信 2026-10-21 14:22 cambiahealth@myworkday.com，正文点名 Healthcare Decision Scientist，other candidates better meet the current needs；拒信日期 2026-10-21",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Healthcare Decision Scientist"
+  },
+  {
+   "applicationId": "202607-119719",
+   "appliedDate": "2026-10-15",
+   "company": "Genentech",
+   "jobUrl": "",
+   "location": "South San Francisco, CA",
+   "notes": "2026-10-15 提交（TRIAGED §2，req 202607-119719，确认页 offline-success）；拒信 2026-10-21 17:36 Roche-Workday-DoNotReply@roche.com，岗位名 Senior Machine Learning Scientist, AI for Biology & Translation (AIBT)，正文 decided to move ahead with other candidates；按 §2 唯一 AIBT 申请对应本条；拒信日期 2026-10-21",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Senior ML Scientist, AI for Biology & Translation"
+  },
+  {
+   "company": "AstraZeneca",
+   "title": "Senior Statistician II (R-261294)",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：chosen to interview other candidates",
+   "link": ""
+  },
+  {
+   "company": "AstraZeneca",
+   "title": "Senior Statistician (R-255015)",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信（西英双语）：chosen to interview other candidates",
+   "link": ""
+  },
+  {
+   "company": "AstraZeneca",
+   "title": "Senior Statistician",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；az-recruitment 拒信：decided not to proceed；邮件未给 req，可能与 R-261294/R-255015 之一对应",
+   "link": ""
+  },
+  {
+   "company": "Trinity Life Sciences",
+   "title": "岗位未注明（申请更新）",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：impressed but moving forward with other candidates；邮件未注明岗位",
+   "link": ""
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "Applied AI Engineer, Clinical Informatics",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：pursue other candidates",
+   "link": ""
+  },
+  {
+   "company": "Regeneron",
+   "title": "Senior Quantitative Biomarker Scientist",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-21（手动申请补录）；Workday 拒信：decided to pursue other candidates",
+   "link": ""
+  },
+  {
+   "company": "Caris Life Sciences",
+   "title": "Data Scientist - Innovation - PhD",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：moving forward with other candidates",
+   "link": ""
+  },
+  {
+   "company": "Walmart",
+   "title": "Staff, Data Scientist",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；拒信：we have decided not to move forward with your application",
+   "link": ""
+  },
+  {
+   "company": "Caterpillar Inc.",
+   "title": "Senior Statistician – AI Product Assurance (R0000375085)",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：Unfortunately, our team did not select you",
+   "link": ""
+  },
+  {
+   "company": "MiniMed",
+   "title": "AI/Data Science Engineer II (R-802158)",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；Workday 拒信：decided to move forward with other candidates",
+   "link": ""
+  },
+  {
+   "applicationId": "req390",
+   "appliedDate": "2026-10-19",
+   "company": "Mathematica",
+   "jobUrl": "https://www.linkedin.com/jobs/view/4478611910/",
+   "location": "Princeton, NJ (Remote)",
+   "notes": "2026-10-19 提交（TRIAGED §2 pipeline，官方 Cornerstone req390，成功页 You have successfully applied；简历 resume_applied_scientist.pdf）；拒信 2026-10-22 15:56 aruedger@acceleratecontent.recruitmail.com，正文 will not be moving forward with your candidacy；拒信日期 2026-10-22",
+   "source": "Muse 求职助手",
+   "status": "拒绝",
+   "title": "Data Scientist (Remote Eligible)"
+  },
+  {
+   "company": "Amgen",
+   "title": "Data Scientist (R-246583)",
+   "applicationId": "R-246583",
+   "appliedDate": "2026-08-30",
+   "status": "拒绝",
+   "notes": "2026-08-30 提交（Amgen Workday Candidate Home Application Received，TRIAGED 去重记录在案，手动申请补录）；拒信 2026-10-23 02:13 amgen@myworkday.com，正文点名 Data Scientist，decided to move forward with candidates whose background is a better match；拒信日期 2026-10-23",
+   "link": "https://careers.amgen.com/en/job/washington/data-scientist/87/99087184432"
+  },
+  {
+   "company": "Lila Sciences",
+   "title": "Senior ML Scientist, Biological Systems",
+   "applicationId": "",
+   "appliedDate": "2026-10-07",
+   "status": "拒绝",
+   "notes": "2026-10-07 提交（TRIAGED §2，手动申请补录）；拒信 2026-10-23 09:45 no-reply@us.greenhouse-mail.io，正文点名 Senior ML Scientist, Biological Systems，decided not to move forward；拒信日期 2026-10-23",
+   "link": "https://www.linkedin.com/jobs/view/4467449291/"
+  },
+  {
+   "company": "State Street",
+   "title": "Quantitative Analyst, Officer (R-799704)",
+   "applicationId": "R-799704",
+   "appliedDate": "2026-10-15",
+   "status": "拒绝",
+   "notes": "2026-10-15 提交（TRIAGED §2，Workday 提交成功，Candidate Home Application Received，手动申请补录）；拒信 2026-10-23 09:04 statestreet@myworkday.com，正文点名 Quantitative Analyst, Officer, Hybrid，decided not to move forward；与在途的 Quantitative Analyst AVP / Credit Risk Modeler (R-790888) 为不同岗位；拒信日期 2026-10-23",
+   "link": "https://www.linkedin.com/jobs/view/4480189081/"
+  },
+  {
+   "company": "东阳光",
+   "title": "计算化学研究员（CADD）",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-24（手动申请补录）；东阳光应聘反馈通知（noreply@italent.cn，10-24 02:50）：本岗位未能进入下一环节",
+   "link": ""
+  },
+  {
+   "company": "Roche",
+   "title": "RWD Data Scientist",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；Roche Workday 拒信（10-22 17:36）：move ahead with other candidates",
+   "link": ""
+  },
+  {
+   "company": "Roche",
+   "title": "Biostatistician/Data Scientist in Personalized Healthcare",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；Roche Workday 拒信（10-22 17:36）：move ahead with other candidates",
+   "link": ""
+  },
+  {
+   "company": "Eikon Therapeutics",
+   "title": "Manager, Biostatistics",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-22（手动申请补录）；Eikon 更新（10-22 10:45）：position has now been filled, requisition closed；与 Scientist, Computational Biology（10-18 拒绝）为不同岗位",
+   "link": ""
+  },
+  {
+   "company": "Eli Lilly",
+   "title": "Campus: Research Advisor - Statistics",
+   "applicationId": "",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-24（手动申请补录）；Eli Lilly Application Update（10-24 00:04）：pursue other candidates",
+   "link": ""
+  },
+  {
+   "company": "UCB",
+   "title": "Senior Real World Evidence Expert (United States)",
+   "applicationId": "850497",
+   "appliedDate": "2026-09-30",
+   "status": "拒绝",
+   "notes": "2026-09-30 提交（官网 careers.ucb.com，job 93916，Atlanta GA hybrid，确认页 successfully applied，简历 resume_biostat_pharma.pdf；手动申请补录——seen_jobs 曾记已推 Radar 但远端核查无此条目，本轮补录）；拒信 2026-10-24 10:16 recruiting@jobalerts.ucb.com，正文点名 Senior Real World Evidence Expert (United States)，pursuing other candidates at this time；拒信日期 2026-10-24",
+   "link": ""
+  },
+  {
+   "company": "IQVIA艾昆纬",
+   "title": "分析师/助理咨询顾问 - 真实世界证据及高阶分析（RWE/RWA）方向 Analyst / Associate Consultant, Real World Solutions (R1566150)",
+   "applicationId": "R1566150",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "总部 Workday 申请（申请确认信 2026-10-22 22:06 iqvia@myworkday.com）；中国校招表 CN322 为同岗，2026-10-24 已移入已拒绝；拒信 2026-10-24 03:16 iqvia@myworkday.com，主题点名 R1566150，decided not to move forward；与北京线 HireVue 在途申请（校招表 CN129 RWD&T 上海）无关；拒信日期 2026-10-24（手动申请补录）",
+   "link": "https://jobs.iqvia.cn/jobs/R1566150-1"
+  },
+  {
+   "company": "Bristol Myers Squibb",
+   "title": "Senior Manager, Biostatistics",
+   "applicationId": "R1604325",
+   "appliedDate": "",
+   "status": "拒绝",
+   "notes": "拒信日期 2026-10-25（手动申请补录）",
+   "link": ""
+  }
+ ],
+ "source": "muse-jobhunt",
+ "updated_at": "2026-10-25T11:00:57-05:00",
+ "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
