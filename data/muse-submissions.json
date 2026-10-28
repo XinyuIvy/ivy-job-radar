@@ -1903,9 +1903,36 @@
       "status": "拒绝",
       "notes": "2026-10-17 提交（TRIAGED §2，SmartRecruiters req 744000151937439，US Remote，成功页 Application submitted 已核；手动申请补录——Radar 此前无此条目）；拒信 2026-10-27 16:45 CDT notifications@recruiting.experian.com，主题 Update on position at Experian，正文 After careful consideration, we won't be advancing your application at this time（正文已开封核验）；另注：该岗 Sova 测评已于 2026-10-25 到期未见完成记录，拒信在其后到达；拒信日期 2026-10-27",
       "link": "https://jobs.smartrecruiters.com/Experian/744000151937439-senior-data-modeler-fraud-risk-detection"
+    },
+    {
+      "company": "IQVIA",
+      "title": "Biostatistician 2",
+      "applicationId": "R1565391",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-28（手动申请补录）",
+      "link": ""
+    },
+    {
+      "company": "Oscar Health",
+      "title": "Data Scientist II",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-28（手动申请补录）",
+      "link": ""
+    },
+    {
+      "company": "MiniMed",
+      "title": "Statistician",
+      "applicationId": "R-802130",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-10-28（手动申请补录）",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-28T00:44:46-05:00",
+  "updated_at": "2026-10-28T16:53:18-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
