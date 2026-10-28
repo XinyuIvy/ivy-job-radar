@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-27T15:54:18.339689+00:00",
+  "generated_at": "2026-10-28T16:38:25.428732+00:00",
   "matched_jobs": 1,
   "sources": [
     {
@@ -11,7 +11,7 @@
     {
       "source": "remotive",
       "state": "success",
-      "scanned": 10,
+      "scanned": 11,
       "matched": 0
     },
     {
