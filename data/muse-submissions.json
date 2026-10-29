@@ -510,9 +510,9 @@
       "appliedDate": "2026-09-28",
       "company": "Arrowstreet Capital",
       "link": "https://arrowstreetcapital.wd5.myworkdayjobs.com/en-US/arrowstreet/job/Boston/Quantitative-Researcher_R1066-3",
-      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：arrowstreetcapital@myworkday.com \"Application Received\" 9/28 3:01 PM；Boston；简历 resume_quant_research.pdf；phd_transcript.pdf 已补传，待办清零",
+      "notes": "2026-09-28 自动提交（daily-job-screening 补跑）。Workday 确认页 \"Application Submitted\"；邮箱确认：arrowstreetcapital@myworkday.com \"Application Received\" 9/28 3:01 PM；Boston；简历 resume_quant_research.pdf；phd_transcript.pdf 已补传，待办清零；拒信日期 2026-10-28",
       "source": "Muse 求职助手",
-      "status": "已申请",
+      "status": "拒绝",
       "title": "Quantitative Researcher"
     },
     {
@@ -1978,6 +1978,6 @@
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-29T20:57:14-05:00",
+  "updated_at": "2026-10-29T20:57:29-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
