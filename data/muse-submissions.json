@@ -1957,9 +1957,27 @@
       "status": "拒绝",
       "notes": "拒信 2026-10-28 17:31 CDT，system@successfactors.com（Talent Acquisition Team），主题 Irvine Company - Thank You for Your Application，正文确认 decided to pursue other candidates，薪资段 $97,500-$128,700（正文已开封核验）；Radar 此前无此条目，手动申请补录；拒信日期 2026-10-28",
       "link": ""
+    },
+    {
+      "company": "CVS Health",
+      "title": "Data Scientist - Pharmacy Benefits",
+      "applicationId": "R1069422",
+      "appliedDate": "2026-10-14",
+      "status": "拒绝",
+      "notes": "拒信 2026-10-28 23:37 CDT，cvshealth@myworkday.com，主题 Thank you for your interest in CVS Health，正文确认 will not be moving forward（正文已开封核验）；与 R1049374 Data Scientist - Clinical AI 的 HackerRank 测评线为不同 req，测评不受此拒信影响；拒信日期 2026-10-28（手动申请补录）",
+      "link": ""
+    },
+    {
+      "company": "Spotter",
+      "title": "Machine Learning Scientist",
+      "applicationId": "",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信 2026-10-28 14:00 CDT，no-reply@us.greenhouse-mail.io，主题 Regarding Your Spotter Application，正文确认 decided to move forward with a candidate whose skills better meet needs（正文已开封核验）；拒信日期 2026-10-28（手动申请补录）",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-29T01:24:05-05:00",
+  "updated_at": "2026-10-29T20:57:14-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。"
 }
