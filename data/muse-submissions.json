@@ -2020,18 +2020,9 @@
       "status": "拒绝",
       "notes": "拒信日期 2026-10-27（手动申请补录）；邮件未注明岗位",
       "link": ""
-    },
-    {
-      "company": "Wuhan Youzhiyou Biological Pharmaceutical",
-      "title": "岗位未注明（申请更新）",
-      "applicationId": "",
-      "appliedDate": "",
-      "status": "拒绝",
-      "notes": "拒信日期 2026-10-29（手动申请补录）；163 邮箱申请更新文件夹拒信，岗位未注明",
-      "link": ""
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-10-30T06:35:00-05:00",
-  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。 | 2026-10-30 email-reply-daily-sweep（Outlook 正式报告版）：新增 2 条拒信（Two Sigma Quantitative Researcher 10-27、Analysis Group 岗位未注明 10-27），Akuna Capital Junior Quantitative Researcher 既有条目转拒绝（拒信日期 2026-10-27）。 | 2026-10-30 email-reply-daily-sweep（163 正式报告追加）：新增 1 条拒信（武汉友芝友生物制药 岗位未注明 10-29）。"
+  "updated_at": "2026-10-31T03:20:00-05:00",
+  "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。 | 2026-10-30 email-reply-daily-sweep（Outlook 正式报告版）：新增 2 条拒信（Two Sigma Quantitative Researcher 10-27、Analysis Group 岗位未注明 10-27），Akuna Capital Junior Quantitative Researcher 既有条目转拒绝（拒信日期 2026-10-27）。 | 2026-10-30 email-reply-daily-sweep（163 正式报告追加）：新增 1 条拒信（武汉友芝友生物制药 岗位未注明 10-29）。 | 2026-10-31 更正：撤回 2026-10-30 追加的武汉友芝友条目——其唯一来源（163 巡检中途报告）已被该任务正式回执推翻（页面从未加载、无邮件被读），该拒信未核实，条目删除。"
 }
