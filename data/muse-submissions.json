@@ -2029,6 +2029,15 @@
       "status": "拒绝",
       "notes": "req R0055822；拒信日期 2026-11-01（手动申请补录）；与 R0055488 为不同 requisition",
       "link": ""
+    },
+    {
+      "company": "诺唯赞（Vazyme）",
+      "title": "研发项目经理-27届校招",
+      "applicationId": "MJ003563",
+      "appliedDate": "2026-10-14",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-11-02（手动申请补录；秋招表 CN462：猎聘 2026-10-14 投递、官网 2026-10-23 重投）",
+      "link": ""
     }
   ],
   "source": "muse-jobhunt",
