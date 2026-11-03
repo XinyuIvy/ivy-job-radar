@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T20:11:35.022883+00:00",
+  "generated_at": "2026-11-03T17:46:54.346497+00:00",
   "matched_jobs": 1,
   "sources": [
     {
@@ -11,7 +11,7 @@
     {
       "source": "remotive",
       "state": "success",
-      "scanned": 12,
+      "scanned": 10,
       "matched": 0
     },
     {
@@ -30,13 +30,13 @@
       "source": "arbeitnow",
       "state": "success",
       "scanned": 300,
-      "matched": 1
+      "matched": 0
     },
     {
       "source": "weworkremotely",
       "state": "success",
       "scanned": 100,
-      "matched": 0
+      "matched": 1
     },
     {
       "source": "themuse",
