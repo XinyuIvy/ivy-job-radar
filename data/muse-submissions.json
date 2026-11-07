@@ -2125,9 +2125,53 @@
       "status": "拒绝",
       "notes": "拒信日期 2026-11-05（手动申请补录）",
       "source": "Muse 求职助手"
+    },
+    {
+      "company": "Anthropic",
+      "title": "Data Scientist, GTM",
+      "applicationId": "5196852008",
+      "appliedDate": "2026-10-17",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-11-06（手动申请补录；TRIAGED §2 #358：2026-10-17 已提交，Greenhouse 5196852008；拒信 2026-11-06 17:00 CST，no-reply@us.greenhouse-mail.io，正文明确 not to move forward）",
+      "source": "Muse 求职助手"
+    },
+    {
+      "company": "AbbVie",
+      "title": "Senior Scientist I-II, ML Molecular Optimization",
+      "applicationId": "R00151712",
+      "appliedDate": "2026-10-16",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-11-06（手动申请补录；TRIAGED §2：2026-10-16 已提交，R00151712，CV AIDD；拒信 2026-11-06 12:23 CST，AbbVie Hiring Team，正文明确改选其他候选人；与 2026-11-04 的 R00150794 为不同岗位）",
+      "source": "Muse 求职助手"
+    },
+    {
+      "company": "Intel",
+      "title": "AI Software Development Engineer",
+      "applicationId": "JR0286124",
+      "appliedDate": "2026-10-28",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-11-06（手动申请补录；JR0286124，2026-10-28 申请；拒信 2026-11-06 02:46 CST，intel@myworkday.com，正文明确改选另一申请人）",
+      "source": "Muse 求职助手"
+    },
+    {
+      "company": "Sanofi",
+      "title": "HEVA Dupixent Business Partner Respiratory Diseases",
+      "applicationId": "R2868728",
+      "appliedDate": "",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-11-05（手动申请补录；R2868728；拒信 2026-11-05 02:17 CST，Sanofi@myworkday.com，正文明确改选其他候选人）",
+      "source": "Muse 求职助手"
+    },
+    {
+      "company": "因诺（上海）资产管理有限公司",
+      "title": "量化投资研究员-上海",
+      "appliedDate": "2026-10-15",
+      "status": "拒绝",
+      "notes": "拒信日期 2026-11-06（手动申请补录；秋招表 CN459：2026-10-15 经猎聘投递；拒信 2026-11-06 01:17 CST，innoam-no-reply@mail.mokahr.com，称岗位名额有限暂不安排面试、已入人才库）",
+      "source": "Muse 求职助手"
     }
   ],
   "source": "muse-jobhunt",
-  "updated_at": "2026-11-06T22:56:41-05:00",
+  "updated_at": "2026-11-07T14:16:46-05:00",
   "sync_note": "2026-09-29 补录 IQVIA 总部 3 条拒信（R1521964/R1522738/R1565233，邮箱核实） | 2026-10-03 14:00 轮 us-apply-allday：3 封拒信已标拒绝（Lilly R-110351 10-02、Bevi 10-03、Amazon 10490800 10-03）。 | 2026-10-24 email-reply-daily-sweep（正式回执版）：新增 5 条拒信（东阳光 CADD 10-24、Roche RWD Data Scientist 10-22、Roche Biostatistician/Data Scientist PHC 10-22、Eikon Manager Biostatistics 10-22、Eli Lilly Campus Research Advisor-Statistics 10-24）。注：同轮早前基于 interim 报告的 6 条推送（Milliman 等）经正式回执核实为未核实条目，未出现在当前远端，已作废。 | 2026-10-30 email-reply-daily-sweep（Outlook 正式报告版）：新增 2 条拒信（Two Sigma Quantitative Researcher 10-27、Analysis Group 岗位未注明 10-27），Akuna Capital Junior Quantitative Researcher 既有条目转拒绝（拒信日期 2026-10-27）。 | 2026-10-30 email-reply-daily-sweep（163 正式报告追加）：新增 1 条拒信（武汉友芝友生物制药 岗位未注明 10-29）。 | 2026-10-31 更正：撤回 2026-10-30 追加的武汉友芝友条目——其唯一来源（163 巡检中途报告）已被该任务正式回执推翻（页面从未加载、无邮件被读），该拒信未核实，条目删除。 | 2026-10-31 更正：撤回 2026-10-30 同步的 Two Sigma、Analysis Group 两条及 Akuna 转拒绝——其唯一来源（Outlook 巡检报告）已被该任务正式回执推翻（页面从未加载、0 封邮件被读），三项均未核实，恢复原状。"
 }
