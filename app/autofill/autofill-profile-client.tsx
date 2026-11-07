@@ -110,7 +110,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
     if (accessKey) {
       window.localStorage.setItem(CONFIG_KEY, JSON.stringify({ version: 1, siteOrigin: window.location.origin, accessKey }));
     }
-    setMessage("已保存本地基础资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库里的 global application profile；申请相关项目、经历描述、技能、项目链接和 PDF 则按当前 APP-ID 的最终定制 CV 读取。这里的教育/经历字段只保留为回退值。");
+    setMessage("已保存本地基础资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库里的 global application profile；申请相关项目、经历描述、技能和项目链接优先按当前 APP-ID 的最终定制 CV 读取。PDF 有定制版时使用定制版，没有定制版时使用保存岗位时选择的母版。这里的教育/经历字段只保留为回退值。");
   };
 
   const copyJson = async () => {
@@ -124,7 +124,7 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
         <div>
           <p className="eyebrow">APPLICATION AUTOFILL · V6.1</p>
           <h1>本地基础申请资料</h1>
-          <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库中的 global application profile；当前岗位的项目、经历描述、技能、项目链接和最终 PDF 则由当前 APP-ID 的最终定制 CV 决定。</p>
+          <p>这里主要保存姓名、联系方式、地址、链接、工作授权等浏览器本地资料。教育详细信息、语言、获奖和作品链接会实时读取 CV 仓库中的 global application profile；当前岗位有最终定制 CV 时优先使用定制版，没有定制 CV 时把保存岗位时选择的母版 PDF 作为定稿 CV。</p>
         </div>
         <Link href="/">返回 Job Radar</Link>
       </header>
@@ -134,8 +134,8 @@ export default function AutofillProfileClient({ accessKey }: { accessKey: string
       </section>
 
       <section className="extension-update">
-        <div><strong>扩展 0.6.1 支持整批保留页面：</strong><span>Chrome 打开时每 5 分钟领取最多 10 份已完成 CV 的任务，先规则填写，再让 API 处理自定义问题，最后保留页面供你逐一检查和提交。</span></div>
-        <a href="/ivy-job-autofill-0.6.1.zip" download>下载整批语义填写版扩展</a>
+        <div><strong>扩展 0.6.9 补全 Skills：</strong><span>从所选 CV 母版读取专业技能，普通文本框一次填写，逐项选择式 Skills 区域会逐条添加。</span></div>
+        <a href="/ivy-job-autofill-0.6.9.zip" download>下载自动填充扩展 0.6.9</a>
       </section>
 
       <form onSubmit={save}>

@@ -6,9 +6,11 @@ import {
   type ArchiveLanguage,
   type ArchiveTrack,
 } from "./application-archive";
+import { inferCvTemplateTrack, isCvTemplateFilename } from "./cv-template-catalog";
 import { cvLanguageGenerationRules, normalizeCvGenerationRules } from "./cv-generation-rules";
+import { buildCvPromptV194SharedContract, CV_PROMPT_VERSION } from "./cv-prompt-v194";
 
-export const CV_PREBUILD_PROMPT_VERSION = "cv-prebuilder-v10-current-canonical-amendment";
+export const CV_PREBUILD_PROMPT_VERSION = CV_PROMPT_VERSION;
 
 export type CvPrebuildSourceFile = {
   text: string;
@@ -69,10 +71,11 @@ export function recommendCvPrebuildTemplate(
   job: Pick<CvPrebuildJobInput, "region" | "track" | "title">,
   preferredTrack?: ArchiveTrack,
   preferredLanguage?: ArchiveLanguage,
+  preferredTemplateFile?: string,
 ): CvPrebuildTemplateSelection {
   const language: ArchiveLanguage = preferredLanguage ?? (job.region === "中国" ? "zh" : "en");
   const signal = `${job.track} ${job.title}`.toLocaleLowerCase();
-  let track: ArchiveTrack = preferredTrack ?? "tech";
+  let track: ArchiveTrack = preferredTrack ?? inferCvTemplateTrack(preferredTemplateFile || "tech");
   if (!preferredTrack) {
     if (/quant|量化|定量/.test(signal)) track = "quant";
     else if (/consult|咨询/.test(signal)) track = "consulting";
@@ -80,6 +83,14 @@ export function recommendCvPrebuildTemplate(
     else if (/pharma|biostat|clinical|epidemi|rwe|heor|healthcare|medical|医药|医疗|生物统计|临床|流行病/.test(signal)) track = "pharma";
   }
 
+  if (preferredTemplateFile && isCvTemplateFilename(preferredTemplateFile)) {
+    return {
+      language,
+      track,
+      templateFile: preferredTemplateFile,
+      templatePath: `master/template-cv/${preferredTemplateFile}`,
+    };
+  }
   if (!templateFiles[language][track]) {
     track = track === "clinical_neuro" ? "pharma" : "tech";
   }
@@ -100,11 +111,12 @@ export async function createCvPrebuildIdentity(input: {
   factMasterSha: string;
   templateTrack?: ArchiveTrack;
   templateLanguage?: ArchiveLanguage;
+  templateFile?: string;
   generationRules?: string;
   promptVersion?: string;
   date?: Date;
 }) {
-  const selection = recommendCvPrebuildTemplate(input.job, input.templateTrack, input.templateLanguage);
+  const selection = recommendCvPrebuildTemplate(input.job, input.templateTrack, input.templateLanguage, input.templateFile);
   const promptVersion = input.promptVersion ?? CV_PREBUILD_PROMPT_VERSION;
   const stableJobIdentity = JSON.stringify({
     jobRowId: input.job.id,
@@ -210,7 +222,8 @@ export function buildCvPrebuildPrompt(input: {
 }) {
   const languageLabel = input.identity.language === "zh" ? "中文（zh）" : "English（en）";
   const languageRules = cvLanguageGenerationRules(input.identity.language);
-  return `请为临时任务 \`${input.identity.prebuildId}\` 预生成一份接近定稿、但尚未获得用户最终确认的定向 CV。
+  const sharedContract = buildCvPromptV194SharedContract();
+  return `请为临时任务 \`${input.identity.prebuildId}\` 按 **${CV_PROMPT_VERSION}** 预生成一份接近定稿、但尚未获得用户最终确认的定向 CV。
 
 Job Radar 已从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支冻结完整目录 \`${input.identity.bundlePath}/\`。完整事实材料保留在该归档中；本次 Responses API 附件包含完整 JD、CV 母版、展示规则、完整事实母版、baseline canonical indexes，以及当前 structured amendment \`canonical_current_addendum.jsonl\` 的按 JD 确定性切片。必须逐一读取已附加文件和 \`agent_context_manifest.md\`；不得把未附加的事实当成已验证证据。
 
@@ -218,21 +231,21 @@ Job Radar 已从私有仓库 \`${ARCHIVE_REPOSITORY}\` 的 \`main\` 分支冻结
 
 完整 JD 是岗位要求的主权威，必须从 \`jd_snapshot.md\` 读取，不得只依赖职位名或索引摘要。候选人做过什么、本人贡献、方法、工具、数据、结果、数字、年月、作者身份和论文状态，以完整 \`fact_master_snapshot.md\` 为第一最高权威。Baseline canonical indexes 与 \`canonical_current_addendum.jsonl\` 只用于结构化召回、证据定位和边界核验；如果 current addendum 明确以相同 record ID supersede baseline canonical record，则在 canonical 层采用 current addendum，但它不能覆盖完整事实母版或凭检索结果创造事实。
 
-以下是用户在启动前可编辑的本次生成规则。必须逐轮执行并把每轮判断与实际改动写入 \`cv_review.md\`。这些规则可以控制岗位画像、内容取舍、改写程度和风格，但不能覆盖冻结事实、禁止编造、固定语言与模板，以及禁止自动提交等边界。
+${sharedContract}
+
+以下是用户在启动前可编辑的附加偏好。只执行其中不与 ${CV_PROMPT_VERSION} 共享合同、冻结事实、固定语言/模板和禁止自动提交边界冲突的内容；共享合同优先。把实际采用或因冲突忽略的偏好写入 \`cv_review.md\`。
 
 ----- BEGIN USER-EDITABLE CV GENERATION RULES -----
 ${input.generationRules.trim()}
 ----- END USER-EDITABLE CV GENERATION RULES -----
 
-下面是本次冻结语言对应的专项写作规则。它只适用于当前语言，是一级质量约束，不能被上面的可编辑规则删除或改成另一语言的写法。
+下面是本次冻结语言对应的专项写作规则。它只适用于当前语言，是一级质量约束，不能被可编辑偏好删除或改成另一语言的写法。
 
 ----- BEGIN CURRENT LANGUAGE-SPECIFIC RULES -----
 ${languageRules}
 ----- END CURRENT LANGUAGE-SPECIFIC RULES -----
 
-不得为贴合 JD 编造事实、改变论文状态或扩大贡献。规则与事实发生冲突时，以完整事实母版为准；structured canonical 发生同 ID 冲突时采用 current amendment，并在审校记录中说明冲突。
-
-在 hosted shell 的 \`/mnt/data\` 创建 TeX、PDF、纯文本和审校记录，用 LuaLaTeX 编译并用 \`pdfinfo\` 与文本提取检查：不超过两个物理页面，内容尽量接近但不挤满两页，不缩小字体或破坏母版间距硬塞，也不添加弱相关内容凑页。交付岗位画像、项目/论文取舍、关键词覆盖、完整临时 CV、实际 PDF 页数和可打开的临时 PDF，然后在这个岗位自己的持久 CV Chat 中等待用户确认。
+在 hosted shell 的 \`/mnt/data\` 创建 TeX、PDF、纯文本和审校记录；按共享合同完成两次 LuaLaTeX 编译、技术检查、两页渲染和视觉检查。交付岗位画像、优先/加分项审计、项目/论文取舍、关键词覆盖、完整临时 CV、实际 PDF 页数和可打开的临时 PDF，然后在这个岗位自己的持久 CV Chat 中等待一次最终确认。
 
 这是 PRECV 临时预览。禁止创建 application/APP ID，禁止修改申请状态，禁止自动提交，禁止写入任何 \`cv_customized_<APP-ID>\` 或 \`cv_submitted_<APP-ID>\` 文件，禁止把临时 TeX/PDF 写回任何仓库。只有用户以后明确进入正式申请和最终确认流程时，才能按正式 APP bundle 的边界继续。
 `;

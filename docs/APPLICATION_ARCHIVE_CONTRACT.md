@@ -1,8 +1,10 @@
 # Application Archive Contract
 
-Status: implemented for formal application bundles, direct-template submissions and application-specific Autofill.
+Status: private archive repository initialized. Formal application bundles, direct-template submissions and application-specific Autofill use the shared Sites prompt contract.
 
 This document defines how Ivy Job Radar stores a reproducible application record in a private GitHub repository. The archive is the source of truth for the JD and CV associated with one submitted application. It must never be stored in the public Job Radar or CV repository.
+
+The archive repository was initialized on 2026-08-12; this historical initialization is distinct from the current code reconciliation.
 
 ## Stable identifiers
 

@@ -11,7 +11,7 @@ class UnifiedCandidateListTests(unittest.TestCase):
         self.assertIn('type CandidateBucket = "favorites" | "pending"', source)
         self.assertIn('candidateBucket === "favorites"', source)
         self.assertIn('savedApplicationMatchesJob', source)
-        self.assertIn('pagedCandidateRows', source)
+        self.assertIn('scrollCandidateRows.map', source)
         self.assertIn('进入待申请', source)
         self.assertIn('取消收藏', source)
 

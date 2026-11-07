@@ -246,6 +246,7 @@ jobs:
           done
 
       - name: Prepare the next ten-job review batch
+        continue-on-error: true
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}

@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import test, { after } from "node:test";
+import { createServer } from "vite";
+const vite = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, appType: "custom" });
+const { verifyPosting } = await vite.ssrLoadModule("/app/lib/job-expiration.ts");
+const { scoreStoredJob } = await vite.ssrLoadModule("/app/lib/job-scoring.ts");
+after(() => vite.close());
+test("verification supplies the JD required by website refresh; accessible non-JDs stay unknown", async (t) => {
+  const jd = "<h1>Data Scientist</h1><h2>Requirements</h2><p>" + "Data Scientist requires statistics and Python experience. ".repeat(10) + "</p>";
+  let body = jd;
+  let status = 200;
+  t.mock.method(globalThis, "fetch", async () => new Response(body, { status }));
+  const result = await verifyPosting("https://example.com/job", "Data Scientist");
+  assert.equal(result.state, "open");
+  assert.equal(typeof result.description, "string");
+  assert.equal(result.canonicalUrl, "https://example.com/job");
+  assert.doesNotThrow(() => scoreStoredJob({ title: "Data Scientist", content: result.description, region: "美国" }));
+  body = "<h1>Sign in</h1>";
+  assert.equal((await verifyPosting("https://example.com/job", "Data Scientist")).state, "unknown");
+  body = jd;
+  assert.equal((await verifyPosting("https://example.com/job", "Accountant")).state, "unknown");
+  body = "This job is closed";
+  assert.equal((await verifyPosting("https://example.com/job", "Data Scientist")).state, "expired");
+  status = 503;
+  assert.equal((await verifyPosting("https://example.com/job", "Data Scientist")).state, "unknown");
+});

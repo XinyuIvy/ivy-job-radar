@@ -7,6 +7,7 @@ out/
 dist/
 .wrangler/
 .sites-runtime/
+.sites-output/
 coverage/
 
 # Secrets and local environment
@@ -28,3 +29,13 @@ resumes/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+__pycache__/
+*.py[cod]
+
+# Generated teaching snapshots and local build metadata
+/app/project-walkthrough/source-snapshot.json
+*.tsbuildinfo
+.sites/
+
+# Also ignore linked development dependencies.
+/node_modules

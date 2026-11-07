@@ -4,9 +4,20 @@ import { eq } from "drizzle-orm";
 import { getD1, getDb } from "../../../db";
 import { applications, jobs } from "../../../db/schema";
 import { cancelCvPrebuildJob } from "../../lib/cv-prebuild-store";
+import {
+  inferCvTemplateLanguage,
+  inferCvTemplateTrack,
+  isCvTemplateFilename,
+} from "../../lib/cv-template-catalog";
 import { extractCoreJobDescription } from "../../lib/job-description";
 import { scoreStoredJob } from "../../lib/job-scoring";
-import { deleteSavedJob, listSavedJobs, saveJob } from "../../lib/saved-jobs-store";
+import { sameLogicalJob } from "../../lib/job-identity";
+import {
+  deleteSavedJob,
+  listSavedJobs,
+  saveJob,
+  updateSavedJobCvSelection,
+} from "../../lib/saved-jobs-store";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +109,103 @@ export async function POST(request: NextRequest) {
     created: result.outcome === "created",
   }, {
     status: result.outcome === "created" ? 201 : 200,
+  });
+}
+
+export async function PUT(request: NextRequest) {
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json({ error: "A valid JSON body is required." }, { status: 400 });
+  }
+
+  const jobId = parseJobId(body.jobId);
+  const language = String(body.language ?? "").trim();
+  const templateFile = String(body.templateFile ?? "").trim();
+  if (!jobId) {
+    return NextResponse.json({ error: "A valid job id is required." }, { status: 400 });
+  }
+  if (language !== "zh" && language !== "en") {
+    return NextResponse.json({ error: "A valid CV language is required." }, { status: 400 });
+  }
+  if (!isCvTemplateFilename(templateFile)) {
+    return NextResponse.json({ error: "A valid CV template filename is required." }, { status: 400 });
+  }
+  if (inferCvTemplateLanguage(templateFile) !== language) {
+    return NextResponse.json({ error: "CV template language does not match the selected language." }, { status: 400 });
+  }
+
+  const db = await getDb();
+  const [job] = await db.select().from(jobs).where(eq(jobs.id, jobId)).limit(1);
+  if (!job) return NextResponse.json({ error: "Job not found." }, { status: 404 });
+
+  const database = await getD1();
+  const now = new Date().toISOString();
+  const saved = await updateSavedJobCvSelection(
+    database,
+    jobId,
+    { language, templateFile },
+    now,
+  );
+  if (!saved) return NextResponse.json({ error: "Saved job not found." }, { status: 404 });
+
+  const applicationRows = await db.select().from(applications);
+  const linkedApplication = applicationRows.find((application) => sameLogicalJob(application, job));
+  const applicationCanFollowSelection = Boolean(
+    linkedApplication
+    && ["收藏", "准备材料"].includes(linkedApplication.status)
+    && !/@[0-9a-f]{7,40}$/i.test(linkedApplication.resumeVersion),
+  );
+  if (linkedApplication && applicationCanFollowSelection) {
+    await db.update(applications).set({
+      resumeVersion: templateFile,
+      updatedAt: now,
+    }).where(eq(applications.id, linkedApplication.id));
+  }
+
+  let cvRequeued = false;
+  if (linkedApplication?.status === "准备材料") {
+    const track = inferCvTemplateTrack(templateFile);
+    await database.prepare(`
+      UPDATE cv_prebuild_jobs
+      SET status = 'stale', updated_at = ?
+      WHERE job_id = ? AND generation_key IS NOT NULL
+        AND status NOT IN ('cancelled', 'stale')
+        AND (language <> ? OR template_file <> ?)
+    `).bind(now, jobId, language, templateFile).run();
+    await database.prepare(`
+      INSERT INTO cv_prebuild_jobs (
+        job_id, application_row_id, status, language, track, template_file,
+        attempts, last_error, created_at, updated_at, completed_at
+      ) VALUES (?, ?, 'queued', ?, ?, ?, 0, '', ?, ?, '')
+      ON CONFLICT(job_id) WHERE generation_key IS NULL DO UPDATE SET
+        application_row_id = excluded.application_row_id,
+        status = 'queued',
+        language = excluded.language,
+        track = excluded.track,
+        template_file = excluded.template_file,
+        attempts = 0,
+        last_error = '',
+        updated_at = excluded.updated_at,
+        completed_at = ''
+    `).bind(
+      jobId,
+      linkedApplication.id,
+      language,
+      track,
+      templateFile,
+      now,
+      now,
+    ).run();
+    cvRequeued = true;
+  }
+
+  return NextResponse.json({
+    ...saved,
+    applicationUpdated: applicationCanFollowSelection,
+    frozenApplicationPreserved: Boolean(linkedApplication && !applicationCanFollowSelection),
+    cvRequeued,
   });
 }
 

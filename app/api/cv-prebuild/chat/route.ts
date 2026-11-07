@@ -1,3 +1,4 @@
+import { CV_AUTOMATION_PAUSED_PAYLOAD, CV_PREBUILD_AUTOMATION_PAUSED } from "../../../lib/cv-prebuild-pause";
 import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -30,6 +31,9 @@ function parseJobId(value: unknown) {
 export async function POST(request: NextRequest) {
   if (!(await getChatGPTUser())) {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+  }
+  if (CV_PREBUILD_AUTOMATION_PAUSED) {
+    return NextResponse.json(CV_AUTOMATION_PAUSED_PAYLOAD, { status: 503 });
   }
   let body: Record<string, unknown>;
   try {

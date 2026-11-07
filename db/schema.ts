@@ -10,6 +10,7 @@ export const applications = sqliteTable("applications", {
   track: text("track").notNull().default(""),
   jobUrl: text("job_url").notNull().default(""),
   applicationId: text("application_id").notNull().default(""),
+  archiveId: text("archive_id").notNull().default(""),
   source: text("source").notNull().default("公司官网"),
   fit: integer("fit").notNull().default(3),
   interest: integer("interest").notNull().default(3),
@@ -128,7 +129,10 @@ export const ignoredJobs = sqliteTable("ignored_jobs", {
 export const savedJobs = sqliteTable("saved_jobs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   jobId: integer("job_id").notNull().unique(),
+  cvLanguage: text("cv_language").notNull().default(""),
+  cvTemplateFile: text("cv_template_file").notNull().default(""),
   createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull().default(""),
 });
 
 export const jobFactScores = sqliteTable("job_fact_scores", {

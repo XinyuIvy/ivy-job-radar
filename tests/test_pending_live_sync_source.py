@@ -5,12 +5,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class PendingLiveSyncSourceTests(unittest.TestCase):
-    def test_capture_does_not_broadcast_or_persist_a_pending_application(self):
+    def test_capture_broadcasts_and_persists_the_saved_application(self):
         capture = (ROOT / "app" / "bookmarklet" / "capture" / "page.tsx").read_text(encoding="utf-8")
-        self.assertIn('fetch("/api/saved-jobs"', capture)
-        self.assertNotIn('new BroadcastChannel(CHANNEL_NAME)', capture)
-        self.assertNotIn('type: "ivy-job-radar-pending-created"', capture)
-        self.assertNotIn("localStorage.setItem(STORAGE_KEY", capture)
+        route = (ROOT / "app" / "api" / "bookmark-capture" / "route.ts").read_text(encoding="utf-8")
+        self.assertIn("const saved = await saveJob", route)
+        self.assertNotIn('fetch("/api/saved-jobs"', capture)
+        self.assertIn("new BroadcastChannel(PENDING_CHANNEL_NAME)", capture)
+        self.assertIn('type: "ivy-job-radar-pending-created"', capture)
+        self.assertIn("window.localStorage.setItem(PENDING_STORAGE_KEY", capture)
 
     def test_live_insert_updates_authoritative_react_state(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")

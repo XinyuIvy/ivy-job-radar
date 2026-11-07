@@ -3,8 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../../db";
 import { applications } from "../../../../db/schema";
-import { archivePath, ARCHIVE_REPOSITORY } from "../../../lib/application-archive";
+import { ARCHIVE_REPOSITORY } from "../../../lib/application-archive";
+import {
+  autofillArchiveId,
+  buildAutofillResumeCandidates,
+  fetchFirstAvailableResume,
+} from "../../../lib/autofill-resume";
 import { deriveBookmarkCaptureKey, secureBookmarkKeyEqual } from "../../../lib/bookmark-capture";
+import { isCvTemplateFilename } from "../../../lib/cv-template-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -28,17 +34,44 @@ async function authorize(request: NextRequest) {
   return Boolean(expected && secureBookmarkKeyEqual(expected, provided));
 }
 
-function archiveIdFrom(value: string) {
-  const normalized = value.trim().toUpperCase();
-  return /^APP-\d{4}-[A-Z0-9]{3,12}-\d{3,}$/.test(normalized) ? normalized : "";
-}
-
 export async function GET(request: NextRequest) {
   if (!await authorize(request)) {
     return NextResponse.json({ error: "Invalid autofill key." }, { status: 401, headers: CORS_HEADERS });
   }
 
-  const applicationRowId = Number(new URL(request.url).searchParams.get("applicationId"));
+  const url = new URL(request.url);
+  const applicationRowId = Number(url.searchParams.get("applicationId"));
+  const templateFile = String(url.searchParams.get("templateFile") || "").trim();
+  const { env } = await import("cloudflare:workers");
+  const cvToken = String(env.CV_GITHUB_TOKEN || "").trim();
+  const archiveToken = String(env.APPLICATION_ARCHIVE_GITHUB_TOKEN || cvToken).trim();
+  const repository = String(env.APPLICATION_ARCHIVE_GITHUB_REPO || ARCHIVE_REPOSITORY).trim();
+
+  if (templateFile) {
+    if (!isCvTemplateFilename(templateFile)) {
+      return NextResponse.json({ error: "A valid CV template filename is required." }, { status: 400, headers: CORS_HEADERS });
+    }
+    const candidates = buildAutofillResumeCandidates({ archiveId: "", resumeVersion: templateFile, archiveRepository: repository });
+    const result = await fetchFirstAvailableResume({
+      candidates,
+      archiveToken,
+      cvToken,
+      accept: "application/vnd.github.raw+json",
+    });
+    if (!result.response || !result.candidate) {
+      return NextResponse.json({ error: "The current template PDF is unavailable." }, { status: result.lastStatus === 404 ? 404 : 502, headers: CORS_HEADERS });
+    }
+    return new NextResponse(await result.response.arrayBuffer(), {
+      status: 200,
+      headers: {
+        ...CORS_HEADERS,
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${result.candidate.fileName}"`,
+        "X-Ivy-Resume-Source": "live-template",
+      },
+    });
+  }
+
   if (!Number.isInteger(applicationRowId) || applicationRowId <= 0) {
     return NextResponse.json({ error: "A valid applicationId is required." }, { status: 400, headers: CORS_HEADERS });
   }
@@ -50,44 +83,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Only submitted applications can provide an autofill resume." }, { status: 409, headers: CORS_HEADERS });
   }
 
-  const archiveId = archiveIdFrom(application.applicationId);
-  if (!archiveId) {
-    return NextResponse.json({ error: "This application does not have a finalized archive ID yet." }, { status: 409, headers: CORS_HEADERS });
+  const archiveId = autofillArchiveId(application.archiveId || application.applicationId);
+  const candidates = buildAutofillResumeCandidates({ archiveId, resumeVersion: application.resumeVersion, archiveRepository: repository });
+  if (!candidates.length) return NextResponse.json({ error: "This application has neither a finalized customized CV nor a selected template CV." }, { status: 409, headers: CORS_HEADERS });
+  const result = await fetchFirstAvailableResume({
+    candidates,
+    archiveToken,
+    cvToken,
+    accept: "application/vnd.github.raw+json",
+  });
+  if (!result.configuredCandidateCount) return NextResponse.json({ error: "CV repository access is not configured." }, { status: 503, headers: CORS_HEADERS });
+  if (!result.response || !result.candidate) {
+    return NextResponse.json({ error: "Neither the finalized customized PDF nor the selected template PDF is available." }, { status: result.lastStatus === 404 ? 404 : 502, headers: CORS_HEADERS });
   }
 
-  const fileName = `cv_customized_${archiveId}.pdf`;
-  const { env } = await import("cloudflare:workers");
-  const token = String(env.APPLICATION_ARCHIVE_GITHUB_TOKEN || env.CV_GITHUB_TOKEN || "").trim();
-  const repository = String(env.APPLICATION_ARCHIVE_GITHUB_REPO || ARCHIVE_REPOSITORY).trim();
-  if (!token) return NextResponse.json({ error: "Archive access is not configured." }, { status: 503, headers: CORS_HEADERS });
-
-  const response = await fetch(
-    `https://api.github.com/repos/${repository}/contents/${archivePath(archiveId)}/${fileName}?ref=main`,
-    {
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github.raw+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "Ivy-Job-Radar-Autofill",
-      },
-    },
-  );
-  if (response.status === 404) {
-    return NextResponse.json({ error: "Final customized PDF is not available yet." }, { status: 404, headers: CORS_HEADERS });
-  }
-  if (!response.ok) {
-    return NextResponse.json({ error: `Archive PDF fetch failed (${response.status}).` }, { status: 502, headers: CORS_HEADERS });
-  }
-
-  const bytes = await response.arrayBuffer();
+  const bytes = await result.response.arrayBuffer();
   return new NextResponse(bytes, {
     status: 200,
     headers: {
       ...CORS_HEADERS,
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${fileName}"`,
-      "X-Ivy-Application-Id": archiveId,
+      "Content-Disposition": `attachment; filename="${result.candidate.fileName}"`,
+      "X-Ivy-Application-Id": archiveId || application.applicationId,
+      "X-Ivy-Resume-Source": result.candidate.source,
     },
   });
 }

@@ -3,14 +3,20 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-type TemplateLanguage = "en" | "zh";
+import {
+  fetchCvTemplateCatalog,
+  recommendCvTemplateOption,
+  type CvTemplateLanguage,
+  type CvTemplateOption,
+} from "../lib/cv-template-catalog";
 
 type ApplicationPrefill = {
   applicationId: number;
   company: string;
   title: string;
   track: string;
-  language: TemplateLanguage;
+  language: CvTemplateLanguage;
+  templateFile?: string;
   region: string;
   location: string;
   jd: string;
@@ -27,42 +33,14 @@ type ArchiveResult = {
 
 type Stage = "loading" | "review" | "analyzing" | "archiving" | "ready" | "error";
 
-type TemplateChoice = {
-  key: string;
-  label: string;
-  filename: string;
-  track: string;
-  language: TemplateLanguage;
-};
-
-const trackLabels: Record<string, string> = {
-  pharma: "Pharma / Biostatistics",
-  tech: "Tech / Data Science / Applied ML",
-  quant: "Quantitative Research",
-  consulting: "Healthcare Consulting",
-  clinical_neuro: "脑科学 / 临床数据 / 医疗器械",
-};
-
-const templateChoices: TemplateChoice[] = [
-  { key: "zh:tech", label: "中文 · Tech / Data Science / Applied ML", filename: "cv_tech_cn.tex", track: "tech", language: "zh" },
-  { key: "zh:quant", label: "中文 · Quantitative Research", filename: "cv_quant_cn.tex", track: "quant", language: "zh" },
-  { key: "zh:pharma", label: "中文 · Pharma / Biostatistics", filename: "cv_pharma_cn.tex", track: "pharma", language: "zh" },
-  { key: "zh:consulting", label: "中文 · Healthcare / Life Sciences Consulting", filename: "cv_healthcare_consulting_cn.tex", track: "consulting", language: "zh" },
-  { key: "zh:clinical_neuro", label: "中文 · 脑科学 / 临床数据 / 医疗器械", filename: "cv_clinical_data_neuro_cn.tex", track: "clinical_neuro", language: "zh" },
-  { key: "en:tech", label: "English · Tech / Data Science / Applied ML", filename: "cv_tech.tex", track: "tech", language: "en" },
-  { key: "en:quant", label: "English · Quantitative Research", filename: "cv_quant.tex", track: "quant", language: "en" },
-  { key: "en:pharma", label: "English · Pharma / Biostatistics", filename: "cv_pharma.tex", track: "pharma", language: "en" },
-  { key: "en:consulting", label: "English · Healthcare Consulting", filename: "cv_healthcare_consulting.tex", track: "consulting", language: "en" },
-];
-
 const stageText: Record<"loading" | "analyzing" | "archiving", string> = {
   loading: "正在读取完整 JD 与申请信息…",
   analyzing: "正在生成 Job Radar 初步匹配…",
   archiving: "正在冻结事实母版、你选择的 CV 母版和申请输入…",
 };
 
-function choiceLabel(key: string) {
-  return templateChoices.find((choice) => choice.key === key)?.label || "";
+function choiceLabel(choices: CvTemplateOption[], filename: string) {
+  return choices.find((choice) => choice.filename === filename)?.label || filename;
 }
 
 export default function CvTailorClient() {
@@ -77,6 +55,7 @@ export default function CvTailorClient() {
   const [copied, setCopied] = useState(false);
   const [selectedTemplateKey, setSelectedTemplateKey] = useState("");
   const [recommendedTemplateKey, setRecommendedTemplateKey] = useState("");
+  const [templateChoices, setTemplateChoices] = useState<CvTemplateOption[]>([]);
 
   const createArchive = useCallback(async (value: ApplicationPrefill, jdInput?: string) => {
     const jd = String(jdInput ?? value.jd).trim();
@@ -98,7 +77,7 @@ export default function CvTailorClient() {
       const analysisResponse = await fetch("/api/cv-tailor/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ track: value.track, language: value.language, jd }),
+        body: JSON.stringify({ track: value.track, language: value.language, templateFile: value.templateFile, jd }),
       });
       const analysis = await analysisResponse.json() as { error?: string; code?: string } & Record<string, unknown>;
       if (!analysisResponse.ok) {
@@ -110,7 +89,7 @@ export default function CvTailorClient() {
       const archiveResponse = await fetch("/api/cv-tailor/archive", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ applicationId: value.applicationId, track: value.track, language: value.language, jdOverride: jd, analysis }),
+        body: JSON.stringify({ applicationId: value.applicationId, track: value.track, language: value.language, templateFile: value.templateFile, jdOverride: jd, analysis }),
       });
       const result = await archiveResponse.json() as ArchiveResult & { error?: string; code?: string };
       if (!archiveResponse.ok) {
@@ -135,23 +114,38 @@ export default function CvTailorClient() {
       return;
     }
 
-    fetch(`/api/cv-tailor/application?applicationId=${id}`, { cache: "no-store" })
-      .then(async (response) => {
+    Promise.all([
+      fetch(`/api/cv-tailor/application?applicationId=${id}`, { cache: "no-store" }).then(async (response) => {
         const result = await response.json() as ApplicationPrefill & { error?: string };
         if (!response.ok) throw new Error(result.error || "无法读取申请");
         return result;
-      })
-      .then((result) => {
+      }),
+      fetchCvTemplateCatalog(),
+    ])
+      .then(([result, catalog]) => {
         const jd = result.jd || "";
-        const recommendation = `${result.language}:${result.track}`;
-        setApplication(result);
-        setRecommendedTemplateKey(templateChoices.some((choice) => choice.key === recommendation) ? recommendation : "");
-        setSelectedTemplateKey("");
+        const savedChoice = catalog.find((choice) => choice.filename === result.templateFile);
+        const recommendation = savedChoice
+          || recommendCvTemplateOption(catalog, result.language, `${result.track} ${result.title}`);
+        const nextApplication = savedChoice
+          ? {
+            ...result,
+            track: savedChoice.track,
+            language: savedChoice.language,
+            templateFile: savedChoice.filename,
+          }
+          : result;
+        setTemplateChoices(catalog);
+        setApplication(nextApplication);
+        setRecommendedTemplateKey(recommendation?.filename || "");
+        setSelectedTemplateKey(savedChoice?.filename || "");
         setJdDraft(jd);
         setJdWasAutoRead(Boolean(jd.trim()));
         setErrorCode("");
         setMessage(jd.trim()
-          ? "系统已读取到 JD。请先明确选择 CV 母版，再核对 JD；只有你确认后才会生成匹配和 Prompt。"
+          ? savedChoice
+            ? "系统已读取该岗位保存的 CV 母版和完整 JD。请核对后再生成匹配和 Prompt。"
+            : "系统已读取到 JD。请先明确选择 CV 母版，再核对 JD；只有你确认后才会生成匹配和 Prompt。"
           : "请先明确选择 CV 母版，并在下方手动粘贴完整职位描述和职位要求。");
         setStage("review");
       })
@@ -174,9 +168,9 @@ export default function CvTailorClient() {
 
   const selectTemplate = (key: string) => {
     setSelectedTemplateKey(key);
-    const choice = templateChoices.find((item) => item.key === key);
+    const choice = templateChoices.find((item) => item.filename === key);
     if (!choice || !application) return;
-    setApplication({ ...application, track: choice.track, language: choice.language });
+    setApplication({ ...application, track: choice.track, language: choice.language, templateFile: choice.filename });
     setErrorCode("");
   };
 
@@ -231,7 +225,7 @@ export default function CvTailorClient() {
       {application && <section className="application-summary" aria-label="申请信息">
         <div><span>公司</span><strong>{application.company}</strong></div>
         <div><span>岗位</span><strong>{application.title}</strong></div>
-        <div><span>系统建议</span><strong>{recommendedTemplateKey ? choiceLabel(recommendedTemplateKey) : `${trackLabels[application.track] || application.track} · ${application.language === "zh" ? "中文" : "English"}`}</strong></div>
+        <div><span>系统建议</span><strong>{recommendedTemplateKey ? choiceLabel(templateChoices, recommendedTemplateKey) : "请从 GitHub 实时母版中选择"}</strong></div>
       </section>}
 
       {stage === "review" && application && <section className="jd-review-card" aria-live="polite">
@@ -250,11 +244,11 @@ export default function CvTailorClient() {
           <label htmlFor="cv-template-choice">CV 母版 <strong>必选</strong></label>
           <select id="cv-template-choice" value={selectedTemplateKey} onChange={(event) => selectTemplate(event.target.value)}>
             <option value="">请选择 CV 母版…</option>
-            {templateChoices.map((choice) => <option key={choice.key} value={choice.key}>{choice.label} · {choice.filename}</option>)}
+            {templateChoices.map((choice) => <option key={choice.filename} value={choice.filename}>{choice.language === "zh" ? "中文" : "English"} · {choice.label} · {choice.filename}</option>)}
           </select>
           <p>
             Job Radar 只给建议，不会自动替你确认。
-            {recommendedTemplateKey ? <> 当前建议：<strong>{choiceLabel(recommendedTemplateKey)}</strong>。</> : null}
+            {recommendedTemplateKey ? <> 当前建议：<strong>{choiceLabel(templateChoices, recommendedTemplateKey)}</strong>。</> : null}
             你最终选择的母版才会冻结成 <code>cv_base.tex</code>。
           </p>
         </div>
@@ -269,7 +263,7 @@ export default function CvTailorClient() {
         <div className="jd-review-footer">
           <div>
             <strong>{jdDraft.trim().length.toLocaleString()} 字符</strong>
-            <span>{selectedTemplateKey ? `已选择：${choiceLabel(selectedTemplateKey)}` : "尚未选择 CV 母版"}</span>
+            <span>{selectedTemplateKey ? `已选择：${choiceLabel(templateChoices, selectedTemplateKey)}` : `已从 GitHub 实时读取 ${templateChoices.length} 个母版`}</span>
           </div>
           <button type="button" onClick={confirmJdAndCreate} disabled={!jdDraft.trim() || !selectedTemplateKey}>
             确认母版与 JD 并生成申请档案
@@ -305,7 +299,7 @@ export default function CvTailorClient() {
           <p className="jd-review-copy">
             {archive.existing
               ? "系统复用了此前已经冻结的申请档案，没有覆盖旧文件。下面保留你本次进入页面时确认的 JD，便于核对。"
-              : `本次使用 ${choiceLabel(selectedTemplateKey)}。下面就是本次匹配使用的 JD；申请档案中的 cv_base.tex 与 jd_snapshot.md 均已冻结。`}
+              : `本次使用 ${choiceLabel(templateChoices, selectedTemplateKey)}。下面就是本次匹配使用的 JD；申请档案中的 cv_base.tex 与 jd_snapshot.md 均已冻结。`}
           </p>
           <textarea readOnly value={confirmedJd} aria-label="本次确认的完整 JD" />
         </section>
@@ -316,7 +310,7 @@ export default function CvTailorClient() {
             <h2>{archive.applicationId}</h2>
             <p>{archive.existing ? "已找到此前冻结的同一申请档案，没有重复创建。" : "完整 JD、事实母版、canonical indexes、你明确选择的 CV 母版和初步匹配已冻结。"}</p>
             <dl>
-              <div><dt>CV 母版</dt><dd>{choiceLabel(selectedTemplateKey) || "沿用已冻结申请档案中的母版"}</dd></div>
+              <div><dt>CV 母版</dt><dd>{choiceLabel(templateChoices, selectedTemplateKey) || "沿用已冻结申请档案中的母版"}</dd></div>
               <div><dt>申请目录</dt><dd>{archive.archivePath}</dd></div>
               <div><dt>下一步</dt><dd>复制 Prompt 到新的 Work / Codex Chat</dd></div>
             </dl>

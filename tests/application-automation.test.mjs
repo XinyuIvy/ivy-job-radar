@@ -35,6 +35,13 @@ Candidates should have a PhD in statistics, biostatistics, computer science, or 
   discoveredAt: "2026-08-26T10:00:00.000Z",
 };
 
+test("scores including zero and old thresholds cannot reject an automation candidate", () => {
+  for (const score of [0, 1, 54, 55, 69, 70, 100]) {
+    const result = evaluateAutomationCandidate({ ...baseJob, score }, { ...defaultAutomationConfig(), minimumScore: 100 });
+    assert.equal(result.eligible, true, JSON.stringify(result.blockers));
+  }
+});
+
 test("high-confidence target roles pass deterministic hard filters", () => {
   const config = defaultAutomationConfig();
   const result = evaluateAutomationCandidate(baseJob, config);

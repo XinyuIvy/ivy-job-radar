@@ -8,9 +8,11 @@ class AutofillManualSelectionPersistenceTests(unittest.TestCase):
     def test_manual_application_selection_is_reused_when_filling(self):
         popup = (ROOT / "browser-extension" / "popup.js").read_text(encoding="utf-8")
         self.assertIn("let selectedApplicationRowId = 0", popup)
+        self.assertIn('let selectedTemplateFile = ""', popup)
         self.assertIn("selectedApplicationRowId = applicationId", popup)
-        self.assertIn("currentContext?.matched && currentContext?.application?.id", popup)
-        self.assertIn("selectedApplicationRowId || candidateSelect.value || 0", popup)
+        self.assertIn('currentContext?.selectionType === "application"', popup)
+        self.assertIn('currentContext?.selectionType === "template"', popup)
+        self.assertIn("selectedApplicationRowId || 0", popup)
         self.assertIn("fetchApplicationPacket(stored.ivyRadarConfig, context)", popup)
 
     def test_matched_context_blocks_manual_fallback_race(self):

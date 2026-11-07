@@ -97,7 +97,7 @@ export async function getAutomationConfig(database: AutomationDatabase): Promise
     executionMode: row.executionMode === "automatic" ? "automatic" : "pilot",
     // Application review is intentionally fixed at ten jobs per batch.
     dailyLimit: 10,
-    minimumScore: Math.max(70, Math.min(95, row.minimumScore || 75)),
+    minimumScore: 0, // Ignore historical score thresholds.
     defaultLanguage: row.defaultLanguage === "zh" ? "zh" : "en",
     allowedAts,
     finalSubmitEnabled: Boolean(row.finalSubmitEnabled),

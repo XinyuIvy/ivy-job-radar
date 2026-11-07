@@ -9,6 +9,7 @@ const vite = await createServer({
   appType: "custom",
 });
 const {
+  CV_PREBUILD_PROMPT_VERSION,
   buildCvPrebuildBundleFiles,
   buildCvPrebuildPrompt,
   createCvPrebuildIdentity,
@@ -55,6 +56,15 @@ test("temporary template selection follows region and job track", () => {
     recommendCvPrebuildTemplate({ ...job, region: "美国" }, "consulting", "zh").templateFile,
     "cv_healthcare_consulting_cn.tex",
   );
+  assert.deepEqual(
+    { ...recommendCvPrebuildTemplate(job, "tech", "en", "CV_Applied_DS_Internet_EN.tex") },
+    {
+      language: "en",
+      track: "tech",
+      templateFile: "CV_Applied_DS_Internet_EN.tex",
+      templatePath: "master/template-cv/CV_Applied_DS_Internet_EN.tex",
+    },
+  );
 });
 
 test("generation key is stable and changes with every frozen authority", async () => {
@@ -80,6 +90,7 @@ test("generation key is stable and changes with every frozen authority", async (
     { ...base, generationRules: "Different review rules" },
     { ...base, templateTrack: "quant" },
     { ...base, templateLanguage: "en" },
+    { ...base, templateFile: "CV_Biostatistician_EN.tex", templateLanguage: "en" },
   ]) {
     assert.notEqual((await createCvPrebuildIdentity(changed)).generationKey, first.generationKey);
   }
@@ -128,11 +139,27 @@ test("PRECV bundle freezes only temporary inputs and never creates APP artifacts
 
   const record = files[`${identity.bundlePath}/job_record.yaml`];
   const prompt = files[`${identity.bundlePath}/prebuild_prompt.txt`];
+  assert.equal(CV_PREBUILD_PROMPT_VERSION, "prompt-v1.9.4-site.3");
   assert.match(record, /application_id: null/);
   assert.match(record, /application_row_id: null/);
   assert.match(record, /canonical_current_addendum\.jsonl/);
   assert.match(record, new RegExp(`cv_commit: "${identity.cvCommit}"`));
   assert.match(prompt, /LuaLaTeX/);
+  assert.match(prompt, /prompt-v1\.9\.4-site\.3 网站执行合同/);
+  assert.match(prompt, /明确优先\/加分项必须单独、突出地审计/);
+  assert.match(prompt, /个人简介\/Summary → 教育背景\/Education → 专业能力\/Professional Skills/);
+  assert.match(prompt, /项目经历是否拆成多个 section、如何分组以及每个 section 的名称/);
+  assert.match(prompt, /临床数据与真实世界研究/);
+  assert.match(prompt, /cv_base\.tex 是本次生成必须实际使用的已选 CV 母版/);
+  assert.match(prompt, /尽量直接复用其自然、成熟、同语种的术语、句式和详细程度/);
+  assert.match(prompt, /每个入选项目必须有且只有两条详细、信息密度充足的 bullet/);
+  assert.match(prompt, /不得只在第二条末尾机械补一句迁移价值/);
+  assert.match(prompt, /CV 必须列出至少三篇经冻结事实母版核验的论文或手稿/);
+  assert.match(prompt, /第二页有效正文占用深度必须严格超过 75%/);
+  assert.match(prompt, /第二页 75% 阈值由实质正文而非放大空白满足/);
+  assert.match(prompt, /PDF 必须恰好两页/);
+  assert.match(prompt, /配对比较识别到 3 个跨模型显著不同的脑区/);
+  assert.match(prompt, /自助法（Bootstrap）/);
   assert.match(prompt, /BEGIN USER-EDITABLE CV GENERATION RULES/);
   assert.match(prompt, /当前 CV 语言专项规则：中文/);
   assert.doesNotMatch(prompt, /Current CV language rules: English/);
@@ -161,4 +188,5 @@ test("English CV prompts receive only the English language contract", async () =
   assert.match(prompt, /Current CV language rules: English/);
   assert.match(prompt, /idiomatic U\.S\. English resume/);
   assert.doesNotMatch(prompt, /当前 CV 语言专项规则：中文/);
+  assert.match(prompt, /prompt-v1\.9\.4-site\.3 网站执行合同/);
 });

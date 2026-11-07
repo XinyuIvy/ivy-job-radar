@@ -8,14 +8,19 @@ import {
   archivePath,
   buildApplicationRecord,
   buildChatPrompt,
+  buildSubmittedTemplateManifest,
   canonicalSnapshotFiles,
+  frozenResumeVersion,
   normalizeInitialClassification,
+  resolveApplicationRecordIds,
   stableArchiveId,
   templateFiles,
   type ArchiveLanguage,
   type ArchiveTrack,
 } from "../../../lib/application-archive";
+import { inferCvTemplateTrack, isCvTemplateFilename } from "../../../lib/cv-template-catalog";
 import { extractCoreJobDescription } from "../../../lib/job-description";
+import { buildTemplateAutofillPacket } from "../../../lib/template-autofill-packet";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +65,7 @@ type GithubCommit = { tree: { sha: string } };
 type GithubBlob = { sha: string };
 type GithubTree = { sha: string };
 type GithubCreatedCommit = { sha: string };
+type ArchiveFileContent = string | { content: string; encoding: "utf-8" | "base64" };
 
 const cvApiRoot = "https://api.github.com/repos/XinyuIvy/CV";
 
@@ -104,6 +110,15 @@ async function readPrivateFile(path: string, ref: string, token: string) {
   );
   if (payload.encoding !== "base64" || !payload.content) throw new Error(`GitHub did not return ${path}.`);
   return decodeBase64Utf8(payload.content);
+}
+
+async function readPrivateFileBase64(path: string, ref: string, token: string) {
+  const payload = await githubJson<{ content?: string; encoding?: string }>(
+    `${cvApiRoot}/contents/${path}?ref=${encodeURIComponent(ref)}`,
+    token,
+  );
+  if (payload.encoding !== "base64" || !payload.content) throw new Error(`GitHub did not return ${path}.`);
+  return payload.content.replace(/\n/g, "");
 }
 
 async function existingArchiveTextFile(apiRoot: string, path: string, filename: string, token: string) {
@@ -155,15 +170,16 @@ function fullJdFromSnapshot(snapshot: string) {
 async function commitFilesAtomically(input: {
   apiRoot: string;
   token: string;
-  files: Record<string, string>;
+  files: Record<string, ArchiveFileContent>;
   message: string;
 }) {
   const main = await githubJson<GithubRef>(`${input.apiRoot}/git/ref/heads/main`, input.token);
   const parent = await githubJson<GithubCommit>(`${input.apiRoot}/git/commits/${main.object.sha}`, input.token);
-  const blobs = await Promise.all(Object.entries(input.files).map(async ([path, content]) => {
+  const blobs = await Promise.all(Object.entries(input.files).map(async ([path, value]) => {
+    const file = typeof value === "string" ? { content: value, encoding: "utf-8" as const } : value;
     const blob = await githubJson<GithubBlob>(`${input.apiRoot}/git/blobs`, input.token, {
       method: "POST",
-      body: JSON.stringify({ content, encoding: "utf-8" }),
+      body: JSON.stringify(file),
     });
     return { path, mode: "100644", type: "blob", sha: blob.sha };
   }));
@@ -244,15 +260,25 @@ export async function POST(request: NextRequest) {
     applicationId?: number;
     track?: ArchiveTrack;
     language?: ArchiveLanguage;
+    templateFile?: string;
     jdOverride?: string;
     analysis?: InitialAnalysis;
+    freezeSubmittedTemplate?: boolean;
+    replaceSubmittedTemplate?: boolean;
   };
   const applicationRowId = Number(body.applicationId);
   const language: ArchiveLanguage = body.language === "zh" ? "zh" : "en";
-  const track: ArchiveTrack = body.track && body.track in templateFiles[language] ? body.track : "tech";
-  const templateFile = templateFiles[language][track];
+  const requestedTemplateFile = String(body.templateFile || "").trim();
+  const track: ArchiveTrack = body.track && body.track in templateFiles[language]
+    ? body.track
+    : inferCvTemplateTrack(requestedTemplateFile || "tech");
+  const templateFile = isCvTemplateFilename(requestedTemplateFile)
+    ? requestedTemplateFile
+    : templateFiles[language][track];
   const analysis = body.analysis ?? {};
   const jdOverride = String(body.jdOverride || "").trim();
+  const freezeSubmittedTemplate = body.freezeSubmittedTemplate === true;
+  const replaceSubmittedTemplate = body.replaceSubmittedTemplate === true;
 
   if (!Number.isInteger(applicationRowId) || applicationRowId <= 0) {
     return NextResponse.json({ error: "A valid applicationId is required.", code: "APPLICATION_ID_REQUIRED" }, { status: 400 });
@@ -260,7 +286,7 @@ export async function POST(request: NextRequest) {
   if (!templateFile) {
     return NextResponse.json({ error: "该方向没有所选语言的 LaTeX 母版。", code: "CV_TEMPLATE_LANGUAGE_UNAVAILABLE" }, { status: 400 });
   }
-  if (!Array.isArray(analysis.matches) || !analysis.matches.length) {
+  if (!freezeSubmittedTemplate && (!Array.isArray(analysis.matches) || !analysis.matches.length)) {
     return NextResponse.json({ error: "初步 JD 分析缺失，不能创建不完整的申请档案。", code: "MATCH_PACKET_REQUIRED" }, { status: 400 });
   }
 
@@ -282,11 +308,145 @@ export async function POST(request: NextRequest) {
       ?? allJobs.find((row) => row.company === application.company && row.title === application.title)
       ?? null;
     const jd = jdOverride || extractCoreJobDescription(job?.description || "").text;
-    if (!jd) return NextResponse.json({ error: "该申请没有完整 JD，不能创建申请档案。", code: "JD_REQUIRED" }, { status: 400 });
 
-    const archiveId = stableArchiveId(application.company, application.id, application.applicationId);
+    const resolvedIds = resolveApplicationRecordIds(application);
+    const archiveId = stableArchiveId(application.company, application.id, resolvedIds.archiveId);
     const path = archivePath(archiveId);
     const templatePath = `master/template-cv/${templateFile}`;
+
+    if (freezeSubmittedTemplate) {
+      const submittedPdf = `cv_submitted_${archiveId}.pdf`;
+      const [existingApplicationRecord, existingJdSnapshot, submittedPdfExists] = await Promise.all([
+        existingArchiveTextFile(archiveApiRoot, path, "application_record.yaml", archiveToken),
+        existingArchiveTextFile(archiveApiRoot, path, "jd_snapshot.md", archiveToken),
+        archiveFileExists(archiveApiRoot, path, submittedPdf, archiveToken),
+      ]);
+      if (!existingJdSnapshot && !jd) {
+        return NextResponse.json({ error: "该申请没有完整 JD，不能创建申请档案。", code: "JD_REQUIRED" }, { status: 400 });
+      }
+      const existingTemplatePath = existingApplicationRecord
+        ? yamlScalar(existingApplicationRecord, "cv_template_path")
+        : "";
+      const replacingSubmittedTemplate = Boolean(
+        replaceSubmittedTemplate
+        && existingTemplatePath
+        && existingTemplatePath !== templatePath,
+      );
+      if (existingTemplatePath && existingTemplatePath !== templatePath && !replaceSubmittedTemplate) {
+        return NextResponse.json({
+          error: `该申请已经冻结为 ${existingTemplatePath}，不能改成 ${templatePath}。`,
+          code: "SUBMITTED_TEMPLATE_ALREADY_FROZEN",
+          existingTemplatePath,
+          selectedTemplatePath: templatePath,
+        }, { status: 409 });
+      }
+
+      const recordedCvCommit = existingApplicationRecord
+        ? yamlScalar(existingApplicationRecord, "cv_commit")
+        : "";
+      if (submittedPdfExists && recordedCvCommit && !replacingSubmittedTemplate) {
+        const resumeVersion = frozenResumeVersion(templateFile, recordedCvCommit);
+        await db.update(applications)
+          .set({ ...resolvedIds, resumeVersion, updatedAt: new Date().toISOString() })
+          .where(eq(applications.id, application.id));
+        return NextResponse.json({
+          ok: true,
+          existing: true,
+          frozenSubmission: true,
+          applicationId: archiveId,
+          archivePath: path,
+          language,
+          templateFile,
+          resumeVersion,
+          submittedCvFile: submittedPdf,
+          cvCommit: recordedCvCommit,
+          repositoryUrl: `https://github.com/${archiveRepository}/tree/main/${path}`,
+        });
+      }
+
+      const cvCommit = replacingSubmittedTemplate || !recordedCvCommit
+        ? (await githubJson<GithubRef>(`${cvApiRoot}/git/ref/heads/main`, cvToken)).object.sha
+        : recordedCvCommit;
+      const templatePdfPath = templatePath.replace(/\.tex$/i, ".pdf");
+      const [templateSource, templatePdfBase64] = await Promise.all([
+        readPrivateFile(templatePath, cvCommit, cvToken),
+        readPrivateFileBase64(templatePdfPath, cvCommit, cvToken),
+      ]);
+      const capturedAt = new Date().toISOString();
+      const resumeVersion = frozenResumeVersion(templateFile, cvCommit);
+      const applicationRecord = existingApplicationRecord && !replacingSubmittedTemplate
+        ? existingApplicationRecord
+        : buildApplicationRecord({
+        archiveId,
+        applicationRowId: application.id,
+        jobRowId: job?.id ?? null,
+        company: application.company,
+        title: application.title,
+        region: application.region,
+        location: application.location,
+        track,
+        language,
+        jobUrl: application.jobUrl,
+        externalApplicationId: resolvedIds.applicationId,
+        source: application.source,
+        capturedAt,
+        cvCommit,
+        templatePath,
+        archivePath: path,
+      });
+      const submissionManifest = buildSubmittedTemplateManifest({
+        archiveId,
+        templateFile,
+        templatePath,
+        cvCommit,
+        submittedPdf,
+        capturedAt,
+      });
+      const autofillPacket = buildTemplateAutofillPacket({
+        archiveId,
+        templateFile,
+        cvCommit,
+        latex: templateSource,
+      });
+      const files: Record<string, ArchiveFileContent> = {
+        [`${path}/application_record.yaml`]: applicationRecord,
+        [`${path}/jd_snapshot.md`]: existingJdSnapshot || `# ${application.company} - ${application.title}\n\n${jd}\n`,
+        [`${path}/cv_base.tex`]: templateSource.endsWith("\n") ? templateSource : `${templateSource}\n`,
+        [`${path}/${submittedPdf}`]: { content: templatePdfBase64, encoding: "base64" },
+        [`${path}/submitted_template_freeze.json`]: `${JSON.stringify(submissionManifest, null, 2)}\n`,
+        [`${path}/application_autofill_${archiveId}.json`]: `${JSON.stringify(autofillPacket, null, 2)}\n`,
+      };
+      const commitSha = await commitFilesAtomically({
+        apiRoot: archiveApiRoot,
+        token: archiveToken,
+        files,
+        message: replacingSubmittedTemplate
+          ? `Replace frozen submitted template CV for ${archiveId}`
+          : `Freeze submitted template CV for ${archiveId}`,
+      });
+      await db.update(applications)
+        .set({ ...resolvedIds, resumeVersion, updatedAt: capturedAt })
+        .where(eq(applications.id, application.id));
+
+      return NextResponse.json({
+        ok: true,
+        existing: Boolean(existingApplicationRecord),
+        frozenSubmission: true,
+        replacedSubmittedTemplate: replacingSubmittedTemplate,
+        applicationId: archiveId,
+        archivePath: path,
+        language,
+        templateFile,
+        resumeVersion,
+        submittedCvFile: submittedPdf,
+        cvCommit,
+        commitSha,
+        repositoryUrl: `https://github.com/${archiveRepository}/tree/main/${path}`,
+      });
+    }
+
+    if (!jd) return NextResponse.json({ error: "该申请没有完整 JD，不能创建申请档案。", code: "JD_REQUIRED" }, { status: 400 });
+
     const existingPrompt = await existingArchiveTextFile(archiveApiRoot, path, "chat_prompt.txt", archiveToken);
 
     if (existingPrompt) {
@@ -302,6 +462,7 @@ export async function POST(request: NextRequest) {
       if (templateMatches) {
         const frozenJd = fullJdFromSnapshot(existingJdSnapshot);
         const currentPrompt = buildChatPrompt(archiveId, path, frozenJd, language, templateFile);
+        await db.update(applications).set(resolvedIds).where(eq(applications.id, application.id));
         return NextResponse.json({
           ok: true,
           existing: true,
@@ -354,6 +515,7 @@ export async function POST(request: NextRequest) {
         track,
         language,
         jobUrl: application.jobUrl,
+        externalApplicationId: resolvedIds.applicationId,
         source: application.source,
         capturedAt,
         cvCommit,
@@ -378,9 +540,8 @@ export async function POST(request: NextRequest) {
         message: `Re-freeze application bundle ${archiveId} with ${templateFile}`,
       });
       await db.update(applications)
-        .set({ applicationId: archiveId, resumeVersion: `${templateFile}@${cvCommit.slice(0, 12)}`, updatedAt: capturedAt })
+        .set({ ...resolvedIds, resumeVersion: `${templateFile}@${cvCommit.slice(0, 12)}`, updatedAt: capturedAt })
         .where(eq(applications.id, application.id));
-      if (job) await db.update(jobs).set({ applicationId: archiveId }).where(eq(jobs.id, job.id));
 
       return NextResponse.json({
         ok: true,
@@ -418,6 +579,7 @@ export async function POST(request: NextRequest) {
       track,
       language,
       jobUrl: application.jobUrl,
+      externalApplicationId: resolvedIds.applicationId,
       source: application.source,
       capturedAt,
       cvCommit,
@@ -442,9 +604,8 @@ export async function POST(request: NextRequest) {
       message: `Create application bundle ${archiveId}`,
     });
     await db.update(applications)
-      .set({ applicationId: archiveId, resumeVersion: `${templateFile}@${cvCommit.slice(0, 12)}`, updatedAt: capturedAt })
+      .set({ ...resolvedIds, resumeVersion: `${templateFile}@${cvCommit.slice(0, 12)}`, updatedAt: capturedAt })
       .where(eq(applications.id, application.id));
-    if (job) await db.update(jobs).set({ applicationId: archiveId }).where(eq(jobs.id, job.id));
 
     return NextResponse.json({
       ok: true,

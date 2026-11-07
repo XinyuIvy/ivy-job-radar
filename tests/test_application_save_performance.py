@@ -5,13 +5,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ApplicationSavePerformanceTests(unittest.TestCase):
-    def test_application_editor_closes_after_core_save_before_background_reconciliation(self):
+    def test_application_editor_closes_before_network_and_restores_on_failure(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn("if (!form || saving) return", source)
         self.assertIn("const submittedForm = form", source)
         self.assertIn("setApplicationsList((current) =>", source)
         self.assertIn("setForm(null)", source)
-        self.assertIn("void (async () =>", source)
+        self.assertIn("setForm(submittedForm)", source)
         self.assertLess(source.index("setForm(null)", source.index("const saveApplication")), source.index('await fetch("/api/applications"', source.index("const saveApplication")))
         self.assertIn("finally {\n      setSaving(false);", source)
 
@@ -25,7 +25,7 @@ class ApplicationSavePerformanceTests(unittest.TestCase):
 
     def test_cold_isolates_use_one_durable_schema_version_check(self):
         source = (ROOT / "db" / "index.ts").read_text(encoding="utf-8")
-        self.assertIn("const SCHEMA_VERSION = 5", source)
+        self.assertIn("const SCHEMA_VERSION = 8", source)
         self.assertIn("const SCHEMA_MARKER", source)
         self.assertIn("SELECT name FROM sqlite_master", source)
         self.assertIn("version?.name === SCHEMA_MARKER", source)

@@ -9,9 +9,21 @@ const vite = await createServer({
   appType: "custom",
 });
 const { resolveBookmarkCaptureFields } = await vite.ssrLoadModule("/app/lib/bookmark-capture.ts");
+const { buildBookmarklet } = await vite.ssrLoadModule("/app/bookmarklet/bookmarklet-installer.tsx");
 
 after(async () => {
   await vite.close();
+});
+
+test("bookmark capture reuses the signed-in session through top-level GET navigation", () => {
+  const bookmarklet = buildBookmarklet("https://radar.example/bookmarklet/capture", "capture-key");
+
+  assert.match(bookmarklet, /bookmarkVersion:"v10"/);
+  assert.match(bookmarklet, /captureUrl\.searchParams\.set\("transport","bookmarklet"\)/);
+  assert.match(bookmarklet, /window\.open\(captureUrl\.href/);
+  assert.match(bookmarklet, /ivy-job-radar-received/);
+  assert.doesNotMatch(bookmarklet, /form\.method="POST"/);
+  assert.doesNotMatch(bookmarklet, /api\/bookmark-capture\/session/);
 });
 
 test("prefers structured job fields over portal chrome", () => {

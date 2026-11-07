@@ -1,3 +1,4 @@
+import { CV_AUTOMATION_PAUSED_PAYLOAD, CV_PREBUILD_AUTOMATION_PAUSED } from "../../../lib/cv-prebuild-pause";
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -7,6 +8,7 @@ import { getChatGPTUser } from "../../../chatgpt-auth";
 import type { ArchiveLanguage, ArchiveTrack } from "../../../lib/application-archive";
 import { CV_PREBUILD_PROMPT_VERSION, recommendCvPrebuildTemplate } from "../../../lib/cv-prebuild-bundle";
 import { getLatestCvPrebuildJob, initializeCvPrebuildJob } from "../../../lib/cv-prebuild-store";
+import { isCvTemplateFilename } from "../../../lib/cv-template-catalog";
 import { sameLogicalJob } from "../../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +25,9 @@ export async function POST() {
   if (!(await getChatGPTUser())) {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
   }
+  if (CV_PREBUILD_AUTOMATION_PAUSED) {
+    return NextResponse.json(CV_AUTOMATION_PAUSED_PAYLOAD, { status: 503 });
+  }
 
   const db = await getDb();
   const database = await getD1();
@@ -38,6 +43,7 @@ export async function POST() {
     db.select().from(jobs),
   ]);
   const savedJobIds = new Set(savedRows.map((row) => row.jobId));
+  const savedByJobId = new Map(savedRows.map((row) => [row.jobId, row]));
   const savedJobRows = jobRows.filter((job) => savedJobIds.has(job.id));
   const queued: Array<{ jobId: number; applicationRowId: number; language: string; templateTrack: string }> = [];
   const skipped: Array<{ applicationRowId: number; company: string; title: string; reason: string }> = [];
@@ -70,13 +76,26 @@ export async function POST() {
       });
       continue;
     }
-    const requestedLanguage = latest?.language === "zh" || latest?.language === "en"
-      ? latest.language as ArchiveLanguage
-      : undefined;
-    const requestedTrack = latest?.track && supportedTracks.has(latest.track as ArchiveTrack)
-      ? latest.track as ArchiveTrack
-      : undefined;
-    const selection = recommendCvPrebuildTemplate(job, requestedTrack, requestedLanguage);
+    const saved = savedByJobId.get(job.id);
+    const requestedLanguage = saved?.cvLanguage === "zh" || saved?.cvLanguage === "en"
+      ? saved.cvLanguage as ArchiveLanguage
+      : latest?.language === "zh" || latest?.language === "en"
+        ? latest.language as ArchiveLanguage
+        : undefined;
+    const savedTemplateFile = isCvTemplateFilename(saved?.cvTemplateFile)
+      ? saved?.cvTemplateFile || ""
+      : "";
+    const requestedTrack = savedTemplateFile
+      ? undefined
+      : latest?.track && supportedTracks.has(latest.track as ArchiveTrack)
+        ? latest.track as ArchiveTrack
+        : undefined;
+    const selection = recommendCvPrebuildTemplate(
+      job,
+      requestedTrack,
+      requestedLanguage,
+      savedTemplateFile || latest?.templateFile || undefined,
+    );
 
     await database.prepare(`
       UPDATE cv_prebuild_jobs

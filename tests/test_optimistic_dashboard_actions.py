@@ -18,6 +18,12 @@ class OptimisticDashboardActionsTests(unittest.TestCase):
         self.assertIn("catch {", toggle)
         self.assertIn("saved: isSaved", toggle)
 
+    def test_saved_job_does_not_trigger_a_full_jobs_reload(self):
+        source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+        toggle = source[source.index("const toggleSaved"):source.index("const openPendingCvSelection")]
+        self.assertNotIn("setJobsReloadToken", toggle)
+        self.assertIn("savedMutationIds.current.has(id)", toggle)
+
     def test_ignore_is_optimistic_with_reconciliation(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn("setDailyJobs((current) => current.filter", source)

@@ -14,9 +14,9 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
         self.assertIn('buildTrackedApplicationMatcher', component)
         self.assertIn('sameLogicalJob(job, candidate)', component)
         self.assertIn('const isTrackedForToday', component)
-        self.assertIn('todayEligible: shortlist.eligible && !saved && !tracked', component)
+        self.assertIn('todayEligible: (shortlist.eligible || spreadsheetApproved) && !saved && !tracked', component)
         self.assertIn('Strong posting identity outranks unreliable scraped display fields', (ROOT / "app" / "lib" / "job-identity.ts").read_text(encoding="utf-8"))
-        self.assertIn('!sameLogicalJob(job, application) && !sameCompanyRole(job, application)', (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8"))
+        self.assertIn('current.filter((job) => !sameLogicalJob(job, application))', (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8"))
         self.assertNotIn('<PendingJobVisibility />', layout)
 
     def test_today_view_excludes_favorites_and_pending_applications(self):
@@ -36,8 +36,9 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
 
         self.assertIn('"准备材料"', route)
         self.assertIn('const isTrackedApplication = buildTrackedApplicationMatcher(trackedApplications)', route)
-        self.assertIn('todayEligible: shortlist.eligible && !saved && !tracked', route)
-        self.assertIn('sameCompanyRole(job, candidate)', route)
+        self.assertIn('todayEligible: (shortlist.eligible || spreadsheetApproved) && !saved && !tracked', route)
+        self.assertIn('sameLogicalJob(job, candidate) || sameCompanyRole(job, candidate)', route)
+        self.assertIn('noStableByLocation.get(keys.locationKey)', route)
         self.assertNotIn('appliedFingerprints', route)
 
     def test_application_post_uses_logical_identity_and_migrates_legacy_generic_rows(self):
@@ -52,8 +53,8 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
         self.assertIn('extractStableJobId(left.jobUrl, left.applicationId)', identity)
         self.assertIn('normalizeJobIdentityText(left.title)', identity)
         self.assertIn('.toLowerCase()', identity)
-        self.assertIn('return NextResponse.json(duplicate, { status: 200 })', route)
-        self.assertIn('return NextResponse.json(updated, { status: 200 })', route)
+        self.assertIn('return NextResponse.json(await ensureApplicationRecordIds(db, duplicate), { status: 200 })', route)
+        self.assertIn('return NextResponse.json(await ensureApplicationRecordIds(db, updated), { status: 200 })', route)
 
 
 if __name__ == "__main__":

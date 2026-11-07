@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../../db";
 import { applications, jobs } from "../../../../db/schema";
+import { selectedTemplateTexFile } from "../../../lib/autofill-resume";
 import { extractCoreJobDescription } from "../../../lib/job-description";
 
 export const dynamic = "force-dynamic";
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
     location: application.location,
     jobUrl: application.jobUrl,
     jd: extractCoreJobDescription(job?.description || "").text,
+    templateFile: selectedTemplateTexFile(application.resumeVersion),
     resumeVersion: application.resumeVersion,
     applicationStatus: application.status,
   });

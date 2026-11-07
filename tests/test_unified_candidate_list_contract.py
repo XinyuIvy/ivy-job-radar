@@ -9,7 +9,7 @@ class UnifiedCandidateListContractTests(unittest.TestCase):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn('view === "saved" ? "候选岗位"', source)
         self.assertIn('type CandidateBucket = "favorites" | "pending"', source)
-        self.assertIn('className="compact-candidate-list"', source)
+        self.assertIn('className="compact-candidate-list scroll-frame"', source)
         self.assertIn('className="stats stats-two candidate-stage-tabs"', source)
         self.assertIn('role="tablist" aria-label="候选岗位分类"', source)
         self.assertIn('href={`/jobs/${entry.job.id}`}', source)

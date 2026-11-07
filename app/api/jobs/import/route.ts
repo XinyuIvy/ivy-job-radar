@@ -149,7 +149,6 @@ export async function POST(request: NextRequest) {
       !title ||
       !jobUrl ||
       !["美国", "中国"].includes(region) ||
-      (region !== "中国" && score < 55) ||
       (region !== "中国" && isExcludedTitle(title)) ||
       !chinaEligible ||
       ignored.has(fingerprint(company, title))

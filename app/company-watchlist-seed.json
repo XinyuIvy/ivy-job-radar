@@ -1,0 +1,2485 @@
+[
+  {
+    "company": "联合利华",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.unilever.com/early-careers"
+      }
+    ]
+  },
+  {
+    "company": "艾昆纬（IQVIA）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.iqvia.com/en/jobs?keywords=biostatistician#job-listing"
+      }
+    ]
+  },
+  {
+    "company": "罗氏（Roche）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.roche.com/cn/zh"
+      }
+    ]
+  },
+  {
+    "company": "GE医疗（GE HealthCare）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.gehealthcare.com/"
+      }
+    ]
+  },
+  {
+    "company": "礼来（Eli Lilly）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.lilly.com/global/zh/china"
+      }
+    ]
+  },
+  {
+    "company": "宝洁（P&G）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.pg.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "欧蒙医学（EUROIMMUN）",
+    "links": []
+  },
+  {
+    "company": "通标标准技术服务（SGS）",
+    "links": []
+  },
+  {
+    "company": "华润双鹤",
+    "links": []
+  },
+  {
+    "company": "上海医药",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.sphchina.com/"
+      }
+    ]
+  },
+  {
+    "company": "哈药集团",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.hayao.com/contact/27.html"
+      }
+    ]
+  },
+  {
+    "company": "药明生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://job.wuxibiologics.com.cn/#/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://job.wuxibiologics.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "迈瑞医疗",
+    "links": []
+  },
+  {
+    "company": "养生堂",
+    "links": []
+  },
+  {
+    "company": "中国飞鹤",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://feihe.com/about/joinUs"
+      }
+    ]
+  },
+  {
+    "company": "复星医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://fosunpharma.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "贝泰妮",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.botanee.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "先声药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://wecruit.hotjob.cn/SU61458d83bef57c54dcb4e43f/pb/school.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.simcere.com/jrwm/jrwm.aspx"
+      }
+    ]
+  },
+  {
+    "company": "三诺生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://wecruit.hotjob.cn/SU61f10828bef57c632bf1a3b9/pb/school.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://wecruit.hotjob.cn/SU61f10828bef57c632bf1a3b9/pb/social.html"
+      }
+    ]
+  },
+  {
+    "company": "安图生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://wecruit.hotjob.cn/SU62302d11bef57c4972f79a6b/pb/school.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://wecruit.hotjob.cn/SU62302d11bef57c4972f79a6b/pb/index.html"
+      }
+    ]
+  },
+  {
+    "company": "贝瑞基因",
+    "links": []
+  },
+  {
+    "company": "梅花生物",
+    "links": []
+  },
+  {
+    "company": "盈康一生",
+    "links": []
+  },
+  {
+    "company": "益丰大药房",
+    "links": []
+  },
+  {
+    "company": "谱尼测试",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.ponytest.com/"
+      }
+    ]
+  },
+  {
+    "company": "永太科技",
+    "links": []
+  },
+  {
+    "company": "京新药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://jingxinpharm.zhiye.com/campus"
+      }
+    ]
+  },
+  {
+    "company": "天宇股份",
+    "links": []
+  },
+  {
+    "company": "瑞普生物",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.ringpu.com/"
+      }
+    ]
+  },
+  {
+    "company": "仲景宛西制药",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://wanxi.com/"
+      }
+    ]
+  },
+  {
+    "company": "朝聚眼科",
+    "links": []
+  },
+  {
+    "company": "维亚生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://viva.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.vivabiotech.com/join"
+      }
+    ]
+  },
+  {
+    "company": "品驰医疗",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus_apply/pinsmedical/2726"
+      }
+    ]
+  },
+  {
+    "company": "谊安医疗",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.heyerglobal.com/CampusRecruitment/"
+      }
+    ]
+  },
+  {
+    "company": "瑞迈特（BMC）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://bmc-medical.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.bmc-medical.com/recruitment/index.html"
+      }
+    ]
+  },
+  {
+    "company": "高博医疗",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.gobroadhealthcare.com/"
+      }
+    ]
+  },
+  {
+    "company": "广生堂",
+    "links": []
+  },
+  {
+    "company": "辉瑞（Pfizer）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.pfizer.com/about/careers"
+      }
+    ]
+  },
+  {
+    "company": "诺华（Novartis）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://novartis.moseeker.com/site/249"
+      }
+    ]
+  },
+  {
+    "company": "默沙东（MSD）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.msd.com/"
+      }
+    ]
+  },
+  {
+    "company": "阿斯利康（AstraZeneca）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.astrazeneca.com.cn/zh/careers.html"
+      }
+    ]
+  },
+  {
+    "company": "葛兰素史克（GSK）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.gsk-china.com/zh-cn/careers/"
+      }
+    ]
+  },
+  {
+    "company": "赛诺菲（Sanofi）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.sanofi.cn/"
+      }
+    ]
+  },
+  {
+    "company": "强生创新制药（Johnson & Johnson）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://chinacampus.jnj.com.cn/jnj/home/index/"
+      },
+      {
+        "label": "总招聘",
+        "url": "http://www-careers-jnj-com.jnjnab25.jnj.com/zh-hans"
+      }
+    ]
+  },
+  {
+    "company": "勃林格殷格翰（Boehringer Ingelheim）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.boehringer-ingelheim.com/careers"
+      }
+    ]
+  },
+  {
+    "company": "艾伯维（AbbVie）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.abbvie.com/"
+      }
+    ]
+  },
+  {
+    "company": "百时美施贵宝（BMS）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.bms.com/careers?location=china"
+      }
+    ]
+  },
+  {
+    "company": "安进（Amgen）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.amgen.com/"
+      }
+    ]
+  },
+  {
+    "company": "吉利德科学（Gilead Sciences）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.gileadchina.cn/zh/careers"
+      }
+    ]
+  },
+  {
+    "company": "武田制药（Takeda）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.takedajobs.com/"
+      }
+    ]
+  },
+  {
+    "company": "安斯泰来（Astellas）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.astellas.com/en/careers/china-recruitment"
+      }
+    ]
+  },
+  {
+    "company": "第一三共（Daiichi Sankyo）",
+    "links": []
+  },
+  {
+    "company": "卫材（Eisai）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.eisai.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "大冢制药（Otsuka）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.otsuka.com.cn/join-us/index.html"
+      }
+    ]
+  },
+  {
+    "company": "诺和诺德（Novo Nordisk）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.novonordisk.com/careers/find-a-job.html"
+      }
+    ]
+  },
+  {
+    "company": "渤健（Biogen）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.biogen.com/"
+      }
+    ]
+  },
+  {
+    "company": "杰特贝林（CSL Behring）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.cslbehring.com.cn/%E8%81%8C%E4%B8%9A%E5%8F%91%E5%B1%95"
+      }
+    ]
+  },
+  {
+    "company": "优时比（UCB）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.ucb.com/"
+      }
+    ]
+  },
+  {
+    "company": "施维雅（Servier）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.servier.com.cn/join-us/index.html"
+      }
+    ]
+  },
+  {
+    "company": "益普生（Ipsen）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.ipsen.com/"
+      }
+    ]
+  },
+  {
+    "company": "灵北（Lundbeck）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.lundbeck.com/"
+      }
+    ]
+  },
+  {
+    "company": "默克医药（Merck KGaA）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.emdgroup.com/"
+      }
+    ]
+  },
+  {
+    "company": "费森尤斯卡比（Fresenius Kabi）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.fresenius-kabi.com/work-with-us"
+      }
+    ]
+  },
+  {
+    "company": "基立福（Grifols）",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.grifols.com/"
+      }
+    ]
+  },
+  {
+    "company": "凯西制药（Chiesi）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.chiesi.com/"
+      }
+    ]
+  },
+  {
+    "company": "美纳里尼（Menarini）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.menarini.com/en-us/careers"
+      }
+    ]
+  },
+  {
+    "company": "欧加隆（Organon）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.organon.com/careers/"
+      }
+    ]
+  },
+  {
+    "company": "晖致（Viatris）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careersite.tupu360.com/Viatris/home/index?page=about"
+      }
+    ]
+  },
+  {
+    "company": "百瑞精鼎（Parexel）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://jobs.parexel.com.cn/emerging-talent"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://jobs.parexel.com.cn/statistical-programmers-jobs"
+      }
+    ]
+  },
+  {
+    "company": "爱康（ICON）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.iconplc.com/jobs?options=1496&page=1"
+      }
+    ]
+  },
+  {
+    "company": "PPD临床研究业务（赛默飞旗下）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.thermofisher.com/global/en/c/clinical-research-jobs"
+      }
+    ]
+  },
+  {
+    "company": "赛纽仕（Syneos Health）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.syneoshealth.com/careers"
+      }
+    ]
+  },
+  {
+    "company": "查士利华（Charles River）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.criver.com/"
+      }
+    ]
+  },
+  {
+    "company": "美迪西普亚（Medpace）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.medpace.com/jobs?page=1&keywords=statistic&sortBy=relevance"
+      }
+    ]
+  },
+  {
+    "company": "赛默飞世尔科技（Thermo Fisher Scientific）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.thermofisher.com/global/en/c/clinical-research-jobs"
+      }
+    ]
+  },
+  {
+    "company": "思拓凡（Cytiva）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.danaher.com/global/en/cytiva"
+      }
+    ]
+  },
+  {
+    "company": "赛多利斯（Sartorius）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.sartorius.com/en/company/careers"
+      }
+    ]
+  },
+  {
+    "company": "凯杰（QIAGEN）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://qiagen.wd502.myworkdayjobs.com/QIAGEN"
+      }
+    ]
+  },
+  {
+    "company": "伯乐生命医学（Bio-Rad）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.bio-rad.com/"
+      }
+    ]
+  },
+  {
+    "company": "丹纳赫（Danaher）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.danaher.com/global/en"
+      }
+    ]
+  },
+  {
+    "company": "甘李药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.ganlee.com/career_personnel.html"
+      }
+    ]
+  },
+  {
+    "company": "鲁南制药",
+    "links": []
+  },
+  {
+    "company": "东阳光药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://hec.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "达能（Danone）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careersite.danone.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "柳药集团",
+    "links": []
+  },
+  {
+    "company": "新风天域",
+    "links": []
+  },
+  {
+    "company": "雀巢（Nestlé）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.nestlecareers.cn/"
+      }
+    ]
+  },
+  {
+    "company": "雅诗兰黛（Estée Lauder）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.elcompanies.com/careers"
+      }
+    ]
+  },
+  {
+    "company": "蒙牛",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://mengniu.zhiye.com/custom/index"
+      }
+    ]
+  },
+  {
+    "company": "新和成",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://xinhecheng1.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "波士顿科学（Boston Scientific）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.bostonscientific.com/"
+      }
+    ]
+  },
+  {
+    "company": "药明合联",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://wuxixdc.com/"
+      }
+    ]
+  },
+  {
+    "company": "泰格医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://tigermed.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "联影医疗",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://usa.united-imaging.com/careers"
+      }
+    ]
+  },
+  {
+    "company": "恒瑞医药",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/hengrui/145997?locale=zh-CN#/"
+      }
+    ]
+  },
+  {
+    "company": "百济神州（BeOne Medicines）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/beigene/98935?sourceToken=ac8c1724c2ec857aed0ae5d025631e2a&locale=zh-CN"
+      }
+    ]
+  },
+  {
+    "company": "信达生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "http://innoventbio.zhiye.com/home"
+      }
+    ]
+  },
+  {
+    "company": "君实生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://junshibiosciences.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.junshipharma.com/join/"
+      }
+    ]
+  },
+  {
+    "company": "康方生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://akesobio.com/cn/career/campus-recruitment/"
+      }
+    ]
+  },
+  {
+    "company": "再鼎医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.zailaboratory.com/careers/"
+      }
+    ]
+  },
+  {
+    "company": "和黄医药",
+    "links": []
+  },
+  {
+    "company": "传奇生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://legendbiotech.com/careers/"
+      }
+    ]
+  },
+  {
+    "company": "荣昌生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://app.mokahr.com/social-recruitment/remegen/45549"
+      }
+    ]
+  },
+  {
+    "company": "亚盛医药",
+    "links": []
+  },
+  {
+    "company": "科伦药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.kelun.com/intro/5.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://kelun.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "科伦博泰",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://kelunbotai.zhiye.com/Campus"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://kelunbotai.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "石药集团",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.e-cspc.com/"
+      }
+    ]
+  },
+  {
+    "company": "翰森制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://hspharm.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "齐鲁制药",
+    "links": []
+  },
+  {
+    "company": "正大天晴",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://cttq.zhiye.com/campus/jobs"
+      }
+    ]
+  },
+  {
+    "company": "中国生物制药",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.sinobiopharm.com/"
+      }
+    ]
+  },
+  {
+    "company": "丽珠医药",
+    "links": []
+  },
+  {
+    "company": "康哲药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://cmshr.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://cmshr.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "华东医药",
+    "links": []
+  },
+  {
+    "company": "远大医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.grandpharm.com/career"
+      }
+    ]
+  },
+  {
+    "company": "海思科",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://wecruit.hotjob.cn/SU6663b85a1eb8051cd22556e3/pb/school.html"
+      }
+    ]
+  },
+  {
+    "company": "海正药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.hisunpharm.com/main/job/skill_develop.htm"
+      }
+    ]
+  },
+  {
+    "company": "华海药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.huahaipharm.com/zpgw.html"
+      }
+    ]
+  },
+  {
+    "company": "人福医药",
+    "links": []
+  },
+  {
+    "company": "海王生物",
+    "links": []
+  },
+  {
+    "company": "以岭药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://yiling.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.yiling.cn/%E4%BA%BA%E6%89%8D%E7%90%86%E5%BF%B5/"
+      }
+    ]
+  },
+  {
+    "company": "天士力",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.hotjob.cn/wt/TASLY/web/index?brandCode="
+      }
+    ]
+  },
+  {
+    "company": "步长制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.buchang.com/newZBT/pages/joinUS/zhaoXianNaShi.html"
+      }
+    ]
+  },
+  {
+    "company": "济川药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jumpcan1.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "康弘药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://kanghong.zhiye.com/campus/jobs"
+      }
+    ]
+  },
+  {
+    "company": "华润三九",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://runjob.crc.com.cn/#/homepage?id=2092202183442501634"
+      }
+    ]
+  },
+  {
+    "company": "华润博雅生物",
+    "links": []
+  },
+  {
+    "company": "国药集团中国生物",
+    "links": []
+  },
+  {
+    "company": "国药现代",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.shyndec.com/shxdzy/rczp/xyzp/A002007003Gone1.html"
+      }
+    ]
+  },
+  {
+    "company": "国药一致",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.szaccord.com.cn/recruitment.html"
+      }
+    ]
+  },
+  {
+    "company": "国药控股",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.sinopharmholding.com/gykg/rcfz/rczp/A006008002Gone1.html"
+      }
+    ]
+  },
+  {
+    "company": "广药集团",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://gpc.hotjob.cn/"
+      }
+    ]
+  },
+  {
+    "company": "白云山",
+    "links": []
+  },
+  {
+    "company": "云南白药",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://wecruit.hotjob.cn/SU6136b970bef57c3b638162c4/pb/school.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://wecruit.hotjob.cn/SU6136b970bef57c3b638162c4/pb/social.html"
+      }
+    ]
+  },
+  {
+    "company": "扬子江药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://yangzijiang.zhiye.com/campus/jobs"
+      }
+    ]
+  },
+  {
+    "company": "绿叶制药",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.luye.cn/"
+      }
+    ]
+  },
+  {
+    "company": "长春高新",
+    "links": []
+  },
+  {
+    "company": "金赛药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/gensci/144980?locale=zh-CN#/"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.genscigroup.com/about/career"
+      }
+    ]
+  },
+  {
+    "company": "通化东宝",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.thdb.com/campus-list.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.thdb.com/social-list.html"
+      }
+    ]
+  },
+  {
+    "company": "联邦制药",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.tul.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "亿帆医药",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://yifanyy.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://yifanyy.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "亿胜生物科技",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.essex.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "华北制药",
+    "links": []
+  },
+  {
+    "company": "新华制药",
+    "links": []
+  },
+  {
+    "company": "东北制药",
+    "links": []
+  },
+  {
+    "company": "石四药集团",
+    "links": []
+  },
+  {
+    "company": "福元医药",
+    "links": []
+  },
+  {
+    "company": "悦康药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.youcareyk.com/personnel/campus.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.youcareyk.com/personnel/recruit.html"
+      }
+    ]
+  },
+  {
+    "company": "苑东生物",
+    "links": []
+  },
+  {
+    "company": "昂利康",
+    "links": []
+  },
+  {
+    "company": "奥赛康",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.ask-pharm.com/inside/7/28.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.ask-pharm.com/inside/7/27.html"
+      }
+    ]
+  },
+  {
+    "company": "一品红",
+    "links": []
+  },
+  {
+    "company": "南新制药",
+    "links": []
+  },
+  {
+    "company": "成都倍特药业",
+    "links": []
+  },
+  {
+    "company": "辰欣药业",
+    "links": []
+  },
+  {
+    "company": "汇宇制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.huiyupharma.com/news_view.aspx?id=982&nid=2&typeid=4"
+      }
+    ]
+  },
+  {
+    "company": "景峰医药",
+    "links": []
+  },
+  {
+    "company": "山东新时代药业",
+    "links": []
+  },
+  {
+    "company": "轩竹生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.xuanzhubio.com/join"
+      }
+    ]
+  },
+  {
+    "company": "百奥泰",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.bio-thera.com/col_28/"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.bio-thera.com/col_7/"
+      }
+    ]
+  },
+  {
+    "company": "神州细胞",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.hotjob.cn/wt/SCT/web/index"
+      }
+    ]
+  },
+  {
+    "company": "诺诚健华",
+    "links": []
+  },
+  {
+    "company": "康宁杰瑞",
+    "links": []
+  },
+  {
+    "company": "迈威生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://mabwell.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://mabwell.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "复宏汉霖",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://henlius.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://henlius.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "复旦张江",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.fd-zj.com/"
+      }
+    ]
+  },
+  {
+    "company": "康诺亚",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://keymedbio.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "乐普生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.lepubiopharma.com/join"
+      }
+    ]
+  },
+  {
+    "company": "科济药业",
+    "links": []
+  },
+  {
+    "company": "药明巨诺",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.jwtherapeutics.com/cn/career/people-and-culture/"
+      }
+    ]
+  },
+  {
+    "company": "亘喜生物",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.gracellbio.com/"
+      }
+    ]
+  },
+  {
+    "company": "基石药业",
+    "links": []
+  },
+  {
+    "company": "嘉和生物",
+    "links": []
+  },
+  {
+    "company": "德琪医药",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.antengene.com/school.html"
+      }
+    ]
+  },
+  {
+    "company": "加科思",
+    "links": []
+  },
+  {
+    "company": "和誉医药",
+    "links": []
+  },
+  {
+    "company": "海和药物",
+    "links": []
+  },
+  {
+    "company": "艾力斯",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.allist.com.cn/recruit.html"
+      }
+    ]
+  },
+  {
+    "company": "泽璟制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.zelgen.com/zhiyefazhan/"
+      }
+    ]
+  },
+  {
+    "company": "贝达药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.bettapharma.com/Jobs/campus"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://bettapharma.zhiye.com/Social"
+      }
+    ]
+  },
+  {
+    "company": "迪哲医药",
+    "links": []
+  },
+  {
+    "company": "益方生物",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.inventisbio.com/"
+      }
+    ]
+  },
+  {
+    "company": "亚虹医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.asieris.cn/cn/join.html"
+      }
+    ]
+  },
+  {
+    "company": "亚宝药业",
+    "links": []
+  },
+  {
+    "company": "前沿生物",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.frontierbiotech.com/"
+      }
+    ]
+  },
+  {
+    "company": "盟科药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.micurxchina.com/joinus"
+      }
+    ]
+  },
+  {
+    "company": "众生药业",
+    "links": []
+  },
+  {
+    "company": "特宝生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://amoytop.zhiye.com/campus"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://amoytop.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "艾迪药业",
+    "links": []
+  },
+  {
+    "company": "君赛生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.juncell.com/campus-recruitment?tp=1"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.juncell.com/social-recruitment"
+      }
+    ]
+  },
+  {
+    "company": "艺妙神州",
+    "links": []
+  },
+  {
+    "company": "驯鹿生物",
+    "links": []
+  },
+  {
+    "company": "合源生物",
+    "links": []
+  },
+  {
+    "company": "宜明昂科",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.immuneonco.com/join/index.html"
+      }
+    ]
+  },
+  {
+    "company": "博安生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.boan-bio.com/en/human.php"
+      }
+    ]
+  },
+  {
+    "company": "科兴制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.kexing.com/about/human.html"
+      }
+    ]
+  },
+  {
+    "company": "康希诺生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://cansinotech.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "智飞生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/zfsw/46252#/"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.zhifeishengwu.com/zh_CN/recruitment.html"
+      }
+    ]
+  },
+  {
+    "company": "沃森生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.walvax.com/employ_info"
+      }
+    ]
+  },
+  {
+    "company": "万泰生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/ystwt/97881"
+      }
+    ]
+  },
+  {
+    "company": "康泰生物",
+    "links": []
+  },
+  {
+    "company": "科兴生物（Sinovac）",
+    "links": []
+  },
+  {
+    "company": "艾美疫苗",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.aimvaccine.com/"
+      }
+    ]
+  },
+  {
+    "company": "三叶草生物",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.cloverbiopharma.com/"
+      }
+    ]
+  },
+  {
+    "company": "成大生物",
+    "links": []
+  },
+  {
+    "company": "康华生物",
+    "links": []
+  },
+  {
+    "company": "欧林生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.olymvax.com/talent.aspx?t=24"
+      }
+    ]
+  },
+  {
+    "company": "康乐卫士",
+    "links": []
+  },
+  {
+    "company": "药明康德",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://wuxiapptec.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://wuxiapptec.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "康龙化成",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/pharmaron/44352"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.pharmaron.cn/careers/job-openings"
+      }
+    ]
+  },
+  {
+    "company": "方达控股（Frontage）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://frontagelab.com.cn/about/careers"
+      }
+    ]
+  },
+  {
+    "company": "博济医药",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.gzboji.com/"
+      }
+    ]
+  },
+  {
+    "company": "诺思格（R&G PharmaStudies）",
+    "links": []
+  },
+  {
+    "company": "普蕊斯",
+    "links": []
+  },
+  {
+    "company": "阳光诺和",
+    "links": []
+  },
+  {
+    "company": "百诚医药",
+    "links": []
+  },
+  {
+    "company": "诺泰生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.sinopep.com/careers/"
+      }
+    ]
+  },
+  {
+    "company": "昭衍新药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://joinnlab.zhiye.com/jobs"
+      }
+    ]
+  },
+  {
+    "company": "美迪西（Medicilon）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.medicilon.com.cn/xiao-yuan-job/index.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.medicilon.com.cn/job/index.html"
+      }
+    ]
+  },
+  {
+    "company": "博腾股份",
+    "links": []
+  },
+  {
+    "company": "九洲药业",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/jiuzhoupharma/74059#/"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.jiuzhoupharma.com/Talent.html"
+      }
+    ]
+  },
+  {
+    "company": "凯莱英",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.asymchem.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "博志研新",
+    "links": []
+  },
+  {
+    "company": "润东医药（RUNDO）",
+    "links": []
+  },
+  {
+    "company": "康缔亚（Caidya，含原缔脉）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://phe.tbe.taleo.net/phe02/ats/careers/v2/jobSearch?org=CLINIPACE&cws=41"
+      }
+    ]
+  },
+  {
+    "company": "昆翎（ClinChoice）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/clinchoice/71943#/"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://app.mokahr.com/social-recruitment/clinchoice/71942"
+      }
+    ]
+  },
+  {
+    "company": "依科赛（EPS）",
+    "links": []
+  },
+  {
+    "company": "思默医药",
+    "links": []
+  },
+  {
+    "company": "易迪希（IDDI）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://iddi.recruitee.com/"
+      }
+    ]
+  },
+  {
+    "company": "中美冠科（Crown Bioscience）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://crownbio.wd504.myworkdayjobs.com/Crown_Bioscience/"
+      }
+    ]
+  },
+  {
+    "company": "百利天恒",
+    "links": []
+  },
+  {
+    "company": "三生制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://3sbio.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "三生国健",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.51job.com/shanghai-pdxq/co4194527.html"
+      }
+    ]
+  },
+  {
+    "company": "三元基因",
+    "links": []
+  },
+  {
+    "company": "歌礼制药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.ascletis.com/single3/138.html"
+      }
+    ]
+  },
+  {
+    "company": "真实生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.genuine-bio.com/join.html"
+      }
+    ]
+  },
+  {
+    "company": "开拓药业",
+    "links": []
+  },
+  {
+    "company": "圣诺医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.sirnaomics.com/en/careers/"
+      }
+    ]
+  },
+  {
+    "company": "瑞博生物",
+    "links": []
+  },
+  {
+    "company": "艾博生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://app.mokahr.com/social-recruitment/abogenbio/43639#/jobs?zhineng=&page=1"
+      }
+    ]
+  },
+  {
+    "company": "斯微生物",
+    "links": []
+  },
+  {
+    "company": "深信生物",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.innorna.com/"
+      }
+    ]
+  },
+  {
+    "company": "递信生物",
+    "links": []
+  },
+  {
+    "company": "舶望制药",
+    "links": []
+  },
+  {
+    "company": "劲方医药",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.genfleet.com/careers"
+      }
+    ]
+  },
+  {
+    "company": "映恩生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://app.mokahr.com/social-recruitment/dualitybio/96174?locale=en"
+      }
+    ]
+  },
+  {
+    "company": "维昇药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.visenpharma.com/cn/Careers/CompanyCulture"
+      }
+    ]
+  },
+  {
+    "company": "箕星药业",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.corxelbio.com/en/join-us/"
+      }
+    ]
+  },
+  {
+    "company": "长风药业",
+    "links": []
+  },
+  {
+    "company": "拨康视云",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://cloudbreakpharma.com/"
+      }
+    ]
+  },
+  {
+    "company": "博瑞医药",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.bright-gene.com/page307"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.bright-gene.com/page265"
+      }
+    ]
+  },
+  {
+    "company": "东曜药业",
+    "links": []
+  },
+  {
+    "company": "药捷安康",
+    "links": []
+  },
+  {
+    "company": "美敦力（Medtronic）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.medtronic.com/en-us/our-company/careers.html"
+      }
+    ]
+  },
+  {
+    "company": "雅培（Abbott）",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://www.abbott.com.cn/careers/students.html"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.jobs.abbott/global/zh/search-results?qcountry=China"
+      }
+    ]
+  },
+  {
+    "company": "西门子医疗（Siemens Healthineers）",
+    "links": []
+  },
+  {
+    "company": "飞利浦医疗（Philips）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.careers.philips.com/"
+      }
+    ]
+  },
+  {
+    "company": "碧迪医疗（BD）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.bd.com/search-jobs"
+      }
+    ]
+  },
+  {
+    "company": "史赛克（Stryker）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.stryker.com/"
+      }
+    ]
+  },
+  {
+    "company": "捷迈邦美（Zimmer Biomet）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.zimmerbiomet.com/us/en?utm_medium=Nav&utm_source=CorporateSite"
+      }
+    ]
+  },
+  {
+    "company": "爱德华生命科学（Edwards Lifesciences）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.edwards.com/careers/jobsearch"
+      }
+    ]
+  },
+  {
+    "company": "百特医疗（Baxter）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.baxter.com/"
+      }
+    ]
+  },
+  {
+    "company": "爱尔康（Alcon）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://alcon.wd5.myworkdayjobs.com/careers_alcon?locationCountry=6cb77610a8a543aea2d6bc10457e35d4"
+      }
+    ]
+  },
+  {
+    "company": "微创医疗",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.microport.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "乐普医疗",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.lepumedical.com/join_lepu.html"
+      }
+    ]
+  },
+  {
+    "company": "威高集团",
+    "links": []
+  },
+  {
+    "company": "鱼跃医疗",
+    "links": []
+  },
+  {
+    "company": "心脉医疗",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.endovastec.com/SocialRecruitment/"
+      }
+    ]
+  },
+  {
+    "company": "启明医疗",
+    "links": []
+  },
+  {
+    "company": "沛嘉医疗",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://peijia.zhiye.com/campus"
+      }
+    ]
+  },
+  {
+    "company": "南微医学",
+    "links": []
+  },
+  {
+    "company": "惠泰医疗",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://app.mokahr.com/social-recruitment/apt/147191?locale=en-US"
+      }
+    ]
+  },
+  {
+    "company": "开立医疗",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/sonoscape/94392/#/jobs?project=100120039"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/sonoscape/94392/"
+      }
+    ]
+  },
+  {
+    "company": "华大基因",
+    "links": [
+      {
+        "label": "公司首页（待补招聘链接）",
+        "url": "https://www.bgi.com/"
+      }
+    ]
+  },
+  {
+    "company": "华大智造",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://genomics.zhiye.com/campus/jobs"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://genomics.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "燃石医学",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.brbiotech.com/en/careers.php"
+      }
+    ]
+  },
+  {
+    "company": "泛生子",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.genetronhealth.com/contact.html"
+      }
+    ]
+  },
+  {
+    "company": "臻和科技",
+    "links": []
+  },
+  {
+    "company": "世和基因",
+    "links": []
+  },
+  {
+    "company": "诺禾致源",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jp.novogene.com/about/careers/"
+      }
+    ]
+  },
+  {
+    "company": "迪安诊断",
+    "links": []
+  },
+  {
+    "company": "金域医学",
+    "links": []
+  },
+  {
+    "company": "圣湘生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://sansurehr.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "新产业生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.snibe.com/en/career/#joinBg"
+      }
+    ]
+  },
+  {
+    "company": "亚辉龙",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://szyhlo.zhiye.com/campus"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://szyhlo.zhiye.com/"
+      }
+    ]
+  },
+  {
+    "company": "基蛋生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/getein/74361#/"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.getein.com.cn/zxns.html"
+      }
+    ]
+  },
+  {
+    "company": "九强生物",
+    "links": []
+  },
+  {
+    "company": "迈克生物",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://maccura.zhiye.com/Campus"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.maccura.com/jiaru/"
+      }
+    ]
+  },
+  {
+    "company": "明德生物",
+    "links": []
+  },
+  {
+    "company": "硕世生物",
+    "links": []
+  },
+  {
+    "company": "艾德生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.amoydx.com/joinus.html"
+      }
+    ]
+  },
+  {
+    "company": "透景生命",
+    "links": []
+  },
+  {
+    "company": "百普赛斯",
+    "links": []
+  },
+  {
+    "company": "义翘神州",
+    "links": []
+  },
+  {
+    "company": "金斯瑞生物科技",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.genscript.com.cn/CareerOverview.html?src=pullmenu"
+      }
+    ]
+  },
+  {
+    "company": "药石科技",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.pharmablock.com.cn/"
+      }
+    ]
+  },
+  {
+    "company": "泓博医药",
+    "links": []
+  },
+  {
+    "company": "成都先导",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.hitgen.com/en/careers-position.html"
+      }
+    ]
+  },
+  {
+    "company": "晶泰科技",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://app.mokahr.com/campus-recruitment/jingtai/2143?locale=zh-CN"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://www.xtalpi.com/career/"
+      }
+    ]
+  },
+  {
+    "company": "英矽智能（Insilico Medicine）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://insilico.com/careers"
+      }
+    ]
+  },
+  {
+    "company": "欧莱雅（L'Oréal）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.loreal.com/en_US/content"
+      }
+    ]
+  },
+  {
+    "company": "皮尔法伯（Pierre Fabre）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://pierrefabre.wd3.myworkdayjobs.com/en-US/External_Career_Site"
+      }
+    ]
+  },
+  {
+    "company": "高德美（Galderma）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://galderma.wd3.myworkdayjobs.com/External"
+      }
+    ]
+  },
+  {
+    "company": "华熙生物",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://bloomagebiotech.hotjob.cn/"
+      }
+    ]
+  },
+  {
+    "company": "巨子生物",
+    "links": []
+  },
+  {
+    "company": "珀莱雅",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://jobs.proya.com/campus/position/list"
+      },
+      {
+        "label": "总招聘",
+        "url": "https://jobs.proya.com/campus"
+      }
+    ]
+  },
+  {
+    "company": "上海家化",
+    "links": [
+      {
+        "label": "校园招聘",
+        "url": "https://shjahwa.zhiye.com/Campus"
+      }
+    ]
+  },
+  {
+    "company": "赫力昂（Haleon）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://jobs.haleon.com/en-gb/"
+      }
+    ]
+  },
+  {
+    "company": "复健资本",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://www.fosunhealthcapital.com/index.php?route=information%2Fcontact"
+      }
+    ]
+  },
+  {
+    "company": "艾尔建美学（Allergan Aesthetics）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.abbvie.com/"
+      }
+    ]
+  },
+  {
+    "company": "波士顿咨询（BCG）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://careers.bcg.com/global/en/locations/china"
+      }
+    ]
+  },
+  {
+    "company": "拜耳（Bayer）",
+    "links": [
+      {
+        "label": "总招聘",
+        "url": "https://career.bayer.cn/"
+      }
+    ]
+  }
+]

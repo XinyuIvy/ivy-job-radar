@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/d1";
 import * as schema from "./schema";
 
 let schemaInitialization: Promise<void> | null = null;
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 8;
 const SCHEMA_MARKER = `ivy_schema_v${SCHEMA_VERSION}`;
 
 export async function getDb() {
@@ -33,6 +33,7 @@ export async function getDb() {
       location TEXT NOT NULL DEFAULT '',
       track TEXT NOT NULL DEFAULT '',
       job_url TEXT NOT NULL DEFAULT '',
+      archive_id TEXT NOT NULL DEFAULT '',
       source TEXT NOT NULL DEFAULT '公司官网',
       fit INTEGER NOT NULL DEFAULT 3,
       interest INTEGER NOT NULL DEFAULT 3,
@@ -129,12 +130,32 @@ export async function getDb() {
     }
   };
   await ensureColumn("applications", "application_id", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("applications", "archive_id", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("applications", "deadline", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("applications", "deadline_type", "TEXT NOT NULL DEFAULT 'unknown'");
   await ensureColumn("applications", "deadline_source", "TEXT NOT NULL DEFAULT 'unknown'");
   await ensureColumn("applications", "planned_application_date", "TEXT NOT NULL DEFAULT ''");
+
+  // Keep internal APP ids separate from employer requisition ids.
+  await env.DB.batch([
+    env.DB.prepare(`
+      UPDATE applications
+      SET archive_id = UPPER(application_id)
+      WHERE archive_id = '' AND UPPER(application_id) LIKE 'APP-%'
+    `),
+    env.DB.prepare(`
+      UPDATE applications
+      SET application_id = ''
+      WHERE archive_id <> '' AND UPPER(application_id) = UPPER(archive_id)
+    `),
+  ]);
   await ensureColumn("jobs", "canonical_url", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("jobs", "application_id", "TEXT NOT NULL DEFAULT ''");
+  await env.DB.prepare(`
+    UPDATE jobs
+    SET application_id = ''
+    WHERE UPPER(application_id) LIKE 'APP-%'
+  `).run();
   await ensureColumn("jobs", "deadline", "TEXT NOT NULL DEFAULT ''");
   await ensureColumn("jobs", "deadline_type", "TEXT NOT NULL DEFAULT 'unknown'");
   await ensureColumn("jobs", "last_seen_at", "TEXT NOT NULL DEFAULT ''");
@@ -217,8 +238,19 @@ export async function getDb() {
     CREATE TABLE IF NOT EXISTS saved_jobs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       job_id INTEGER NOT NULL UNIQUE,
-      created_at TEXT NOT NULL
+      cv_language TEXT NOT NULL DEFAULT '',
+      cv_template_file TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT ''
     )
+  `).run();
+  await ensureColumn("saved_jobs", "cv_language", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("saved_jobs", "cv_template_file", "TEXT NOT NULL DEFAULT ''");
+  await ensureColumn("saved_jobs", "updated_at", "TEXT NOT NULL DEFAULT ''");
+  await env.DB.prepare(`
+    UPDATE saved_jobs
+    SET updated_at = created_at
+    WHERE updated_at = ''
   `).run();
 
   await env.DB.prepare(`

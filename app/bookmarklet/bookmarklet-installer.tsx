@@ -7,7 +7,7 @@ type Props = {
   captureKey: string;
 };
 
-function buildBookmarklet(capturePageUrl: string, key: string) {
+export function buildBookmarklet(capturePageUrl: string, key: string) {
   const code = `(()=>{try{
 const clean=(value,max=50000)=>String(value||"").replace(/\\u0000/g,"").replace(/\\s+/g," ").trim().slice(0,max);
 const text=(node)=>clean(node&&(node.innerText||node.textContent));
@@ -42,20 +42,28 @@ const params=new URL(window.location.href).searchParams;
 const titleApplicationId=clean((title.match(/[（(](J\\d+)[）)]/i)||[])[1],500);
 const applicationId=clean(typeof identifier==="string"?identifier:identifier&&(identifier.value||identifier.name),500)||clean(params.get("gh_jid")||params.get("jobId")||params.get("job_id")||params.get("currentJobId")||params.get("postingId")||params.get("positionId")||params.get("reqId")||params.get("requisitionId")||params.get("vacancyId"),500)||titleApplicationId;
 const captureId=Date.now().toString(36)+"-"+Math.random().toString(36).slice(2);
-const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,titleCandidates,companyCandidates,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title,captureId,bookmarkVersion:"v6"};
+const payload={key:${JSON.stringify(key)},jobUrl:window.location.href,title,company,titleCandidates,companyCandidates,location:jobLocation,description,applicationId,addressCountry:country,sourcePageTitle:document.title,captureId,bookmarkVersion:"v10"};
 const captureUrl=new URL(${JSON.stringify(capturePageUrl)});
-let popup=null;
-let sent=false;
-const listener=(event)=>{if(sent||event.source!==popup||event.origin!==captureUrl.origin||event.data!=="ivy-job-radar-ready")return;sent=true;window.removeEventListener("message",listener);popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);};
-window.addEventListener("message",listener);
+captureUrl.searchParams.set("transport","bookmarklet");
 const popupName="ivy_job_radar_capture_"+captureId;
-popup=window.open(captureUrl.href,popupName,"popup,width=600,height=760");
-if(!popup){window.removeEventListener("message",listener);alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");return;}
-setTimeout(()=>{if(!sent){window.removeEventListener("message",listener);try{popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);}catch{}}},2500);
+const popup=window.open(captureUrl.href,popupName,"popup,width=660,height=900");
+if(!popup){alert("Chrome 阻止了保存窗口，请允许此网站打开弹窗后重试。");return;}
+let delivered=false;
+let retryTimer=0;
+let expiryTimer=0;
+const sendPayload=()=>{try{if(!popup.closed)popup.postMessage({type:"ivy-job-radar-capture",payload},captureUrl.origin);}catch{}};
+const cleanup=()=>{window.removeEventListener("message",relayPayload);if(retryTimer)clearInterval(retryTimer);if(expiryTimer)clearTimeout(expiryTimer);};
+const relayPayload=(event)=>{
+if(event.source!==popup||event.origin!==captureUrl.origin)return;
+if(event.data==="ivy-job-radar-ready")sendPayload();
+if(event.data==="ivy-job-radar-received"){delivered=true;cleanup();}
+};
+window.addEventListener("message",relayPayload);
+retryTimer=setInterval(()=>{if(delivered)return;if(popup.closed){cleanup();return;}sendPayload();},1200);
+expiryTimer=setTimeout(cleanup,180000);
 }catch(error){alert("无法保存当前岗位："+(error&&error.message?error.message:error));}})()`;
   return `javascript:${code}`;
 }
-
 export default function BookmarkletInstaller({ captureKey }: Props) {
   const linkRef = useRef<HTMLAnchorElement>(null);
   const bookmarkletRef = useRef("");
@@ -82,9 +90,9 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
       <section style={{ maxWidth: 820, margin: "0 auto" }}>
         <Link href="/" style={{ color: "#536159", textDecoration: "none", fontWeight: 700 }}>← 返回 Ivy Job Radar</Link>
         <p style={{ marginTop: 48, letterSpacing: ".16em", fontSize: 12, fontWeight: 800, color: "#718078" }}>CHROME BOOKMARK CAPTURE</p>
-        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(38px, 7vw, 70px)", lineHeight: 1.02, margin: "12px 0 20px" }}>浏览岗位时，一键加入收藏</h1>
+        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "clamp(38px, 7vw, 70px)", lineHeight: 1.02, margin: "12px 0 20px" }}>浏览岗位时，一键保存</h1>
         <p style={{ maxWidth: 680, fontSize: 18, lineHeight: 1.75, color: "#536159" }}>
-          把下面的按钮拖到 Chrome 书签栏。以后在 LinkedIn、BOSS、猎聘、公司官网或其他招聘页面看到岗位，点击书签只会加入收藏。之后由你决定是否进入待申请并生成 CV。
+          把下面的按钮拖到 Chrome 书签栏。以后在 LinkedIn、BOSS、猎聘、公司官网或其他招聘页面看到岗位，点击书签后可以选择保存到待申请或已申请，并记录本次使用的 CV 母版。
         </p>
 
         <article style={{ marginTop: 34, background: "#fff", border: "1px solid #d8d4c9", borderRadius: 24, padding: "30px", boxShadow: "0 22px 60px rgba(32,40,35,.10)" }}>
@@ -104,20 +112,23 @@ export default function BookmarkletInstaller({ captureKey }: Props) {
                 }}
                 style={{ display: "inline-flex", alignItems: "center", gap: 10, marginTop: 14, borderRadius: 999, padding: "15px 22px", background: "#16794b", color: "white", textDecoration: "none", fontWeight: 850, boxShadow: "0 10px 28px rgba(22,121,75,.25)", cursor: "grab" }}
               >
-                ＋ 保存到收藏
+                ＋ 保存岗位
               </a>
               <button type="button" onClick={() => void copyCode()} style={{ marginLeft: 10, border: "1px solid #cfcabe", borderRadius: 999, padding: "14px 18px", background: "#f7f5ef", fontWeight: 750, cursor: "pointer" }}>
                 {copied ? "已复制" : "无法拖动时复制代码"}
               </button>
+              <p style={{ margin: "18px 0 0", color: "#8a6428", fontSize: 13, lineHeight: 1.6 }}>
+                当前为 V10。请先删除旧的“保存岗位”书签，再重新拖动一次。新版首次登录后会复用现有会话，连续保存岗位不再重复登录。
+              </p>
             </>
           )}
         </article>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 16, marginTop: 20 }}>
           {[
-            ["只进收藏", "书签保存不会建立申请记录，也不会调用 CV API。"],
+            ["状态自己选", "每次保存时选择待申请或已申请，并记录 CV 母版。"],
             ["连续保存", "每次点击都有独立保存身份，可连续保存多个岗位，不需要等待一分钟。"],
-            ["自动去重", "优先按 Requisition ID；招聘门户只显示通用标题时，再按完整 JD 内容识别。"],
+            ["不生成 CV", "只保存岗位、申请状态和母版记录，不调用模型或 CV 生成接口。"],
           ].map(([title, body]) => (
             <article key={title} style={{ background: "rgba(255,255,255,.68)", border: "1px solid #ded9ce", borderRadius: 18, padding: 20 }}>
               <strong>{title}</strong><p style={{ marginBottom: 0, lineHeight: 1.6, color: "#647169" }}>{body}</p>

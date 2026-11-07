@@ -20,6 +20,10 @@ import {
   searchCvTemplate,
   type CvTemplateMatch,
 } from "../../../lib/cv-template-index";
+import {
+  inferCvTemplateTrack,
+  isCvTemplateFilename,
+} from "../../../lib/cv-template-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -111,7 +115,7 @@ type ModificationDraft = {
   latexDiff: { before: string; after: string } | null;
 };
 
-const templateFiles: Record<TemplateLanguage, Record<string, string | null>> = {
+const legacyTemplateFiles: Record<TemplateLanguage, Record<string, string | null>> = {
   en: { pharma: "cv_pharma.tex", tech: "cv_tech.tex", quant: "cv_quant.tex", consulting: "cv_healthcare_consulting.tex", clinical_neuro: null },
   zh: { pharma: "cv_pharma_cn.tex", tech: "cv_tech_cn.tex", quant: "cv_quant_cn.tex", consulting: "cv_healthcare_consulting_cn.tex", clinical_neuro: "cv_clinical_data_neuro_cn.tex" },
 };
@@ -377,11 +381,15 @@ function buildModificationDrafts(matches: RequirementMatch[], language: Template
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json() as { track?: string; language?: TemplateLanguage; jd?: string };
+  const body = await request.json() as { track?: string; language?: TemplateLanguage; templateFile?: string; jd?: string };
   const language: TemplateLanguage = body.language === "zh" ? "zh" : "en";
-  const track = body.track && body.track in templateFiles[language] ? body.track : "tech";
+  const requestedTemplateFile = String(body.templateFile || "").trim();
+  const hasExactTemplate = isCvTemplateFilename(requestedTemplateFile);
+  const track = body.track && body.track in legacyTemplateFiles[language]
+    ? body.track
+    : inferCvTemplateTrack(requestedTemplateFile || "tech");
   const jd = body.jd?.trim() || "";
-  const templateFile = templateFiles[language][track];
+  const templateFile = hasExactTemplate ? requestedTemplateFile : legacyTemplateFiles[language][track];
   const { env } = await import("cloudflare:workers");
   const token = String(env.CV_GITHUB_TOKEN || "").trim();
 

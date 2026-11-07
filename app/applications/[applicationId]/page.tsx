@@ -5,9 +5,11 @@ import { notFound } from "next/navigation";
 import { getD1, getDb } from "../../../db";
 import { applications, jobs } from "../../../db/schema";
 import { requireChatGPTUser } from "../../chatgpt-auth";
+import { resolveApplicationRecordIds } from "../../lib/application-archive";
 import { cvPrebuildStatusView } from "../../lib/cv-prebuild-status";
 import { getLatestCvPrebuildJob } from "../../lib/cv-prebuild-store";
 import { sameLogicalJob } from "../../lib/job-identity";
+import ApplicationRecordEditor from "./application-record-editor";
 
 function displayDate(value: string) {
   return value || "未设置";
@@ -26,8 +28,12 @@ export default async function ApplicationDetailPage({
   const db = await getDb();
   const [application] = await db.select().from(applications).where(eq(applications.id, applicationId)).limit(1);
   if (!application) notFound();
+  const resolvedIds = resolveApplicationRecordIds(application);
+  if (resolvedIds.archiveId !== application.archiveId || resolvedIds.applicationId !== application.applicationId) {
+    await db.update(applications).set(resolvedIds).where(eq(applications.id, application.id));
+  }
   const jobRows = await db.select().from(jobs);
-  const linkedJob = jobRows.find((job) => sameLogicalJob(application, job));
+  const linkedJob = jobRows.find((job) => sameLogicalJob({ ...application, ...resolvedIds }, job));
   const cvTask = linkedJob ? await getLatestCvPrebuildJob(await getD1(), linkedJob.id) : null;
   const cvStatus = cvPrebuildStatusView(cvTask?.status);
 
@@ -50,8 +56,15 @@ export default async function ApplicationDetailPage({
         <article><span>计划申请</span><strong>{displayDate(application.plannedApplicationDate)}</strong></article>
         <article><span>已申请日期</span><strong>{displayDate(application.appliedDate)}</strong></article>
         <article><span>下一步</span><strong>{application.nextAction || "未设置"}</strong></article>
-        <article><span>Application ID</span><strong>{application.applicationId || "未提供"}</strong></article>
+        <article><span>系统申请编号</span><strong>{resolvedIds.archiveId}</strong></article>
+        <article><span>公司职位编号</span><strong>{resolvedIds.applicationId || "JD 未提供"}</strong></article>
       </section>
+      <ApplicationRecordEditor
+        applicationId={application.id}
+        initialCompany={application.company}
+        initialTitle={application.title}
+        initialStatus={application.status}
+      />
       <section className="detail-section"><h2>工作授权</h2><p>{application.workAuthorization || "未填写"}</p></section>
       <section className="detail-section"><h2>申请记录</h2><p className="detail-long-text">{application.notes || "暂无记录。"}</p></section>
       {linkedJob?.description && <section className="detail-section"><h2>完整 Job Description</h2><p className="detail-long-text">{linkedJob.description}</p></section>}

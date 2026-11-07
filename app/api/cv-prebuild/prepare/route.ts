@@ -27,6 +27,8 @@ import { activeJobStatuses } from "../../../lib/job-expiration";
 import { extractCoreJobDescription } from "../../../lib/job-description";
 import { sameCompanyRole } from "../../../lib/job-identity";
 import { normalizeCvGenerationRules } from "../../../lib/cv-generation-rules";
+import { isCvTemplateFilename } from "../../../lib/cv-template-catalog";
+import { CV_AUTOMATION_PAUSED_PAYLOAD, CV_PREBUILD_AUTOMATION_PAUSED } from "../../../lib/cv-prebuild-pause";
 import {
   createOpenAiConversation,
   DEFAULT_CV_MODEL,
@@ -66,6 +68,9 @@ export async function POST(request: NextRequest) {
   if (!maintenanceAuthorized && !(await getChatGPTUser())) {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
   }
+  if (CV_PREBUILD_AUTOMATION_PAUSED) {
+    return NextResponse.json(CV_AUTOMATION_PAUSED_PAYLOAD, { status: 503 });
+  }
 
   let body: Record<string, unknown>;
   try {
@@ -91,6 +96,10 @@ export async function POST(request: NextRequest) {
     : undefined;
   if (rawLanguage && !requestedLanguage) {
     return NextResponse.json({ error: "A valid CV language is required." }, { status: 400 });
+  }
+  const requestedTemplateFile = String(body.templateFile ?? "").trim();
+  if (requestedTemplateFile && !isCvTemplateFilename(requestedTemplateFile)) {
+    return NextResponse.json({ error: "A valid CV template filename is required." }, { status: 400 });
   }
   let generationRules: string;
   try {
@@ -143,8 +152,18 @@ export async function POST(request: NextRequest) {
   const queuedLanguage = queuedSelection?.language === "zh" || queuedSelection?.language === "en"
     ? queuedSelection.language as ArchiveLanguage
     : undefined;
-  const selectedTrack = templateTrack ?? queuedTrack;
-  const selectedLanguage = requestedLanguage ?? queuedLanguage;
+  const savedLanguage = saved.cvLanguage === "zh" || saved.cvLanguage === "en"
+    ? saved.cvLanguage as ArchiveLanguage
+    : undefined;
+  const savedTemplateFile = isCvTemplateFilename(saved.cvTemplateFile)
+    ? saved.cvTemplateFile
+    : "";
+  const queuedTemplateFile = String(queuedSelection?.templateFile || "");
+  const selectedTrack = templateTrack ?? (savedTemplateFile ? undefined : queuedTrack);
+  const selectedLanguage = requestedLanguage ?? savedLanguage ?? queuedLanguage;
+  const selectedTemplateFile = requestedTemplateFile
+    || savedTemplateFile
+    || (isCvTemplateFilename(queuedTemplateFile) ? queuedTemplateFile : "");
 
   const jd = extractCoreJobDescription(job.description).text;
   if (!jd) {
@@ -181,7 +200,7 @@ export async function POST(request: NextRequest) {
       applicationId: job.applicationId,
       source: job.source,
     };
-    const selection = recommendCvPrebuildTemplate(jobInput, selectedTrack, selectedLanguage);
+    const selection = recommendCvPrebuildTemplate(jobInput, selectedTrack, selectedLanguage, selectedTemplateFile);
     const sourcePairs = [...canonicalSnapshotFiles, [selection.templatePath, "cv_base.tex"] as const];
     const [frozenSources, currentProjectMetadata] = await Promise.all([
       Promise.all(sourcePairs.map(async ([sourcePath, archiveName]) => ({
@@ -221,6 +240,7 @@ export async function POST(request: NextRequest) {
       factMasterSha,
       templateTrack: selectedTrack,
       templateLanguage: selectedLanguage,
+      templateFile: selection.templateFile,
       generationRules,
     });
     generationKey = identity.generationKey;

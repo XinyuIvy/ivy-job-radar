@@ -15,7 +15,7 @@ class CvPrebuildPhase2SourceTests(unittest.TestCase):
         self.assertIn("activeJobStatuses.has(job.status)", route)
         self.assertIn("extractCoreJobDescription(job.description).text", route)
         self.assertIn("body.templateTrack", route)
-        self.assertIn("recommendCvPrebuildTemplate(jobInput, selectedTrack, selectedLanguage)", route)
+        self.assertIn("recommendCvPrebuildTemplate(jobInput, selectedTrack, selectedLanguage, selectedTemplateFile)", route)
 
     def test_bundle_freezes_one_cv_commit_and_does_not_create_an_application(self):
         route = (ROOT / "app" / "api" / "cv-prebuild" / "prepare" / "route.ts").read_text(encoding="utf-8")

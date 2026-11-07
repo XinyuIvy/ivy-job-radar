@@ -1,10 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, type UIEvent, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
-import companyPool from "./company-pool.json";
-import companyPoolAdditions from "./company-pool-additions.json";
-import { companyCollectionMode, companySourceSearchUrl, findCompanySource } from "./lib/company-sources";
 import {
   cvPrebuildStatusView,
   cvPrebuildSummaryBucket,
@@ -14,15 +11,24 @@ import {
   CV_GENERATION_RULES_MAX_LENGTH,
   DEFAULT_CV_GENERATION_RULES,
 } from "./lib/cv-generation-rules";
+import { CV_PREBUILD_AUTOMATION_PAUSED } from "./lib/cv-prebuild-pause";
 import { automationStatusLabel } from "./lib/application-automation";
 import {
   emptyFixedApplicationProfile,
+  normalizeFixedApplicationProfile,
   type FixedApplicationProfile,
 } from "./lib/application-profile";
-import { sameCompanyRole, sameLogicalJob } from "./lib/job-identity";
+import {
+  fetchCvTemplateCatalog,
+  inferCvTemplateLanguage,
+  recommendCvTemplateOption,
+  type CvTemplateLanguage,
+  type CvTemplateOption,
+  type CvTemplateTrack,
+} from "./lib/cv-template-catalog";
+import { sameLogicalJob } from "./lib/job-identity";
 import CandidateFactFitScores from "./pending-application-fit-scores";
 
-const completeCompanyPool = [...companyPool, ...companyPoolAdditions];
 const activeCvPrebuildStatuses = new Set<CvPrebuildStatus>([
   "preparing_bundle",
   "agent_queued",
@@ -31,8 +37,8 @@ const activeCvPrebuildStatuses = new Set<CvPrebuildStatus>([
 const MAX_AUTOMATIC_CV_ATTEMPTS = 7;
 const CV_GENERATION_RULES_STORAGE_KEY = "ivy-job-radar:cv-generation-rules:v1";
 const CV_TEMPLATE_LANGUAGE_STORAGE_KEY = "ivy-job-radar:cv-template-language:v1";
-const PENDING_CV_FAVORITES_STORAGE_KEY = "ivy-job-radar:pending-cv-favorites:v1";
-const CV_PROMPT_AUTOREGEN_STORAGE_KEY = "ivy-job-radar:cv-prompt-autoregen:v9-language-specific-contracts";
+const CV_TEMPLATE_FILE_STORAGE_KEY = "ivy-job-radar:cv-template-file:v1";
+const CV_PROMPT_AUTOREGEN_STORAGE_KEY = "ivy-job-radar:cv-prompt-autoregen:prompt-v1.9.4-site.3";
 
 type Job = {
   id: number;
@@ -63,6 +69,8 @@ type Job = {
   cvPrebuildError?: string;
   cvPrebuildUpdatedAt?: string;
   cvPrebuildAttempts?: number;
+  savedCvLanguage?: CvTemplateLanguage | "";
+  savedCvTemplateFile?: string;
 };
 
 function canAutomaticallyRetryCv(job: Job) {
@@ -88,6 +96,7 @@ type Application = {
   track: string;
   jobUrl: string;
   applicationId: string;
+  archiveId: string;
   source: string;
   fit: number;
   interest: number;
@@ -108,77 +117,6 @@ type Application = {
   updatedAt?: string;
 };
 
-type CvTemplateLanguage = "zh" | "en";
-type CvTemplateTrack = "tech" | "quant" | "consulting" | "pharma" | "clinical_neuro";
-
-const cvTemplateTrackOptions: Array<{ value: CvTemplateTrack; label: string }> = [
-  { value: "tech", label: "Tech / Data Science / Applied ML" },
-  { value: "quant", label: "Quantitative Research" },
-  { value: "consulting", label: "Consulting" },
-  { value: "pharma", label: "Healthcare / Pharma / Biostatistics" },
-  { value: "clinical_neuro", label: "Clinical Data / Neuro / Medical Device" },
-];
-
-const cvTemplateFiles: Record<CvTemplateLanguage, Record<CvTemplateTrack, string>> = {
-  zh: {
-    tech: "cv_tech_cn.tex",
-    quant: "cv_quant_cn.tex",
-    consulting: "cv_healthcare_consulting_cn.tex",
-    pharma: "cv_pharma_cn.tex",
-    clinical_neuro: "cv_clinical_data_neuro_cn.tex",
-  },
-  en: {
-    tech: "cv_tech.tex",
-    quant: "cv_quant.tex",
-    consulting: "cv_healthcare_consulting.tex",
-    pharma: "cv_pharma.tex",
-    clinical_neuro: "cv_pharma.tex",
-  },
-};
-
-function recommendCvTemplateTrack(input: Pick<Job | Application, "title" | "track">): CvTemplateTrack {
-  const signal = `${input.track} ${input.title}`.toLocaleLowerCase();
-  if (/quant|量化|定量|systematic/.test(signal)) return "quant";
-  if (/consult|咨询|strategy|战略/.test(signal)) return "consulting";
-  if (/pharma|biostat|clinical|epidemi|rwe|heor|healthcare|medical|neuro|brain|医药|医疗|生物统计|临床|流行病|神经|脑科学/.test(signal)) return "pharma";
-  return "tech";
-}
-
-type ApplicationTask = {
-  id?: number;
-  applicationId: number;
-  title: string;
-  dueDate: string;
-  reminderDate: string;
-  status: "pending" | "done";
-  source: "automatic" | "manual";
-};
-
-type Interview = {
-  id?: number;
-  applicationId: number;
-  round: string;
-  scheduledAt: string;
-  format: string;
-  contactName: string;
-  contactEmail: string;
-  notes: string;
-  outcome: string;
-  thankYouStatus: string;
-  thankYouDueAt: string;
-  followUpAt: string;
-};
-
-type CompanyResearch = {
-  company: string;
-  website: string;
-  careersUrl: string;
-  businessSummary: string;
-  recentNotes: string;
-  personalNotes: string;
-  updatedAt?: string;
-};
-
 type Contact = {
   id?: number;
   name: string;
@@ -192,20 +130,6 @@ type Contact = {
   lastContactAt: string;
   nextFollowUpAt: string;
   notes: string;
-};
-
-type InterviewExperience = {
-  id: string;
-  company: string;
-  roleFamily: string;
-  roleTitle: string;
-  year: number;
-  source: string;
-  sourceUrl: string;
-  summary: string;
-  rounds: string[];
-  topics: string[];
-  reliability: string;
 };
 
 type QualityRun = {
@@ -344,29 +268,6 @@ type UserProfile = {
   applicationProfile: FixedApplicationProfile;
 };
 
-type ApplicationAnalytics = {
-  generatedAt: string;
-  funnel: Array<{ key: string; label: string; count: number }>;
-  sources: Array<{
-    source: string;
-    applications: number;
-    interviews: number;
-    offers: number;
-    rejected: number;
-    interviewRate: number;
-    offerRate: number;
-  }>;
-  totals: {
-    tracked: number;
-    pending: number;
-    submitted: number;
-    interviews: number;
-    offers: number;
-    rejected: number;
-    withdrawn: number;
-  };
-};
-
 type ApplicationAutomationDashboard = {
   config: {
     enabled: boolean;
@@ -470,7 +371,7 @@ type ScanNotice = {
   read: boolean;
 };
 
-type View = "today" | "saved" | "automation" | "applications" | "profile" | "tools" | "companies" | "verify" | "ignored";
+type View = "today" | "saved" | "automation" | "applications" | "profile" | "tools" | "verify" | "ignored";
 
 const tracks = ["全部", "Technology", "Quant", "Pharma", "Medical Device", "Healthcare AI", "Consulting"];
 const sortOptions = [
@@ -502,6 +403,7 @@ const emptyApplication: Application = {
   track: "",
   jobUrl: "",
   applicationId: "",
+  archiveId: "",
   source: "公司官网",
   fit: 3,
   interest: 3,
@@ -560,12 +462,6 @@ function normalizeCompanyName(value: string) {
     .replace(/[^a-z0-9\u4e00-\u9fff]+/g, "");
 }
 
-function sameCompany(left: string, right: string) {
-  const a = normalizeCompanyName(left);
-  const b = normalizeCompanyName(right);
-  return Boolean(a && b && (a === b || a.includes(b) || b.includes(a)));
-}
-
 function groupJobsByCompany(rows: Job[]) {
   const groups = new Map<string, Job[]>();
   for (const row of rows) {
@@ -575,10 +471,6 @@ function groupJobsByCompany(rows: Job[]) {
     else groups.set(key, [row]);
   }
   return [...groups.values()].flat();
-}
-
-function experienceSearchUrl(item: InterviewExperience) {
-  return `https://www.google.com/search?q=${encodeURIComponent(`${item.company} ${item.roleTitle} interview experience ${item.source}`)}`;
 }
 
 function scoreLabel(score: number) {
@@ -713,46 +605,29 @@ function applicationHidesFavorite(application: Application, job: Job) {
 }
 
 function applicationHidesToday(application: Application, job: Job) {
-  return savedApplicationMatchesJob(application, job) || sameCompanyRole(application, job);
-}
-
-function updatePendingCvFavorite(jobId: number, pending: boolean) {
-  try {
-    const current = JSON.parse(window.localStorage.getItem(PENDING_CV_FAVORITES_STORAGE_KEY) || "[]") as unknown[];
-    const ids = new Set(current.map(Number).filter(Number.isSafeInteger));
-    if (pending) ids.add(jobId);
-    else ids.delete(jobId);
-    window.localStorage.setItem(PENDING_CV_FAVORITES_STORAGE_KEY, JSON.stringify([...ids]));
-  } catch {
-    // Recovery remains available from the server-side recent-job heuristic.
-  }
+  return savedApplicationMatchesJob(application, job);
 }
 
 
-const JOB_PAGE_SIZE = 20;
-const COMPANY_PAGE_SIZE = 20;
-const APPLICATION_PAGE_SIZE = 15;
+const SCROLL_WINDOW_SIZE = 30;
 
-function PaginationControls({
-  page,
-  pageCount,
-  onPageChange,
-  label,
-}: {
-  page: number;
-  pageCount: number;
-  onPageChange: (page: number) => void;
-  label: string;
-}) {
-  if (pageCount <= 1) return null;
-  return (
-    <nav className="pagination" aria-label={`${label}分页`}>
-      <button type="button" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>上一页</button>
-      <span>第 <strong>{page}</strong> / {pageCount} 页</span>
-      <button type="button" disabled={page >= pageCount} onClick={() => onPageChange(page + 1)}>下一页</button>
-    </nav>
-  );
+function useScrollBatch(totalRows: number, resetKey: string) {
+  const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
+  const visibleCount = visibleCounts[resetKey] ?? SCROLL_WINDOW_SIZE;
+
+  const onScroll = useCallback((event: UIEvent<HTMLElement>) => {
+    const container = event.currentTarget;
+    const remaining = container.scrollHeight - container.scrollTop - container.clientHeight;
+    if (remaining > Math.max(240, container.clientHeight * 0.35)) return;
+    setVisibleCounts((current) => ({
+      ...current,
+      [resetKey]: Math.min(totalRows, (current[resetKey] ?? SCROLL_WINDOW_SIZE) + SCROLL_WINDOW_SIZE),
+    }));
+  }, [resetKey, totalRows]);
+
+  return [Math.min(visibleCount, totalRows), onScroll] as const;
 }
+
 
 export default function JobRadar() {
   const [view, setView] = useState<View>("today");
@@ -762,21 +637,30 @@ export default function JobRadar() {
   const [jobQuery, setJobQuery] = useState("");
   const deferredJobQuery = useDeferredValue(jobQuery);
   const [saved, setSaved] = useState<number[]>([]);
+  const savedMutationIds = useRef(new Set<number>());
   const [cvGenerationRules, setCvGenerationRules] = useState(DEFAULT_CV_GENERATION_RULES);
   const [cvRulesOpen, setCvRulesOpen] = useState(false);
   const [cvAutomationNotice, setCvAutomationNotice] = useState("");
-  const [cvRecoveryCandidates, setCvRecoveryCandidates] = useState<Job[]>([]);
-  const [cvRecoverySelected, setCvRecoverySelected] = useState<number[]>([]);
-  const [cvRecoveryRunning, setCvRecoveryRunning] = useState(false);
   const [cvBulkRegenerating, setCvBulkRegenerating] = useState(false);
   const [candidateBucket, setCandidateBucket] = useState<CandidateBucket>("favorites");
   const [candidateMovingId, setCandidateMovingId] = useState<number | null>(null);
+  const [cvTemplateSavingId, setCvTemplateSavingId] = useState<number | null>(null);
+  const [cvTemplates, setCvTemplates] = useState<CvTemplateOption[]>([]);
+  const [cvTemplatesLoading, setCvTemplatesLoading] = useState(false);
+  const [cvTemplatesError, setCvTemplatesError] = useState("");
   const [pendingCvSelection, setPendingCvSelection] = useState<{
-    job: Job;
+    job?: Job;
+    application?: Application;
+    company: string;
+    title: string;
+    track: string;
     language: CvTemplateLanguage;
-    track: CvTemplateTrack;
+    templateFile: string;
+    mode: "application" | "move";
   } | null>(null);
   const [applicationBucket, setApplicationBucket] = useState<ApplicationBucket>("submitted");
+  const [applicationQuery, setApplicationQuery] = useState("");
+  const deferredApplicationQuery = useDeferredValue(applicationQuery);
   const [dailyJobs, setDailyJobs] = useState<Job[]>([]);
   const [cvTasks, setCvTasks] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
@@ -789,11 +673,6 @@ export default function JobRadar() {
   const [automationLoading, setAutomationLoading] = useState(true);
   const [automationSaving, setAutomationSaving] = useState(false);
   const [automationMessage, setAutomationMessage] = useState("");
-  const [companyQuery, setCompanyQuery] = useState("");
-  const deferredCompanyQuery = useDeferredValue(companyQuery);
-  const [companyPriority, setCompanyPriority] = useState("全部");
-  const [companyRegion, setCompanyRegion] = useState("全部地区");
-  const [companyCollection, setCompanyCollection] = useState("全部接入状态");
   const [form, setForm] = useState<Application | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -812,13 +691,9 @@ export default function JobRadar() {
   const [clock, setClock] = useState(0);
   const [profile, setProfile] = useState<UserProfile>(emptyProfile);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState("");
-  const [analytics, setAnalytics] = useState<ApplicationAnalytics | null>(null);
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
-  const [jobPage, setJobPage] = useState(1);
-  const [companyPage, setCompanyPage] = useState(1);
-  const [applicationPage, setApplicationPage] = useState(1);
   useEffect(() => {
     const storedRules = window.localStorage.getItem(CV_GENERATION_RULES_STORAGE_KEY)?.trim();
     if (!storedRules) return;
@@ -826,6 +701,7 @@ export default function JobRadar() {
     return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => {
+    if (CV_PREBUILD_AUTOMATION_PAUSED) return;
     if (window.localStorage.getItem(CV_PROMPT_AUTOREGEN_STORAGE_KEY)) return;
     window.localStorage.setItem(CV_PROMPT_AUTOREGEN_STORAGE_KEY, "running");
     let active = true;
@@ -851,26 +727,15 @@ export default function JobRadar() {
       window.clearTimeout(timer);
     };
   }, []);
-  const [savedPage, setSavedPage] = useState(1);
   const [quality, setQuality] = useState<DataQuality | null>(null);
   const [qualityLoading, setQualityLoading] = useState(false);
   const [qualityAutomationRunning, setQualityAutomationRunning] = useState(false);
   const [notices, setNotices] = useState<ScanNotice[]>([]);
   const [noticePanelOpen, setNoticePanelOpen] = useState(false);
   const [browserNotificationsEnabled, setBrowserNotificationsEnabled] = useState(false);
-  const [tasks, setTasks] = useState<ApplicationTask[]>([]);
-  const [interviews, setInterviews] = useState<Interview[]>([]);
-  const [taskForm, setTaskForm] = useState<ApplicationTask | null>(null);
-  const [interviewForm, setInterviewForm] = useState<Interview | null>(null);
-  const [workflowSaving, setWorkflowSaving] = useState(false);
-  const [researchRows, setResearchRows] = useState<CompanyResearch[]>([]);
-  const [researchForm, setResearchForm] = useState<CompanyResearch | null>(null);
-  const [researchSaving, setResearchSaving] = useState(false);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [contactForm, setContactForm] = useState<Contact | null>(null);
   const [contactSaving, setContactSaving] = useState(false);
-  const [experiences, setExperiences] = useState<InterviewExperience[]>([]);
-  const [calendarMonth, setCalendarMonth] = useState(() => new Date().toISOString().slice(0, 7));
   const [scanPanelOpen, setScanPanelOpen] = useState(false);
   const [hardRequirementOpen, setHardRequirementOpen] = useState(false);
   const navigationReady = useRef(false);
@@ -913,12 +778,9 @@ export default function JobRadar() {
       region?: string;
       jobSort?: (typeof sortOptions)[number]["value"];
       jobQuery?: string;
+      applicationQuery?: string;
       candidateBucket?: CandidateBucket;
       applicationBucket?: ApplicationBucket;
-      jobPage?: number;
-      companyPage?: number;
-      applicationPage?: number;
-      savedPage?: number;
       scrollByView?: Partial<Record<View, number>>;
     } = {};
     try {
@@ -932,12 +794,9 @@ export default function JobRadar() {
       if (stored.region) setRegion(stored.region);
       if (stored.jobSort) setJobSort(stored.jobSort);
       if (typeof stored.jobQuery === "string") setJobQuery(stored.jobQuery);
+      if (typeof stored.applicationQuery === "string") setApplicationQuery(stored.applicationQuery);
       if (stored.candidateBucket) setCandidateBucket(stored.candidateBucket);
       if (stored.applicationBucket) setApplicationBucket(stored.applicationBucket);
-      if (stored.jobPage) setJobPage(stored.jobPage);
-      if (stored.companyPage) setCompanyPage(stored.companyPage);
-      if (stored.applicationPage) setApplicationPage(stored.applicationPage);
-      if (stored.savedPage) setSavedPage(stored.savedPage);
       if (stored.scrollByView) scrollByView.current = stored.scrollByView;
       navigationReady.current = true;
     }, 0);
@@ -952,15 +811,12 @@ export default function JobRadar() {
       region,
       jobSort,
       jobQuery,
+      applicationQuery,
       candidateBucket,
       applicationBucket,
-      jobPage,
-      companyPage,
-      applicationPage,
-      savedPage,
       scrollByView: scrollByView.current,
     }));
-  }, [view, track, region, jobSort, jobQuery, candidateBucket, applicationBucket, jobPage, companyPage, applicationPage, savedPage]);
+  }, [view, track, region, jobSort, jobQuery, applicationQuery, candidateBucket, applicationBucket]);
 
   useEffect(() => {
     let scrollTimer = 0;
@@ -993,8 +849,7 @@ export default function JobRadar() {
         application,
         ...current.filter((item) => item.id !== payload.application?.id),
       ]);
-      setDailyJobs((current) => current.filter((job) =>
-        !sameLogicalJob(job, application) && !sameCompanyRole(job, application)));
+      setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, application)));
     };
     const storageHandler = (event: StorageEvent) => {
       if (event.key !== PENDING_STORAGE_KEY || !event.newValue) return;
@@ -1084,57 +939,18 @@ export default function JobRadar() {
     return () => window.clearTimeout(timer);
   }, []);
 
-  const loadWorkflow = async () => {
-    const response = await fetch("/api/workflow", { cache: "no-store" });
-    if (!response.ok) return;
-    const result = await response.json() as { tasks: ApplicationTask[]; interviews: Interview[] };
-    setTasks(result.tasks);
-    setInterviews(result.interviews);
-  };
-
   useEffect(() => {
     if (view !== "applications") return;
     let active = true;
-    Promise.all([
-      fetch("/api/workflow", { cache: "no-store" }).then((response) => response.ok ? response.json() : { tasks: [], interviews: [] }),
-      fetch("/api/contacts", { cache: "no-store" }).then((response) => response.ok ? response.json() : []),
-    ]).then(([workflow, contactRows]) => {
+    fetch("/api/contacts", { cache: "no-store" }).then((response) => response.ok ? response.json() : []).then((contactRows) => {
       if (!active) return;
-      setTasks(workflow.tasks ?? []);
-      setInterviews(workflow.interviews ?? []);
       setContacts(contactRows);
     });
     return () => { active = false; };
   }, [view]);
 
   useEffect(() => {
-    if (view !== "companies") return;
-    let active = true;
-    Promise.all([
-      fetch("/api/workflow", { cache: "no-store" }).then((response) => response.ok ? response.json() : { tasks: [], interviews: [] }),
-      fetch("/api/company-research", { cache: "no-store" }).then((response) => response.ok ? response.json() : []),
-      fetch("/api/contacts", { cache: "no-store" }).then((response) => response.ok ? response.json() : []),
-      fetch("/api/interview-prep", { cache: "no-store" }).then((response) => response.ok ? response.json() : { experiences: [] }),
-    ]).then(([workflow, research, contactRows, prep]) => {
-      if (!active) return;
-      setTasks(workflow.tasks ?? []);
-      setInterviews(workflow.interviews ?? []);
-      setResearchRows(research);
-      setContacts(contactRows);
-      setExperiences(prep.experiences ?? []);
-    });
-    return () => { active = false; };
-  }, [view]);
-
-  useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const applicationById = new Map(applicationsList.map((item) => [item.id, item]));
     const reminders: ScanNotice[] = [];
-    for (const task of tasks) {
-      if (task.status === "done" || !task.reminderDate || task.reminderDate > today) continue;
-      const application = applicationById.get(task.applicationId);
-      reminders.push({ id: `task:${task.id}:${task.reminderDate}`, kind: "reminder", title: `待办：${task.title}`, body: `${application?.company ?? "申请任务"} · 截止 ${task.dueDate || "未设置"}`, createdAt: `${today}T12:00:00.000Z`, read: false });
-    }
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
     for (const application of applicationsList) {
@@ -1150,12 +966,6 @@ export default function JobRadar() {
         read: false,
       });
     }
-    for (const interview of interviews) {
-      const scheduled = Date.parse(interview.scheduledAt);
-      if (!Number.isFinite(scheduled) || scheduled < now || scheduled - now > 24 * 60 * 60 * 1000) continue;
-      const application = applicationById.get(interview.applicationId);
-      reminders.push({ id: `interview:${interview.id}:${interview.scheduledAt}`, kind: "reminder", title: `面试提醒：${interview.round}`, body: `${application?.company ?? "面试"} · ${new Date(interview.scheduledAt).toLocaleString("zh-CN")}`, createdAt: new Date().toISOString(), read: false });
-    }
     if (!reminders.length) return;
     const timer = window.setTimeout(() => {
       setNotices((current) => {
@@ -1166,7 +976,7 @@ export default function JobRadar() {
       });
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [tasks, interviews, applicationsList]);
+  }, [applicationsList]);
 
   useEffect(() => {
     if (view !== "today" || !scanPanelOpen) return;
@@ -1200,15 +1010,8 @@ export default function JobRadar() {
     });
   };
 
-  const loadAnalytics = async () => {
-    setAnalyticsLoading(true);
-    const response = await fetch("/api/analytics", { cache: "no-store" });
-    if (response.ok) setAnalytics(await response.json());
-    setAnalyticsLoading(false);
-  };
-
   useEffect(() => {
-    if (!["saved", "applications", "companies"].includes(view)) return;
+    if (!["saved", "applications"].includes(view)) return;
     let active = true;
     fetch("/api/applications", { cache: "no-store" })
       .then((response) => (response.ok ? response.json() : []))
@@ -1219,12 +1022,6 @@ export default function JobRadar() {
       active = false;
     };
   }, [view]);
-
-  useEffect(() => {
-    if (view !== "applications") return;
-    const timer = window.setTimeout(() => void loadAnalytics(), 0);
-    return () => window.clearTimeout(timer);
-  }, [view, applicationsList]);
 
   useEffect(() => {
     if (view !== "verify") return;
@@ -1295,11 +1092,25 @@ export default function JobRadar() {
 
   const loadProfile = async () => {
     setProfileLoading(true);
+    setProfileLoaded(false);
     setProfileMessage("");
-    const profileResponse = await fetch("/api/profile", { cache: "no-store" });
-    if (profileResponse.ok) setProfile(await profileResponse.json());
-    if (!profileResponse.ok) setProfileMessage("申请固定资料读取失败，请重新登录后再试。");
-    setProfileLoading(false);
+    try {
+      const response = await fetch("/api/profile", { cache: "no-store", signal: AbortSignal.timeout(20000) });
+      if (response.status === 401) throw new Error("登录已失效，请重新登录网站后重试。本地预览需要单独配置登录。");
+      if (!response.ok) throw new Error(`资料读取失败（${response.status}），请稍后重试。`);
+      const data = await response.json();
+      if (!data || typeof data.userEmail !== "string" || !data.applicationProfile || typeof data.applicationProfile !== "object") {
+        throw new Error("资料接口返回格式不正确，可能是网站版本不一致，请刷新后重试。");
+      }
+      setProfile({ userEmail: data.userEmail, applicationProfile: normalizeFixedApplicationProfile(data.applicationProfile) });
+      setProfileLoaded(true);
+    } catch (error) {
+      setProfileMessage(error instanceof Error && error.name === "TimeoutError"
+        ? "资料读取超过 20 秒，请检查网络后重试。"
+        : error instanceof Error ? error.message : "资料读取失败，请重试。");
+    } finally {
+      setProfileLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -1310,6 +1121,7 @@ export default function JobRadar() {
 
   const saveProfile = async (event: FormEvent) => {
     event.preventDefault();
+    if (!profileLoaded || profileSaving) return;
     setProfileSaving(true);
     setProfileMessage("");
     const response = await fetch("/api/profile", {
@@ -1447,27 +1259,6 @@ export default function JobRadar() {
     };
   }, [jobsReloadToken]);
 
-  useEffect(() => {
-    let active = true;
-    fetch("/api/cv-prebuild/recovery", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : [])
-      .then((rows: Job[]) => {
-        if (!active) return;
-        let pendingIds: number[] = [];
-        try {
-          pendingIds = (JSON.parse(window.localStorage.getItem(PENDING_CV_FAVORITES_STORAGE_KEY) || "[]") as unknown[])
-            .map(Number)
-            .filter(Number.isSafeInteger);
-        } catch {}
-        const ordered = [...rows].sort((left, right) =>
-          Number(pendingIds.includes(right.id)) - Number(pendingIds.includes(left.id)) || right.id - left.id);
-        setCvRecoveryCandidates(ordered);
-        setCvRecoverySelected(ordered.map((job) => job.id));
-      });
-    return () => {
-      active = false;
-    };
-  }, [jobsReloadToken]);
 
   useEffect(() => {
     let active = true;
@@ -1624,15 +1415,13 @@ export default function JobRadar() {
     },
     [dailyJobs, track, region, saved, applicationsList, view, jobSort, deferredJobQuery],
   );
+  const jobScrollKey = `${view}|${track}|${region}|${jobSort}|${deferredJobQuery}`;
+  const [visibleJobCount, handleJobScroll] = useScrollBatch(
+    jobs.length,
+    jobScrollKey,
+  );
+  const scrollJobs = jobs.slice(0, visibleJobCount);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setJobPage(1), 0);
-    return () => window.clearTimeout(timer);
-  }, [track, region, jobSort, view, jobQuery]);
-
-  const jobPageCount = Math.max(1, Math.ceil(jobs.length / JOB_PAGE_SIZE));
-  const safeJobPage = Math.min(jobPage, jobPageCount);
-  const visibleJobs = jobs.slice((safeJobPage - 1) * JOB_PAGE_SIZE, safeJobPage * JOB_PAGE_SIZE);
   const manualRequestKeys = new Set(requests.map((item) => `${item.company.trim().toLowerCase()}::${item.title.trim().toLowerCase()}`));
   const qualityQueueIssues = (quality?.issues ?? [])
     .filter((issue) => issue.automationStatus !== "resolved")
@@ -1649,49 +1438,6 @@ export default function JobRadar() {
     .filter((issue) => !manualRequestKeys.has(`${issue.company.trim().toLowerCase()}::${issue.title.trim().toLowerCase()}`));
   const unreadNoticeCount = notices.filter((notice) => !notice.read).length;
 
-  const companyRecords = useMemo(() => {
-    const existingNames = new Set(completeCompanyPool.map((company) => company.company.toLowerCase()));
-    const verified = dailyJobs
-      .filter((job, index, rows) =>
-        !existingNames.has(job.company.toLowerCase())
-        && rows.findIndex((candidate) => candidate.company.toLowerCase() === job.company.toLowerCase()) === index)
-      .map((job, index) => ({
-        rank: completeCompanyPool.length + index + 1,
-        region: job.region,
-        priority: algorithmPriority(job.score),
-        track: job.track,
-        fit: Math.max(1, Math.min(5, Math.round(job.score / 20))),
-        company: job.company,
-        companyType: "已核验公司",
-        keywords: job.title,
-        reason: `已有通过核验的岗位：${job.title}。`,
-        dataTypes: "",
-        strategy: "在今日岗位查看具体 JD，并从岗位卡片进入申请追踪。",
-        source: job.source,
-      }));
-    return [...completeCompanyPool, ...verified];
-  }, [dailyJobs]);
-  const companies = useMemo(() => {
-    const query = deferredCompanyQuery.trim().toLowerCase();
-    return companyRecords.filter((company) => {
-      const searchable = `${company.company} ${company.keywords} ${company.companyType} ${company.track}`.toLowerCase();
-      return (
-        (!query || searchable.includes(query)) &&
-        (companyPriority === "全部" || company.priority === companyPriority) &&
-        (companyRegion === "全部地区" || company.region === companyRegion) &&
-        (companyCollection === "全部接入状态" || companyCollectionMode(findCompanySource(company.company)) === companyCollection)
-      );
-    });
-  }, [companyRecords, deferredCompanyQuery, companyPriority, companyRegion, companyCollection]);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setCompanyPage(1), 0);
-    return () => window.clearTimeout(timer);
-  }, [companyQuery, companyPriority, companyRegion, companyCollection]);
-  const companyPageCount = Math.max(1, Math.ceil(companies.length / COMPANY_PAGE_SIZE));
-  const safeCompanyPage = Math.min(companyPage, companyPageCount);
-  const visibleCompanies = companies.slice((safeCompanyPage - 1) * COMPANY_PAGE_SIZE, safeCompanyPage * COMPANY_PAGE_SIZE);
-
   const pendingApplications = applicationsList.filter((item) => item.status === "准备材料");
   const submittedApplications = applicationsList.filter((item) => item.status === "已申请");
   const interviewingApplications = applicationsList.filter((item) => interviewStatuses.includes(item.status));
@@ -1700,24 +1446,30 @@ export default function JobRadar() {
   const appliedCount = submittedApplications.length;
   const interviewingCount = interviewingApplications.length;
   const offerCount = applicationsList.filter((item) => item.status === "Offer").length;
-  const visibleApplications = applicationBucket === "submitted"
+  const bucketApplications = applicationBucket === "submitted"
     ? submittedApplications
     : applicationBucket === "interview"
       ? interviewingApplications
       : applicationBucket === "offer"
         ? offerApplications
         : rejectedApplications;
-  useEffect(() => {
-    const timer = window.setTimeout(() => setApplicationPage(1), 0);
-    return () => window.clearTimeout(timer);
-  }, [applicationBucket]);
-  useEffect(() => {
-    const timer = window.setTimeout(() => setSavedPage(1), 0);
-    return () => window.clearTimeout(timer);
-  }, [saved, applicationsList, candidateBucket]);
-  const applicationPageCount = Math.max(1, Math.ceil(visibleApplications.length / APPLICATION_PAGE_SIZE));
-  const safeApplicationPage = Math.min(applicationPage, applicationPageCount);
-  const pagedApplications = visibleApplications.slice((safeApplicationPage - 1) * APPLICATION_PAGE_SIZE, safeApplicationPage * APPLICATION_PAGE_SIZE);
+  const normalizedApplicationQuery = deferredApplicationQuery.trim().toLocaleLowerCase();
+  const visibleApplications = normalizedApplicationQuery
+    ? bucketApplications.filter((item) => [
+      item.company,
+      item.title,
+      item.archiveId,
+      item.applicationId,
+      item.jobUrl,
+      item.id ? String(item.id) : "",
+    ].some((value) => String(value || "").toLocaleLowerCase().includes(normalizedApplicationQuery)))
+    : bucketApplications;
+  const applicationScrollKey = `${applicationBucket}|${normalizedApplicationQuery}`;
+  const [visibleApplicationCount, handleApplicationScroll] = useScrollBatch(
+    visibleApplications.length,
+    applicationScrollKey,
+  );
+  const scrollApplications = visibleApplications.slice(0, visibleApplicationCount);
   const allFavoriteJobs = dailyJobs.filter((job) =>
     saved.includes(job.id)
     && !applicationsList.some((application) => applicationHidesFavorite(application, job)),
@@ -1749,38 +1501,15 @@ export default function JobRadar() {
       application,
       job: pendingCvJobs.find((row) => row.application.id === application.id)?.job,
     }));
-  const savedPageCount = Math.max(1, Math.ceil(candidateRows.length / APPLICATION_PAGE_SIZE));
-  const safeSavedPage = Math.min(savedPage, savedPageCount);
-  const pagedCandidateRows = candidateRows.slice((safeSavedPage - 1) * APPLICATION_PAGE_SIZE, safeSavedPage * APPLICATION_PAGE_SIZE);
+  const [visibleCandidateCount, handleCandidateScroll] = useScrollBatch(candidateRows.length, candidateBucket);
+  const scrollCandidateRows = candidateRows.slice(0, visibleCandidateCount);
   useEffect(() => {
     if (view !== "saved") return;
     const frame = window.requestAnimationFrame(() => {
       window.dispatchEvent(new CustomEvent("ivy-job-radar-candidate-rendered"));
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [view, safeSavedPage, applicationsList, saved]);
-  const applicationById = new Map(applicationsList.filter((item) => item.id).map((item) => [item.id as number, item]));
-  const pendingTasks = tasks
-    .filter((task) => task.status === "pending")
-    .sort((a, b) => (a.dueDate || "9999").localeCompare(b.dueDate || "9999"));
-  const upcomingInterviews = interviews
-    .filter((item) => item.outcome === "待进行")
-    .sort((a, b) => (a.scheduledAt || "9999").localeCompare(b.scheduledAt || "9999"));
-  const calendarEvents = [
-    ...applicationsList.flatMap((item) => [
-      ...(item.plannedApplicationDate ? [{ date: item.plannedApplicationDate, type: "计划申请", title: `${item.company} · ${item.title}`, tone: "green" }] : []),
-      ...(item.deadline ? [{ date: item.deadline, type: "申请截止", title: `${item.company} · ${item.title}`, tone: "red" }] : []),
-      ...(item.followUpDate ? [{ date: item.followUpDate, type: "申请跟进", title: `${item.company} · ${item.title}`, tone: "gold" }] : []),
-    ]),
-    ...tasks.filter((item) => item.dueDate).map((item) => ({ date: item.dueDate, type: "任务", title: item.title, tone: item.status === "done" ? "gray" : "green" })),
-    ...interviews.flatMap((item) => [
-      ...(item.scheduledAt ? [{ date: item.scheduledAt.slice(0, 10), type: item.round, title: applicationById.get(item.applicationId)?.company ?? "面试", tone: "purple" }] : []),
-      ...(item.thankYouDueAt && item.thankYouStatus === "未发送" ? [{ date: item.thankYouDueAt.slice(0, 10), type: "感谢信", title: applicationById.get(item.applicationId)?.company ?? "面试", tone: "gold" }] : []),
-      ...(item.followUpAt ? [{ date: item.followUpAt.slice(0, 10), type: "面试跟进", title: applicationById.get(item.applicationId)?.company ?? "面试", tone: "blue" }] : []),
-    ]),
-    ...contacts.filter((item) => item.nextFollowUpAt).map((item) => ({ date: item.nextFollowUpAt, type: "联系人跟进", title: `${item.name} · ${item.company}`, tone: "blue" })),
-  ].filter((item) => item.date.startsWith(calendarMonth)).sort((a, b) => a.date.localeCompare(b.date));
-
+  }, [view, applicationsList, saved, visibleCandidateCount]);
   const startCvPrebuild = useCallback(async (
     id: number,
     templateTrack?: CvTemplateTrack,
@@ -1832,36 +1561,6 @@ export default function JobRadar() {
     }
   }, []);
 
-  const restoreCvFavorites = async () => {
-    if (!cvRecoverySelected.length || cvRecoveryRunning) return;
-    const selectedJobs = cvRecoveryCandidates.filter((job) => cvRecoverySelected.includes(job.id));
-    setCvRecoveryRunning(true);
-    setCvAutomationNotice(`正在恢复 ${selectedJobs.length} 个收藏，不调用生成 API…`);
-    const restored: number[] = [];
-    const failures: string[] = [];
-    for (const job of selectedJobs) {
-      try {
-        const response = await fetch("/api/saved-jobs", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ jobId: job.id }),
-        });
-        const payload = await response.json() as { created?: boolean; error?: string };
-        if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
-        restored.push(job.id);
-        updatePendingCvFavorite(job.id, false);
-      } catch (error) {
-        failures.push(`${job.title}：${error instanceof Error ? error.message : "恢复失败"}`);
-      }
-    }
-    setCvRecoveryCandidates((current) => current.filter((job) => !restored.includes(job.id)));
-    setCvRecoverySelected((current) => current.filter((id) => !restored.includes(id)));
-    setJobsReloadToken((value) => value + 1);
-    setCvAutomationNotice(failures.length
-      ? `已恢复 ${restored.length} 个；${failures.length} 个失败：${failures.join("；")}`
-      : `已恢复 ${restored.length} 个收藏，没有调用生成 API。`);
-    setCvRecoveryRunning(false);
-  };
 
   const runApplicationAutomation = async () => {
     if (automationSaving) return;
@@ -2041,14 +1740,14 @@ export default function JobRadar() {
   };
 
   const toggleSaved = async (id: number) => {
+    if (savedMutationIds.current.has(id)) return;
+    savedMutationIds.current.add(id);
     const isSaved = saved.includes(id);
-    const savedSnapshot = saved;
     setSaved((current) => isSaved
       ? current.filter((item) => item !== id)
       : current.includes(id) ? current : [...current, id]);
     setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: !isSaved } : job));
     setCvAutomationNotice(isSaved ? "正在取消收藏…" : "正在保存到收藏…");
-    if (!isSaved) updatePendingCvFavorite(id, true);
     try {
       const response = await fetch(
         isSaved ? `/api/saved-jobs?jobId=${id}` : "/api/saved-jobs",
@@ -2064,37 +1763,175 @@ export default function JobRadar() {
         setCvAutomationNotice("已取消收藏。");
       } else {
         await response.json() as { created?: boolean };
-        updatePendingCvFavorite(id, false);
         setCvAutomationNotice("已加入收藏。进入待申请后才会自动生成 CV。");
       }
-      setJobsReloadToken((value) => value + 1);
     } catch {
-      setSaved(savedSnapshot);
+      setSaved((current) => isSaved
+        ? current.includes(id) ? current : [...current, id]
+        : current.filter((item) => item !== id));
       setDailyJobs((current) => current.map((job) => job.id === id ? { ...job, saved: isSaved } : job));
-      if (!isSaved) updatePendingCvFavorite(id, false);
       setCvAutomationNotice(isSaved
         ? "取消收藏失败，后台记录没有变化。"
         : "收藏失败，后台记录没有变化，请稍后重试。");
+    } finally {
+      savedMutationIds.current.delete(id);
     }
   };
 
-  const openPendingCvSelection = (job: Job) => {
-    let language: CvTemplateLanguage = "zh";
+  const openPendingCvSelection = async (job: Job) => {
+    let language: CvTemplateLanguage = job.savedCvLanguage === "en" ? "en" : "zh";
+    let storedTemplateFile = job.savedCvTemplateFile || "";
     try {
-      if (window.localStorage.getItem(CV_TEMPLATE_LANGUAGE_STORAGE_KEY) === "en") language = "en";
+      if (!job.savedCvLanguage && window.localStorage.getItem(CV_TEMPLATE_LANGUAGE_STORAGE_KEY) === "en") language = "en";
+      if (!storedTemplateFile) storedTemplateFile = window.localStorage.getItem(CV_TEMPLATE_FILE_STORAGE_KEY) || "";
     } catch {}
-    setPendingCvSelection({ job, language, track: recommendCvTemplateTrack(job) });
+    setPendingCvSelection({
+      job,
+      company: job.company,
+      title: job.title,
+      track: job.track,
+      language,
+      templateFile: storedTemplateFile,
+      mode: "move",
+    });
+    setCvTemplatesLoading(true);
+    setCvTemplatesError("");
+    try {
+      const catalog = await fetchCvTemplateCatalog();
+      setCvTemplates(catalog);
+      const storedOption = catalog.find((option) => option.filename === storedTemplateFile && option.language === language);
+      const recommendation = storedOption || recommendCvTemplateOption(catalog, language, `${job.track} ${job.title}`);
+      setPendingCvSelection((current) => current?.mode === "move" && current.job?.id === job.id
+        ? { ...current, templateFile: recommendation?.filename || "" }
+        : current);
+    } catch (error) {
+      setCvTemplatesError(error instanceof Error ? error.message : "CV 母版清单读取失败。");
+    } finally {
+      setCvTemplatesLoading(false);
+    }
+  };
+
+  const openApplicationCvSelection = async (application: Application) => {
+    if (!application.id) return;
+    const currentTemplateFile = String(application.resumeVersion || "").split("@", 1)[0].trim();
+    const language: CvTemplateLanguage = currentTemplateFile
+      ? inferCvTemplateLanguage(currentTemplateFile)
+      : application.region === "美国" ? "en" : "zh";
+    setPendingCvSelection({
+      application,
+      company: application.company,
+      title: application.title,
+      track: application.track,
+      language,
+      templateFile: currentTemplateFile,
+      mode: "application",
+    });
+    setCvTemplatesLoading(true);
+    setCvTemplatesError("");
+    try {
+      const catalog = await fetchCvTemplateCatalog();
+      setCvTemplates(catalog);
+      const currentOption = catalog.find((option) => option.filename === currentTemplateFile && option.language === language);
+      const recommendation = currentOption || recommendCvTemplateOption(
+        catalog,
+        language,
+        `${application.track} ${application.title}`,
+      );
+      setPendingCvSelection((current) => current?.mode === "application" && current.application?.id === application.id
+        ? { ...current, templateFile: recommendation?.filename || "" }
+        : current);
+    } catch (error) {
+      setCvTemplatesError(error instanceof Error ? error.message : "CV 母版清单读取失败。");
+    } finally {
+      setCvTemplatesLoading(false);
+    }
+  };
+
+  const persistSavedJobCvSelection = async (
+    job: Job,
+    language: CvTemplateLanguage,
+    templateFile: string,
+  ) => {
+    const response = await fetch("/api/saved-jobs", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId: job.id, language, templateFile }),
+    });
+    const payload = await response.json() as {
+      error?: string;
+      cvRequeued?: boolean;
+      frozenApplicationPreserved?: boolean;
+    };
+    if (!response.ok) throw new Error(payload.error || "CV 母版保存失败。");
+    const applySelection = (candidate: Job) => candidate.id === job.id
+      ? { ...candidate, savedCvLanguage: language, savedCvTemplateFile: templateFile }
+      : candidate;
+    setDailyJobs((current) => current.map(applySelection));
+    setCvTasks((current) => current.map(applySelection));
+    window.localStorage.setItem(CV_TEMPLATE_LANGUAGE_STORAGE_KEY, language);
+    window.localStorage.setItem(CV_TEMPLATE_FILE_STORAGE_KEY, templateFile);
+    return payload;
+  };
+
+  const saveAppliedCvSelection = async (
+    application: Application,
+    language: CvTemplateLanguage,
+    templateFile: string,
+  ) => {
+    if (cvTemplateSavingId || !application.id) return;
+    const selectedTemplate = cvTemplates.find((option) => option.filename === templateFile && option.language === language);
+    if (!selectedTemplate) {
+      setCvAutomationNotice("请选择一个当前可用的 CV 母版。");
+      return;
+    }
+    const currentTemplateFile = String(application.resumeVersion || "").split("@", 1)[0].trim();
+    if (currentTemplateFile === templateFile) {
+      setPendingCvSelection(null);
+      setCvAutomationNotice("该申请已经使用这个母版，原冻结 CV 保持不变。");
+      return;
+    }
+    setCvTemplateSavingId(application.id);
+    try {
+      const response = await fetch("/api/cv-tailor/archive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          applicationId: application.id,
+          language,
+          templateFile,
+          freezeSubmittedTemplate: true,
+          replaceSubmittedTemplate: true,
+        }),
+      });
+      const result = await response.json() as { error?: string; resumeVersion?: string };
+      if (!response.ok || !result.resumeVersion) throw new Error(result.error || "已申请岗位的 CV 母版修改失败。");
+      setApplicationsList((current) => current.map((item) => item.id === application.id
+        ? { ...item, resumeVersion: result.resumeVersion || item.resumeVersion }
+        : item));
+      setPendingCvSelection(null);
+      setCvAutomationNotice("已更新该申请的 CV 母版并冻结新副本；原 JD 和 APP-ID 保持不变。");
+    } catch (error) {
+      setCvAutomationNotice(error instanceof Error ? error.message : "已申请岗位的 CV 母版修改失败。");
+    } finally {
+      setCvTemplateSavingId(null);
+    }
   };
 
   const moveFavoriteToPending = async (
     job: Job,
     language: CvTemplateLanguage,
-    templateTrack: CvTemplateTrack,
+    templateFile: string,
   ) => {
     if (candidateMovingId) return;
+    const selectedTemplate = cvTemplates.find((option) => option.filename === templateFile && option.language === language);
+    if (!selectedTemplate) {
+      setCvAutomationNotice("请选择一个当前可用的 CV 母版。");
+      return;
+    }
     setCandidateMovingId(job.id);
     setCvAutomationNotice(`正在把 ${job.title} 移入待申请并创建 CV 任务…`);
     try {
+      await persistSavedJobCvSelection(job, language, templateFile);
       const applicationDraft: Application = {
         ...emptyApplication,
         company: job.company,
@@ -2113,6 +1950,7 @@ export default function JobRadar() {
         deadlineSource: job.deadline || job.deadlineType === "rolling" ? "automatic" : "unknown",
         workAuthorization: job.region === "美国" ? `Sponsorship：${job.visa}` : "中国工作资格",
         notes: job.evidence,
+        resumeVersion: templateFile,
       };
       const applicationResponse = await fetch("/api/applications", {
         method: "POST",
@@ -2151,7 +1989,8 @@ export default function JobRadar() {
           jobId: job.id,
           applicationRowId: application.id,
           language,
-          templateTrack,
+          templateTrack: selectedTemplate.track,
+          templateFile,
         }),
       });
       const queued = await queueResponse.json() as { status?: CvPrebuildStatus; error?: string };
@@ -2163,6 +2002,7 @@ export default function JobRadar() {
       ]);
       setCandidateBucket("pending");
       window.localStorage.setItem(CV_TEMPLATE_LANGUAGE_STORAGE_KEY, language);
+      window.localStorage.setItem(CV_TEMPLATE_FILE_STORAGE_KEY, templateFile);
       setPendingCvSelection(null);
       setCvAutomationNotice(status === "ready"
         ? "已进入待申请，现有 CV 初稿可以继续调整。"
@@ -2275,31 +2115,23 @@ export default function JobRadar() {
         return current.map((item, itemIndex) => itemIndex === index ? savedApplication : item);
       });
       if (!["撤回", "拒绝"].includes(savedApplication.status)) {
-        setDailyJobs((current) => current.filter((job) =>
-          !sameLogicalJob(job, savedApplication) && !sameCompanyRole(job, savedApplication)));
+        setDailyJobs((current) => current.filter((job) => !sameLogicalJob(job, savedApplication)));
       }
 
       // The editor already closed optimistically. Automatic task creation and server
       // reconciliation stay in the background and never block the perceived save action.
       if (savedApplication.status === "准备材料") {
         setView("saved");
-      } else if (savedApplication.status === "撤回" || savedApplication.status === "拒绝") {
+      } else if (savedApplication.status === "拒绝") {
+        setApplicationBucket("submitted");
+        setMessage("已从“我的申请”移出，记录保留在“拒绝记录”中。");
+        setView("applications");
+      } else if (savedApplication.status === "撤回") {
         setView("today");
       } else {
         setView("applications");
       }
 
-      void (async () => {
-        const taskDueDate = savedApplication.plannedApplicationDate || savedApplication.deadline;
-        if (savedApplication.id && taskDueDate && !tasks.some((task) => task.applicationId === savedApplication.id && task.title === "准备并提交申请")) {
-          const taskResponse = await fetch("/api/workflow", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ kind: "task", applicationId: savedApplication.id, title: "准备并提交申请", dueDate: taskDueDate, reminderDate: taskDueDate, status: "pending", source: "automatic" }),
-          });
-          if (taskResponse.ok) await loadWorkflow();
-        }
-      })();
     } finally {
       setSaving(false);
     }
@@ -2309,65 +2141,12 @@ export default function JobRadar() {
     setForm((current) => (current ? { ...current, ...patch } : current));
   };
 
-  const saveTask = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!taskForm) return;
-    setWorkflowSaving(true);
-    await fetch("/api/workflow", { method: taskForm.id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "task", ...taskForm }) });
-    setWorkflowSaving(false);
-    setTaskForm(null);
-    await loadWorkflow();
-  };
-
-  const toggleTask = async (task: ApplicationTask) => {
-    const nextStatus = task.status === "done" ? "pending" : "done";
-    setTasks((current) => current.map((item) => item.id === task.id ? { ...item, status: nextStatus } : item));
-    const response = await fetch("/api/workflow", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "task", ...task, status: nextStatus }) });
-    if (!response.ok) await loadWorkflow();
-  };
-
-  const saveInterview = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!interviewForm) return;
-    setWorkflowSaving(true);
-    await fetch("/api/workflow", { method: interviewForm.id ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: "interview", ...interviewForm }) });
-    setWorkflowSaving(false);
-    setInterviewForm(null);
-    await loadWorkflow();
-  };
-
-  const openResearch = (company: string, careersUrl = "") => {
-    const existing = researchRows.find((item) => item.company.toLowerCase() === company.toLowerCase());
-    const source = findCompanySource(company);
-    setResearchForm(existing ?? {
-      company,
-      website: source?.website ?? "",
-      careersUrl: source?.careersUrl ?? careersUrl,
-      businessSummary: "",
-      recentNotes: "",
-      personalNotes: "",
-    });
-  };
-
   const openContactForApplication = (application: Application) => {
     setContactForm({
       ...emptyContact,
       company: application.company,
       applicationId: application.id ?? null,
     });
-  };
-
-  const saveResearch = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!researchForm) return;
-    setResearchSaving(true);
-    const response = await fetch("/api/company-research", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(researchForm) });
-    setResearchSaving(false);
-    if (response.ok) {
-      const savedResearch = await response.json() as CompanyResearch;
-      setResearchRows((current) => [savedResearch, ...current.filter((item) => item.company.toLowerCase() !== savedResearch.company.toLowerCase())]);
-      setResearchForm(null);
-    }
   };
 
   const saveContact = async (event: FormEvent) => {
@@ -2568,16 +2347,14 @@ export default function JobRadar() {
       <section className="hero">
         <div>
           <p className="eyebrow">每日 6:00 · 美国东部时间</p>
-          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "automation" ? "自动投递" : view === "companies" ? "公司研究与面经" : view === "verify" ? "岗位核验" : view === "profile" ? "申请固定资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
+          <h1>{view === "applications" ? "申请进度" : view === "saved" ? "候选岗位" : view === "automation" ? "自动投递" : view === "verify" ? "岗位核验" : view === "profile" ? "申请固定资料" : view === "tools" ? "工具" : view === "ignored" ? "不再推荐" : "早上好，十一"}</h1>
           <p className="hero-copy">
             {view === "applications"
-              ? "在这里更新每一次投递、跟进和面试，并集中查看所有求职日程。"
+              ? "在这里更新每一次投递、跟进和面试。"
               : view === "saved"
                 ? "你保存或建立申请记录但尚未投递的岗位，都在同一个列表里统一管理。"
               : view === "automation"
                 ? "系统每次先列出 10 个美国岗位和完整 JD；只有你确认整批后，才开始生成英文 CV 和填写申请表。"
-              : view === "companies"
-                ? `公司池共 ${companyRecords.length} 条；自动汇总官网、招聘入口、岗位记录与历年公开面经。`
                 : view === "verify"
                   ? "提交岗位、查看统一核验队列，并在同一页监控自动数据质检。"
                   : view === "profile"
@@ -2597,7 +2374,7 @@ export default function JobRadar() {
         ) : (
           <div className="scan-status">
             <span className="pulse" />
-            <div><strong>{view === "companies" ? "公司与面经" : view === "applications" ? "本月活动" : view === "automation" ? "10 个一批" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : view === "tools" ? "集中入口" : "已隐藏"}</strong><span>{view === "companies" ? `${companyRecords.length} 家 · ${experiences.length} 条面经` : view === "applications" ? `${calendarEvents.length} 项` : view === "automation" ? `${automationDashboard?.summary.awaitingReview || 0} 待批量确认 · ${automationDashboard?.summary.submitted || 0} 已投` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : view === "tools" ? "7 个辅助功能" : `${ignoredJobs.length} 条`}</span></div>
+            <div><strong>{view === "applications" ? "申请记录" : view === "automation" ? "10 个一批" : view === "profile" ? "私有资料" : view === "verify" ? "核验与质检" : view === "tools" ? "集中入口" : "已隐藏"}</strong><span>{view === "applications" ? `${appliedCount} 已投 · ${interviewingCount} 面试中` : view === "automation" ? `${automationDashboard?.summary.awaitingReview || 0} 待批量确认 · ${automationDashboard?.summary.submitted || 0} 已投` : view === "profile" ? "仅你的账户可见" : view === "verify" ? `${requests.length + qualityQueueIssues.length} 条队列记录` : view === "tools" ? "7 个辅助功能" : `${ignoredJobs.length} 条`}</span></div>
           </div>
         )}
       </section>
@@ -2641,7 +2418,6 @@ export default function JobRadar() {
               <div className="automation-settings">
                 <label><span>自动筛选</span><input type="checkbox" checked={automationDashboard.config.enabled} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ enabled: event.target.checked })} /></label>
                 <div className="automation-mode batch"><strong>每批固定 10 个</strong><span>不足 10 个合格岗位时显示实际数量，不用低质量岗位补齐</span></div>
-                <label><span>最低综合匹配分</span><select value={automationDashboard.config.minimumScore} disabled={automationSaving} onChange={(event) => void updateApplicationAutomationConfig({ minimumScore: Number(event.target.value) })}>{[50, 55, 60, 65, 70, 75, 80].map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
                 <div className="automation-mode pilot"><strong>最终提交由你完成</strong><span>自动生成 CV 和填写，但不会点击 Submit，10 个页面会保留打开</span></div>
               </div>
               <div className="automation-summary-grid">
@@ -2722,13 +2498,15 @@ export default function JobRadar() {
       {view === "tools" && (
         <section className="tools-section" aria-label="求职工具">
           <div className="tools-grid">
-            <button type="button" onClick={() => setView("companies")}><span>⌕</span><strong>公司与面经</strong><p>查看目标公司、招聘入口和公开面经。</p></button>
+            <a href="/company-watchlist"><span>◎</span><strong>公司关注池</strong><p>长期维护公司官网和招聘入口。</p></a>
             <button type="button" onClick={() => setView("verify")}><span>✓</span><strong>岗位核验</strong><p>提交链接并处理人工复核例外。</p></button>
             <button type="button" onClick={() => setView("ignored")}><span>⊘</span><strong>不再推荐</strong><p>查看或恢复被忽略的岗位。</p></button>
             <a href="/autofill"><span>✦</span><strong>申请 Autofill</strong><p>管理申请表自动填写资料。</p></a>
             <a href="/bookmarklet"><span>＋</span><strong>Chrome 保存岗位</strong><p>从任意 JD 页面直接加入候选。</p></a>
             <a href="/cv-knowledge"><span>◈</span><strong>CV 知识库</strong><p>维护可证明的项目、技能与事实。</p></a>
             <a href="/screening-learning"><span>◇</span><strong>筛选学习</strong><p>查看从人工判断中提炼的建议。</p></a>
+            <a href="/interview-prep"><span>▧</span><strong>项目面试复盘</strong><p>架构、AI 决策、技术取舍与追问答案。</p></a>
+            <a href="/evidence-rag"><span>⌕</span><strong>证据 RAG 问答</strong><p>检索真实经历，查看模型回答和原文出处。</p></a>
           </div>
         </section>
       )}
@@ -2738,122 +2516,6 @@ export default function JobRadar() {
           <button className={applicationBucket === "submitted" ? "active" : ""} onClick={() => setApplicationBucket("submitted")}><span>已提交申请</span><strong>{appliedCount}</strong><em>仅已提交，未进入面试</em></button>
           <button className={applicationBucket === "interview" ? "active" : ""} onClick={() => setApplicationBucket("interview")}><span>面试中</span><strong>{interviewingCount}</strong><em>一面至终面</em></button>
           <button className={applicationBucket === "offer" ? "active" : ""} onClick={() => setApplicationBucket("offer")}><span>Offer</span><strong>{offerCount}</strong><em>已收到 Offer</em></button>
-        </section>
-      )}
-
-      {view === "applications" && (
-        <section className="analytics-section" aria-label="申请漏斗和来源成功率">
-          <div className="section-heading analytics-heading">
-            <div><p className="eyebrow">APPLICATION ANALYTICS</p><h2>申请漏斗与来源成功率</h2></div>
-            <div className="export-actions" aria-label="完整数据导出">
-              <a href="/api/export?format=csv">CSV</a>
-              <a href="/api/export?format=xlsx">Excel</a>
-              <a href="/api/export?format=json">JSON</a>
-              <a href="/api/export?format=sqlite">SQLite</a>
-            </div>
-          </div>
-          <p className="analytics-note">漏斗按每份申请曾达到的最高阶段累计；来源转化率以已投递数量为分母。完整导出包含岗位、申请、状态历史、核验、自动质检、收藏、忽略、扫描、个人资料与 CV 元数据，不包含 CV 文件本体。</p>
-          {analyticsLoading && !analytics ? (
-            <div className="analytics-loading">正在计算申请分析…</div>
-          ) : (
-            <div className="analytics-grid">
-              <article className="analytics-card funnel-card">
-                <div className="analytics-card-title"><strong>申请漏斗</strong><span>{analytics?.totals.submitted ?? 0} 份已投递</span></div>
-                <div className="funnel-list">
-                  {(analytics?.funnel ?? []).map((step, index, rows) => {
-                    const maximum = Math.max(1, rows[0]?.count ?? 0);
-                    const previous = index === 0 ? step.count : rows[index - 1].count;
-                    const conversion = previous > 0 ? Math.round((step.count / previous) * 1000) / 10 : 0;
-                    return (
-                      <div className="funnel-row" key={step.key}>
-                        <div><span>{step.label}</span><strong>{step.count}</strong></div>
-                        <div className="funnel-track"><span style={{ width: `${Math.max(step.count > 0 ? 7 : 0, (step.count / maximum) * 100)}%` }} /></div>
-                        <em>{index === 0 ? "基准" : `${conversion}%`}</em>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="terminal-summary">
-                  <span>当前拒绝 <strong>{analytics?.totals.rejected ?? 0}</strong></span>
-                  <span>当前撤回 <strong>{analytics?.totals.withdrawn ?? 0}</strong></span>
-                  <span>待提交 <strong>{analytics?.totals.pending ?? 0}</strong></span>
-                </div>
-              </article>
-
-              <article className="analytics-card source-card">
-                <div className="analytics-card-title"><strong>来源成功率</strong><span>按样本量排序</span></div>
-                {(analytics?.sources.length ?? 0) === 0 ? (
-                  <p className="analytics-empty">有已投递记录后，这里会按来源显示面试率和 Offer 率。</p>
-                ) : (
-                  <div className="source-table" role="table" aria-label="申请来源成功率">
-                    <div className="source-table-row source-table-head" role="row">
-                      <span>来源</span><span>申请</span><span>面试</span><span>Offer</span>
-                    </div>
-                    {analytics?.sources.map((source) => (
-                      <div className="source-table-row" role="row" key={source.source}>
-                        <strong>{source.source}<small>样本 n={source.applications}</small></strong>
-                        <span>{source.applications}</span>
-                        <span>{source.interviewRate}%<small>{source.interviews} 份</small></span>
-                        <span>{source.offerRate}%<small>{source.offers} 份</small></span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </article>
-            </div>
-          )}
-          <p className="history-note">状态历史从本功能启用后持续记录；旧记录以启用时的当前状态作为起点，因此旧的拒绝记录若此前进入过面试，需再次更新状态后才能完整反映历史路径。</p>
-        </section>
-      )}
-
-      {view === "applications" && (
-        <section className="workflow-section" aria-label="任务与面试日程">
-          <div className="section-heading">
-            <div><p className="eyebrow">SCHEDULE & FOLLOW-UP</p><h2>任务与面试日程</h2></div>
-          </div>
-          <div className="workflow-grid">
-            <article className="workflow-card">
-              <div className="workflow-card-head"><strong>待办任务</strong><span>{pendingTasks.length} 项未完成</span></div>
-              {pendingTasks.length === 0 ? <p className="workflow-empty">暂无待办。可从任意申请记录新增任务。</p> : pendingTasks.slice(0, 8).map((task) => {
-                const application = applicationById.get(task.applicationId);
-                return <div className="workflow-row" key={`task-${task.id}`}>
-                  <button className="task-check" onClick={() => void toggleTask(task)} aria-label="标记任务完成">○</button>
-                  <div><strong>{task.title}</strong><span>{application?.company ?? "申请记录"} · {task.dueDate || "未设截止日期"}</span></div>
-                  <button className="row-edit" onClick={() => setTaskForm(task)}>编辑</button>
-                </div>;
-              })}
-            </article>
-            <article className="workflow-card">
-              <div className="workflow-card-head"><strong>面试与跟进</strong><span>{upcomingInterviews.length} 场待进行</span></div>
-              {upcomingInterviews.length === 0 ? <p className="workflow-empty">暂无待进行面试。进入面试阶段后可记录时间和联系人。</p> : upcomingInterviews.slice(0, 8).map((interview) => {
-                const application = applicationById.get(interview.applicationId);
-                return <div className="workflow-row" key={`interview-${interview.id}`}>
-                  <span className="interview-dot">●</span>
-                  <div><strong>{interview.round} · {application?.company ?? "面试"}</strong><span>{interview.scheduledAt ? new Date(interview.scheduledAt).toLocaleString("zh-CN") : "时间未设置"} · {interview.contactName || "联系人未填写"}</span></div>
-                  <button className="row-edit" onClick={() => setInterviewForm(interview)}>编辑</button>
-                </div>;
-              })}
-            </article>
-          </div>
-        </section>
-      )}
-
-      {view === "applications" && (
-        <section className="workspace-section embedded-calendar" aria-label="求职活动日历">
-          <div className="section-heading">
-            <div><p className="eyebrow">JOB SEARCH CALENDAR</p><h2>求职活动日历</h2></div>
-            <input className="month-picker" type="month" value={calendarMonth} onChange={(event) => setCalendarMonth(event.target.value)} />
-          </div>
-          <div className="calendar-summary"><strong>{calendarEvents.length}</strong><span>项活动</span><p>申请计划、截止日期、任务、面试、感谢信与联系人跟进按日期合并显示。</p></div>
-          <div className="calendar-list">
-            {calendarEvents.length === 0 ? <div className="empty-state"><span>□</span><h3>这个月没有安排</h3><p>新增任务、面试或跟进日期后会自动出现在这里。</p></div> : calendarEvents.map((event, index) => (
-              <article className="calendar-row" key={`${event.date}-${event.type}-${index}`}>
-                <time><strong>{new Date(`${event.date}T12:00:00`).toLocaleDateString("zh-CN", { day: "2-digit" })}</strong><span>{new Date(`${event.date}T12:00:00`).toLocaleDateString("zh-CN", { weekday: "short" })}</span></time>
-                <i className={`calendar-dot ${event.tone}`} />
-                <div><span>{event.type}</span><h3>{event.title}</h3></div>
-              </article>
-            ))}
-          </div>
         </section>
       )}
 
@@ -3008,7 +2670,7 @@ export default function JobRadar() {
         <>
           <section className="toolbar">
             <div className="section-heading">
-              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `候选岗位（${allFavoriteJobs.length + pendingApplications.length}）` : `今日岗位（${jobs.length}）`}</h2>{view === "today" && <p className="shortlist-filter-note">只显示官方申请页仍开放、已取得完整 JD 且没有硬性资格冲突的潜在岗位。匹配分只决定排序，不再把可申请岗位挡掉；已筛选中国公司整家公司排除，其他公司按具体岗位去重。</p>}</div>
+              <div><p className="eyebrow">DAILY SHORTLIST</p><h2>{view === "saved" ? `候选岗位（${allFavoriteJobs.length + pendingApplications.length}）` : `今日岗位（${jobs.length}）`}</h2>{view === "today" && <p className="shortlist-filter-note">显示已确认可申请且尚未收藏、进入待申请或提交申请的岗位。Excel 中标记为“直接可投”或“条件型可投”的岗位会直接同步，并按具体岗位去重。</p>}</div>
               {view === "today" && <div className="job-controls">
                 <label className="job-search">
                   <span aria-hidden="true">⌕</span>
@@ -3049,33 +2711,6 @@ export default function JobRadar() {
                 )}
               </div>
               {cvAutomationNotice && <p className="cv-automation-notice" role="status">{cvAutomationNotice}</p>}
-              {cvRecoveryCandidates.length > 0 && candidateBucket === "favorites" && (
-                <section className="cv-recovery-panel" aria-labelledby="cv-recovery-title">
-                  <div>
-                    <strong id="cv-recovery-title">找回刚才未写入后台的收藏</strong>
-                    <span>恢复后只会进入收藏，不会调用 CV API。</span>
-                  </div>
-                  <div className="cv-recovery-list compact">
-                    {cvRecoveryCandidates.map((job) => (
-                      <label key={`cv-recovery-${job.id}`}>
-                        <input
-                          type="checkbox"
-                          checked={cvRecoverySelected.includes(job.id)}
-                          onChange={(event) => setCvRecoverySelected((current) => event.target.checked
-                            ? [...new Set([...current, job.id])]
-                            : current.filter((id) => id !== job.id))}
-                        />
-                        <span><strong>{job.title}</strong><small>{job.company}</small></span>
-                      </label>
-                    ))}
-                  </div>
-                  <div className="cv-recovery-actions">
-                    <button type="button" className="primary" disabled={cvRecoveryRunning || !cvRecoverySelected.length} onClick={() => void restoreCvFavorites()}>
-                      {cvRecoveryRunning ? "正在恢复…" : `恢复到收藏（${cvRecoverySelected.length}）`}
-                    </button>
-                  </div>
-                </section>
-              )}
               {candidateRows.length === 0 ? (
                 <div className="empty-state">
                   <span>{candidateBucket === "favorites" ? "☆" : "✓"}</span>
@@ -3083,12 +2718,17 @@ export default function JobRadar() {
                   <p>{candidateBucket === "favorites" ? "在今日岗位点星标，岗位会先保存到这里。" : "从收藏中点击“进入待申请”，系统会自动生成第一版 CV。"}</p>
                 </div>
               ) : (
-                <div className="compact-candidate-list">
-                  <PaginationControls page={safeSavedPage} pageCount={savedPageCount} onPageChange={setSavedPage} label={candidateBucket === "favorites" ? "收藏" : "待申请"} />
+                <div
+                  key={candidateBucket}
+                  className="compact-candidate-list scroll-frame"
+                  onScroll={handleCandidateScroll}
+                  tabIndex={0}
+                  aria-label={`${candidateBucket === "favorites" ? "收藏" : "待申请"}岗位滚动列表，每批 30 条`}
+                >
                   <div className={`compact-candidate-header ${candidateBucket}`} aria-hidden="true">
                     <span>公司</span><span>岗位</span><span>{candidateBucket === "favorites" ? "事实库匹配" : "CV 进度"}</span><span>{candidateBucket === "favorites" ? "操作" : "更新时间"}</span>
                   </div>
-                  {pagedCandidateRows.map((entry) => entry.kind === "job" ? (
+                  {scrollCandidateRows.map((entry) => entry.kind === "job" ? (
                     <article className="compact-candidate-row favorites" key={`favorite-${entry.job.id}`}>
                       <a className="compact-candidate-main" href={`/jobs/${entry.job.id}`} aria-label={`查看 ${entry.job.company} ${entry.job.title} 详情`}>
                         <strong title={entry.job.company}>{entry.job.company}</strong>
@@ -3097,7 +2737,7 @@ export default function JobRadar() {
                       </a>
                       <div className="compact-candidate-actions">
                         <button type="button" onClick={() => void toggleSaved(entry.job.id)}>取消收藏</button>
-                        <button type="button" className="primary" disabled={candidateMovingId === entry.job.id} onClick={() => openPendingCvSelection(entry.job)}>
+                        <button type="button" className="primary" disabled={candidateMovingId === entry.job.id} onClick={() => void openPendingCvSelection(entry.job)}>
                           {candidateMovingId === entry.job.id ? "正在进入…" : "进入待申请"}
                         </button>
                       </div>
@@ -3128,7 +2768,14 @@ export default function JobRadar() {
               </div>
             </section>
             </>
-          ) : <section className="job-list" aria-live="polite">
+          ) : <section
+            key={jobScrollKey}
+            className="job-list scroll-frame job-scroll-frame"
+            aria-live="polite"
+            aria-label="岗位滚动列表，每批 30 条"
+            onScroll={handleJobScroll}
+            tabIndex={0}
+          >
             {jobsLoading ? (
               <div className="empty-state"><span>◌</span><h3>正在读取岗位</h3><p>请稍等，正在载入最新核验结果。</p></div>
             ) : jobsError ? (
@@ -3139,7 +2786,7 @@ export default function JobRadar() {
               }}>重新读取</button></div>
             ) : jobs.length === 0 ? (
               <div className="empty-state"><span>◎</span><h3>这个筛选下暂时没有已核验岗位</h3><p>打开“岗位更新”面板即可运行首轮扫描。</p></div>
-            ) : visibleJobs.map((job) => (
+            ) : scrollJobs.map((job) => (
               <article className="job-card" key={job.id}>
                 <div className="job-card-top">
                   <div className="company-logo">{job.company.slice(2, 4)}</div>
@@ -3178,7 +2825,6 @@ export default function JobRadar() {
                 </div>
               </article>
             ))}
-            <PaginationControls page={safeJobPage} pageCount={jobPageCount} onPageChange={setJobPage} label="岗位" />
           </section>}
         </>
       )}
@@ -3217,123 +2863,56 @@ export default function JobRadar() {
               <h2>{applicationBucket === "submitted" ? "我的申请" : applicationBucket === "interview" ? "我的面试" : applicationBucket === "offer" ? "我的 Offer" : "拒绝记录"}（{visibleApplications.length}）</h2>
             </div>
             <div className="section-actions">
+              <input
+                className="application-search"
+                value={applicationQuery}
+                onChange={(event) => setApplicationQuery(event.target.value)}
+                placeholder="搜索公司、岗位或 APP 编号"
+                aria-label="搜索申请记录"
+              />
               <button className={`quiet-list-button ${applicationBucket === "rejected" ? "active" : ""}`} onClick={() => setApplicationBucket("rejected")}>拒绝记录 {rejectedApplications.length}</button>
             </div>
           </div>
           {visibleApplications.length === 0 ? (
             <div className="empty-state"><span>▤</span><h3>{applicationBucket === "rejected" ? "没有拒绝记录" : "还没有申请记录"}</h3><p>{applicationBucket === "rejected" ? "被拒绝的岗位会保留在这个隐藏列表中。" : "发现具体 JD 后新增一条，之后直接在这里更新状态。"}</p></div>
           ) : (
-            <div className="compact-application-list" role="table" aria-label="申请记录">
-              <PaginationControls page={safeApplicationPage} pageCount={applicationPageCount} onPageChange={setApplicationPage} label="申请" />
+            <div
+              key={applicationScrollKey}
+              className="compact-application-list scroll-frame"
+              role="table"
+              aria-label="申请记录滚动列表，每批 30 条"
+              onScroll={handleApplicationScroll}
+              tabIndex={0}
+            >
               <div className="compact-application-header" role="row">
                 <span role="columnheader">公司</span>
-                <span role="columnheader">岗位</span>
+                <span role="columnheader">岗位 / 系统申请编号</span>
                 <span role="columnheader">申请日期</span>
+                <span role="columnheader">CV 母版</span>
               </div>
-              {pagedApplications.map((item) => (
-                <a className="compact-application-row" role="row" href={`/applications/${item.id}`} key={item.id} aria-label={`查看 ${item.company} ${item.title} 申请详情`}>
-                  <strong role="cell" title={item.company}>{item.company}</strong>
-                  <span role="cell" title={item.title}>{item.title}</span>
+              {scrollApplications.map((item) => (
+                <div className="compact-application-row" role="row" key={item.id}>
+                  <a role="cell" href={`/applications/${item.id}`} title={item.company}>{item.company}</a>
+                  <a className="compact-application-identity" role="cell" href={`/applications/${item.id}`} title={`${item.title} · ${item.archiveId}`}>
+                    <span>{item.title}</span>
+                    <small>{item.archiveId}</small>
+                  </a>
                   <time role="cell" dateTime={item.appliedDate || undefined}>{item.appliedDate || "未记录"}</time>
-                </a>
+                  <span className="compact-application-cv" role="cell">
+                    {applicationBucket === "rejected" ? (
+                      <small>{String(item.resumeVersion || "").split("@", 1)[0] || "未记录"}</small>
+                    ) : (
+                      <button
+                        type="button"
+                        title={String(item.resumeVersion || "").split("@", 1)[0] || "尚未记录 CV 母版"}
+                        onClick={() => void openApplicationCvSelection(item)}
+                      >修改母版</button>
+                    )}
+                  </span>
+                </div>
               ))}
             </div>
           )}
-        </section>
-      )}
-
-      {view === "companies" && (
-        <section className="company-section">
-          <div className="company-source-guide">
-            <div><strong>当前入口与历史语料严格分开</strong><span>公司池只展示今天可重新检查的官网和招聘入口；历史 JD 不作为当前开放证据，也不会出现在公司卡片里。</span></div>
-            <div><strong>面经已合并</strong><span>公司特异面经显示在对应公司档案，通用岗位面经集中放在本页底部；每条同时提供原始来源与备用搜索。</span></div>
-          </div>
-          <div className="company-filters">
-            <input value={companyQuery} onChange={(event) => setCompanyQuery(event.target.value)} placeholder="搜索公司、职位关键词或赛道" aria-label="搜索目标公司" />
-            <select value={companyRegion} onChange={(event) => setCompanyRegion(event.target.value)}>
-              <option>全部地区</option><option>美国</option><option>中国</option>
-            </select>
-            <select value={companyPriority} onChange={(event) => setCompanyPriority(event.target.value)}>
-              <option>全部</option><option>P1</option><option>P2</option><option>P3</option>
-            </select>
-            <select value={companyCollection} onChange={(event) => setCompanyCollection(event.target.value)}>
-              <option value="全部接入状态">全部接入状态</option>
-              <option value="structured">可直接接入</option>
-              <option value="public-page">官网职位页</option>
-              <option value="manual">需人工核实</option>
-            </select>
-          </div>
-          <p className="result-count">匹配 {companies.length} / {companyRecords.length} 条目标公司记录</p>
-          <PaginationControls page={safeCompanyPage} pageCount={companyPageCount} onPageChange={setCompanyPage} label="公司" />
-          <div className="company-list">
-            {visibleCompanies.map((company) => {
-              const companyJobs = dailyJobs.filter((job) => !["已过期", "疑似过期"].includes(job.status) && job.company.toLowerCase() === company.company.toLowerCase());
-              const companyApplications = applicationsList.filter((item) => item.company.toLowerCase() === company.company.toLowerCase());
-              const companyApplicationIds = new Set(companyApplications.map((item) => item.id).filter(Boolean));
-              const companyInterviews = interviews.filter((item) => companyApplicationIds.has(item.applicationId));
-              const research = researchRows.find((item) => item.company.toLowerCase() === company.company.toLowerCase());
-              const source = findCompanySource(company.company);
-              const collectionMode = companyCollectionMode(source);
-              const website = research?.website || source?.website || "";
-              const careersUrl = research?.careersUrl || source?.careersUrl || "";
-              const companyExperiences = experiences.filter((item) => sameCompany(item.company, company.company));
-              const companyContacts = contacts.filter((item) => item.applicationId && companyApplicationIds.has(item.applicationId));
-              return (
-              <article className="company-card" key={`${company.rank}-${company.company}`}>
-                <div className="company-card-head">
-                  <div><span>{company.priority} · 匹配 {company.fit}/5 · {company.region}</span><h3>{company.company}</h3><p>{company.companyType} · {normalizeTrack(company.track)}</p></div>
-                  <button onClick={() => openResearch(company.company, careersUrl || companyJobs[0]?.jobUrl || "")}>编辑研究备注</button>
-                </div>
-                <div className="company-metrics"><span>当前岗位 <b>{companyJobs.length}</b></span><span>申请 <b>{companyApplications.length}</b></span><span>面试 <b>{companyInterviews.length}</b></span><span>联系人 <b>{companyContacts.length}</b></span><span>面经 <b>{companyExperiences.length}</b></span></div>
-                <div className="company-links">
-                  {website ? <a href={website} target="_blank" rel="noreferrer">公司官网 ↗</a> : <span>官网待核实</span>}
-                  {careersUrl ? <a href={careersUrl} target="_blank" rel="noreferrer">{collectionMode === "structured" ? "结构化招聘系统" : collectionMode === "public-page" ? "官方招聘页" : "招聘入口（需核实）"} ↗</a> : companyJobs[0]?.jobUrl ? <a href={companyJobs[0].jobUrl} target="_blank" rel="noreferrer">当前已核验 JD ↗</a> : <a href={companySourceSearchUrl(company.company)} target="_blank" rel="noreferrer">搜索当前官方招聘页 ↗</a>}
-                  <em className={`collection-state collection-${collectionMode}`}>{collectionMode === "structured" ? "可直接接入 · 每次重新核验" : collectionMode === "public-page" ? "官网职位页 · 待连续验证" : "需人工核实 · 不自动认定开放"}</em>
-                </div>
-                <details>
-                  <summary>查看公司研究、岗位与面经</summary>
-                  <div className="company-detail">
-                    <b>业务概况</b><p>{research?.businessSummary || "尚未填写公司业务概况。"}</p>
-                    <b>近期动态</b><p>{research?.recentNotes || "尚未记录近期动态。"}</p>
-                    <b>我的备注</b><p>{research?.personalNotes || "尚未添加个人备注。"}</p>
-                    <b>建议搜索</b><p>{company.keywords}</p><b>适合你的原因</b><p>{company.reason}</p><b>申请策略</b><p>{company.strategy}</p>
-                    <div className="company-related-records">
-                      <section>
-                        <h4>当前岗位与申请记录</h4>
-                        {companyJobs.slice(0, 5).map((job) => <a key={job.id} href={job.jobUrl} target="_blank" rel="noreferrer">{job.title} · {job.location || job.region} ↗</a>)}
-                        {companyApplications.slice(0, 5).map((application) => <span key={`application-${application.id}`}>{application.status} · {application.title}</span>)}
-                        {!companyJobs.length && !companyApplications.length && <span>目前没有岗位或申请记录。</span>}
-                      </section>
-                      <section>
-                        <h4>历年公开面经</h4>
-                        {companyExperiences.map((item) => <article className="company-experience" key={item.id}>
-                          <div><strong>{item.roleTitle}</strong><span>{item.year} · {item.source} · {item.roleFamily}</span></div>
-                          <p>{item.summary}</p>
-                          <div className="topic-tags">{item.topics.map((topic) => <span key={topic}>{topic}</span>)}</div>
-                          <small>{item.reliability}{item.source === "Glassdoor" || item.source === "一亩三分地" ? "；源站可能要求登录" : ""}</small>
-                          <div className="record-actions"><a href={item.sourceUrl} target="_blank" rel="noreferrer">{item.source === "Glassdoor" ? "打开公司面经页" : "打开原始来源"} ↗</a><a href={experienceSearchUrl(item)} target="_blank" rel="noreferrer">按岗位搜索 ↗</a></div>
-                        </article>)}
-                        {!companyExperiences.length && <span>尚未收集到该公司的公开面经；后续搜索会自动补入。</span>}
-                      </section>
-                    </div>
-                  </div>
-                </details>
-              </article>
-              );
-            })}
-          </div>
-          <section className="general-experiences">
-            <div className="section-heading compact"><div><p className="eyebrow">ROLE-FAMILY INTERVIEWS</p><h2>通用岗位面经</h2></div><span>{experiences.filter((item) => item.company === "通用" || item.company.includes("中国数据科学")).length} 条</span></div>
-            <div className="experience-grid">
-              {experiences.filter((item) => item.company === "通用" || item.company.includes("中国数据科学")).map((item) => <article className="experience-card" key={item.id}>
-                <div className="experience-meta"><span>{item.source} · {item.year}</span><em>{item.roleFamily}</em></div>
-                <h3>{item.roleTitle}</h3><p>{item.summary}</p>
-                <div className="topic-tags">{item.topics.map((topic) => <span key={topic}>{topic}</span>)}</div>
-                <small>{item.reliability}</small>
-                <div className="record-actions"><a href={item.sourceUrl} target="_blank" rel="noreferrer">{item.source === "Glassdoor" ? "打开公司面经页" : "打开原始来源"} ↗</a><a href={experienceSearchUrl(item)} target="_blank" rel="noreferrer">按岗位搜索 ↗</a></div>
-              </article>)}
-            </div>
-          </section>
         </section>
       )}
 
@@ -3449,6 +3028,12 @@ export default function JobRadar() {
         <section className="profile-section">
           {profileLoading ? (
             <div className="empty-state"><span>◌</span><h3>正在读取个人资料</h3><p>请稍等。</p></div>
+          ) : !profileLoaded ? (
+            <div className="empty-state" role="alert">
+              <span>!</span><h3>资料暂时无法显示</h3>
+              <p>{profileMessage || "正在准备读取资料。"}</p>
+              <button type="button" onClick={() => void loadProfile()}>重新读取资料</button>
+            </div>
           ) : (
             <form className="profile-form" onSubmit={saveProfile}>
               <article className="profile-card profile-source-note">
@@ -3663,29 +3248,40 @@ export default function JobRadar() {
               </article>)}
             </section>
             {message && <p className="form-error">{message}</p>}
-            <div className="form-actions"><button type="button" onClick={() => setForm(null)}>取消</button><button className="primary" disabled={saving}>{saving ? "保存中…" : "保存记录"}</button></div>
+            <div className="form-actions"><button type="button" onClick={() => setForm(null)}>取消</button><button className="primary" disabled={saving}>{saving ? "保存中…" : form.status === "拒绝" ? "保存并移出我的申请" : "保存记录"}</button></div>
           </form>
         </div>
       )}
 
       {pendingCvSelection && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && !candidateMovingId && setPendingCvSelection(null)}>
+        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && !candidateMovingId && !cvTemplateSavingId && setPendingCvSelection(null)}>
           <section className="cv-template-dialog" role="dialog" aria-modal="true" aria-labelledby="pending-cv-selection-title">
             <div className="form-head">
-              <div><p className="eyebrow">CV PREBUILD</p><h2 id="pending-cv-selection-title">选择生成语言和 CV 模板</h2></div>
-              <button type="button" disabled={Boolean(candidateMovingId)} onClick={() => setPendingCvSelection(null)} aria-label="关闭">×</button>
+              <div><p className="eyebrow">CV TEMPLATE</p><h2 id="pending-cv-selection-title">{pendingCvSelection.mode === "application" ? "修改已申请岗位的 CV 母版" : "选择生成语言和 CV 模板"}</h2></div>
+              <button type="button" disabled={Boolean(candidateMovingId || cvTemplateSavingId)} onClick={() => setPendingCvSelection(null)} aria-label="关闭">×</button>
             </div>
             <p className="cv-template-note">
-              {pendingCvSelection.job.company} · {pendingCvSelection.job.title}。确认后才会进入待申请并调用 API 生成第一版 CV。
+              {pendingCvSelection.company} · {pendingCvSelection.title}。
+              {pendingCvSelection.mode === "application"
+                ? " 保存后，新选择的母版会冻结到这个 APP；岗位 JD 和 APP-ID 不变，之前的冻结版本仍可从 Git 历史找回。"
+                : " 确认后才会进入待申请并调用 API 生成第一版 CV。"}
             </p>
             <div className="form-grid">
               <label>
                 CV 语言
                 <select
                   value={pendingCvSelection.language}
-                  onChange={(event) => setPendingCvSelection((current) => current
-                    ? { ...current, language: event.target.value as CvTemplateLanguage }
-                    : current)}
+                  onChange={(event) => {
+                    const language = event.target.value as CvTemplateLanguage;
+                    const recommendation = recommendCvTemplateOption(
+                      cvTemplates,
+                      language,
+                      `${pendingCvSelection.track} ${pendingCvSelection.title}`,
+                    );
+                    setPendingCvSelection((current) => current
+                      ? { ...current, language, templateFile: recommendation?.filename || "" }
+                      : current);
+                  }}
                 >
                   <option value="zh">中文</option>
                   <option value="en">English</option>
@@ -3694,33 +3290,44 @@ export default function JobRadar() {
               <label>
                 CV 模板
                 <select
-                  value={pendingCvSelection.track}
+                  value={pendingCvSelection.templateFile}
                   onChange={(event) => setPendingCvSelection((current) => current
-                    ? { ...current, track: event.target.value as CvTemplateTrack }
+                    ? { ...current, templateFile: event.target.value }
                     : current)}
+                  disabled={cvTemplatesLoading || !cvTemplates.some((option) => option.language === pendingCvSelection.language)}
                 >
-                  {cvTemplateTrackOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
+                  {cvTemplatesLoading && <option value="">正在读取 GitHub 母版…</option>}
+                  {!cvTemplatesLoading && !cvTemplates.some((option) => option.language === pendingCvSelection.language) && <option value="">当前语言没有可用母版</option>}
+                  {cvTemplates.filter((option) => option.language === pendingCvSelection.language).map((option) => (
+                    <option key={option.filename} value={option.filename}>{option.label} · {option.filename}</option>
                   ))}
                 </select>
               </label>
             </div>
             <p className="cv-template-language">
-              将使用：{pendingCvSelection.language === "zh" ? "中文" : "English"} · {cvTemplateFiles[pendingCvSelection.language][pendingCvSelection.track]}
+              {cvTemplatesError || `将使用：${pendingCvSelection.language === "zh" ? "中文" : "English"} · ${pendingCvSelection.templateFile || "正在读取母版"}（GitHub 共 ${cvTemplates.length} 个）`}
             </p>
             <div className="form-actions">
-              <button type="button" disabled={Boolean(candidateMovingId)} onClick={() => setPendingCvSelection(null)}>取消</button>
+              <button type="button" disabled={Boolean(candidateMovingId || cvTemplateSavingId)} onClick={() => setPendingCvSelection(null)}>取消</button>
               <button
                 type="button"
                 className="primary"
-                disabled={Boolean(candidateMovingId)}
-                onClick={() => void moveFavoriteToPending(
-                  pendingCvSelection.job,
-                  pendingCvSelection.language,
-                  pendingCvSelection.track,
-                )}
+                disabled={Boolean(candidateMovingId || cvTemplateSavingId) || cvTemplatesLoading || !pendingCvSelection.templateFile}
+                onClick={() => pendingCvSelection.mode === "application"
+                  ? void saveAppliedCvSelection(
+                    pendingCvSelection.application!,
+                    pendingCvSelection.language,
+                    pendingCvSelection.templateFile,
+                  )
+                  : void moveFavoriteToPending(
+                    pendingCvSelection.job!,
+                    pendingCvSelection.language,
+                    pendingCvSelection.templateFile,
+                  )}
               >
-                {candidateMovingId ? "正在进入并排队…" : "确认并进入待申请"}
+                {pendingCvSelection.mode === "application"
+                  ? cvTemplateSavingId ? "正在冻结…" : "保存并冻结新母版"
+                  : candidateMovingId ? "正在进入并排队…" : "确认并进入待申请"}
               </button>
             </div>
           </section>
@@ -3762,21 +3369,6 @@ export default function JobRadar() {
         </div>
       )}
 
-      {taskForm && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setTaskForm(null)}>
-          <form className="application-form compact-form" onSubmit={saveTask}>
-            <div className="form-head"><div><p className="eyebrow">APPLICATION TASK</p><h2>{taskForm.id ? "编辑任务" : "新增任务"}</h2></div><button type="button" onClick={() => setTaskForm(null)} aria-label="关闭">×</button></div>
-            <div className="form-grid">
-              <label className="full">任务名称<input required value={taskForm.title} onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })} placeholder="例如准备 cover letter" /></label>
-              <label>截止日期<input type="date" value={taskForm.dueDate} onChange={(e) => setTaskForm({ ...taskForm, dueDate: e.target.value })} /></label>
-              <label>提醒日期<input type="date" value={taskForm.reminderDate} onChange={(e) => setTaskForm({ ...taskForm, reminderDate: e.target.value })} /></label>
-              <label>状态<select value={taskForm.status} onChange={(e) => setTaskForm({ ...taskForm, status: e.target.value as ApplicationTask["status"] })}><option value="pending">未完成</option><option value="done">已完成</option></select></label>
-            </div>
-            <div className="form-actions"><button type="button" onClick={() => setTaskForm(null)}>取消</button><button className="primary" disabled={workflowSaving}>{workflowSaving ? "保存中…" : "保存任务"}</button></div>
-          </form>
-        </div>
-      )}
-
       {contactForm && (
         <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setContactForm(null)}>
           <form className="application-form" onSubmit={saveContact}>
@@ -3795,43 +3387,6 @@ export default function JobRadar() {
               <label className="full">备注<textarea value={contactForm.notes} onChange={(event) => setContactForm({ ...contactForm, notes: event.target.value })} /></label>
             </div>
             <div className="form-actions"><button type="button" onClick={() => setContactForm(null)}>取消</button><button className="primary" disabled={contactSaving}>{contactSaving ? "保存中…" : "保存联系人"}</button></div>
-          </form>
-        </div>
-      )}
-
-      {interviewForm && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setInterviewForm(null)}>
-          <form className="application-form" onSubmit={saveInterview}>
-            <div className="form-head"><div><p className="eyebrow">INTERVIEW & FOLLOW-UP</p><h2>{interviewForm.id ? "更新面试" : "记录面试"}</h2></div><button type="button" onClick={() => setInterviewForm(null)} aria-label="关闭">×</button></div>
-            <div className="form-grid">
-              <label>面试轮次<select value={interviewForm.round} onChange={(e) => setInterviewForm({ ...interviewForm, round: e.target.value })}><option>HR 筛选</option><option>一面</option><option>二面/技术面</option><option>终面</option><option>其他</option></select></label>
-              <label>时间<input type="datetime-local" value={interviewForm.scheduledAt} onChange={(e) => setInterviewForm({ ...interviewForm, scheduledAt: e.target.value })} /></label>
-              <label>形式<select value={interviewForm.format} onChange={(e) => setInterviewForm({ ...interviewForm, format: e.target.value })}><option>Video</option><option>Phone</option><option>On-site</option><option>其他</option></select></label>
-              <label>结果<select value={interviewForm.outcome} onChange={(e) => setInterviewForm({ ...interviewForm, outcome: e.target.value })}><option>待进行</option><option>已完成</option><option>通过</option><option>未通过</option><option>取消</option></select></label>
-              <label>联系人<input value={interviewForm.contactName} onChange={(e) => setInterviewForm({ ...interviewForm, contactName: e.target.value })} /></label>
-              <label>联系邮箱<input type="email" value={interviewForm.contactEmail} onChange={(e) => setInterviewForm({ ...interviewForm, contactEmail: e.target.value })} /></label>
-              <label>感谢信<select value={interviewForm.thankYouStatus} onChange={(e) => setInterviewForm({ ...interviewForm, thankYouStatus: e.target.value })}><option>未发送</option><option>已发送</option><option>不需要</option></select></label>
-              <label>感谢信截止<input type="datetime-local" value={interviewForm.thankYouDueAt} onChange={(e) => setInterviewForm({ ...interviewForm, thankYouDueAt: e.target.value })} /></label>
-              <label>下次跟进<input type="date" value={interviewForm.followUpAt} onChange={(e) => setInterviewForm({ ...interviewForm, followUpAt: e.target.value })} /></label>
-              <label className="full">面试笔记<textarea value={interviewForm.notes} onChange={(e) => setInterviewForm({ ...interviewForm, notes: e.target.value })} /></label>
-            </div>
-            <div className="form-actions"><button type="button" onClick={() => setInterviewForm(null)}>取消</button><button className="primary" disabled={workflowSaving}>{workflowSaving ? "保存中…" : "保存面试"}</button></div>
-          </form>
-        </div>
-      )}
-
-      {researchForm && (
-        <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.currentTarget === event.target && setResearchForm(null)}>
-          <form className="application-form" onSubmit={saveResearch}>
-            <div className="form-head"><div><p className="eyebrow">COMPANY RESEARCH</p><h2>{researchForm.company}</h2></div><button type="button" onClick={() => setResearchForm(null)} aria-label="关闭">×</button></div>
-            <div className="form-grid">
-              <label>公司官网<input type="url" value={researchForm.website} onChange={(e) => setResearchForm({ ...researchForm, website: e.target.value })} placeholder="https://" /></label>
-              <label>招聘页面<input type="url" value={researchForm.careersUrl} onChange={(e) => setResearchForm({ ...researchForm, careersUrl: e.target.value })} placeholder="https://" /></label>
-              <label className="full">业务概况<textarea value={researchForm.businessSummary} onChange={(e) => setResearchForm({ ...researchForm, businessSummary: e.target.value })} placeholder="核心业务、产品、规模和与你目标方向的关系" /></label>
-              <label className="full">近期动态<textarea value={researchForm.recentNotes} onChange={(e) => setResearchForm({ ...researchForm, recentNotes: e.target.value })} placeholder="融资、并购、临床项目、裁员或招聘趋势等" /></label>
-              <label className="full">我的备注<textarea value={researchForm.personalNotes} onChange={(e) => setResearchForm({ ...researchForm, personalNotes: e.target.value })} placeholder="申请策略、已联系的人、需要继续查的问题" /></label>
-            </div>
-            <div className="form-actions"><button type="button" onClick={() => setResearchForm(null)}>取消</button><button className="primary" disabled={researchSaving}>{researchSaving ? "保存中…" : "保存研究档案"}</button></div>
           </form>
         </div>
       )}
@@ -3873,7 +3428,7 @@ export default function JobRadar() {
         <button className={view === "automation" ? "selected" : ""} onClick={() => setView("automation")}><span>◎</span>自动</button>
         <button className={view === "applications" ? "selected" : ""} onClick={() => setView("applications")}><span>▤</span>申请</button>
         <button className={view === "profile" ? "selected" : ""} onClick={() => setView("profile")}><span>♙</span>资料</button>
-        <button className={["tools", "companies", "verify", "ignored"].includes(view) ? "selected" : ""} onClick={() => setView("tools")}><span>•••</span>工具</button>
+        <button className={["tools", "verify", "ignored"].includes(view) ? "selected" : ""} onClick={() => setView("tools")}><span>•••</span>工具</button>
       </nav>
     </main>
   );

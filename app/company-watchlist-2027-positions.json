@@ -1,0 +1,1442 @@
+[
+  {
+    "company": "科伦博泰",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://kelunbotai.zhiye.com/zpdetail/230943019"
+      }
+    ],
+    "positions": [
+      {
+        "title": "高级生物统计师II（J10850）",
+        "priority": "A",
+        "sector": "医药/CRO",
+        "location": "成都",
+        "officialUrl": "https://kelunbotai.zhiye.com/zpdetail/230943019",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://kelunbotai.zhiye.com/zpdetail/230943019",
+        "deadline": "2027-09-20",
+        "notes": "明确应届博士；统计/生物统计；R或SAS；岗位名称虽为高级仍接受应届生",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "科伦博泰"
+      }
+    ]
+  },
+  {
+    "company": "都正生物",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "http://www.duxact.com"
+      }
+    ],
+    "positions": [
+      {
+        "title": "统计师",
+        "priority": "A",
+        "sector": "医药/CRO",
+        "location": "长沙",
+        "officialUrl": "http://www.duxact.com",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://fimmu.jobsys.cn/index.php/web/index/jobs-brief-detail?id=S1UXSQE",
+        "deadline": "",
+        "notes": "企业2027届招聘简章；硕士及以上；邮件投递；官网未见逐岗展示",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "都正生物"
+      },
+      {
+        "title": "定量药理分析师",
+        "priority": "A",
+        "sector": "医药/CRO",
+        "location": "长沙",
+        "officialUrl": "http://www.duxact.com",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://fimmu.jobsys.cn/index.php/web/index/jobs-brief-detail?id=S1UXSQE",
+        "deadline": "",
+        "notes": "2027届简章列数学/统计学；须评估药代/定量药理基础",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "都正生物"
+      }
+    ]
+  },
+  {
+    "company": "晶易医药",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "http://www.jingyiyiyao.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "临床统计专员-27届校招（J10640）",
+        "priority": "A",
+        "sector": "医药/CRO",
+        "location": "长沙",
+        "officialUrl": "http://www.jingyiyiyao.com/",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.zhaopin.com/jobdetail/CC256546620J41021249202.htm",
+        "deadline": "",
+        "notes": "智联岗位标明27届；统计分析计划与临床试验；企业官网岗位页待核对",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "晶易医药"
+      }
+    ]
+  },
+  {
+    "company": "先声药业",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.simcere.com/jrwm/jrwm.aspx"
+      }
+    ],
+    "positions": [
+      {
+        "title": "临床研究：统计与数据管理",
+        "priority": "A",
+        "sector": "医药/制药",
+        "location": "上海/北京等",
+        "officialUrl": "https://www.simcere.com/jrwm/jrwm.aspx",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://job.hust.edu.cn/zpinfo1/2439773.htm",
+        "deadline": "2027-04",
+        "notes": "企业2027届公告；博士/硕士；公告写网申2026-09至2027-04",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "先声药业"
+      },
+      {
+        "title": "AI医药研发岗位",
+        "priority": "B",
+        "sector": "医药/制药",
+        "location": "上海",
+        "officialUrl": "https://www.simcere.com/jrwm/jrwm.aspx",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://job.hust.edu.cn/zpinfo1/2439773.htm",
+        "deadline": "2027-04",
+        "notes": "企业2027届公告；博士；须核对岗位具体AI药研要求",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "先声药业"
+      }
+    ]
+  },
+  {
+    "company": "齐鲁制药",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.qilu-pharma.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "生物统计/临床研究方向（具体岗位待筛）",
+        "priority": "B",
+        "sector": "医药/制药",
+        "location": "济南等",
+        "officialUrl": "https://www.qilu-pharma.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://job.tiangong.edu.cn/correcruit/content/id/55776.html",
+        "deadline": "",
+        "notes": "2027届校招专业明确含生物统计和流行病统计；岗位名称和投递入口需在官网查",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "齐鲁制药"
+      }
+    ]
+  },
+  {
+    "company": "圣湘生物",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://sansurehr.zhiye.com/campus"
+      }
+    ],
+    "positions": [
+      {
+        "title": "生信研发工程师",
+        "priority": "B",
+        "sector": "医药/诊断",
+        "location": "长沙等",
+        "officialUrl": "https://sansurehr.zhiye.com/campus",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://job.hust.edu.cn/zpinfo1/2407466.htm",
+        "deadline": "",
+        "notes": "2027届简章列生信研发；需核对是否要求测序生信经验",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "圣湘生物"
+      }
+    ]
+  },
+  {
+    "company": "联影医疗",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://global.united-imaging.com/zh-cn/careers"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI算法工程师（J19777）",
+        "priority": "B",
+        "sector": "医药/医疗AI",
+        "location": "上海",
+        "officialUrl": "https://global.united-imaging.com/zh-cn/careers",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.nowcoder.com/jobs/detail/459904",
+        "deadline": "",
+        "notes": "牛客企业校招岗位；医学影像/机器学习，官网具体岗位待复核",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "联影医疗"
+      },
+      {
+        "title": "软件算法工程师：大模型方向（J19787）",
+        "priority": "B",
+        "sector": "医药/医疗AI",
+        "location": "北京",
+        "officialUrl": "https://global.united-imaging.com/zh-cn/careers",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.shushuqiuzhi.com/position/401907",
+        "deadline": "",
+        "notes": "2027届岗位聚合页；医学影像/AI解决方案；官网具体岗位待复核",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "联影医疗"
+      }
+    ]
+  },
+  {
+    "company": "联影智能",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.uii-ai.com/recruitment.html"
+      }
+    ],
+    "positions": [
+      {
+        "title": "医疗AI研发岗位（具体岗位待筛）",
+        "priority": "B",
+        "sector": "医药/医疗AI",
+        "location": "上海等",
+        "officialUrl": "https://www.uii-ai.com/recruitment.html",
+        "evidenceStatus": "官网有相关招聘",
+        "evidenceType": "企业官网",
+        "evidenceUrl": "https://www.uii-ai.com/recruitment.html",
+        "deadline": "",
+        "notes": "官网展示校园招聘入口；未在该页确认2027届具体岗位",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "联影智能"
+      }
+    ]
+  },
+  {
+    "company": "养生堂",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://m.yst.com.cn/pc/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "算法工程师",
+        "priority": "B",
+        "sector": "医药/诊断",
+        "location": "多地",
+        "officialUrl": "https://m.yst.com.cn/pc/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.tjcu.edu.cn/correcruit/content/id/14383.html",
+        "deadline": "",
+        "notes": "2027届简章列统计/数学相关专业；企业以公众号与二维码投递",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "养生堂/万泰生物"
+      },
+      {
+        "title": "人工智能应用研究员（AI+生物/化学）",
+        "priority": "B",
+        "sector": "医药/诊断",
+        "location": "杭州",
+        "officialUrl": "https://m.yst.com.cn/pc/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.tjcu.edu.cn/correcruit/content/id/14383.html",
+        "deadline": "",
+        "notes": "2027届简章列博士；计算机或生物信息学相关；需核对生物AI研究要求",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "养生堂/万泰生物"
+      }
+    ]
+  },
+  {
+    "company": "蓝达凯医药",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.lan-da-kai.com/col.jsp?id=107"
+      }
+    ],
+    "positions": [
+      {
+        "title": "初级统计分析员",
+        "priority": "C",
+        "sector": "医药/CRO",
+        "location": "广州/武汉",
+        "officialUrl": "https://www.lan-da-kai.com/col.jsp?id=107",
+        "evidenceStatus": "官网有相关招聘",
+        "evidenceType": "企业官网",
+        "evidenceUrl": "https://www.lan-da-kai.com/col.jsp?id=107",
+        "deadline": "",
+        "notes": "官网有初级统计编程岗；非2027届专场，重SAS/SDTM；CET4要求",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "蓝达凯医药"
+      }
+    ]
+  },
+  {
+    "company": "百度",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://talent.baidu.com/jobs/detail/GRADUATE/02f73086-be71-4d09-8d6e-f1c6981b8b48"
+      },
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://talent.baidu.com/jobs/detail/GRADUATE/cbdc8a04-785e-483e-9037-43c2b7fa873e"
+      },
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://talent.baidu.com/jobs/detail/GRADUATE/4f1cbc80-8332-4a92-b8fa-c0132b17d47e"
+      }
+    ],
+    "positions": [
+      {
+        "title": "智能体算法工程师（J101017）",
+        "priority": "A",
+        "sector": "互联网/AI",
+        "location": "北京",
+        "officialUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/02f73086-be71-4d09-8d6e-f1c6981b8b48",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/02f73086-be71-4d09-8d6e-f1c6981b8b48",
+        "deadline": "",
+        "notes": "官网校招；专业包括统计；Agent系统与评估经验相关",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "百度"
+      },
+      {
+        "title": "2027 AIDU智能体算法研究员（J102506）",
+        "priority": "A",
+        "sector": "互联网/AI",
+        "location": "北京",
+        "officialUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/cbdc8a04-785e-483e-9037-43c2b7fa873e",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/cbdc8a04-785e-483e-9037-43c2b7fa873e",
+        "deadline": "",
+        "notes": "官网校招；研究决策、验证与专家反馈闭环，需逐条核对技术门槛",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "百度"
+      },
+      {
+        "title": "2027 AIDU智能体算法工程师（J99969）",
+        "priority": "B",
+        "sector": "互联网/AI",
+        "location": "北京",
+        "officialUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/4f1cbc80-8332-4a92-b8fa-c0132b17d47e",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://talent.baidu.com/jobs/detail/GRADUATE/4f1cbc80-8332-4a92-b8fa-c0132b17d47e",
+        "deadline": "",
+        "notes": "官网校招；Agent/RAG/多智能体与评测；计算机/AI相关硕士起",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "百度"
+      }
+    ]
+  },
+  {
+    "company": "阿里云",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://campus-talent.alibaba.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI应用算法工程师",
+        "priority": "A",
+        "sector": "互联网/AI",
+        "location": "多地",
+        "officialUrl": "https://campus-talent.alibaba.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/116681.html",
+        "deadline": "",
+        "notes": "企业2027应届公告列该岗位；2026-11至2027-10毕业区间",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "阿里云"
+      },
+      {
+        "title": "AI Agent算法工程师 / 大模型应用开发工程师",
+        "priority": "A",
+        "sector": "互联网/AI",
+        "location": "多地",
+        "officialUrl": "https://campus-talent.alibaba.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/116681.html",
+        "deadline": "",
+        "notes": "企业2027应届公告；按官网具体JD筛选应用方向",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "阿里云"
+      }
+    ]
+  },
+  {
+    "company": "网易有道",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://campus.163.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI Agent应用开发工程师",
+        "priority": "A",
+        "sector": "互联网/AI",
+        "location": "北京",
+        "officialUrl": "https://campus.163.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/117401.html",
+        "deadline": "",
+        "notes": "2027届公告列岗；2026-09至2027-08毕业",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "网易有道"
+      },
+      {
+        "title": "算法应用工程师",
+        "priority": "B",
+        "sector": "互联网/AI",
+        "location": "北京",
+        "officialUrl": "https://campus.163.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/117401.html",
+        "deadline": "",
+        "notes": "2027届公告列岗；算法栈细项待官网核实",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "网易有道"
+      }
+    ]
+  },
+  {
+    "company": "美团",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zhaopin.meituan.com/web/position/detail?highlightType=campus&jobShareType=1&jobUnionId=4697317646"
+      },
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zhaopin.meituan.com/web/position/detail?highlightType=campus&jobUnionId=4697320023"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI Agent开发工程师（应届）",
+        "priority": "A",
+        "sector": "互联网/AI",
+        "location": "以岗位页为准",
+        "officialUrl": "https://zhaopin.meituan.com/web/position/detail?highlightType=campus&jobShareType=1&jobUnionId=4697317646",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://zhaopin.meituan.com/web/position/detail?highlightType=campus&jobShareType=1&jobUnionId=4697317646",
+        "deadline": "",
+        "notes": "官方岗位搜索可见；多智能体原型与应用落地；页面有时加载超时",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "美团"
+      },
+      {
+        "title": "大模型应用算法工程师（应届）",
+        "priority": "B",
+        "sector": "互联网/AI",
+        "location": "以岗位页为准",
+        "officialUrl": "https://zhaopin.meituan.com/web/position/detail?highlightType=campus&jobUnionId=4697320023",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://zhaopin.meituan.com/web/position/detail?highlightType=campus&jobUnionId=4697320023",
+        "deadline": "",
+        "notes": "官方岗位索引可见；侧重搜索推荐模型，技术匹配需再看完整JD",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "美团"
+      }
+    ]
+  },
+  {
+    "company": "字节跳动",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://jobs.bytedance.com/campus/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "2027届大模型应用/算法方向（逐岗筛）",
+        "priority": "B",
+        "sector": "互联网/AI",
+        "location": "多地",
+        "officialUrl": "https://jobs.bytedance.com/campus/",
+        "evidenceStatus": "官网有相关招聘",
+        "evidenceType": "企业官网",
+        "evidenceUrl": "https://jobs.bytedance.com/campus/page-6272Gc",
+        "deadline": "",
+        "notes": "官网介绍2027及以后前沿技术项目；普通校招具体岗位须筛选；已有投递与否待你确认",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "字节跳动"
+      }
+    ]
+  },
+  {
+    "company": "腾讯",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://join.qq.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "中国区2027校招算法/AI应用（逐岗筛）",
+        "priority": "B",
+        "sector": "互联网/AI",
+        "location": "多地",
+        "officialUrl": "https://join.qq.com/",
+        "evidenceStatus": "官网有相关招聘",
+        "evidenceType": "企业官网",
+        "evidenceUrl": "https://careers.tencent.com/m/zh-cn/faqdetail.html",
+        "deadline": "",
+        "notes": "官方FAQ确认中国区入口和2027届毕业区间；具体职位未逐条验证",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "腾讯"
+      }
+    ]
+  },
+  {
+    "company": "京东集团/京东健康",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://campus.jd.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "算法开发/医疗AI（逐岗筛）",
+        "priority": "B",
+        "sector": "互联网/AI",
+        "location": "多地",
+        "officialUrl": "https://campus.jd.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/recruitment/content/type/2/id/6108.html",
+        "deadline": "",
+        "notes": "2027校招公告确认官网入口；医疗健康业务岗位需在官网筛选",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "京东集团/京东健康"
+      }
+    ]
+  },
+  {
+    "company": "度小满",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "http://campus.duxiaoman.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "算法工程师：机器学习与AI应用方向",
+        "priority": "A",
+        "sector": "互联网/金融科技",
+        "location": "北京/上海",
+        "officialUrl": "http://campus.duxiaoman.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/116782.html",
+        "deadline": "",
+        "notes": "2027届企业公告明确该方向；官网具体职位要二次核对",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "度小满"
+      }
+    ]
+  },
+  {
+    "company": "冰鉴科技",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.icekredit.com/careers/campus/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "数据科学家",
+        "priority": "B",
+        "sector": "互联网/金融科技",
+        "location": "上海等",
+        "officialUrl": "https://www.icekredit.com/careers/campus/",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://www.icekredit.com/careers/campus/",
+        "deadline": "",
+        "notes": "官网校园招聘展示职位；风控建模；官网页未明确2027毕业范围",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "冰鉴科技"
+      }
+    ]
+  },
+  {
+    "company": "中望软件",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.zwsoft.cn/job/campus"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI算法工程师（2027届）",
+        "priority": "B",
+        "sector": "互联网/软件",
+        "location": "上海/广州/武汉",
+        "officialUrl": "https://www.zwsoft.cn/job/campus",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://www.zwsoft.cn/job/campus",
+        "deadline": "",
+        "notes": "官网校园招聘岗位在列；需核对具体研发方向是否匹配",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中望软件"
+      }
+    ]
+  },
+  {
+    "company": "迪普科技",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "http://zhaopin.dptech.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI应用开发工程师",
+        "priority": "B",
+        "sector": "互联网/软件",
+        "location": "北京/杭州等",
+        "officialUrl": "http://zhaopin.dptech.com/",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://qiuzhaowang.com/campus-recruitment/internet?batch=%E7%A7%8B%E6%8B%9B&year=2027",
+        "deadline": "",
+        "notes": "校招汇总列2027届岗位；企业招聘官网具体岗位待核对",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "迪普科技"
+      }
+    ]
+  },
+  {
+    "company": "安脉盛",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.aimsphm.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "PHM算法工程师",
+        "priority": "B",
+        "sector": "互联网/工业AI",
+        "location": "杭州",
+        "officialUrl": "https://www.aimsphm.com/",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.ncss.cn/student/jobs/16mwDNdXTjUUfagKrpMsiV/detail.html",
+        "deadline": "",
+        "notes": "2027届岗位；设备故障诊断/寿命预测，需补工业设备知识",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "安脉盛"
+      }
+    ]
+  },
+  {
+    "company": "同花顺",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://campus.10jqka.com.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "金融AI/量化算法方向",
+        "priority": "B",
+        "sector": "互联网/金融科技",
+        "location": "杭州等",
+        "officialUrl": "https://campus.10jqka.com.cn/",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://campus.10jqka.com.cn/",
+        "deadline": "",
+        "notes": "官网2027届校园招聘列表显示量化与金融AI岗位；按模型训练占比筛选",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "同花顺"
+      }
+    ]
+  },
+  {
+    "company": "小红书",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://job.xiaohongshu.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "Agent研发/Agent Harness方向",
+        "priority": "C",
+        "sector": "互联网/AI",
+        "location": "上海等",
+        "officialUrl": "https://job.xiaohongshu.com/",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://nowcoder-ai-pubilc.oss-cn-hangzhou.aliyuncs.com/ut/2026/08/27/AIZHUANTI_9f907600.html",
+        "deadline": "",
+        "notes": "牛客校招专题列出；官网具体岗位与要求待核实",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "小红书"
+      }
+    ]
+  },
+  {
+    "company": "小米",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://hr.xiaomi.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI研发工程师：智能风控方向",
+        "priority": "C",
+        "sector": "互联网/金融科技",
+        "location": "多地",
+        "officialUrl": "https://hr.xiaomi.com/",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.nowcoder.com/jobs/detail/459617",
+        "deadline": "",
+        "notes": "牛客2027届企业岗位；AI风控工作流，官网待核实；用户可能已投同公司",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "小米"
+      }
+    ]
+  },
+  {
+    "company": "虾皮 Shopee",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://careers.shopee.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "算法工程师：风控方向（27届）",
+        "priority": "B",
+        "sector": "互联网/电商",
+        "location": "上海",
+        "officialUrl": "https://careers.shopee.cn/",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.nowcoder.com/jobs/detail/461388",
+        "deadline": "2026-12-31",
+        "notes": "招聘平台给出2026-12-31截止；硕博统计适配，需SQL/模型实作",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "虾皮 Shopee"
+      }
+    ]
+  },
+  {
+    "company": "中欧基金",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zofund.zhiye.com/campusxq?jobId=620953573"
+      },
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zofund.zhiye.com/campus"
+      },
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zofund.zhiye.com/campusxq?jobId=621080967"
+      },
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zofund.zhiye.com/campusxq?jobId=621069892"
+      }
+    ],
+    "positions": [
+      {
+        "title": "27届量化风控（AI应用方向）",
+        "priority": "A",
+        "sector": "金融/公募",
+        "location": "上海",
+        "officialUrl": "https://zofund.zhiye.com/campusxq?jobId=620953573",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://zofund.zhiye.com/campusxq?jobId=620953573",
+        "deadline": "",
+        "notes": "2027应届硕士及以上；量化风控、归因与组合优化；强匹配统计和模型评估",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中欧基金"
+      },
+      {
+        "title": "27届AI应用开发",
+        "priority": "A",
+        "sector": "金融/公募",
+        "location": "上海",
+        "officialUrl": "https://zofund.zhiye.com/campus",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://zofund.zhiye.com/campus",
+        "deadline": "",
+        "notes": "官方校园招聘列表在列；打开职位页复核工程要求",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中欧基金"
+      },
+      {
+        "title": "27届量化研究",
+        "priority": "B",
+        "sector": "金融/公募",
+        "location": "上海",
+        "officialUrl": "https://zofund.zhiye.com/campusxq?jobId=621080967",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://zofund.zhiye.com/campusxq?jobId=621080967",
+        "deadline": "",
+        "notes": "统计/机器学习研究Alpha；金融量化策略经验可能是短板",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中欧基金"
+      },
+      {
+        "title": "27届投资监督",
+        "priority": "B",
+        "sector": "金融/公募",
+        "location": "上海",
+        "officialUrl": "https://zofund.zhiye.com/campusxq?jobId=621069892",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://zofund.zhiye.com/campusxq?jobId=621069892",
+        "deadline": "",
+        "notes": "明确硕士及以上和统计专业；风险系统/投资合规",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中欧基金"
+      }
+    ]
+  },
+  {
+    "company": "泰康基金",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://tkfunds.com.cn/aboutus/job/campus/index.html"
+      }
+    ],
+    "positions": [
+      {
+        "title": "量化风控（投资组合）",
+        "priority": "B",
+        "sector": "金融/公募",
+        "location": "北京",
+        "officialUrl": "https://tkfunds.com.cn/aboutus/job/campus/index.html",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://tkfunds.com.cn/aboutus/job/campus/index.html",
+        "deadline": "",
+        "notes": "官网校园岗位列表；须核对岗位细节中的学历与届次",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "泰康基金"
+      }
+    ]
+  },
+  {
+    "company": "广发证券",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://job.gf.com.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "FICC投资交易岗：固收量化研究",
+        "priority": "B",
+        "sector": "金融/证券",
+        "location": "广州",
+        "officialUrl": "https://job.gf.com.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118078.html",
+        "deadline": "",
+        "notes": "企业2027校招简章列统计学；量化投资专业知识门槛较高",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "广发证券"
+      },
+      {
+        "title": "风险控制岗：市场/信用/FICC风控",
+        "priority": "B",
+        "sector": "金融/证券",
+        "location": "广州",
+        "officialUrl": "https://job.gf.com.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118078.html",
+        "deadline": "",
+        "notes": "企业2027校招简章列统计/数据科学，适合风险建模转向",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "广发证券"
+      },
+      {
+        "title": "卖方行业研究岗",
+        "priority": "B",
+        "sector": "金融/证券",
+        "location": "北上广深",
+        "officialUrl": "https://job.gf.com.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118078.html",
+        "deadline": "",
+        "notes": "企业2027公告列统计背景；需行业研究兴趣与写作证据",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "广发证券"
+      }
+    ]
+  },
+  {
+    "company": "申万菱信基金",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://job.swsmu.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI与金融工程岗",
+        "priority": "B",
+        "sector": "金融/公募",
+        "location": "上海/北京/广州",
+        "officialUrl": "https://job.swsmu.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118082.html",
+        "deadline": "2026-10-25",
+        "notes": "2027届硕士及以上；公告明确截止时间",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "申万菱信基金"
+      },
+      {
+        "title": "数量研究岗：AI细分方向",
+        "priority": "B",
+        "sector": "金融/公募",
+        "location": "上海/北京/广州",
+        "officialUrl": "https://job.swsmu.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118082.html",
+        "deadline": "2026-10-25",
+        "notes": "数量研究；需核对岗位是否要求金融研究成果",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "申万菱信基金"
+      }
+    ]
+  },
+  {
+    "company": "中国人保寿险",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "http://picc.zhiye.com"
+      }
+    ],
+    "positions": [
+      {
+        "title": "总公司精算岗（J80474）",
+        "priority": "B",
+        "sector": "金融/保险科技",
+        "location": "北京",
+        "officialUrl": "http://picc.zhiye.com",
+        "evidenceStatus": "招聘平台岗位在列",
+        "evidenceType": "招聘平台",
+        "evidenceUrl": "https://www.zhaopin.com/jobdetail/CC132763350J40870379711.htm",
+        "deadline": "",
+        "notes": "智联2027届岗位；精算考试或保险经历需查看官方JD",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国人保寿险"
+      }
+    ]
+  },
+  {
+    "company": "中国人寿",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.chinalife.com.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "精算类2027届校招",
+        "priority": "B",
+        "sector": "金融/保险",
+        "location": "多地",
+        "officialUrl": "https://www.chinalife.com.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://jdjyw.jlu.edu.cn/portal/jyzp/recruit/details?id=96a2c9835fc9491c9e087cd491cc6c45",
+        "deadline": "",
+        "notes": "2027届企业简章列精算；具体分公司和资格需官网筛选",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国人寿"
+      }
+    ]
+  },
+  {
+    "company": "宁波银行",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://zhaopin.nbcb.com.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "总行金融科技定向生：算法/数据研发",
+        "priority": "B",
+        "sector": "金融/银行",
+        "location": "宁波",
+        "officialUrl": "https://zhaopin.nbcb.com.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://job.tju.edu.cn/recruitment/content/type/2/id/6487.html",
+        "deadline": "",
+        "notes": "2027届校招公告；官网检索金融科技定向生",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "宁波银行"
+      }
+    ]
+  },
+  {
+    "company": "招商银行",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://career.cmbchina.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "总行智能科学研发方向",
+        "priority": "B",
+        "sector": "金融/银行",
+        "location": "深圳等",
+        "officialUrl": "https://career.cmbchina.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/117199.html",
+        "deadline": "",
+        "notes": "2027校招企业公告；AI算法研究与系统研发；应关注英语门槛",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "招商银行"
+      }
+    ]
+  },
+  {
+    "company": "安贤投资 AXQ",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://job-boards.greenhouse.io/axq/jobs/6147008004"
+      }
+    ],
+    "positions": [
+      {
+        "title": "2027届量化研究员",
+        "priority": "B",
+        "sector": "金融/私募",
+        "location": "上海",
+        "officialUrl": "https://job-boards.greenhouse.io/axq/jobs/6147008004",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://job-boards.greenhouse.io/axq/jobs/6147008004",
+        "deadline": "",
+        "notes": "官方ATS可见Apply；统计建模/时间序列/ML；量化策略经验可作补充",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "安贤投资 AXQ"
+      }
+    ]
+  },
+  {
+    "company": "申万宏源",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.swhysc.com/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "金融科技/数理统计方向（逐岗筛）",
+        "priority": "C",
+        "sector": "金融/证券",
+        "location": "多地",
+        "officialUrl": "https://www.swhysc.com/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.hebut.edu.cn/home/correcruit/content/id/80131.html",
+        "deadline": "",
+        "notes": "2027届企业公告明确专业要求；具体技术岗待官网核查",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "申万宏源"
+      }
+    ]
+  },
+  {
+    "company": "北京证券交易所/全国股转公司",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.neeq.com.cn/recruit/200029113.html"
+      }
+    ],
+    "positions": [
+      {
+        "title": "经济金融和数理统计类",
+        "priority": "B",
+        "sector": "金融/交易所",
+        "location": "北京",
+        "officialUrl": "https://www.neeq.com.cn/recruit/200029113.html",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://www.neeq.com.cn/recruit/200029113.html",
+        "deadline": "",
+        "notes": "官方招聘公告面向2027届硕士及以上；核对报名截止时间和专业限制",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "北京证券交易所/全国股转公司"
+      }
+    ]
+  },
+  {
+    "company": "中国移动九天人工智能科技",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://job.10086.cn/personal/campus/campus_job_list.html"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI开发岗",
+        "priority": "A",
+        "sector": "国央企/通信",
+        "location": "北京/广州/深圳/西安",
+        "officialUrl": "https://job.10086.cn/personal/campus/campus_job_list.html",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118392.html",
+        "deadline": "",
+        "notes": "中国移动2027公告明确AI开发；需官网岗位具体JD",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国移动九天人工智能科技"
+      },
+      {
+        "title": "算法开发岗",
+        "priority": "B",
+        "sector": "国央企/通信",
+        "location": "北京/广州/深圳/西安",
+        "officialUrl": "https://job.10086.cn/personal/campus/campus_job_list.html",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118392.html",
+        "deadline": "",
+        "notes": "2027公告明确算法开发；模型训练重度岗位择优",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国移动九天人工智能科技"
+      }
+    ]
+  },
+  {
+    "company": "卓望公司",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://aspire.zhiye.com/Campus/jobs?activityGuid=8e6333c2-35d2-49ab-a436-8187af4186a0&ActivityJumpPage=PortalPage"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI应用开发工程师（27届）",
+        "priority": "A",
+        "sector": "国央企/通信",
+        "location": "北京/广州/昆明/西安",
+        "officialUrl": "https://aspire.zhiye.com/Campus/jobs?activityGuid=8e6333c2-35d2-49ab-a436-8187af4186a0&ActivityJumpPage=PortalPage",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://hzau.91wllm.cn/campus/view/id/1003333",
+        "deadline": "",
+        "notes": "中国移动控股企业2027简章列AI应用开发；官方ATS入口可访问",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "卓望公司"
+      },
+      {
+        "title": "人工智能工程师（27届）",
+        "priority": "B",
+        "sector": "国央企/通信",
+        "location": "北京/广州",
+        "officialUrl": "https://aspire.zhiye.com/Campus/jobs?activityGuid=8e6333c2-35d2-49ab-a436-8187af4186a0&ActivityJumpPage=PortalPage",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/117596.html",
+        "deadline": "",
+        "notes": "AI应用落地与部署；具体算法类别需查JD",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "卓望公司"
+      }
+    ]
+  },
+  {
+    "company": "中国电信天翼视联",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://wejob.chinatelecom.com.cn/wt/TELE/web/index"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI算法工程师：智能体与大模型应用",
+        "priority": "A",
+        "sector": "国央企/通信",
+        "location": "多地",
+        "officialUrl": "https://wejob.chinatelecom.com.cn/wt/TELE/web/index",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://wejob.chinatelecom.com.cn/wt/TELE/mobweb/v8/position/subscriptionPositionList?operational=6ea22abfb2f66f367f13a4e3ea50ec2d4a10de72420408f949ee0830216a63b34544b4e52edfc7ad76c6df2d68a724beca474294a21a00586241f798afec4c6c1ba12a24a94e089b1bcdd5be7a3af4ef",
+        "deadline": "",
+        "notes": "电信官方招聘系统展示2027年度；RAG/Agent应用；岗位具体地点和专业要复核",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国电信天翼视联"
+      }
+    ]
+  },
+  {
+    "company": "中国电信集团",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://wejob.chinatelecom.com.cn/wt/TELE/web/index"
+      }
+    ],
+    "positions": [
+      {
+        "title": "研发/产数/AI应用方向（逐岗筛）",
+        "priority": "B",
+        "sector": "国央企/通信",
+        "location": "多地",
+        "officialUrl": "https://wejob.chinatelecom.com.cn/wt/TELE/web/index",
+        "evidenceStatus": "官网岗位在列",
+        "evidenceType": "官方岗位/列表",
+        "evidenceUrl": "https://wejob.chinatelecom.com.cn/wt/TELE/web/index",
+        "deadline": "",
+        "notes": "官方页面显示2027校招和岗位陆续更新，需分子公司筛选",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国电信集团"
+      }
+    ]
+  },
+  {
+    "company": "中国移动研究院",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://job.10086.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "AI应用/算法研发（逐岗筛）",
+        "priority": "B",
+        "sector": "国央企/通信",
+        "location": "北京等",
+        "officialUrl": "https://job.10086.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://job.hust.edu.cn/zpinfo1/2432063.htm",
+        "deadline": "",
+        "notes": "2027届校招公告；具体研究岗专业条件官网待核对",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国移动研究院"
+      }
+    ]
+  },
+  {
+    "company": "中国银保信",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://campus.51job.com/cbit2027"
+      }
+    ],
+    "positions": [
+      {
+        "title": "总公司大数据及AI应用研发岗",
+        "priority": "B",
+        "sector": "国央企/金融科技",
+        "location": "北京",
+        "officialUrl": "https://campus.51job.com/cbit2027",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://em.seu.edu.cn/2026/0922/c57206a584203/page.htm",
+        "deadline": "",
+        "notes": "2027公告；总公司应届硕士以上；计算机/AI专业列举，生统跨专业资格需核对",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国银保信"
+      },
+      {
+        "title": "总公司业务管理岗：经济金融类",
+        "priority": "A",
+        "sector": "国央企/金融科技",
+        "location": "北京",
+        "officialUrl": "https://campus.51job.com/cbit2027",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/119119.html",
+        "deadline": "",
+        "notes": "统计/精算明确列为专业；境外学位须在2027-06月底前取得认证；公告页误挂cbit2026，采用另一高校注明cbit2027",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国银保信"
+      },
+      {
+        "title": "银保信科技软件研发岗",
+        "priority": "B",
+        "sector": "国央企/金融科技",
+        "location": "北京",
+        "officialUrl": "https://campus.51job.com/cbit2027",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/119119.html",
+        "deadline": "",
+        "notes": "公告岗位专业明确包括统计/数学；需核对开发经验",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国银保信"
+      }
+    ]
+  },
+  {
+    "company": "中国人民保险集团",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "http://picc.zhiye.com"
+      }
+    ],
+    "positions": [
+      {
+        "title": "精算/统计/数据类2027届（逐岗筛）",
+        "priority": "B",
+        "sector": "国央企/保险",
+        "location": "多地",
+        "officialUrl": "http://picc.zhiye.com",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://myjob.dlmu.edu.cn/campus/view/id/869109",
+        "deadline": "",
+        "notes": "企业2027公告列精算/统计专业；优先筛总公司技术/精算岗位",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国人民保险集团"
+      }
+    ]
+  },
+  {
+    "company": "中国国新",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.crhc.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "2027届经济统计相关岗位",
+        "priority": "C",
+        "sector": "国央企/国资",
+        "location": "北京等",
+        "officialUrl": "https://www.crhc.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://jdjywpt.jlu.edu.cn/mportal/recruit/details?id=8abf7cab8edd45a1a4ba8d8185e67ba9",
+        "deadline": "",
+        "notes": "校招公告包含经济统计；具体岗位与研究职责未核对",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国国新"
+      }
+    ]
+  },
+  {
+    "company": "中国广核",
+    "links": [
+      {
+        "label": "2027校招/招聘入口",
+        "url": "https://www.cgnpc.com.cn/"
+      }
+    ],
+    "positions": [
+      {
+        "title": "数字科技/统计类（逐岗筛）",
+        "priority": "C",
+        "sector": "国央企/能源",
+        "location": "多地",
+        "officialUrl": "https://www.cgnpc.com.cn/",
+        "evidenceStatus": "企业校招公告已发布",
+        "evidenceType": "企业公告（高校转发）",
+        "evidenceUrl": "https://career.nankai.edu.cn/correcruit/content/id/118224.html",
+        "deadline": "",
+        "notes": "2027公告包含统计学；技术岗位须在招聘平台进一步筛选",
+        "checkedAt": "2026-09-23",
+        "sourceCompany": "中国广核"
+      }
+    ]
+  }
+]

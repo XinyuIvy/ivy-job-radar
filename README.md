@@ -236,3 +236,9 @@ python -m unittest discover -s tests -p 'test_*.py'
 ## License
 
 本仓库目前没有单独的开源许可证。公开可见不等于自动授权复制、分发或商业使用。如需复用，请先联系仓库所有者。
+
+## Source synchronization and walkthrough
+
+See [SOURCE_SYNC.md](docs/SOURCE_SYNC.md) for the 2026-11-07 reconciliation with the private Sites implementation, preserved GitHub updates, private-data exclusions, and the distinction between data synchronization and code publication.
+
+The build generates a source-only walkthrough snapshot from this checkout. No private Sites teaching snapshot or runtime secrets are committed. Personal override and review-note JSON files are empty in the public source.

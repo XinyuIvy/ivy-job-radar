@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
 import { applications, cvPrebuildJobs, ignoredJobs, jobs, savedJobs, scanStatus } from "../../../db/schema";
+import manualJobAdditions from "../../manual-job-additions.json";
+import manualJobStatusCorrections from "../../manual-job-status-corrections.json";
 import { ashbyBoards, greenhouseBoards, iCimsBoards, leverBoards, paylocityBoards, workdayBoards } from "../../lib/company-sources";
 import { repairBookmarkCompany } from "../../lib/bookmark-capture";
 import { isChinaCompanyIdentity, sameCompanyIdentity } from "../../lib/company-identity";
@@ -12,7 +14,8 @@ import { activeJobStatuses, deadlineHasPassed, verifyPosting } from "../../lib/j
 import { hardJobExclusionReasons } from "../../lib/job-hard-exclusions";
 import { sameDisplayedJob } from "../../lib/job-display-identity";
 import { scoreStoredJob } from "../../lib/job-scoring";
-import { evaluateTodayShortlistCandidate } from "../../lib/job-shortlist";
+import { inferCvTemplateLanguage, isCvTemplateFilename } from "../../lib/cv-template-catalog";
+import { evaluateTodayShortlistCandidate, isSpreadsheetApprovedCandidate } from "../../lib/job-shortlist";
 import {
   canonicalizeJobIdentityUrl,
   extractStableJobId,
@@ -25,6 +28,76 @@ import {
 } from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
+
+async function ensureManualJobAdditions(db: Awaited<ReturnType<typeof getDb>>) {
+  const storedRows = await db.select().from(jobs);
+  const existingByUrl = new Map(storedRows.map((row) => [row.jobUrl, row]));
+  const writes: Promise<unknown>[] = [];
+  for (const row of manualJobAdditions) {
+    const values = {
+      ...row,
+      skills: JSON.stringify(row.skills),
+      lastSeenAt: row.checkedAt,
+      missedScanCount: 0,
+      expirationReason: "",
+    };
+    const existing = existingByUrl.get(row.jobUrl);
+    if (!existing) {
+      writes.push(db.insert(jobs).values(values));
+      continue;
+    }
+    const terminalStatus = new Set(["已关闭", "已过期", "忽略", "不适配", "重复归档", "旧年份归档"]);
+    const nextStatus = terminalStatus.has(existing.status) ? existing.status : row.status;
+    const nextExpirationReason = terminalStatus.has(existing.status) ? existing.expirationReason : "";
+    const nextDiscoveredAt = existing.discoveredAt || row.discoveredAt;
+    const alreadyCurrent = existing.company === values.company
+      && existing.title === values.title
+      && existing.location === values.location
+      && existing.source === values.source
+      && existing.score === values.score
+      && existing.description === values.description
+      && existing.evidence === values.evidence
+      && existing.status === nextStatus
+      && existing.checkedAt === values.checkedAt
+      && existing.expirationReason === nextExpirationReason
+      && existing.discoveredAt === nextDiscoveredAt;
+    if (alreadyCurrent) continue;
+    writes.push(db.update(jobs).set({
+      ...values,
+      status: nextStatus,
+      expirationReason: nextExpirationReason,
+      discoveredAt: nextDiscoveredAt,
+    }).where(eq(jobs.id, existing.id)));
+  }
+  await Promise.all(writes);
+}
+
+async function ensureManualJobStatusCorrections(db: Awaited<ReturnType<typeof getDb>>) {
+  const storedRows = await db.select({
+    id: jobs.id,
+    jobUrl: jobs.jobUrl,
+    status: jobs.status,
+    expirationReason: jobs.expirationReason,
+    checkedAt: jobs.checkedAt,
+  }).from(jobs);
+  const existingByUrl = new Map(storedRows.map((row) => [row.jobUrl, row]));
+  const writes: Promise<unknown>[] = [];
+  for (const correction of manualJobStatusCorrections) {
+    const existing = existingByUrl.get(correction.jobUrl);
+    if (!existing) continue;
+    if (
+      existing.status === correction.status
+      && existing.expirationReason === correction.expirationReason
+      && existing.checkedAt === correction.checkedAt
+    ) continue;
+    writes.push(db.update(jobs).set({
+      status: correction.status,
+      expirationReason: correction.expirationReason,
+      checkedAt: correction.checkedAt,
+    }).where(eq(jobs.id, existing.id)));
+  }
+  await Promise.all(writes);
+}
 
 async function reconcileExpiration(sources: SourceStats[], now: string) {
   const db = await getDb();
@@ -696,6 +769,47 @@ async function dispatchGlobalScan() {
   };
 }
 
+async function dispatchLatestSnapshotSync() {
+  const { env } = await import("cloudflare:workers");
+  const token = String(env.GITHUB_WORKFLOW_TOKEN ?? "").trim();
+  if (!token) {
+    return {
+      triggered: false,
+      status: "not_configured",
+      message: "GitHub Actions 触发令牌尚未配置。",
+    };
+  }
+
+  const response = await fetch(
+    "https://api.github.com/repos/XinyuIvy/ivy-job-radar/actions/workflows/sync-latest-job-snapshot.yml/dispatches",
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "User-Agent": "IvyJobRadar/1.0",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+      body: JSON.stringify({ ref: "main" }),
+    },
+  );
+
+  if (response.status === 204) {
+    return {
+      triggered: true,
+      status: "queued",
+      message: "最新岗位快照已排队重新同步。",
+    };
+  }
+
+  return {
+    triggered: false,
+    status: `github_${response.status}`,
+    message: "最新岗位快照重新同步启动失败。",
+  };
+}
+
 type IdentityRow = {
   company?: string;
   title?: string;
@@ -724,20 +838,16 @@ function identityParts(row: IdentityRow) {
 function buildTrackedApplicationMatcher(rows: Array<IdentityRow>) {
   const byStable = new Map<string, IdentityRow>();
   const anyByCanonical = new Map<string, IdentityRow>();
-  const anyByRole = new Map<string, IdentityRow>();
   const noStableByCanonical = new Map<string, IdentityRow>();
   const noStableByLocation = new Map<string, IdentityRow>();
-  const noStableByRole = new Map<string, IdentityRow>();
 
   for (const row of rows) {
     const keys = identityParts(row);
     if (keys.stableKey && !byStable.has(keys.stableKey)) byStable.set(keys.stableKey, row);
     if (keys.canonicalKey && !anyByCanonical.has(keys.canonicalKey)) anyByCanonical.set(keys.canonicalKey, row);
-    if (keys.roleKey && !anyByRole.has(keys.roleKey)) anyByRole.set(keys.roleKey, row);
     if (!keys.stableId) {
       if (keys.canonicalKey && !noStableByCanonical.has(keys.canonicalKey)) noStableByCanonical.set(keys.canonicalKey, row);
       if (keys.locationKey && !noStableByLocation.has(keys.locationKey)) noStableByLocation.set(keys.locationKey, row);
-      if (keys.roleKey && !noStableByRole.has(keys.roleKey)) noStableByRole.set(keys.roleKey, row);
     }
   }
 
@@ -748,14 +858,10 @@ function buildTrackedApplicationMatcher(rows: Array<IdentityRow>) {
         byStable.get(keys.stableKey),
         noStableByCanonical.get(keys.canonicalKey),
         noStableByLocation.get(keys.locationKey),
-        noStableByRole.get(keys.roleKey),
-        anyByRole.get(keys.roleKey),
       ]
       : [
         anyByCanonical.get(keys.canonicalKey),
         noStableByLocation.get(keys.locationKey),
-        noStableByRole.get(keys.roleKey),
-        anyByRole.get(keys.roleKey),
       ];
     return candidates.some((candidate) => candidate && (
       sameLogicalJob(job, candidate) || sameCompanyRole(job, candidate)
@@ -819,12 +925,31 @@ function deduplicateDisplayedJobs<Row extends IdentityRow>(rows: Row[], rank: (r
 
 export async function GET() {
   const db = await getDb();
+  await ensureManualJobAdditions(db);
+  await ensureManualJobStatusCorrections(db);
   const now = new Date().toISOString();
   const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
-  const savedIds = new Set((await db.select().from(savedJobs)).map((row) => row.jobId));
-  const cvPrebuildByJob = new Map<number, { status: string; lastError: string }>();
+  const savedRows = await db.select().from(savedJobs);
+  const savedByJob = new Map(savedRows.map((row) => [row.jobId, row]));
+  const savedIds = new Set(savedByJob.keys());
+  const cvPrebuildByJob = new Map<number, {
+    status: string;
+    lastError: string;
+    language: string;
+    templateFile: string;
+    updatedAt: string;
+    attempts: number;
+  }>();
   const cvPrebuildRows = await db
-    .select({ jobId: cvPrebuildJobs.jobId, status: cvPrebuildJobs.status, lastError: cvPrebuildJobs.lastError })
+    .select({
+      jobId: cvPrebuildJobs.jobId,
+      status: cvPrebuildJobs.status,
+      lastError: cvPrebuildJobs.lastError,
+      language: cvPrebuildJobs.language,
+      templateFile: cvPrebuildJobs.templateFile,
+      updatedAt: cvPrebuildJobs.updatedAt,
+      attempts: cvPrebuildJobs.attempts,
+    })
     .from(cvPrebuildJobs)
     .orderBy(
       sql`CASE WHEN ${cvPrebuildJobs.status} = 'stale' THEN 1 ELSE 0 END`,
@@ -846,23 +971,17 @@ export async function GET() {
       ...row,
       company: repairBookmarkCompany(row.company, row.title, row.jobUrl),
       description,
-      score: rescored.score,
+      score: /四川大学2027校招页|牛客联影校招直达申请页|Excel同步/.test(row.source)
+        ? Math.max(row.score, rescored.score)
+        : rescored.score,
       visa: rescored.visa,
     };
   });
   const isTrackedApplication = buildTrackedApplicationMatcher(trackedApplications);
   const savedJobRows = rows.filter((row) => savedIds.has(row.id));
-  const reviewedCompanies = [
-    ...trackedApplications.map((application) => application.company),
-    ...savedJobRows.map((row) => row.company),
-  ];
   const isTrackedForToday = (row: (typeof rows)[number]) =>
     isTrackedApplication(row)
-    || savedJobRows.some((savedJob) => sameLogicalJob(savedJob, row))
-    || (
-      isChinaCompanyIdentity(row.company)
-      && reviewedCompanies.some((company) => sameCompanyIdentity(company, row.company))
-    );
+    || savedJobRows.some((savedJob) => sameLogicalJob(savedJob, row));
 
   const filteredRows = rows
     .filter((row) =>
@@ -883,21 +1002,39 @@ export async function GET() {
   return NextResponse.json(
     uniqueRows.map((row) => {
       const shortlist = evaluateTodayShortlistCandidate(row, { now });
+      const spreadsheetApproved = isSpreadsheetApprovedCandidate(row);
       const tracked = isTrackedForToday(row);
       const saved = savedIds.has(row.id);
+      const savedRecord = savedByJob.get(row.id);
+      const prebuild = cvPrebuildByJob.get(row.id);
+      const linkedApplication = trackedApplications.find((application) => sameLogicalJob(application, row));
+      const applicationTemplateFile = String(linkedApplication?.resumeVersion || "").split("@", 1)[0];
+      const fallbackTemplateFile = isCvTemplateFilename(applicationTemplateFile)
+        ? applicationTemplateFile
+        : "";
+      const effectiveTemplateFile = savedRecord?.cvTemplateFile
+        || prebuild?.templateFile
+        || fallbackTemplateFile;
+      const effectiveLanguage = savedRecord?.cvLanguage
+        || prebuild?.language
+        || (effectiveTemplateFile ? inferCvTemplateLanguage(effectiveTemplateFile) : "");
       return {
         ...row,
         skills: JSON.parse(row.skills || "[]"),
-        saved,
-        todayEligible: shortlist.eligible && !saved && !tracked,
+        saved: savedIds.has(row.id),
+        savedCvLanguage: effectiveLanguage,
+        savedCvTemplateFile: effectiveTemplateFile,
+        todayEligible: (shortlist.eligible || spreadsheetApproved) && !saved && !tracked,
         todayFitScore: shortlist.fitScore,
         todayBlockers: [
-          ...shortlist.blockers,
+          ...(spreadsheetApproved ? [] : shortlist.blockers),
           ...(saved ? ["岗位已收藏"] : []),
-          ...(tracked ? ["岗位已被跟踪，或同一中国公司已有岗位被收藏/进入申请流程"] : []),
+          ...(tracked ? ["该岗位已被收藏或进入申请流程"] : []),
         ],
-        cvPrebuildStatus: cvPrebuildByJob.get(row.id)?.status ?? null,
-        cvPrebuildError: cvPrebuildByJob.get(row.id)?.lastError ?? "",
+        cvPrebuildStatus: prebuild?.status ?? null,
+        cvPrebuildError: prebuild?.lastError ?? "",
+        cvPrebuildUpdatedAt: prebuild?.updatedAt ?? "",
+        cvPrebuildAttempts: prebuild?.attempts ?? 0,
       };
     }),
   );
@@ -912,6 +1049,10 @@ export async function POST(request: NextRequest) {
     const officialJds = await refreshStoredOfficialJds();
     const backgroundScan = await dispatchGlobalScan();
     return NextResponse.json({ ...officialBoards, officialJds, backgroundScan });
+  }
+  if (body.action === "sync-latest") {
+    const result = await dispatchLatestSnapshotSync();
+    return NextResponse.json(result, { status: result.triggered ? 202 : 502 });
   }
   if (Object.keys(body).length === 0 || body.action === "refresh") {
     const officialBoards = await refreshOfficialBoards();

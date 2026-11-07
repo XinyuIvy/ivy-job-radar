@@ -41,7 +41,10 @@ class TestD1Database {
       CREATE TABLE saved_jobs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         job_id INTEGER NOT NULL UNIQUE,
-        created_at TEXT NOT NULL
+        cv_language TEXT NOT NULL DEFAULT '',
+        cv_template_file TEXT NOT NULL DEFAULT '',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT ''
       );
       CREATE TABLE cv_prebuild_jobs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -113,6 +116,7 @@ const {
   deleteSavedJob,
   listSavedJobs,
   saveJob,
+  updateSavedJobCvSelection,
 } = await vite.ssrLoadModule("/app/lib/saved-jobs-store.ts");
 const {
   beginCvPrebuildGeneration,
@@ -140,7 +144,14 @@ test("saved jobs survive a new store call and duplicate saves stay idempotent", 
   const createdAt = "2026-08-22T22:00:00.000Z";
   const created = await saveJob(database, 1, createdAt);
   assert.equal(created.outcome, "created");
-  assert.deepEqual({ ...created.row }, { id: 1, jobId: 1, createdAt });
+  assert.deepEqual({ ...created.row }, {
+    id: 1,
+    jobId: 1,
+    cvLanguage: "",
+    cvTemplateFile: "",
+    createdAt,
+    updatedAt: createdAt,
+  });
 
   const duplicate = await saveJob(database, 1, "2026-08-22T23:00:00.000Z");
   assert.equal(duplicate.outcome, "existing");
@@ -148,6 +159,19 @@ test("saved jobs survive a new store call and duplicate saves stay idempotent", 
 
   const persisted = await listSavedJobs(database);
   assert.deepEqual(persisted.map((row) => ({ ...row })), [{ ...created.row }]);
+
+  const updated = await updateSavedJobCvSelection(database, 1, {
+    language: "en",
+    templateFile: "CV_Applied_DS_Internet_EN.tex",
+  }, "2026-08-22T23:30:00.000Z");
+  assert.deepEqual({ ...updated }, {
+    id: 1,
+    jobId: 1,
+    cvLanguage: "en",
+    cvTemplateFile: "CV_Applied_DS_Internet_EN.tex",
+    createdAt,
+    updatedAt: "2026-08-22T23:30:00.000Z",
+  });
 });
 
 test("prebuild state blocks missing JD before configuration and stays idempotent", async () => {

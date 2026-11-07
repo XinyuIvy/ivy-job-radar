@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../../db";
 import { applications } from "../../../../db/schema";
-import { archivePath, ARCHIVE_REPOSITORY } from "../../../lib/application-archive";
+import { ARCHIVE_REPOSITORY } from "../../../lib/application-archive";
+import {
+  autofillArchiveId,
+  buildAutofillResumeCandidates,
+  selectedTemplateVersion,
+  fetchFirstAvailableResume,
+} from "../../../lib/autofill-resume";
 import { deriveBookmarkCaptureKey, secureBookmarkKeyEqual } from "../../../lib/bookmark-capture";
+import {
+  createCvTemplateOption,
+  CV_TEMPLATE_DIRECTORY,
+  sortCvTemplateOptions,
+} from "../../../lib/cv-template-catalog";
 import { canonicalizeJobIdentityUrl, extractStableJobId } from "../../../lib/job-identity";
+import { privateGithubJson } from "../../../lib/private-github-repository";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +28,11 @@ const CORS_HEADERS = {
 };
 
 const AUTOFILL_APPLICATION_STATUS = "已申请";
+
+type GithubContentEntry = {
+  name?: string;
+  type?: string;
+};
 
 function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: CORS_HEADERS });
@@ -29,10 +46,6 @@ function hostOf(raw: string) {
   try { return new URL(raw).hostname.toLowerCase().replace(/^www\./, ""); } catch { return ""; }
 }
 
-function stableArchiveId(value: string) {
-  return /^APP-\d{4}-[A-Z0-9]{3,12}-\d{3,}$/i.test(value.trim()) ? value.trim().toUpperCase() : "";
-}
-
 async function authorize(request: NextRequest) {
   const { env } = await import("cloudflare:workers");
   const expected = await deriveBookmarkCaptureKey(String(env.IVY_JOB_RADAR_SYNC_TOKEN ?? "").trim());
@@ -40,25 +53,44 @@ async function authorize(request: NextRequest) {
   return Boolean(expected && secureBookmarkKeyEqual(expected, provided));
 }
 
-async function resumeExists(archiveId: string) {
+async function resolveResume(archiveId: string, resumeVersion: string) {
   const { env } = await import("cloudflare:workers");
-  const token = String(env.APPLICATION_ARCHIVE_GITHUB_TOKEN || env.CV_GITHUB_TOKEN || "").trim();
+  const cvToken = String(env.CV_GITHUB_TOKEN || "").trim();
+  const archiveToken = String(env.APPLICATION_ARCHIVE_GITHUB_TOKEN || cvToken).trim();
   const repository = String(env.APPLICATION_ARCHIVE_GITHUB_REPO || ARCHIVE_REPOSITORY).trim();
-  if (!token || !archiveId) return false;
-  const fileName = `cv_customized_${archiveId}.pdf`;
-  const response = await fetch(
-    `https://api.github.com/repos/${repository}/contents/${archivePath(archiveId)}/${fileName}?ref=main`,
-    {
-      cache: "no-store",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        "User-Agent": "Ivy-Job-Radar-Autofill",
-      },
-    },
-  );
-  return response.ok;
+  const candidates = buildAutofillResumeCandidates({ archiveId, resumeVersion, archiveRepository: repository });
+  const result = await fetchFirstAvailableResume({
+    candidates,
+    archiveToken,
+    cvToken,
+    accept: "application/vnd.github+json",
+  });
+  if (result.candidate) return { available: true, ...result.candidate };
+  const hasTemplate = candidates.some((candidate) => candidate.source === "template");
+  return {
+    available: false,
+    fileName: "",
+    source: "none",
+    successReason: hasTemplate ? "template-pdf-not-found" : archiveId ? "final-pdf-not-found" : "cv-not-selected",
+  };
+}
+
+async function listTemplates() {
+  const { env } = await import("cloudflare:workers");
+  const token = String(env.CV_GITHUB_TOKEN || "").trim();
+  if (!token) return [];
+  try {
+    const entries = await privateGithubJson<GithubContentEntry[]>(
+      `https://api.github.com/repos/XinyuIvy/CV/contents/${CV_TEMPLATE_DIRECTORY}?ref=main`,
+      token,
+    );
+    return sortCvTemplateOptions(entries
+      .filter((entry) => entry.type === "file")
+      .map((entry) => createCvTemplateOption(String(entry.name || "")))
+      .filter((entry) => entry !== null));
+  } catch {
+    return [];
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -67,8 +99,13 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const jobUrl = String(url.searchParams.get("jobUrl") || "").trim();
   const requestedApplicationRowId = Number(url.searchParams.get("applicationId") || 0);
+  const requestedTemplateFile = String(url.searchParams.get("templateFile") || "").trim();
   const db = await getDb();
-  const rows = (await db.select().from(applications)).filter((row) => row.status === AUTOFILL_APPLICATION_STATUS);
+  const [applicationRows, templates] = await Promise.all([
+    db.select().from(applications),
+    listTemplates(),
+  ]);
+  const rows = applicationRows.filter((row) => row.status === AUTOFILL_APPLICATION_STATUS);
 
   let selected = Number.isInteger(requestedApplicationRowId) && requestedApplicationRowId > 0
     ? rows.find((row) => row.id === requestedApplicationRowId) ?? null
@@ -108,8 +145,29 @@ export async function GET(request: NextRequest) {
       if (aSameHost !== bSameHost) return Number(bSameHost) - Number(aSameHost);
       return (b.updatedAt || "").localeCompare(a.updatedAt || "");
     })
-    .slice(0, 50)
-    .map((row) => ({ id: row.id, applicationId: row.applicationId, company: row.company, title: row.title, location: row.location, jobUrl: row.jobUrl }));
+    .map((row) => ({ id: row.id, applicationId: row.applicationId, archiveId: row.archiveId, company: row.company, title: row.title, location: row.location, jobUrl: row.jobUrl }));
+
+  if (requestedTemplateFile) {
+    const template = templates.find((item) => item.filename === requestedTemplateFile);
+    if (!template) return json({ error: "The selected live CV template is unavailable." }, 404);
+    const resume = await resolveResume("", template.filename);
+    return json({
+      ok: true,
+      matched: false,
+      selected: true,
+      selectionType: "template",
+      matchedBy: "manual-template-selection",
+      template,
+      resume: {
+        available: resume.available,
+        fileName: resume.fileName,
+        source: "live-template",
+        reason: resume.successReason,
+      },
+      candidates,
+      templates,
+    });
+  }
 
   if (!selected) {
     return json({
@@ -117,18 +175,20 @@ export async function GET(request: NextRequest) {
       matched: false,
       needsSelection: candidates.length > 0,
       selectionReason: ambiguousAutomaticMatch ? "ambiguous-auto-match" : "no-auto-match",
-      candidateScope: "submitted-applications",
+      candidateScope: "submitted-applications-and-live-templates",
       candidates,
+      templates,
     });
   }
 
-  const archiveId = stableArchiveId(selected.applicationId);
-  const fileName = archiveId ? `cv_customized_${archiveId}.pdf` : "";
-  const available = archiveId ? await resumeExists(archiveId) : false;
+  const archiveId = autofillArchiveId(selected.archiveId || selected.applicationId);
+  const resume = await resolveResume(archiveId, selected.resumeVersion);
 
   return json({
     ok: true,
     matched: true,
+    selected: true,
+    selectionType: "application",
     matchedBy,
     application: {
       id: selected.id,
@@ -140,11 +200,14 @@ export async function GET(request: NextRequest) {
       status: selected.status,
       jobUrl: selected.jobUrl,
     },
+    templateFile: selectedTemplateVersion(selected.resumeVersion).fileName,
     resume: {
-      available,
-      fileName,
-      reason: available ? "final-customized-cv" : archiveId ? "final-pdf-not-found" : "application-archive-not-created",
+      available: resume.available,
+      fileName: resume.fileName,
+      source: resume.source,
+      reason: resume.successReason,
     },
     candidates,
+    templates,
   });
 }

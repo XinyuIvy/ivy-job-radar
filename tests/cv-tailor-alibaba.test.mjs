@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, { after } from "node:test";
+import { createServer } from "vite";
 
-import { runHybridRag } from "../app/lib/hybrid-rag.ts";
-import { CV_JD_RULES } from "../app/lib/cv-capability-ontology.ts";
-import { buildCvTemplateIndex, searchCvTemplate } from "../app/lib/cv-template-index.ts";
-import { matchStructuredEvidence } from "../app/lib/structured-evidence.ts";
+const vite = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, appType: "custom" });
+const { runHybridRag } = await vite.ssrLoadModule("/app/lib/hybrid-rag.ts");
+const { CV_JD_RULES } = await vite.ssrLoadModule("/app/lib/cv-capability-ontology.ts");
+const { buildCvTemplateIndex, searchCvTemplate } = await vite.ssrLoadModule("/app/lib/cv-template-index.ts");
+const { matchStructuredEvidence } = await vite.ssrLoadModule("/app/lib/structured-evidence.ts");
+after(async () => { await vite.close(); });
 
 const noTranslation = { translation_type: "no_evidence", valid_transferable_interpretation: [], invalid_overclaim: [] };
 const translations = { pharma: noTranslation, tech: noTranslation, quant: noTranslation, consulting: noTranslation };

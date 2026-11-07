@@ -15,25 +15,32 @@ class FastUiSourceTests(unittest.TestCase):
     def test_heavy_data_is_loaded_by_view(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn('if (view !== "applications") return;', source)
-        self.assertIn('if (view !== "companies") return;', source)
         self.assertIn('if (view !== "verify") return;', source)
-        self.assertIn('["saved", "applications", "companies"].includes(view)', source)
+        self.assertIn('["saved", "applications"].includes(view)', source)
 
-    def test_large_lists_use_pagination(self):
+    def test_large_lists_use_continuous_scroll_with_offscreen_rendering(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
-        self.assertIn('JOB_PAGE_SIZE = 20', source)
-        self.assertIn('COMPANY_PAGE_SIZE = 20', source)
-        self.assertIn('APPLICATION_PAGE_SIZE = 15', source)
-        self.assertIn('PaginationControls', source)
-        self.assertNotIn('setVisibleJobCount', source)
-        self.assertNotIn('再显示 20 个岗位', source)
+        styles = (ROOT / "app" / "globals.css").read_text(encoding="utf-8")
+        self.assertNotIn('PaginationControls', source)
+        self.assertNotIn('JOB_PAGE_SIZE', source)
+        self.assertIn('SCROLL_WINDOW_SIZE = 30', source)
+        self.assertIn('useScrollBatch', source)
+        self.assertIn('jobs.slice(0, visibleJobCount)', source)
+        self.assertIn('candidateRows.slice(0, visibleCandidateCount)', source)
+        self.assertIn('visibleApplications.slice(0, visibleApplicationCount)', source)
+        self.assertIn('className="job-list scroll-frame job-scroll-frame"', source)
+        self.assertIn('onScroll={handleJobScroll}', source)
+        self.assertIn('height: min(70vh, 760px)', styles)
+        self.assertIn('overflow-y: auto', styles)
+        self.assertIn('content-visibility: auto', styles)
+        self.assertIn('contain-intrinsic-size', styles)
 
     def test_common_mutations_are_optimistic(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         self.assertIn('setForm(null);\n    try {', source)
-        self.assertIn('const savedSnapshot = saved;', source)
+        self.assertIn('savedMutationIds.current.has(id)', source)
+        self.assertIn('current.filter((item) => item !== id)', source)
         self.assertLess(source.index('setSaved((current)', source.index('const toggleSaved')), source.index('await fetch(', source.index('const toggleSaved')))
-        self.assertIn('setTasks((current) => current.map', source)
 
     def test_application_save_does_not_scan_full_table(self):
         route = (ROOT / "app" / "api" / "applications" / "route.ts").read_text(encoding="utf-8")

@@ -1,7 +1,7 @@
 import { and, eq, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getDb } from "../../../db";
+import { getD1, getDb } from "../../../db";
 import { ignoredJobs, jobs } from "../../../db/schema";
 import {
   BOOKMARK_CAPTURE_SOURCE,
@@ -25,7 +25,9 @@ import {
   sameLogicalJob,
 } from "../../lib/job-identity";
 import { scoreStoredJob } from "../../lib/job-scoring";
+import { isCvTemplateFilename } from "../../lib/cv-template-catalog";
 import { isBaiduTalentJobUrl, parseBaiduTalentJobHtml } from "../../lib/baidu-job-page";
+import { saveJob, type SavedJobCvSelection } from "../../lib/saved-jobs-store";
 
 export const dynamic = "force-dynamic";
 
@@ -192,6 +194,12 @@ export async function POST(request: NextRequest) {
     });
   }
   const now = new Date().toISOString();
+  const requestedCvLanguage = cleanBookmarkText(body.cvLanguage, 8);
+  const requestedCvTemplateFile = cleanBookmarkText(body.cvTemplateFile, 500);
+  const cvSelection: SavedJobCvSelection | undefined = (requestedCvLanguage === "zh" || requestedCvLanguage === "en")
+    && isCvTemplateFilename(requestedCvTemplateFile)
+    ? { language: requestedCvLanguage as "zh" | "en", templateFile: requestedCvTemplateFile }
+    : undefined;
   const evidence = isPlaceholderJobTitle(title)
     ? "你通过 Chrome 书签手动加入；页面只暴露了招聘门户标题，系统用完整 JD 内容生成独立岗位身份。"
     : "你通过 Chrome 书签在原招聘页面手动确认并加入；此岗位不经过自动核验。";
@@ -280,6 +288,13 @@ export async function POST(request: NextRequest) {
     created = true;
   }
 
+  const saved = await saveJob(await getD1(), jobId, now, cvSelection);
+  if (saved.outcome === "missing") {
+    return wantsJson(request)
+      ? NextResponse.json({ error: "The captured job could not be saved." }, { status: 500 })
+      : resultPage({ ok: false, title: "保存失败", detail: "岗位已读取，但收藏记录没有写入。请重试。", status: 500 });
+  }
+
   const result = {
     ok: true,
     created,
@@ -287,10 +302,19 @@ export async function POST(request: NextRequest) {
     jobId,
     company,
     title,
+    location,
+    region,
+    track,
+    score: scoring.score,
+    visa: scoring.visa,
+    evidence,
+    deadline: "",
+    deadlineType: "unknown",
     jobUrl: storedJobUrl,
     canonicalUrl,
     applicationId,
     status: BOOKMARK_CAPTURE_STATUS,
+    saved: true,
     description,
     descriptionExtraction: descriptionExtraction.method,
   };

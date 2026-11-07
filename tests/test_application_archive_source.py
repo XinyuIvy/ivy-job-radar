@@ -5,263 +5,195 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ApplicationArchiveSourceTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+        cls.shared = (ROOT / "app" / "lib" / "cv-prompt-v194.ts").read_text(encoding="utf-8")
+        cls.route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+
     def test_archive_uses_stable_id_and_private_repository(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
-        self.assertIn("stableArchiveId", route)
-        self.assertIn("APP-${newYorkYear()}", helper)
-        self.assertIn("XinyuIvy/job-application-archive", helper)
-        self.assertIn("Create application bundle", route)
-        self.assertIn("commitFilesAtomically", route)
+        self.assertIn("stableArchiveId", self.route)
+        self.assertIn("APP-${newYorkYear()}", self.helper)
+        self.assertIn("XinyuIvy/job-application-archive", self.helper)
+        self.assertIn("Create application bundle", self.route)
+        self.assertIn("commitFilesAtomically", self.route)
 
     def test_bundle_freezes_complete_manual_review_inputs(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
         for filename in [
-            "application_record.yaml",
-            "jd_snapshot.md",
-            "jd_requirements.json",
-            "match_packet.json",
-            "fact_master_snapshot.md",
-            "cv_display_rules_snapshot.yaml",
-            "canonical_project_index.jsonl",
-            "canonical_fact_index.jsonl",
-            "canonical_capability_index.jsonl",
-            "canonical_concept_index.jsonl",
-            "canonical_relation_index.jsonl",
-            "canonical_retrieval_index.jsonl",
-            "cv_base.tex",
-            "chat_prompt.txt",
+            "application_record.yaml", "jd_snapshot.md", "jd_requirements.json", "match_packet.json",
+            "fact_master_snapshot.md", "cv_display_rules_snapshot.yaml", "canonical_project_index.jsonl",
+            "canonical_fact_index.jsonl", "canonical_capability_index.jsonl", "canonical_concept_index.jsonl",
+            "canonical_relation_index.jsonl", "canonical_retrieval_index.jsonl",
+            "canonical_current_addendum.jsonl", "cv_base.tex", "chat_prompt.txt",
         ]:
-            self.assertIn(filename, helper)
+            self.assertIn(filename, self.helper)
 
-    def test_prompt_enforces_human_review_content_first_and_keyword_priority(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_direct_submission_freezes_jd_source_cv_pdf_and_autofill_packet(self):
+        bookmark = (ROOT / "app" / "bookmarklet" / "capture" / "page.tsx").read_text(encoding="utf-8")
+        parser = (ROOT / "app" / "lib" / "template-autofill-packet.ts").read_text(encoding="utf-8")
         for phrase in [
-            "初步分类，不是最终结论",
-            "每次最多展示 3 至 5 条",
-            "JD 中的关键词优先",
-            "已有的行业关键词",
-            "内容定稿",
-            "保持母版",
-            "不能写入任何仓库",
+            "freezeSubmittedTemplate", "submitted_template_freeze.json",
+            "cv_submitted_${archiveId}.pdf", "application_autofill_${archiveId}.json",
+            'encoding: "base64"', "frozenResumeVersion",
         ]:
-            self.assertIn(phrase, helper)
-        self.assertIn("automatic_tex_generation_authorized: false", helper)
+            self.assertIn(phrase, self.route)
+        self.assertIn('fetch("/api/cv-tailor/archive"', bookmark)
+        self.assertIn("freezeSubmittedTemplate: true", bookmark)
+        self.assertIn('input.provenance || "frozen_submitted_template"', parser)
 
-    def test_prompt_runs_role_aligned_internal_review_before_one_confirmation(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_applied_job_template_editor_replaces_only_the_frozen_cv(self):
+        dashboard = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
         for phrase in [
-            "一次任务内部连续完成的多轮审校协议",
-            "岗位角色画像与学术权重判断",
-            "研究/学术产出导向",
-            "应用/业务交付导向",
-            "角色画像对齐后的风格重写",
-            "只有完成岗位角色画像和风格对齐后，才执行本次冻结语言的专项审校",
-            "完成后只等待我进行一次最终确认",
-            "10 秒招聘官扫描测试",
-            "最可能拒绝该候选人的三个理由",
-            "cvLanguageGenerationRules(language)",
-            "最终版本必须同时通过五个门槛",
-            "本轮输入、关键判断、实际修改和通过或未通过",
+            "修改已申请岗位的 CV 母版", "saveAppliedCvSelection",
+            "replaceSubmittedTemplate: true", "保存并冻结新母版",
+            "岗位 JD 和 APP-ID 不变",
         ]:
-            self.assertIn(phrase, helper)
-
-    def test_prompt_selects_publications_by_role_and_preserves_nine_presentations(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+            self.assertIn(phrase, dashboard)
         for phrase in [
-            "论文和学术材料不得机械地每份 CV 都放同样数量",
-            "高水平论文、科研能力、论文写作、文献复现、学术影响力",
-            "在审、返修或预印本不得写成已发表论文",
-            "以第一作者身份在九个学术会议作报告",
-            "不得把九个改写成七个或其他数量",
+            "replaceSubmittedTemplate?: boolean", "replacingSubmittedTemplate",
+            "Replace frozen submitted template CV", "replacedSubmittedTemplate",
+            "existingJdSnapshot ||",
         ]:
-            self.assertIn(phrase, helper)
+            self.assertIn(phrase, self.route)
 
-    def test_prompt_structures_industry_research_and_applied_work(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_formal_and_prebuild_prompts_share_v194_contract(self):
+        prebuild = (ROOT / "app" / "lib" / "cv-prebuild-bundle.ts").read_text(encoding="utf-8")
+        self.assertIn('CV_PROMPT_VERSION = "prompt-v1.9.4-site.3"', self.shared)
+        self.assertIn("buildCvPromptV194SharedContract", self.helper)
+        self.assertIn("buildCvPromptV194SharedContract", prebuild)
+        self.assertIn("CV_PREBUILD_PROMPT_VERSION = CV_PROMPT_VERSION", prebuild)
+        self.assertIn("prompt_version: ${yamlString(CV_PROMPT_VERSION)}", self.helper)
+        self.assertIn("prompt_source_sha256", self.helper)
+
+    def test_v194_integration_does_not_start_automatic_generation(self):
+        pause = (ROOT / "app" / "lib" / "cv-prebuild-pause.ts").read_text(encoding="utf-8")
+        dashboard = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
+        self.assertIn("CV_PREBUILD_AUTOMATION_PAUSED = true", pause)
+        self.assertIn('code: "CV_AUTOMATION_PAUSED"', pause)
+        self.assertIn("if (CV_PREBUILD_AUTOMATION_PAUSED) return;", dashboard)
+        for name in ["queue", "prepare", "chat", "regenerate-pending"]:
+            route = (ROOT / "app" / "api" / "cv-prebuild" / name / "route.ts").read_text(encoding="utf-8")
+            self.assertIn("CV_PREBUILD_AUTOMATION_PAUSED", route)
+            self.assertIn("CV_AUTOMATION_PAUSED_PAYLOAD", route)
+
+    def test_v194_foregrounds_explicit_preferred_and_bonus_items(self):
         for phrase in [
-            "禁止把所有经历和项目塞进一个“项目经历”或“代表性项目”section",
-            "行业经历或实习经历必须独立成节",
-            "研究型项目必须单独成节",
-            "应用型项目必须单独成节",
-            "至少要把研究型项目与应用型项目分成两个不同的项目 section",
-            "行业/实习经历另设独立 section",
-            "每个项目只能出现一次",
-            "仍被平铺在同一 section，或 Summary、Skills 与前三条核心 bullet 没有形成一致定位",
+            "明确优先/加分项必须单独、突出地审计",
+            "把最强证据放在个人简介、专业能力或靠前经历中",
+            "证据不足时，在审校记录中明确保留为 gap",
+            "JD 没有明确优先项时不得自行制造",
         ]:
-            self.assertIn(phrase, helper)
+            self.assertIn(phrase, self.shared)
 
-    def test_prompt_compiles_and_checks_pdf_page_count_and_density(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_v194_uses_fixed_spine_and_job_specific_project_sections(self):
         for phrase in [
-            "本地 TeX、PDF 页数与页面密度验证",
-            "pdfinfo",
-            "实际 PDF 页数",
-            "尽量接近但不挤满 2 页",
-            "不超过 2 个物理页面",
-            "不要把 1.5 页当成理想目标",
-            "不得加入弱相关论文或其他弱内容机械凑页数",
-            "只写年份即视为不合格",
+            "个人简介/Summary → 教育背景/Education → 专业能力/Professional Skills",
+            "下一节必须是独立的实习/工作经历节",
+            "项目经历是否拆成多个 section、如何分组以及每个 section 的名称",
+            "不得强制合并成单一“研究经历”或“相关项目”",
+            "如果一个 section 跨页",
+            "不写“续”、Continued、cont.",
         ]:
-            self.assertIn(phrase, helper)
+            self.assertIn(phrase, self.shared)
 
-    def test_prompt_freezes_authoritative_cv_display_rules(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
-        self.assertIn("master/project-evidence/CV_DISPLAY_RULES.yaml", helper)
-        self.assertIn("cv_display_rules_snapshot.yaml", helper)
-        self.assertIn("用户确认的权威 CV 展示边界", helper)
-        self.assertIn("不得因为 JD 关键词", helper)
-
-    def test_prompt_embeds_current_chinese_cv_display_contract(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_v194_requires_three_papers_and_substantive_second_page_depth(self):
         for phrase in [
-            "Summary / 个人简介必须明确写出“博士候选人”",
-            "个人简介中不得出现“范德堡大学”或 Vanderbilt University",
-            "学校只保留在教育背景中",
-            "YYYY 年 M 月 - YYYY 年 M 月",
-            "2026 年 5 月 - 2026 年 8 月",
-            "YYYY 年 M 月 - 至今",
-            "若事实材料无法核验任一月份，必须停止并向我确认",
-            "波士顿，美国",
-            r"禁止写成 \`美国波士顿\`",
-            "括号内英文首字母大写",
-            "脑区皮层厚度",
-            "不得单独写“皮层”",
+            "样本数、患者数、观测数、脑区数、体素数等规模数字不是固定必写项",
+            "专有数据集名称默认不在可见 CV 中显示",
+            "CV 必须列出至少三篇",
+            "第二页有效正文占用深度必须严格超过 75%",
+            "不得加入弱相关项目、虚构事实或拉长空话",
         ]:
-            self.assertIn(phrase, helper)
-        for forbidden in [
-            "以下三条是用户确认的长期硬规则",
-            "用于补充上面三条长期硬规则",
+            self.assertIn(phrase, self.shared)
+
+    def test_v194_contains_confirmed_chinese_terminology(self):
+        for phrase in [
+            "脑区皮层厚度", "联合纵向混合模型", "日历外划分（Temporal Validation）",
+            "基于模型依赖度（Model Reliance）的变量重要性",
+            "配对比较识别到 3 个跨模型显著不同的脑区",
+            "自助法（Bootstrap）", "二次型区间",
         ]:
-            self.assertNotIn(forbidden, helper)
+            self.assertIn(phrase, self.shared)
+
+    def test_v194_layout_contract_covers_visual_feedback(self):
+        for phrase in [
+            "姓名必须使用实际可用且视觉上明确的粗体",
+            "标题后的实习生/第一作者/通讯作者/合作者等身份、地点、日期一律常规字重",
+            "教育条目之间有一致正间距", "技能行之间有一致正间距",
+            "项目标题与第一条 bullet 之间有小的正间距", "bullet 之间有小且一致的正间距",
+            "项目与项目之间的间距明显大于项目内部间距",
+            "论文/展示/荣誉条目间距为正且不大于普通 bullet 间距",
+            "中文不得出现异常拉伸的字间距",
+        ]:
+            self.assertIn(phrase, self.shared)
+
+    def test_v194_requires_two_page_render_and_visual_checks(self):
+        for phrase in [
+            "PDF 必须恰好两页", "LuaLaTeX 连续编译两次", "pdfinfo", "pdftotext", "pdffonts",
+            "渲染两页并逐页目视检查", "文本可提取", "跨页标题精确重复",
+        ]:
+            self.assertIn(phrase, self.shared)
 
     def test_selected_template_language_is_an_explicit_prompt_authority(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
-        for phrase in [
-            "本次已确认的 CV 语言与母版（一级硬约束）",
-            "输出语言：${languageLabel}",
-            "已确认母版：\\`${templateFile}\\`",
-            "最终 CV 的 Summary/个人简介、技能、经历、项目、论文/荣誉等自然语言内容必须使用中文",
-            "不得因为 JD 是英文",
-            "冻结母版与本次选择不一致",
-        ]:
-            self.assertIn(phrase, helper)
-        self.assertIn("language: ArchiveLanguage", helper)
-        self.assertIn("templateFile: string", helper)
-        self.assertIn("buildChatPrompt(archiveId, path, jd, language, templateFile)", route)
-        self.assertIn("buildChatPrompt(archiveId, path, frozenJd, language, templateFile)", route)
+        for phrase in ["输出语言：${languageLabel}", "已确认母版：\\`${templateFile}\\`", "冻结语言与母版"]:
+            self.assertIn(phrase, self.helper)
+        self.assertIn("language: ArchiveLanguage", self.helper)
+        self.assertIn("templateFile: string", self.helper)
+        self.assertIn("buildChatPrompt(archiveId, path, jd, language, templateFile)", self.route)
+        self.assertIn("buildChatPrompt(archiveId, path, frozenJd, language, templateFile)", self.route)
 
     def test_existing_archive_never_silently_reuses_a_different_template(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
         for phrase in [
             'existingArchiveTextFile(archiveApiRoot, path, "application_record.yaml", archiveToken)',
             'yamlScalar(existingApplicationRecord, "language")',
             'yamlScalar(existingApplicationRecord, "cv_template_path")',
             "const templateMatches = existingLanguage === language && existingTemplatePath === templatePath",
-            "archiveFileExists",
-            "CV_TEMPLATE_CHANGE_AFTER_FINALIZATION",
-            "Re-freeze application bundle ${archiveId} with ${templateFile}",
-            "refrozen: true",
-            "previousLanguage: existingLanguage",
-            "previousTemplatePath: existingTemplatePath",
+            "CV_TEMPLATE_CHANGE_AFTER_FINALIZATION", "refrozen: true",
         ]:
-            self.assertIn(phrase, route)
-        self.assertIn("cv_customized_${archiveId}.tex", route)
-        self.assertIn("cv_submitted_${archiveId}.pdf", route)
+            self.assertIn(phrase, self.route)
 
-    def test_prompt_uses_application_id_in_cv_filenames(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
-        self.assertIn("cv_customized_${archiveId}.tex", helper)
-        self.assertIn("cv_customized_${archiveId}.pdf", helper)
-        self.assertIn("cv_submitted_${archiveId}.pdf", helper)
-        self.assertIn("文件名必须保留完整 application ID", helper)
-        self.assertIn("不得简化为 \\`cv_customized.tex\\`", helper)
-
-    def test_prompt_delegates_binary_pdf_build_to_github_actions(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_prompt_uses_application_id_and_safe_pdf_workflow(self):
         for phrase in [
-            "automatic_pdf_compilation_authorized: true",
-            "manual_binary_pdf_upload_by_chat_authorized: false",
-            "Build customized CV PDF",
-            "不要在 Chat 中把 PDF 二进制重新编码成 base64",
-            "scripts/build_cv.sh",
-            "workflow 成功且这些归档文件确实存在之前，不得声称归档 PDF 已成功生成",
+            "cv_customized_${archiveId}.tex", "cv_customized_${archiveId}.pdf",
+            "cv_customized_${archiveId}.txt", "cv_build_manifest_${archiveId}.json",
+            "cv_submitted_${archiveId}.pdf", "Build customized CV PDF", "scripts/build_cv.sh",
+            "LuaLaTeX", "automatic_tex_generation_authorized: false",
+            "local_chat_pdf_preview_authorized: true", "不能写入任何仓库",
         ]:
-            self.assertIn(phrase, helper)
+            self.assertIn(phrase, self.helper)
 
-    def test_prompt_uses_lualatex_for_local_and_archived_pdfs(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
-        self.assertIn("LuaLaTeX", helper)
-        self.assertNotIn("XeLaTeX", helper)
-
-    def test_prompt_allows_local_pdf_preview_before_archive_write(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
+    def test_existing_archive_gets_current_prompt_without_rewriting_snapshot(self):
         for phrase in [
-            "local_chat_pdf_preview_authorized: true",
-            "local_preview_repository_write_authorized: false",
-            "Chat 内 PDF 预览规则",
-            "不要只告诉我“编译成功”",
-            "PDF定稿",
-            "GitHub connector 不能可靠读取二进制 PDF 内容",
-            "cv_customized_${archiveId}.txt",
-            "cv_build_manifest_${archiveId}.json",
+            "const existingPrompt = await existingArchiveTextFile", "jd_snapshot.md",
+            "const frozenJd = fullJdFromSnapshot(existingJdSnapshot)",
+            "const currentPrompt = buildChatPrompt(archiveId, path, frozenJd, language, templateFile)",
+            "prompt: currentPrompt", "promptContractUpdated: existingPrompt !== currentPrompt",
         ]:
-            self.assertIn(phrase, helper)
+            self.assertIn(phrase, self.route)
 
-    def test_existing_archive_gets_current_operational_prompt_without_rewriting_matching_snapshot(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("const existingPrompt = await existingArchiveTextFile", route)
-        self.assertIn("jd_snapshot.md", route)
-        self.assertIn("const frozenJd = fullJdFromSnapshot(existingJdSnapshot)", route)
-        self.assertIn("const currentPrompt = buildChatPrompt(archiveId, path, frozenJd, language, templateFile)", route)
-        self.assertIn("prompt: currentPrompt", route)
-        self.assertIn("promptContractUpdated: existingPrompt !== currentPrompt", route)
-
-    def test_prompt_embeds_complete_confirmed_jd_and_treats_summaries_as_secondary(self):
-        helper = (ROOT / "app" / "lib" / "application-archive.ts").read_text(encoding="utf-8")
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+    def test_prompt_embeds_complete_confirmed_jd(self):
         for phrase in [
-            "完整 JD 是本次定制的主输入",
-            "BEGIN CONFIRMED FULL JD",
-            "END CONFIRMED FULL JD",
-            "${confirmedFullJd}",
-            "如果 GitHub/connector 返回内容被截断，继续分段读取直到 EOF",
-            "绝对不能替代完整 JD",
-            r"不要只根据 \`jd_requirements.json\` 里的几条 fact / requirement 做匹配",
-            "完整 JD 的全部主要板块",
+            "BEGIN CONFIRMED FULL JD", "END CONFIRMED FULL JD", "${confirmedFullJd}",
+            "jd_snapshot.md 从第一行读到 EOF", "绝对不能替代完整 JD",
         ]:
-            self.assertIn(phrase, helper)
-        self.assertIn("buildChatPrompt(archiveId, path, jd, language, templateFile)", route)
-        self.assertIn('existingArchiveTextFile(archiveApiRoot, path, "jd_snapshot.md", archiveToken)', route)
-        self.assertIn("fullJdFromSnapshot(existingJdSnapshot)", route)
+            self.assertIn(phrase, self.helper)
 
     def test_archive_stops_when_private_repo_is_missing(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
-        self.assertIn("ARCHIVE_REPOSITORY_REQUIRED", route)
-        self.assertIn("ARCHIVE_WRITE_PERMISSION_REQUIRED", route)
-        self.assertIn("请检查该凭据是否包含这个私有仓库", route)
+        for phrase in ["ARCHIVE_REPOSITORY_REQUIRED", "ARCHIVE_WRITE_PERMISSION_REQUIRED", "请检查该凭据是否包含这个私有仓库"]:
+            self.assertIn(phrase, self.route)
 
-    def test_jd_and_template_are_both_human_confirmed_before_archive(self):
-        route = (ROOT / "app" / "api" / "cv-tailor" / "archive" / "route.ts").read_text(encoding="utf-8")
+    def test_jd_and_template_are_human_confirmed_before_archive(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
-        self.assertIn("jdOverride?: string", route)
-        self.assertIn('const jd = jdOverride || extractCoreJobDescription(job?.description || "").text', route)
-        self.assertIn('type Stage = "loading" | "review"', client)
-        self.assertIn("确认并编辑完整 JD", client)
-        self.assertIn("确认母版与 JD 并生成申请档案", client)
-        self.assertIn("selectedTemplateKey", client)
-        self.assertIn("CV_TEMPLATE_REQUIRED", client)
-        self.assertIn("jdOverride: jd", client)
+        for phrase in ["jdOverride?: string", 'const jd = jdOverride || extractCoreJobDescription(job?.description || "").text']:
+            self.assertIn(phrase, self.route)
+        for phrase in ['type Stage = "loading" | "review"', "确认并编辑完整 JD", "确认母版与 JD 并生成申请档案", "selectedTemplateKey", "jdOverride: jd", "CV_TEMPLATE_REQUIRED"]:
+            self.assertIn(phrase, client)
 
     def test_auto_read_jd_never_skips_human_review(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
         self.assertIn('setStage("review")', client)
         self.assertIn("系统已读取到 JD", client)
-        self.assertIn("再核对 JD", client)
         self.assertNotIn("void createArchive(result)", client)
-        self.assertIn("只有你确认后才会生成匹配和 Prompt", client)
-        self.assertIn("已确认并冻结的输入", client)
 
     def test_contract_records_completed_repository_initialization(self):
         contract = (ROOT / "docs" / "APPLICATION_ARCHIVE_CONTRACT.md").read_text(encoding="utf-8")

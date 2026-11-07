@@ -10,6 +10,36 @@ function runMigration(database, filename) {
   }
 }
 
+test("saved jobs gain durable CV template selections without losing creation dates", () => {
+  const database = new DatabaseSync(":memory:");
+  database.exec(`
+    CREATE TABLE saved_jobs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      job_id INTEGER NOT NULL UNIQUE,
+      created_at TEXT NOT NULL
+    );
+    INSERT INTO saved_jobs (job_id, created_at)
+      VALUES (7, '2026-08-22T22:00:00.000Z');
+  `);
+
+  runMigration(database, "0020_violet_scream.sql");
+
+  assert.deepEqual(
+    { ...database.prepare(`
+      SELECT cv_language AS cvLanguage, cv_template_file AS cvTemplateFile,
+        created_at AS createdAt, updated_at AS updatedAt
+      FROM saved_jobs WHERE job_id = 7
+    `).get() },
+    {
+      cvLanguage: "",
+      cvTemplateFile: "",
+      createdAt: "2026-08-22T22:00:00.000Z",
+      updatedAt: "2026-08-22T22:00:00.000Z",
+    },
+  );
+  database.close();
+});
+
 test("Phase 1 databases migrate to generation history without duplicate placeholders", () => {
   const database = new DatabaseSync(":memory:");
   database.exec(`

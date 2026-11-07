@@ -187,5 +187,8 @@
   {"company":"WorldQuant","website":"https://www.worldquant.com/","careersUrl":"https://www.worldquant.com/career-listing/","sourceType":"Official careers page","collectionMode":"public-page"},
   {"company":"ZipRecruiter","careersUrl":"https://job-boards.greenhouse.io/ziprecruiter","sourceType":"Official ATS","collectionMode":"structured","ats":{"kind":"greenhouse","token":"ziprecruiter"},"website":"https://www.ziprecruiter.com/"},
   {"company":"Zoox","careersUrl":"https://jobs.lever.co/zoox","sourceType":"Official ATS","collectionMode":"structured","ats":{"kind":"lever","token":"zoox","instance":"global"},"website":"https://zoox.com/"},
-  {"company":"ZS China","aliases":["ZS"],"website":"https://www.zs.com/","careersUrl":"https://jobs.zs.com/all/jobs","sourceType":"Official careers page","collectionMode":"public-page"}
+  {"company":"ZS China","aliases":["ZS"],"website":"https://www.zs.com/","careersUrl":"https://jobs.zs.com/all/jobs","sourceType":"Official careers page","collectionMode":"public-page"},
+  {"company":"长沙都正生物科技股份有限公司","aliases":["都正生物"],"website":"https://www.duxact.com/","careersUrl":"https://www.duxact.com/dzxz.html","sourceType":"Official careers page","collectionMode":"public-page"},
+  {"company":"鲁南制药集团","aliases":["鲁南制药"],"website":"https://www.lunan.com.cn/","careersUrl":"https://hcm.lunan.com.cn/recruit","sourceType":"Official careers portal","collectionMode":"public-page"},
+  {"company":"甘李药业股份有限公司","aliases":["甘李药业"],"website":"https://www.ganlee.com.cn/","careersUrl":"https://www.ganlee.com.cn/career_join.html","sourceType":"Official careers page","collectionMode":"public-page"}
 ]

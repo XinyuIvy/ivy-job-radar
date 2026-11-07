@@ -52,7 +52,7 @@ export const defaultAutomationConfig = (now = new Date().toISOString()): Automat
   enabled: true,
   executionMode: "pilot",
   dailyLimit: 10,
-  minimumScore: 55,
+  minimumScore: 0, // Legacy field; never used for admission.
   defaultLanguage: "en",
   allowedAts: ["greenhouse", "lever", "ashby"],
   finalSubmitEnabled: false,
@@ -90,7 +90,6 @@ export function evaluateAutomationCandidate(
   const reasons = [...shortlist.reasons];
 
   if (job.region !== "美国") blockers.push("不是美国岗位");
-  if (shortlist.fitScore < config.minimumScore) blockers.push(`综合匹配分低于 ${config.minimumScore}`);
   if (!config.allowedAts.includes(atsProvider)) blockers.push("申请系统暂不在自动投递支持范围内");
   if (job.region === "美国" && !shortlist.blockers.some((value) => value.includes("sponsorship"))) reasons.push("未发现明确拒绝 sponsorship 的文本");
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isCvTemplateFilename } from "../../../lib/cv-template-catalog";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,10 @@ export async function GET(request: NextRequest) {
   const language: TemplateLanguage = search.get("language") === "zh" ? "zh" : "en";
   const requestedTrack = search.get("track") || "pharma";
   const track = requestedTrack in templates[language] ? requestedTrack : "pharma";
-  const filename = templates[language][track];
+  const requestedTemplateFile = String(search.get("templateFile") || "").trim();
+  const filename = isCvTemplateFilename(requestedTemplateFile)
+    ? requestedTemplateFile
+    : templates[language][track];
   const { env } = await import("cloudflare:workers");
   const token = String(env.CV_GITHUB_TOKEN || "").trim();
 

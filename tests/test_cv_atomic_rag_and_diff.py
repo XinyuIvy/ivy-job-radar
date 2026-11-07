@@ -29,10 +29,11 @@ class CvAtomicRagAndDiffTests(unittest.TestCase):
     def test_client_selects_language_and_fifth_track(self):
         client = (ROOT / "app" / "cv-tailor" / "cv-tailor-client.tsx").read_text(encoding="utf-8")
         self.assertIn("const jd = String(jdInput ?? value.jd).trim()", client)
-        self.assertIn('track: value.track, language: value.language, jd', client)
+        self.assertIn('track: value.track, language: value.language, templateFile: value.templateFile, jd', client)
         self.assertIn("English", client)
         self.assertIn("中文", client)
-        self.assertIn("clinical_neuro", client)
+        self.assertIn("fetchCvTemplateCatalog", client)
+        self.assertIn("choice.track", client)
 
     def test_every_supported_or_adjacent_gap_gets_handling(self):
         route = (ROOT / "app" / "api" / "cv-tailor" / "analyze" / "route.ts").read_text(encoding="utf-8")

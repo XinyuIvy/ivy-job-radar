@@ -2,7 +2,8 @@ import { and, desc, eq, notInArray, or } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getDb } from "../../../db";
-import { applications, cvPrebuildJobs } from "../../../db/schema";
+import { applications, applicationStatusEvents, cvPrebuildJobs } from "../../../db/schema";
+import { resolveApplicationRecordIds } from "../../lib/application-archive";
 import {
   canonicalizeJobIdentityUrl,
   isPlaceholderJobTitle,
@@ -11,6 +12,25 @@ import {
 } from "../../lib/job-identity";
 
 export const dynamic = "force-dynamic";
+
+type ApplicationRow = typeof applications.$inferSelect;
+
+async function ensureApplicationRecordIds(
+  db: Awaited<ReturnType<typeof getDb>>,
+  row: ApplicationRow,
+) {
+  const resolved = resolveApplicationRecordIds(row);
+  if (resolved.archiveId === row.archiveId && resolved.applicationId === row.applicationId) return row;
+  const [updated] = await db.update(applications).set(resolved).where(eq(applications.id, row.id)).returning();
+  return updated ?? { ...row, ...resolved };
+}
+
+async function ensureAllApplicationRecordIds(
+  db: Awaited<ReturnType<typeof getDb>>,
+  rows: ApplicationRow[],
+) {
+  return Promise.all(rows.map((row) => ensureApplicationRecordIds(db, row)));
+}
 
 const editableFields = [
   "company",
@@ -71,12 +91,16 @@ function baseJobPageUrl(value: unknown) {
   }
 }
 
+function resumeUsesTemplate(resumeVersion: string, templateFile: string) {
+  return !resumeVersion || !templateFile || resumeVersion === templateFile || resumeVersion.startsWith(`${templateFile}@`);
+}
+
 export async function GET() {
   const db = await getDb();
-  let rows = await db
+  let rows = await ensureAllApplicationRecordIds(db, await db
     .select()
     .from(applications)
-    .orderBy(desc(applications.updatedAt));
+    .orderBy(desc(applications.updatedAt)));
   const applicationHistory = rows.filter((row) => !["收藏", "准备材料"].includes(row.status));
   const duplicatePending = rows.filter((row) =>
     row.status === "准备材料"
@@ -100,7 +124,10 @@ export async function GET() {
         notInArray(cvPrebuildJobs.status, ["ready", "cancelled", "stale"]),
       ));
     }));
-    rows = await db.select().from(applications).orderBy(desc(applications.updatedAt));
+    rows = await ensureAllApplicationRecordIds(
+      db,
+      await db.select().from(applications).orderBy(desc(applications.updatedAt)),
+    );
   }
   return NextResponse.json(rows);
 }
@@ -137,7 +164,56 @@ export async function POST(request: NextRequest) {
   const rows = await db.select().from(applications).where(candidateCondition);
   const duplicate = rows.find((row) => sameLogicalJob(row, incoming));
   if (duplicate) {
-    return NextResponse.json(duplicate, { status: 200 });
+    if (body.mergeDuplicate !== true) {
+      return NextResponse.json(await ensureApplicationRecordIds(db, duplicate), { status: 200 });
+    }
+
+    const desiredStatus = String(payload.status ?? duplicate.status);
+    const requestedTemplate = String(payload.resumeVersion ?? "");
+    if (["收藏", "准备材料"].includes(duplicate.status)) {
+      if (!resumeUsesTemplate(duplicate.resumeVersion, requestedTemplate)) {
+        return NextResponse.json({
+          error: `这条岗位已记录使用 ${duplicate.resumeVersion}，不能静默改成 ${requestedTemplate}。`,
+        }, { status: 409 });
+      }
+      const now = new Date().toISOString();
+      const [updated] = await db.update(applications).set({
+        ...(payload as Partial<typeof applications.$inferInsert>),
+        updatedAt: now,
+      }).where(eq(applications.id, duplicate.id)).returning();
+      if (desiredStatus !== duplicate.status) {
+        await db.insert(applicationStatusEvents).values({
+          applicationId: duplicate.id,
+          status: desiredStatus,
+          occurredAt: now,
+        });
+      }
+      return NextResponse.json(await ensureApplicationRecordIds(db, updated), { status: 200 });
+    }
+    if (desiredStatus === "准备材料") {
+      return NextResponse.json({
+        error: `该岗位已经在申请记录中，当前状态是“${duplicate.status}”，不能重复放回待申请。`,
+      }, { status: 409 });
+    }
+    if (duplicate.status !== "已申请") {
+      return NextResponse.json({
+        error: `该岗位已经在申请记录中，当前状态是“${duplicate.status}”。`,
+      }, { status: 409 });
+    }
+    if (!resumeUsesTemplate(duplicate.resumeVersion, requestedTemplate)) {
+      return NextResponse.json({
+        error: `这条申请已记录使用 ${duplicate.resumeVersion}，与本次选择的 ${requestedTemplate} 不一致。`,
+      }, { status: 409 });
+    }
+    if (!duplicate.resumeVersion && requestedTemplate) {
+      const now = new Date().toISOString();
+      const [updated] = await db.update(applications).set({
+        resumeVersion: requestedTemplate,
+        updatedAt: now,
+      }).where(eq(applications.id, duplicate.id)).returning();
+      return NextResponse.json(await ensureApplicationRecordIds(db, updated), { status: 200 });
+    }
+    return NextResponse.json(await ensureApplicationRecordIds(db, duplicate), { status: 200 });
   }
 
   const now = new Date().toISOString();
@@ -158,7 +234,7 @@ export async function POST(request: NextRequest) {
       })
       .where(eq(applications.id, legacyAmbiguous.id))
       .returning();
-    return NextResponse.json(updated, { status: 200 });
+    return NextResponse.json(await ensureApplicationRecordIds(db, updated), { status: 200 });
   }
 
   const [created] = await db
@@ -169,7 +245,7 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     })
     .returning();
-  return NextResponse.json(created, { status: 201 });
+  return NextResponse.json(await ensureApplicationRecordIds(db, created), { status: 201 });
 }
 
 export async function PUT(request: NextRequest) {
@@ -179,15 +255,32 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "A valid record id is required." }, { status: 400 });
   }
   const db = await getDb();
+  const [existing] = await db
+    .select()
+    .from(applications)
+    .where(eq(applications.id, id))
+    .limit(1);
+  if (!existing) {
+    return NextResponse.json({ error: "Application not found." }, { status: 404 });
+  }
+  const payload = cleanPayload(body);
+  const now = new Date().toISOString();
   const [updated] = await db
     .update(applications)
     .set({
-      ...(cleanPayload(body) as Partial<typeof applications.$inferInsert>),
-      updatedAt: new Date().toISOString(),
+      ...(payload as Partial<typeof applications.$inferInsert>),
+      updatedAt: now,
     })
     .where(eq(applications.id, id))
     .returning();
-  return NextResponse.json(updated);
+  if (payload.status && payload.status !== existing.status) {
+    await db.insert(applicationStatusEvents).values({
+      applicationId: id,
+      status: String(payload.status),
+      occurredAt: now,
+    });
+  }
+  return NextResponse.json(await ensureApplicationRecordIds(db, updated));
 }
 
 export async function DELETE(request: NextRequest) {

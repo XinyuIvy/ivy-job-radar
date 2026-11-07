@@ -167,7 +167,7 @@ export async function PUT(request: NextRequest) {
     enabled: body.enabled === undefined ? current.enabled : body.enabled === true,
     executionMode: "pilot",
     dailyLimit: 10,
-    minimumScore: Math.max(50, Math.min(80, Number(body.minimumScore) || current.minimumScore)),
+    minimumScore: 0, // Older clients cannot re-enable score-based admission.
     defaultLanguage: body.defaultLanguage === "zh" ? "zh" : "en",
     allowedAts: current.allowedAts,
     finalSubmitEnabled,
@@ -273,9 +273,9 @@ export async function POST(request: NextRequest) {
   }
 
   candidates.sort((left, right) =>
-    right.decision.score - left.decision.score
-    || right.job.score - left.job.score
-    || right.job.checkedAt.localeCompare(left.job.checkedAt),
+    right.job.discoveredAt.localeCompare(left.job.discoveredAt)
+    || right.job.checkedAt.localeCompare(left.job.checkedAt)
+    || right.job.id - left.job.id,
   );
   const candidateIds = new Set(candidates.map(({ job }) => job.id));
   const validOpenReviewBatch = existingTasks.filter((task) =>
@@ -446,11 +446,21 @@ export async function PATCH(request: NextRequest) {
           }).where(eq(applications.id, application.id)).returning();
         }
 
-        await saveJob(database, job.id, now);
-        await initializeCvPrebuildJob(database, job.id, cvConfigured, now);
-        let prebuild = await getLatestCvPrebuildJob(database, job.id);
         const selection = recommendCvPrebuildTemplate(job, decision.templateTrack, config.defaultLanguage);
         const templateFile = templateFiles[selection.language][selection.track];
+        if (!templateFile) throw new Error("No CV template is available for this automated application.");
+        await saveJob(database, job.id, now, {
+          language: selection.language,
+          templateFile,
+        });
+        if (!application.resumeVersion) {
+          [application] = await db.update(applications).set({
+            resumeVersion: templateFile,
+            updatedAt: now,
+          }).where(eq(applications.id, application.id)).returning();
+        }
+        await initializeCvPrebuildJob(database, job.id, cvConfigured, now);
+        let prebuild = await getLatestCvPrebuildJob(database, job.id);
         if (prebuild && !prebuild.generationKey) {
           await db.update(cvPrebuildJobs).set({
             applicationRowId: application.id,

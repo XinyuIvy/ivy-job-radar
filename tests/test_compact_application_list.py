@@ -6,16 +6,19 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CompactApplicationListTests(unittest.TestCase):
-    def test_application_tracker_uses_three_column_rows(self):
+    def test_application_tracker_adds_cv_template_action_to_applied_rows(self):
         source = (ROOT / "app" / "job-radar.tsx").read_text(encoding="utf-8")
-        start = source.index('<div className="compact-application-list"')
+        start = source.index('className="compact-application-list scroll-frame"')
         end = source.index('</section>', start)
         tracker = source[start:end]
 
         self.assertIn('role="columnheader">公司', tracker)
         self.assertIn('role="columnheader">岗位', tracker)
         self.assertIn('role="columnheader">申请日期', tracker)
+        self.assertIn('role="columnheader">CV 母版', tracker)
         self.assertIn('item.appliedDate || "未记录"', tracker)
+        self.assertIn("openApplicationCvSelection(item)", tracker)
+        self.assertIn("修改母版", tracker)
         self.assertNotIn("item.notes", tracker)
         self.assertNotIn("item.nextAction", tracker)
         self.assertNotIn("openTask(item)", tracker)

@@ -4,8 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getD1, getDb } from "../../../../db";
 import { jobs, savedJobs } from "../../../../db/schema";
 import { getChatGPTUser } from "../../../chatgpt-auth";
-import { templateFiles, type ArchiveLanguage, type ArchiveTrack } from "../../../lib/application-archive";
+import { type ArchiveLanguage, type ArchiveTrack } from "../../../lib/application-archive";
 import { recommendCvPrebuildTemplate } from "../../../lib/cv-prebuild-bundle";
+import { isCvTemplateFilename } from "../../../lib/cv-template-catalog";
+import { CV_AUTOMATION_PAUSED_PAYLOAD, CV_PREBUILD_AUTOMATION_PAUSED } from "../../../lib/cv-prebuild-pause";
 import {
   getLatestCvPrebuildJob,
   initializeCvPrebuildJob,
@@ -29,6 +31,9 @@ function parsePositiveInteger(value: unknown) {
 export async function POST(request: NextRequest) {
   if (!(await getChatGPTUser())) {
     return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+  }
+  if (CV_PREBUILD_AUTOMATION_PAUSED) {
+    return NextResponse.json(CV_AUTOMATION_PAUSED_PAYLOAD, { status: 503 });
   }
 
   let body: Record<string, unknown>;
@@ -58,11 +63,15 @@ export async function POST(request: NextRequest) {
   if (rawTemplateTrack && !requestedTrack) {
     return NextResponse.json({ error: "A valid CV template is required." }, { status: 400 });
   }
+  const requestedTemplateFile = String(body.templateFile ?? "").trim();
+  if (requestedTemplateFile && !isCvTemplateFilename(requestedTemplateFile)) {
+    return NextResponse.json({ error: "A valid CV template filename is required." }, { status: 400 });
+  }
 
   const db = await getDb();
   const [[job], [saved]] = await Promise.all([
     db.select().from(jobs).where(eq(jobs.id, jobId)).limit(1),
-    db.select({ jobId: savedJobs.jobId }).from(savedJobs).where(eq(savedJobs.jobId, jobId)).limit(1),
+    db.select().from(savedJobs).where(eq(savedJobs.jobId, jobId)).limit(1),
   ]);
   if (!job) return NextResponse.json({ error: "Job not found." }, { status: 404 });
   if (!saved) {
@@ -82,14 +91,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "CV task could not be created." }, { status: 500 });
   }
 
-  const selection = recommendCvPrebuildTemplate(job, requestedTrack, requestedLanguage);
-  const selectedTemplateFile = templateFiles[selection.language][selection.track];
-  if (!selectedTemplateFile) {
-    return NextResponse.json({ error: "The selected CV template is unavailable." }, { status: 409 });
-  }
+  const savedLanguage = saved.cvLanguage === "zh" || saved.cvLanguage === "en"
+    ? saved.cvLanguage as ArchiveLanguage
+    : undefined;
+  const savedTemplateFile = isCvTemplateFilename(saved.cvTemplateFile)
+    ? saved.cvTemplateFile
+    : "";
+  const selection = recommendCvPrebuildTemplate(
+    job,
+    requestedTrack,
+    requestedLanguage ?? savedLanguage,
+    requestedTemplateFile || savedTemplateFile,
+  );
+  const selectedTemplateFile = selection.templateFile;
   const selectionChanged = Boolean(
     latest.generationKey
-    && (latest.language !== selection.language || latest.track !== selection.track),
+    && (latest.language !== selection.language || latest.track !== selection.track || latest.templateFile !== selectedTemplateFile),
   );
   if (selectionChanged) {
     await database.prepare(`
