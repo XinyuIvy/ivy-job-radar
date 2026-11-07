@@ -17,7 +17,7 @@ function visit(dir) {
   }
 }
 roots.forEach(visit);
-for (const name of ['middleware.ts', 'vite.config.ts', 'package.json', 'requirements-jobscan.txt', 'browser-extension/manifest.json']) {
+for (const name of ['middleware.ts', 'vite.config.ts', 'package.json', 'requirements-jobscan.txt', 'browser-extension/manifest.json', 'config/job-ingestion.schema.json', 'docs/UNIFIED_ETL.md']) {
   if (fs.existsSync(name)) { const content = fs.readFileSync(name, 'utf8'); files[name] = { content, sha256: crypto.createHash('sha256').update(content).digest('hex') }; }
 }
 const snapshot = { capturedAt: new Date().toISOString(), sourceCommit: execFileSync('git', ['rev-parse', 'HEAD'], {encoding:'utf8'}).trim(), files };

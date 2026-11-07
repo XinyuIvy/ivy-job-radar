@@ -101,8 +101,8 @@ export default function InterviewPrep() {
       </div>
     </Section>
 
-    <Section id="collection" number="04" title="岗位从哪里来，怎么进入看板？" intro="按全栈开发的顺序读：谁启动任务 → 从哪里取数据 → 怎么清洗去重 → 如何入库 → 如何筛选评分 → 浏览器怎样显示。此节于 2026-11-05 对照源码重写；说明代码行为，不代表刚刚重跑了生产扫描。">
-      <div className="ip-callout ip-callout-green"><strong>先把 ETL 记成一句话：取回来，整理好，存进去。</strong><p>E（Extract）提取是发请求拿岗位；T（Transform）转换是统一字段、清洗和去重；L（Load）加载是写入数据库。筛选评分和看板是数据进入业务应用后的处理。本项目也会在采集、导入阶段提前过滤，所以真实代码并不是三段完全隔离的流水线。</p></div>
+    <Section id="collection" number="04" title="岗位从哪里来，怎么进入看板？" intro="按全栈开发的顺序读：谁启动任务 → 从哪里取数据 → 怎么清洗去重 → 如何入库 → 如何筛选评分 → 浏览器怎样显示。此节按统一后端 ETL 更新；说明代码行为，不代表已经执行新的生产全量扫描。">
+      <div className="ip-callout ip-callout-green"><strong>先把 ETL 记成一句话：取回来，整理好，存进去。</strong><p>E（Extract）提取是发请求拿岗位；T（Transform）转换是统一字段、清洗和去重；L（Load）加载是写入数据库。两路共用同一后端服务；Python 负责获取、解析和传输，清洗、校验、评分、去重和入库由后端统一执行。页面读取时仍有业务展示逻辑。</p></div>
       <Table caption="先认工具：每个工具到底负责什么" headers={["工具", "人话解释", "运行位置与作用"]} rows={[
         ["Python + JobSpy + pandas", "采集脚本、招聘搜索库和表格处理库", "GitHub Actions 的云端 runner；收集候选、整理成记录，再做官网核验。"],
         ["TypeScript + fetch", "网站服务端语言和发 HTTP 请求的方法", "Cloudflare Workers；请求官方 ATS、解析响应、执行导入与查询。"],
@@ -113,7 +113,7 @@ export default function InterviewPrep() {
       ]} />
       <div className="ip-two-column">
         <div className="ip-paper"><h3>入口一：网站自己采集</h3><p>站内请求触发 API → Worker 的 TypeScript 用 fetch 请求招聘接口 → 转换岗位对象 → 清洗与数据库写入。</p><p>中间对象可以直接传给函数，不需要先落一个 Python JSON 文件。具体来源仍由各自适配逻辑处理。</p></div>
-        <div className="ip-paper"><h3>入口二：Python 定时扫描</h3><p>GitHub Actions → Python 扫描和官网核验 → 各来源 JSON → merge_scan_results.py → all_jobs_latest.json → 拆批 → curl POST → 导入 API → D1。</p><p>这是跨运行环境的交接，所以需要文件和 HTTP。两条入口最后都可以被 GET /api/jobs 读取。</p></div>
+        <div className="ip-paper"><h3>入口二：Python 定时扫描</h3><p>GitHub Actions → collect_raw_jobs.py → raw_jobs_latest.json → sync_raw_jobs.py 拆批上传 → ingestJobs 统一清洗、校验和去重 → D1。</p><p>这是跨运行环境的交接，所以需要文件和 HTTP。两条入口最后都可以被 GET /api/jobs 读取。</p></div>
       </div>
       <h3>逐步拆解：沿着一条岗位记录走到底</h3>
       <Steps steps={collectionSteps} />
@@ -122,7 +122,7 @@ export default function InterviewPrep() {
       <Table caption="同一条岗位在各阶段的样子" headers={["阶段", "数据是什么样", "谁读它"]} rows={[
         ["接口原始响应", '例如 {"id":"123","title":"AI Engineer","location":{"name":"Chicago"}}；还没有通用字段规范。', "来源适配代码解析 JSON，提取所需字段。"],
         ["转换后的通用记录", '{"company":"Example","title":"AI Engineer","location":"Chicago","job_url":"https://example.com/jobs/123?utm_source=a","application_id":"123"}', "清洗与身份判断代码；此例只示意数据流，是否通过现有筛选需另判。"],
-        ["清洗去重之后", "规范链接去掉 utm_source；若另一入口也拿到同一岗位，则合并来源，保留较完整的 JD。", "Python 汇总文件，或站内后续写入函数。"],
+        ["清洗去重之后", "规范链接去掉 utm_source；若另一入口也拿到同一岗位，则合并来源，保留较完整的 JD。", "统一后端内存对象，再交给 D1 存储适配器。"],
         ["脚本文件 / 上传正文", "all_jobs_latest.json 是数组；batch-0001.json 是拆出的一小批；curl 上传的是文件内容。", "POST /api/jobs/import 的 request.json() 解码。"],
         ["D1 数据行", "jobs 表中公司、标题、链接、JD 等成为列，id 是站内记录主键；重扫同岗位通常更新原记录。", "GET /api/jobs 和后续按 jobId 查资料的接口。"],
         ["看板响应 / 页面状态", "服务端返回 JSON 数组；浏览器 response.json() 后调用 setDailyJobs(rows)，React 根据状态渲染。", "岗位卡片和筛选交互。JSON 响应不是又存了一份永久文件。"],
@@ -130,7 +130,7 @@ export default function InterviewPrep() {
       <details className="ip-deep"><summary>展开：面试官让你说“具体怎么写”，怎么回答？</summary>
         <p><strong>1. 请求与解析：</strong>服务端 await fetch(url)，先检查 HTTP 是否成功，再 await response.json() 或 response.text()。JSON 直接按字段读；HTML 要按来源提取内容。不能把 200 状态码自动等同于内容完整。</p>
         <p><strong>2. 建统一结构：</strong>给岗位定义公司、标题、地点、链接、JD、来源和检查时间；各来源适配器负责映射。Python 字典和 TypeScript 对象都是内存中的键值结构，JSON 是把它们编码后保存或传输的格式。</p>
-        <p><strong>3. 判断身份：</strong>先规范链接、保留岗位编号，再与已有记录比对。Python 汇总可以用 identity 作为字典键；数据库写入会查候选并调用 sameLogicalJob。不能只按标题去重。</p>
+        <p><strong>3. 判断身份：</strong>先规范链接、保留岗位编号，再与已有记录比对。本批去重和数据库查重都由后端使用 sameLogicalJob 完成。不能只按标题去重。</p>
         <p><strong>4. 写数据库：</strong>本项目是先 SELECT 找已有记录，再分别 UPDATE 或 INSERT；已有非空内容不能被新来的空内容轻易覆盖。并发下两次查询可能都认为不存在，这是需要事务、唯一约束或原子写入继续完善的地方，不能说当前已经解决。</p>
         <p><strong>5. 返回与展示：</strong>API 从数据库读取并组织结果，返回 JSON；前端 fetch 后更新 React state。写入成功与页面刷新是两个动作，不能只因为脚本生成了文件就认定看板已更新。</p>
         <p><strong>SQL 概念示意：</strong>SELECT 是查，INSERT 是新增，UPDATE 是改。源码通过 Drizzle 表达这些操作，下面不是可直接照抄的完整生产 SQL。</p>

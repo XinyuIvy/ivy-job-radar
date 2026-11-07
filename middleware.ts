@@ -1,14 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  if (request.method === "POST" && request.nextUrl.pathname === "/api/jobs/import") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/api/jobs/import-learned";
-    return NextResponse.rewrite(url);
-  }
+// Ingestion applies approved rules after authentication in its shared service.
+export function middleware() {
   return NextResponse.next();
 }
 
-export const config = {
-  matcher: ["/api/jobs/import"],
-};
+export const config = { matcher: ["/api/jobs/import"] };

@@ -23,12 +23,14 @@ class ScreeningLearningSourceTests(unittest.TestCase):
         self.assertIn("boost: Math.min(15", store)
 
     def test_imports_pass_through_approved_rules(self):
-        middleware = (ROOT / "middleware.ts").read_text(encoding="utf-8")
-        learned = (ROOT / "app/api/jobs/import-learned/route.ts").read_text(encoding="utf-8")
-        self.assertIn('/api/jobs/import-learned', middleware)
-        self.assertIn("getApprovedScreeningRules", learned)
-        self.assertIn("learnedRuleAdjustment", learned)
-        self.assertIn("POST as importJobs", learned)
+        route = (ROOT / "app/api/jobs/import/route.ts").read_text(encoding="utf-8")
+        legacy = (ROOT / "app/api/jobs/import-learned/route.ts").read_text(encoding="utf-8")
+        pipeline = (ROOT / "app/lib/job-ingestion.ts").read_text(encoding="utf-8")
+        store = (ROOT / "app/lib/job-ingestion-store.ts").read_text(encoding="utf-8")
+        self.assertIn("getApprovedScreeningRules", store)
+        self.assertIn("learnedRuleAdjustment", pipeline)
+        self.assertIn("ingestJobs(importRows, context)", route)
+        self.assertIn('export { POST, dynamic } from "../import/route"', legacy)
 
     def test_verification_queue_has_four_embedded_actions(self):
         enhancer = (ROOT / "app/job-radar.tsx").read_text(encoding="utf-8")

@@ -12,15 +12,16 @@ export type PipelineStep = {
 };
 
 export const collectionSteps: PipelineStep[] = [
+
   {
     "id": "A1",
     "title": "先安排谁来运行：网站服务端和定时扫描是两条入口",
     "plain": "先有一个执行程序的地方，采集代码才会真的跑起来。页面关掉以后，浏览器本身不会替你继续采集。",
     "input": "站内扫描请求，或 GitHub Actions 的定时 / 手动触发事件；需要扫描的公司、招聘系统与搜索条件。",
     "tools": "站内 API 路由由 Cloudflare Workers 执行 TypeScript；另一条路径由 GitHub Actions 的 Ubuntu runner 安装 Python 3.11 和 requirements-jobscan.txt，然后执行扫描脚本。runner 就是本轮任务临时使用的一台云端机器。",
-    "output": "一次扫描任务和日志。daily-us-jobscan.yml 声明 cron 为 0 10 * * *，也提供 workflow_dispatch 手动入口；这说明代码配置了调度，不证明最近每次都执行成功。",
+    "output": "一次开始运行的任务和日志。每天 UTC 10:00 定时启动，也支持手动运行；需检查实际执行结果。",
     "storage": "任务步骤写在 YAML 工作流文件；执行日志在 GitHub Actions。运行中的变量先留在各自进程内存。",
-    "next": "站内代码继续请求官方 ATS；Actions 按工作流顺序执行 JobSpy、官网核验和其他来源扫描脚本。",
+    "next": "站内请求 ATS；GitHub Actions 执行 collect_raw_jobs.py。",
     "why": "站内适合交互式刷新，外部 runner 适合安装 Python 依赖和跑较长任务。不能把整个系统说成全程 Python，也不能把定时配置等同于运行成功记录。",
     "source": "app/api/jobs/route.ts · .github/workflows/daily-us-jobscan.yml · requirements-jobscan.txt"
   },
@@ -29,72 +30,72 @@ export const collectionSteps: PipelineStep[] = [
     "title": "E / 提取：用接口或网页把岗位拿回来",
     "plain": "接口就像网站提供的一扇数据窗口。我发请求，它把岗位列表返回给我；没有统一接口时，再按来源解析网页。",
     "input": "招聘系统地址、公司 board token（招聘看板标识，不是 API 密钥）、搜索词、地点等条件。",
-    "tools": "TypeScript 的 fetch 发 HTTP 请求。源码直接对接 Greenhouse、Lever、Ashby 等 JSON 接口，Workday 使用其招聘接口；其他来源有网页提取逻辑。Python 的 jobspy_scan.py 调用 JobSpy scrape_jobs，pandas 处理表格结果；verify_company_jobs.py 等脚本再做官网核验。",
-    "output": "原始响应是 JSON 或 HTML。JSON 解码成对象 / 数组；HTML 提取成文字和字段。需要的内容包括公司、标题、地点、岗位编号、完整 JD、原始链接和来源。",
-    "storage": "站内响应通常先在 Worker 内存中处理，不保证每份原始 HTML 都归档；脚本路径会写 data/scans 下的来源 JSON，例如 us_jobs_latest.json、us_jobs_verified_latest.json。",
-    "next": "各来源适配器把不同字段转为项目通用岗位结构，交给清洗和合并。",
+    "tools": "站内 TypeScript fetch 请求 ATS 或网页。Python collect_raw_jobs.py 调 JobSpy、公开来源和官网采集辅助函数，只解析来源记录并包装 provider、raw、context。",
+    "output": "来源 JSON、XML、RSS 或 HTML 中解析的岗位记录，保留原字段、重复项和空值。",
+    "storage": "Python 保存 data/scans/raw_jobs_latest.json；站内使用 Worker 内存对象。原始快照和采集回执在 Actions 运行产物保留30天，不提交到 Git。",
+    "next": "Python 交 sync_raw_jobs.py 上传；站内直接调用公共后端 ingestJobs。",
     "why": "能用结构化接口时字段更明确；网页结构变动可能导致提取失败。接口超时、返回空列表、岗位确实关闭是不同情况。此处主要靠代码取数据，不靠 LLM 猜岗位。",
-    "source": "app/api/jobs/route.ts · app/lib/company-sources.ts · scripts/jobspy_scan.py · scripts/verify_company_jobs.py"
+    "source": "scripts/collect_raw_jobs.py · app/api/jobs/route.ts"
+  },
+  {
+    "id": "A5",
+    "title": "交接 / 把 Python 文件通过 HTTP 送给网站后端",
+    "plain": "Python 和网站不在同一台机器，不能直接读取对方内存。中间要把数据变成请求，传给网站。",
+    "input": "raw_jobs_latest.json：未经业务清洗或去重的来源包装记录数组。",
+    "tools": "sync_raw_jobs.py 按最多100条及1000000字节拆批，HTTPS POST 到 /api/jobs/import。认证通过后直接调用 ingestJobs；import-learned 仅为兼容 URL，没有二次修改，也没有中间件重写。",
+    "output": "后端返回 received、created、updated、skipped、duplicates、invalid 和拒绝原因。",
+    "storage": "原始快照与回执保存在 Actions 产物；HTTP body 是传输内容，后端解析后是内存对象。",
+    "next": "认证与请求体校验 → createJobIngestionContext → ingestJobs → normalizeIncomingJob → 同批合并 → 数据库查重与写入。",
+    "why": "Python 不维护数据库字段或业务处理规则，所有岗位转换集中后端。拆批控制请求体和重传范围，平台网关权限与应用同步令牌仍分别校验。",
+    "source": "scripts/sync_raw_jobs.py · scripts/split_json_batches.py · app/api/jobs/import/route.ts · app/lib/job-ingestion.ts"
   },
   {
     "id": "A3",
     "title": "T / 转换：统一字段、空值和文本格式",
     "plain": "不同来源叫法不同，先翻译成同一种数据结构，后面的逻辑才能复用。这里是 ETL 的 T。",
     "input": "各来源的 JSON 对象、表格行或网页提取字段；不同来源可能把标题叫 title、job_name 等不同名字。",
-    "tools": "Python 使用字典、pandas、re 正则表达式和 json；TypeScript 使用对象字段映射、字符串处理和 URL API。示例映射用于理解原理，不表示每个来源都恰好有 job_name 字段。导入接口还会 String(...).trim()、规范地区、处理 skills 数组，并限制 JD 长度。",
-    "output": "统一的岗位记录：company、title、location、region、job_url、description / full_description、skills、source、checked_at 等；字段按具体入口略有不同。",
-    "storage": "Python 将对象列表序列化为 UTF-8 JSON 文件；TypeScript 先保持为内存对象。接口入库时 skills 序列化为 JSON 文本，description 最长保留 50000 字符。",
-    "next": "统一记录交给身份识别和去重；后端入库前还会再次检查必填信息。",
+    "tools": "统一由后端 TypeScript normalizeIncomingJob 读取 config/job-ingestion.schema.json 的字段别名，清理 HTML 和空白，处理地点、时间、技能并校验 URL 与必填字段。",
+    "output": "同一种 NormalizedJob 内存对象，包括 company、title、location、description、jobUrl、canonicalUrl、applicationId、region 等。",
+    "storage": "Worker 内存。skills 序列化为 JSON 文本，JD 最多50000字符；没有额外生成清洗后的 Python 文件。",
+    "next": "同一后端服务继续应用批准规则、评分和去重。",
     "why": "空值不能随便补成事实。签证未知应保留 JD 未明确，不能自动当成支持。清洗是整理已知内容，不能生成不存在的要求、薪资或经历。",
-    "source": "scripts/jobspy_scan.py · scripts/merge_scan_results.py · app/api/jobs/import/route.ts"
+    "source": "config/job-ingestion.schema.json · app/lib/job-ingestion.ts"
   },
   {
     "id": "A4",
     "title": "T / 身份判断与去重：这些是不是同一个岗位？",
     "plain": "一个岗位可以从好几个入口被找到。要合并的是同一个岗位，不是名字有点像的岗位。",
     "input": "统一字段后的记录，包含原始 URL、规范 URL、官方岗位编号、公司、标题与地点。",
-    "tools": "Python merge_scan_results.py 用 urllib.parse 拆 URL，去推广参数，用 identity 构造字典键；其优先级是规范 URL，再公司加岗位编号，最后公司加标题加地点。TypeScript job-identity 另外保留身份参数并用 sameLogicalJob 判断；两处规则并不完全相同。",
-    "output": "去重后的记录与合并的来源信息。Python quality 优先比较核验状态、JD 完整程度、证据和分数，再合并非空字段、来源和技能。",
-    "storage": "脚本合并产物为 data/scans/all_jobs_latest.json；run_receipt_latest.json 记录扫描情况。站内逻辑使用内存对象，并最终更新数据库。",
-    "next": "脚本汇总文件交给拆批上传；站内记录继续进入数据库写入逻辑。",
-    "why": "utm_source 一般是推广信息，删掉后可以识别同一链接；job_id 等身份参数应保留。旧 Python 扫描器的参数规则与 TypeScript 并不完全一致，不能声称所有入口已完全统一。相同标题也可能是不同地点、不同编号的岗位。",
-    "source": "scripts/merge_scan_results.py · scripts/jobspy_scan.py · app/lib/job-identity.ts · app/lib/job-display-identity.ts"
-  },
-  {
-    "id": "A5",
-    "title": "交接 / 把 Python 文件通过 HTTP 送给网站后端",
-    "plain": "Python 和网站不在同一台机器，不能直接读取对方内存。中间要把数据变成请求，传给网站。",
-    "input": "all_jobs_latest.json：内容是岗位对象组成的数组，不是每个岗位一份文件。",
-    "tools": "Actions 调用 split_json_batches.py，按条数和字节数拆成 batch-0001.json 等文件；当前工作流指定每批 40 条。然后 curl 通过 HTTPS POST 到 /api/jobs/import，Content-Type 为 application/json，使用 --data-binary 发送文件正文并配置失败重试。",
-    "output": "后端收到一批 JSON 数据；解析成功得到数组。接口支持数组，或带 jobs 字段的对象。非法 JSON 返回 400，超过接口单批 500 条上限返回 413，身份校验失败返回 401。",
-    "storage": "批次文件在 runner 临时目录，HTTP body 是网络传输内容。到达后端后先成为内存对象，此时还没有完成数据库写入。",
-    "next": "导入 API 检查同步令牌、字段、地区和业务准入条件，查找已有记录后插入或更新。",
-    "why": "拆批减少单次请求体积和失败重传范围，但整轮导入并不是一个全局事务。同步密钥保存在运行环境 / Actions Secrets，通过请求头传递，不写进前端。私有站点网关认证与应用自己的同步令牌是两层校验。",
-    "source": "scripts/split_json_batches.py · .github/workflows/daily-us-jobscan.yml · app/api/jobs/import/route.ts"
+    "tools": "两路都使用 TypeScript canonicalizeJobIdentityUrl 和 sameLogicalJob。ingestJobs 合并本批重复；job-ingestion-store 查询已有候选，再确认是否同一岗位。",
+    "output": "本批重复合并、完整 JD 与来源保留，以及数据库新增/更新统计。",
+    "storage": "临时数组在 Worker 内存，长期记录在 D1；backend_ingestion_receipt_latest.json 保存响应统计，并上传 Actions 产物。",
+    "next": "交给统一 D1 存储适配器。跨批重复由数据库查重处理。",
+    "why": "保留身份参数，避免按标题误合并。同一扫描上下文写入串行执行；独立请求间仍有并发风险，不宣称全局 exactly-once。",
+    "source": "app/lib/job-ingestion.ts · app/lib/job-ingestion-store.ts · app/lib/job-identity.ts"
   },
   {
     "id": "A6",
     "title": "L / 加载：写进 D1，重复导入时更新已有记录",
     "plain": "数据库像一个可查询的长期岗位台账。入库后才能关闭浏览器再打开继续看到记录。",
     "input": "通过身份校验的一批岗位对象，以及 D1 中已有的岗位和忽略记录。",
-    "tools": "Cloudflare D1 是基于 SQLite 的托管关系数据库；Drizzle ORM 让 TypeScript 用 db.select、db.insert、db.update 表达 SQL 操作。getDb 读取服务端 env.DB 绑定。导入接口先检查公司、标题、链接和地区等，再查询候选并用 sameLogicalJob 确认身份。",
+    "tools": "两路都经过 job-ingestion-store.ts，使用 getDb / Drizzle 访问 D1，并以 sameLogicalJob 确认身份。已有岗位 UPDATE，新岗位 INSERT。",
     "output": "新岗位执行 INSERT，已有岗位执行 UPDATE；空的新 JD、地点等通常保留已有值，并保留首次发现时间。接口累计 created、updated、skipped 等统计。",
     "storage": "长期数据在 D1 jobs 表的行和列里，结构由 db/schema.ts 定义；不是在 R2 保存一堆岗位 JSON 文件。applications 等表另外保存申请记录。",
-    "next": "GET /api/jobs 读取数据库；更新状态和看板读取都使用这些岗位 ID 与字段。",
+    "next": "GET /api/jobs 读取 D1。原始批次完成后发 finalize_run 收尾请求检查截止日期；不会因一批未见岗位就将其关闭。",
     "why": "重复导入采用查重再更新，通常可以减少重试造成的重复，但不是严格的并发原子 upsert：查询与写入是分开的，仍需关注并发冲突和部分批次失败。当前不能说已经实现端到端 exactly-once。",
-    "source": "db/index.ts · db/schema.ts · app/api/jobs/import/route.ts"
+    "source": "app/lib/job-ingestion-store.ts · db/index.ts · db/schema.ts"
   },
   {
     "id": "A7",
     "title": "业务筛选与排序：先判断资格，再决定先看哪个",
     "plain": "ETL 把数据整理并存好；接下来才回答“这些岗位哪些适合我”。部分入口也会在入库前先做业务过滤。",
     "input": "完整 JD、标题、地区、经验要求、签证信息，以及用户目标方向与排除规则。",
-    "tools": "job-hard-exclusions 检查明确排除条件；job-shortlist 组织候选；job-scoring 使用正则和手写加分 / 扣分规则。scoreJob 的基础维度为学历经验 20、统计研究 30、领域 20、工具 15、工作授权 15，另有能力缺口处理。GET 读取时还会调用 scoreStoredJob 重算分数。",
+    "tools": "统一后端应用 hardJobExclusionReasons、忽略记录和批准筛选规则，使用 scoreStoredJob 计算规则分；页面读取时仍有评分和 shortlist 业务逻辑。",
     "output": "可申请性、阻止进入候选的原因 blockers、规则分和解释。资格与偏好分别表达，规则分不是录用概率，也不是训练出的机器学习模型预测值。",
     "storage": "基础岗位及部分分数在 D1；读取时计算的结果通过 API 返回。独立事实匹配分析可保存在 job_fact_scores.score_json，不能与普通规则分混为一谈。",
     "next": "API 把分数和候选信息交给页面；用户选择岗位后，材料流程按 jobId 读取 JD。",
-    "why": "目前 Python、导入接口和展示阶段都有过滤，存在规则分散、维护不同步的风险。例如部分旧规则排除工程 / LLM 方向，不能声称已经完全适配最新的 AI 应用求职目标。这里说明现有实现，本节没有修改筛选策略。",
-    "source": "app/lib/job-hard-exclusions.ts · app/lib/job-shortlist.ts · app/lib/job-scoring.ts · app/api/jobs/route.ts"
+    "why": "入库处理已统一，不代表重新训练模型或重新设计所有求职规则。",
+    "source": "app/lib/job-ingestion.ts · app/lib/job-scoring.ts · app/lib/job-hard-exclusions.ts"
   },
   {
     "id": "A8",
@@ -115,11 +116,12 @@ export const collectionSteps: PipelineStep[] = [
     "input": "扫描是否完整成功、岗位上次出现时间、遗漏次数、截止日期，以及职位页面的直接核验结果。",
     "tools": "reconcileExpiration 与 verifyPosting 检查状态，识别截止日期、404 / 410 或明确关闭文字；扫描进度与 run receipt 帮助定位哪个来源失败。网络异常保留不确定性，不应当作关闭证据。",
     "output": "开放、过期、待核验等状态与原因，供下一轮重查和看板展示使用。",
-    "storage": "D1 保存 lastSeenAt、missedScanCount、expirationReason 等对应字段；扫描回执写 JSON。applications 表独立保存历史申请，不随一个扫描失败删除。",
+    "storage": "原始采集和导入回执保存在 Actions 运行产物，岗位状态在 D1；旧 run_receipt_latest.json 属于历史流程。",
     "next": "下一轮扫描继续更新；页面通过 API 读取新状态，申请历史仍能查看。",
     "why": "需要同时观察采集成功率、缺失字段比例、重复情况、导入 created / updated / skipped 和数据新鲜度。代码已有部分进度与回执，但本次没有实测生产运行的覆盖率、延迟或恢复率，不能编造这些指标。",
-    "source": "app/lib/job-expiration.ts · app/api/jobs/import/route.ts · app/api/jobs/route.ts · scripts/scan_health.py"
+    "source": "app/lib/job-expiration.ts · app/api/jobs/import/route.ts · scripts/collect_raw_jobs.py · scripts/sync_raw_jobs.py"
   }
+
 ];
 
 export const ragSteps: PipelineStep[] = [

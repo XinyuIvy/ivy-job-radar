@@ -54,6 +54,9 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
             "app/api/applications/route.ts",
         ]:
             source = (ROOT / relative).read_text(encoding="utf-8")
+            if relative == "app/api/jobs/import/route.ts":
+                self.assertIn("ingestJobs", source)
+                source += (ROOT / "app/lib/job-ingestion.ts").read_text(encoding="utf-8")
             self.assertIn("sameLogicalJob", source, relative)
         for relative in [
             "app/api/jobs/route.ts",
@@ -62,6 +65,8 @@ class JobIdentityAndIgnoreRegressionTests(unittest.TestCase):
             "app/api/manual-review/route.ts",
         ]:
             source = (ROOT / relative).read_text(encoding="utf-8")
+            if relative == "app/api/jobs/import/route.ts":
+                source += (ROOT / "app/lib/job-ingestion-store.ts").read_text(encoding="utf-8")
             self.assertIn("makeDistinctStoredJobUrl", source, relative)
 
     def test_application_tracking_does_not_merge_distinct_postings_by_title_alone(self):

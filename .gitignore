@@ -39,3 +39,7 @@ __pycache__/
 
 # Also ignore linked development dependencies.
 /node_modules
+# Raw extraction snapshots are retained as Actions artifacts, not Git blobs.
+data/scans/raw_jobs_latest.json
+data/scans/raw_collection_receipt_latest.json
+data/scans/backend_ingestion_receipt_latest.json

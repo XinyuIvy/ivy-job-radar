@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: daily-us-jobscan
@@ -29,7 +29,7 @@ jobs:
               --header "Content-Type: application/json" \
               --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
               --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-              --data '{"state":"running","phase":"等待云端任务","current_source":"GitHub Actions","steps_completed":1,"steps_total":10,"message":"美国 ATS 已完成，云端扫描正在启动。"}' \
+              --data '{"state":"running","phase":"等待云端任务","current_source":"GitHub Actions","steps_completed":1,"steps_total":4,"message":"云端原始数据采集正在启动，清洗和入库由后端统一执行。"}' \
               "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status" \
               || echo "Warning: could not publish running status."
           fi
@@ -47,203 +47,20 @@ jobs:
       - name: Install scanner dependencies
         run: python -m pip install --requirement requirements-jobscan.txt
 
-      - name: Initialize current-run progress
+      - name: Validate extraction and transport code
+        run: python -m py_compile scripts/collect_raw_jobs.py scripts/sync_raw_jobs.py scripts/company_portal_scan.py scripts/split_json_batches.py
+
+      - name: Test raw collection and transport
+        run: python -m unittest discover -s tests -p 'test_raw_job_collection.py'
+
+      - name: Collect source records without cleaning or deduplication
+        run: python scripts/collect_raw_jobs.py --region 美国
+
+      - name: Send raw records to shared backend ingestion
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --start-run
-          --phase "准备扫描"
-          --source "GitHub Actions"
-          --completed 1
-          --message "云端环境已准备完成，正在运行美国聚合平台搜索。"
-
-      - name: Validate scanner syntax
-        run: >-
-          python -m py_compile
-          scripts/jobspy_scan.py
-          scripts/verify_company_jobs.py
-          scripts/china_scan.py
-          scripts/china_snapshot_import.py
-          scripts/apify_zhaopin_scan.py
-          scripts/merge_china_sources.py
-          scripts/cloud_sources_scan.py
-          scripts/aggregator_scan.py
-          scripts/verify_aggregator_jobs.py
-          scripts/company_portal_scan.py
-          scripts/merge_scan_results.py
-          scripts/scan_health.py
-          scripts/split_json_batches.py
-          scripts/publish_us_scan_progress.py
-
-      - name: Run scanner fixture tests
-        # Keep collection gated by scanner regressions, not unrelated CV/UI tests.
-        # The complete suite remains in pr-python-tests.yml.
-        run: >-
-          python -m unittest
-          tests.test_company_portal_scan
-          tests.test_split_json_batches
-          tests.test_publish_us_scan_progress
-          tests.test_verify_application_id
-          tests.test_merge_china_sources
-          tests.test_salary_policy
-          tests.test_scan_workflow_scope
-
-      - name: Collect US jobs
-        run: python scripts/jobspy_scan.py
-
-
-      - name: Publish JobSpy progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "聚合平台搜索"
-          --source "JobSpy"
-          --completed 2
-          --message "JobSpy 搜索完成，正在官网核验候选岗位。"
-
-      - name: Verify US candidates on company career sites
-        run: python scripts/verify_company_jobs.py
-
-
-      - name: Publish company verification progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "官网核验"
-          --source "美国公司官网"
-          --completed 3
-          --message "JobSpy 候选的公司官网核验已完成。"
-
-      - name: Collect credential-free cloud sources
-        run: python scripts/cloud_sources_scan.py
-
-
-      - name: Publish cloud-source progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "公开来源搜索"
-          --source "无需登录的公开来源"
-          --completed 4
-          --message "公开来源扫描完成，正在运行 Job Board Aggregator。"
-
-      - name: Collect Job Board Aggregator candidates
-        run: python scripts/aggregator_scan.py
-
-
-      - name: Publish aggregator progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "聚合平台搜索"
-          --source "Job Board Aggregator"
-          --completed 5
-          --message "Aggregator 候选收集完成，正在官方 ATS 核验。"
-
-      - name: Verify Aggregator candidates on official ATS pages
-        run: python scripts/verify_aggregator_jobs.py
-
-
-      - name: Publish aggregator verification progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "官网核验"
-          --source "官方 ATS"
-          --completed 6
-          --message "Aggregator 候选官网核验完成，正在扫描公司池官网。"
-
-      - name: Scan every company-pool career portal
-        run: python scripts/company_portal_scan.py --region 美国
-
-
-      - name: Publish company-pool progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "公司官网扫描"
-          --source "美国公司池官网"
-          --completed 7
-          --message "美国公司池官网扫描完成，正在统一去重和筛选。"
-
-      - name: Canonicalize, prune, and write run receipt
-        run: python scripts/merge_scan_results.py --region 美国
-
-
-      - name: Publish merge progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "去重与筛选"
-          --source "统一岗位池"
-          --completed 8
-          --message "所有来源已合并去重，正在核验过期状态和扫描质量。"
-
-      - name: Record scan health and anomaly history
-        run: python scripts/scan_health.py
-
-
-      - name: Publish health-check progress
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --phase "过期与质量核验"
-          --source "岗位状态核验"
-          --completed 9
-          --message "过期状态与扫描质量检查完成，正在回写网站。"
-
-      - name: Sync jobs to Ivy Job Radar
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        shell: bash
-        run: |
-          if [[ -z "${IVY_JOB_RADAR_SYNC_TOKEN}" || -z "${SITES_SIWC_BYPASS_TOKEN}" ]]; then
-            echo "::error::Website sync credentials are not fully configured."
-            exit 1
-          fi
-          import_batch_dir="$(mktemp -d)"
-          python scripts/split_json_batches.py \
-            data/scans/all_jobs_latest.json \
-            "${import_batch_dir}" \
-            --batch-size 40 \
-            --max-bytes 1000000
-
-          shopt -s nullglob
-          import_batches=("${import_batch_dir}"/batch-*.json)
-          if [[ "${#import_batches[@]}" -eq 0 ]]; then
-            echo "::error::No website import batches were generated."
-            exit 1
-          fi
-
-          for batch_path in "${import_batches[@]}"; do
-            echo "Importing $(basename "${batch_path}") of ${#import_batches[@]}"
-            curl --fail-with-body --retry 3 --retry-all-errors \
-              --request POST \
-              --header "Content-Type: application/json" \
-              --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}" \
-              --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}" \
-              --data-binary @"${batch_path}" \
-              "https://ivy-job-radar.rourou1199.chatgpt.site/api/jobs/import"
-          done
+        run: python scripts/sync_raw_jobs.py
 
       - name: Prepare the next ten-job review batch
         continue-on-error: true
@@ -273,73 +90,24 @@ jobs:
           print(f"Prepared {count} jobs in the {state} review batch. CV generation remains paused until user approval.")
           PY
 
-      - name: Publish completed run receipt
-        env:
-          IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
-          SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
-        run: >-
-          python scripts/publish_us_scan_progress.py
-          --state completed
-          --phase "完成"
-          --source "Ivy Job Radar"
-          --completed 10
-          --message "美国岗位扫描、筛选、过期核验和回写已完成。"
-
       - name: Mark website scan as failed
         if: failure()
         env:
           IVY_JOB_RADAR_SYNC_TOKEN: ${{ secrets.IVY_JOB_RADAR_SYNC_TOKEN }}
           SITES_SIWC_BYPASS_TOKEN: ${{ secrets.SITES_SIWC_BYPASS_TOKEN }}
         run: >-
-          python scripts/publish_us_scan_progress.py
-          --state failed
-          --phase "运行失败"
-          --source "GitHub Actions"
-          --message "美国岗位更新被中断；已完成的阶段和计数已保留，请查看本次运行日志。"
+          curl --fail-with-body --request POST
+          --header "Content-Type: application/json"
+          --header "OAI-Sites-Authorization: Bearer ${SITES_SIWC_BYPASS_TOKEN}"
+          --header "Authorization: Bearer ${IVY_JOB_RADAR_SYNC_TOKEN}"
+          --data '{"state":"failed","message":"采集或后端统一入库失败；请检查本次运行产物与日志。"}'
+          "https://ivy-job-radar.rourou1199.chatgpt.site/api/scan-status"
 
       - name: Upload scan artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: us-jobscan-${{ github.run_id }}
+          name: raw-jobscan-${{ github.run_id }}
           path: data/scans/
           if-no-files-found: error
           retention-days: 30
-
-      - name: Commit latest scan snapshot
-        if: always()
-        shell: bash
-        run: |
-          if [[ -z "$(git status --short -- data/scans)" ]]; then
-            echo "No scan changes to commit."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/scans/
-          git commit -m "Update daily US job scan"
-
-          # The scan can run for a long time while main receives unrelated updates.
-          # Rebase the generated snapshot onto the newest main before pushing.
-          for attempt in 1 2 3; do
-            echo "Snapshot push attempt ${attempt}/3"
-            git fetch origin main
-
-            if ! git rebase origin/main; then
-              git rebase --abort || true
-              echo "Snapshot rebase conflicted; the uploaded artifact remains available."
-              exit 1
-            fi
-
-            if git push origin HEAD:main; then
-              exit 0
-            fi
-
-            if [[ "${attempt}" -lt 3 ]]; then
-              sleep $((attempt * 5))
-            fi
-          done
-
-          echo "Snapshot push still failed after 3 attempts; the uploaded artifact remains available."
-          exit 1

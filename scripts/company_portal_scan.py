@@ -885,7 +885,7 @@ def enterprise_board_url(ats_type: str, tenant: str, portal_url: str) -> str:
     return portal_url
 
 
-def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str, Any]], str]:
+def api_jobs(ats_type: str, tenant: str, portal_url: str, *, raw_only: bool = False) -> tuple[list[dict[str, Any]], str]:
     tenant_parts = tenant.split("/")
     endpoint = ""
     parser = ""
@@ -999,6 +999,9 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
         ).encode("utf-8")
     result = fetch(endpoint, request_body=request_body)
     if parser == "enterprise_html":
+        if raw_only:
+            _, links, postings = parse_html(result.body, result.url or endpoint)
+            return postings + [{"title": anchor, "url": url} for url, anchor in links if JOB_LINK.search(url)], endpoint
         return parse_enterprise_html(result.body, result.url or endpoint), endpoint
     if parser == "workable_markdown":
         return parse_workable_markdown(result.body, tenant_parts[0]), endpoint
@@ -1010,11 +1013,26 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
     if payload is None:
         return [], endpoint
     if parser == "enterprise_json":
+        if raw_only:
+            rows = []
+            stack = [payload]
+            while stack:
+                item = stack.pop()
+                if isinstance(item, list):
+                    stack.extend(item)
+                elif isinstance(item, dict):
+                    if any(key in item for key in ("title", "Title", "jobTitle", "JobTitle")) and any(key in item for key in ("url", "jobUrl", "id", "Id", "jobId")):
+                        rows.append(item)
+                    else:
+                        stack.extend(value for value in item.values() if isinstance(value, (list, dict)))
+            return rows, endpoint
         return job_rows_from_payload(payload, endpoint), endpoint
     if parser == "gem_graphql":
         data = payload.get("data", {}) if isinstance(payload, dict) else {}
         container = data.get("oatsExternalJobPostings", {}) if isinstance(data, dict) else {}
         rows = container.get("jobPostings", []) if isinstance(container, dict) else []
+        if raw_only:
+            return [row for row in rows if isinstance(row, dict)], endpoint
         for row in rows if isinstance(rows, list) else []:
             if not isinstance(row, dict):
                 continue
@@ -1058,6 +1076,8 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
                 rows.extend(page_rows)
                 if len(page_rows) < page_size:
                     break
+        if raw_only:
+            return rows, endpoint
         deduplicated = {
             value(row, "externalPath", "jobReqId", "title"): row
             for row in rows
@@ -1073,7 +1093,7 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
             item = page_payload.get("items", [None])[0] if isinstance(page_payload, dict) else None
             page_rows = item.get("requisitionList", []) if isinstance(item, dict) else []
             page_rows = [row for row in page_rows if isinstance(row, dict)]
-            for row in page_rows:
+            for row in ([] if raw_only else page_rows):
                 job_id = clean(row.get("Id") or row.get("RequisitionNumber"))
                 row["title"] = row.get("Title")
                 row["location"] = row.get("PrimaryLocation")
@@ -1101,7 +1121,7 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
     elif parser == "bamboohr":
         rows = payload.get("result", []) if isinstance(payload, dict) else []
         origin = f"https://{tenant_parts[0]}.bamboohr.com"
-        for row in rows:
+        for row in ([] if raw_only else rows):
             if isinstance(row, dict):
                 row["title"] = row.get("jobOpeningName")
                 row["url"] = f"{origin}/careers/{row.get('id', '')}"
@@ -1111,7 +1131,7 @@ def api_jobs(ats_type: str, tenant: str, portal_url: str) -> tuple[list[dict[str
         rows = payload.get("data", []) if isinstance(payload, dict) else []
     elif parser == "rippling":
         rows = payload if isinstance(payload, list) else []
-        for row in rows:
+        for row in ([] if raw_only else rows):
             if isinstance(row, dict):
                 row["title"] = row.get("name")
     elif parser == "jibeapply":

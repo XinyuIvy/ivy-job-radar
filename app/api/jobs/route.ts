@@ -27,6 +27,9 @@ import {
   sameLogicalJob,
 } from "../../lib/job-identity";
 
+import { ingestJobs, type IngestionContext } from "../../lib/job-ingestion";
+import { createJobIngestionContext } from "../../lib/job-ingestion-store";
+
 export const dynamic = "force-dynamic";
 
 async function ensureManualJobAdditions(db: Awaited<ReturnType<typeof getDb>>) {
@@ -193,21 +196,6 @@ const workdaySearchTerms = [
   "health economics", "outcomes research", "生物统计", "数据科学", "统计", "量化研究",
 ];
 
-const excludedTitles = [
-  "intern", "postdoc", "postdoctoral", "software engineer", "data engineer",
-  "machine learning engineer", "nlp", "language model", "generative ai", "llm",
-  "director", "vice president", "senior", "principal", "staff",
-  "manager", "lead", "head of", "technical leadership",
-];
-
-function isExcludedTitle(title: string) {
-  const lower = title.toLowerCase();
-  return excludedTitles.some((signal) => lower.includes(signal))
-    || /\bsr\.?(?:\s|$)/i.test(title)
-    || /\bexperienced hire\b/i.test(title)
-    || /\bresearch scientist\s+(?:iii|iv|v|[3-9])\b/i.test(title);
-}
-
 function stripHtml(html: string) {
   return html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, " ")
     .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, " ")
@@ -245,32 +233,6 @@ function extractApplicationId(rawUrl: string, supplied?: unknown) {
   }
 }
 
-function classifyTrack(text: string) {
-  const lower = text.toLowerCase();
-  if (/quantitative researcher|quantitative analyst|systematic|量化研究|定量研究|量化分析/.test(lower)) return "Quant";
-  if (/biostat|statistical scientist|clinical trial|epidemiol|health economics|outcomes research|生物统计|临床统计|医学统计|流行病|卫生经济|健康经济|真实世界/.test(lower)) return "Pharma";
-  if (/healthcare consultant|life sciences consultant|医疗咨询|医药咨询|生命科学咨询/.test(lower)) return "Healthcare Consulting";
-  if (/health|clinical ai|medical|imaging/.test(lower)) return "Healthcare AI";
-  if (/device|diagnostic|algorithm validation/.test(lower)) return "Medical Device";
-  return "Technology";
-}
-
-function extractSkills(text: string) {
-  const rules: Array<[string, RegExp]> = [
-    ["Python", /\bpython\b/i], ["R", /(?:^|\W)R(?:\W|$)/], ["SQL", /\bsql\b/i],
-    ["SAS", /\bsas\b/i], ["Statistics", /\bstatistic/i], ["Biostatistics", /\bbiostat/i],
-    ["Causal inference", /causal inference|propensity score|inverse probability|target trial/i],
-    ["Experimentation", /experiment(?:al)? design|a\/b test|randomized experiment/i],
-    ["Machine learning", /machine learning|statistical learning|predictive model/i],
-    ["Clinical trials", /clinical trial|randomized controlled trial|estimand/i],
-    ["Longitudinal data", /longitudinal|repeated measures|mixed.effects|survival analysis/i],
-    ["Model validation", /external validation|calibration|generaliz|fairness|bias analysis|model evaluation/i],
-    ["Medical imaging", /medical imaging|neuroimaging|multimodal imaging|digital biomarker/i],
-    ["RWE / HEOR", /real.world evidence|\brwe\b|\bheor\b|health economics|pharmacoepidemi/i],
-  ];
-  return rules.filter(([, pattern]) => pattern.test(text)).map(([label]) => label).slice(0, 7);
-}
-
 type CandidateJob = {
   company: string;
   title: string;
@@ -291,83 +253,16 @@ type SourceStats = {
   matchedJobs: string[];
 };
 
-async function saveCandidate(candidate: CandidateJob, ignored: Set<string>, now: string) {
-  const { company, title, location, content, jobUrl, applicationId, source } = candidate;
-  if (!title || !jobUrl || ignored.has(fingerprint(company, title))) return false;
-  const lowerTitle = title.toLowerCase();
-  if (!wantedTitles.some((signal) => lowerTitle.includes(signal))) return false;
-  if (isExcludedTitle(lowerTitle)) return false;
-
-  const region = /china|greater china|beijing|shanghai|shenzhen|guangzhou|suzhou|hangzhou|nanjing|chengdu|wuhan|tianjin|wuxi|xiamen|qingdao|中国|北京|上海|深圳|广州|苏州|杭州|南京|成都|武汉|天津|无锡|厦门|青岛|重庆|西安|合肥|长沙|大连|珠海|东莞/i.test(location)
-    ? "中国"
-    : "美国";
-  const scoring = scoreStoredJob({ title, content, region });
-  const visa = scoring.visa;
-  const deadline = extractDeadline(content);
-  if (hardJobExclusionReasons({ title, description: content, region, visa }).length > 0) return false;
-
-  const db = await getDb();
-  if (isChinaCompanyIdentity(company)) {
-    const [applicationRows, savedRows, storedJobs] = await Promise.all([
-      db.select().from(applications),
-      db.select().from(savedJobs),
-      db.select().from(jobs),
-    ]);
-    const savedIds = new Set(savedRows.map((row) => row.jobId));
-    const trackedStatuses = new Set(["准备材料", "已申请", "一面", "二面/技术面", "终面", "Offer"]);
-    const reviewedCompanies = [
-      ...applicationRows.filter((row) => trackedStatuses.has(row.status)).map((row) => row.company),
-      ...storedJobs.filter((row) => savedIds.has(row.id)).map((row) => row.company),
-    ];
-    if (reviewedCompanies.some((reviewed) => sameCompanyIdentity(reviewed, company))) return false;
-  }
-  const canonicalUrl = canonicalizeJobUrl(jobUrl);
-  const incomingIdentity = { company, title, location, jobUrl, canonicalUrl, applicationId };
-  const candidates = await db
-    .select()
-    .from(jobs)
-    .where(
-      or(
-        eq(jobs.jobUrl, jobUrl),
-        eq(jobs.canonicalUrl, canonicalUrl),
-        applicationId ? eq(jobs.applicationId, applicationId) : eq(jobs.jobUrl, jobUrl),
-        and(eq(jobs.company, company), eq(jobs.title, title)),
-      ),
-    );
-  const existing = candidates.find((row) => sameLogicalJob(row, incomingIdentity));
-  const exactUrlCollision = candidates.some((row) => row.jobUrl === jobUrl && !sameLogicalJob(row, incomingIdentity));
-  const storedJobUrl = existing?.jobUrl
-    || (exactUrlCollision ? makeDistinctStoredJobUrl(jobUrl, incomingIdentity) : jobUrl);
-  const values = {
-    company,
-    title,
-    location,
-    region,
-    track: classifyTrack(`${title} ${content}`),
-    score: scoring.score,
-    visa,
-    evidence: ["公司当前职位列表中仍有该岗位", ...scoring.details].join("；"),
-    description: content.slice(0, 50000),
-    skills: JSON.stringify(extractSkills(content)),
-    jobUrl: storedJobUrl,
-    canonicalUrl,
-    applicationId,
-    source,
-    status: "开放",
-    deadline: deadline.deadline,
-    deadlineType: deadline.deadlineType,
-    lastSeenAt: now,
-    missedScanCount: 0,
-    expirationReason: "",
-    discoveredAt: existing?.discoveredAt ?? now,
-    checkedAt: now,
-  };
-  if (existing) await db.update(jobs).set(values).where(eq(jobs.id, existing.id));
-  else await db.insert(jobs).values(values);
-  return true;
+async function saveCandidate(candidate: CandidateJob, context: IngestionContext, now: string) {
+  const result = await ingestJobs([{
+    provider: "ats",
+    raw: candidate,
+    context: { source: candidate.source, status: "开放", collectedAt: now },
+  }], context);
+  return result.created + result.updated > 0;
 }
 
-async function scanGreenhouse(ignored: Set<string>, now: string): Promise<SourceStats> {
+async function scanGreenhouse(context: IngestionContext, now: string): Promise<SourceStats> {
   const stats: SourceStats = {
     source: "Greenhouse",
     boards: greenhouseBoards.length,
@@ -399,7 +294,7 @@ async function scanGreenhouse(ignored: Set<string>, now: string): Promise<Source
           jobUrl,
           applicationId: extractApplicationId(jobUrl, raw.id),
           source: "Greenhouse · 公司官方招聘系统",
-        }, ignored, now)) {
+        }, context, now)) {
           stats.matched += 1;
           stats.matchedJobs.push(`${company} · ${String(raw.title ?? "").trim()}`);
         }
@@ -411,7 +306,7 @@ async function scanGreenhouse(ignored: Set<string>, now: string): Promise<Source
   return stats;
 }
 
-async function scanLever(ignored: Set<string>, now: string): Promise<SourceStats> {
+async function scanLever(context: IngestionContext, now: string): Promise<SourceStats> {
   const stats: SourceStats = {
     source: "Lever",
     boards: leverBoards.length,
@@ -447,7 +342,7 @@ async function scanLever(ignored: Set<string>, now: string): Promise<SourceStats
           jobUrl,
           applicationId: extractApplicationId(jobUrl, raw.id),
           source: "Lever · 公司官方招聘系统",
-        }, ignored, now)) {
+        }, context, now)) {
           stats.matched += 1;
           stats.matchedJobs.push(`${company} · ${String(raw.text ?? "").trim()}`);
         }
@@ -459,7 +354,7 @@ async function scanLever(ignored: Set<string>, now: string): Promise<SourceStats
   return stats;
 }
 
-async function scanAshby(ignored: Set<string>, now: string): Promise<SourceStats> {
+async function scanAshby(context: IngestionContext, now: string): Promise<SourceStats> {
   const stats: SourceStats = {
     source: "Ashby",
     boards: ashbyBoards.length,
@@ -492,7 +387,7 @@ async function scanAshby(ignored: Set<string>, now: string): Promise<SourceStats
           jobUrl,
           applicationId: extractApplicationId(jobUrl),
           source: "Ashby · 公司官方招聘系统",
-        }, ignored, now)) {
+        }, context, now)) {
           stats.matched += 1;
           stats.matchedJobs.push(`${company} · ${String(raw.title ?? "").trim()}`);
         }
@@ -527,7 +422,7 @@ async function scanHtmlAts(
   source: string,
   boards: ReadonlyArray<readonly [string, string]>,
   linkPattern: RegExp,
-  ignored: Set<string>,
+  context: IngestionContext,
   now: string,
 ): Promise<SourceStats> {
   const stats: SourceStats = {
@@ -569,7 +464,7 @@ async function scanHtmlAts(
             jobUrl,
             applicationId: extractApplicationId(jobUrl),
             source: `${source} · 公司官方招聘系统`,
-          }, ignored, now)) {
+          }, context, now)) {
             stats.matched += 1;
             stats.matchedJobs.push(`${company} · ${title}`);
           }
@@ -584,7 +479,7 @@ async function scanHtmlAts(
   return stats;
 }
 
-async function scanWorkday(ignored: Set<string>, now: string): Promise<SourceStats> {
+async function scanWorkday(context: IngestionContext, now: string): Promise<SourceStats> {
   const stats: SourceStats = {
     source: "Workday",
     boards: workdayBoards.length,
@@ -623,7 +518,7 @@ async function scanWorkday(ignored: Set<string>, now: string): Promise<SourceSta
         stats.scanned += 1;
         const title = String(posting.title ?? "").trim();
         const externalPath = String(posting.externalPath ?? "");
-        if (!title || !externalPath || !wantedTitles.some((signal) => title.toLowerCase().includes(signal))) continue;
+        if (!title || !externalPath) continue;
         const detailResponse = await fetch(`${host}/wday/cxs/${tenant}/${site}${externalPath}`, {
           headers: { Accept: "application/json", "User-Agent": "IvyJobRadar/1.0" },
         });
@@ -640,7 +535,7 @@ async function scanWorkday(ignored: Set<string>, now: string): Promise<SourceSta
           jobUrl,
           applicationId: String(info.jobReqId ?? extractApplicationId(jobUrl)),
           source: "Workday · 公司官方招聘系统",
-        }, ignored, now)) {
+        }, context, now)) {
           stats.matched += 1;
           stats.matchedJobs.push(`${company} · ${title}`);
         }
@@ -654,16 +549,16 @@ async function scanWorkday(ignored: Set<string>, now: string): Promise<SourceSta
 
 async function refreshOfficialBoards() {
   const db = await getDb();
-  const ignored = new Set((await db.select().from(ignoredJobs)).map((row) => row.fingerprint));
   const now = new Date().toISOString();
+  const context = await createJobIngestionContext(now);
   const sources = await Promise.all([
-    scanGreenhouse(ignored, now),
-    scanLever(ignored, now),
-    scanAshby(ignored, now),
-    scanHtmlAts("BambooHR", bambooHrBoards, /\/careers\/\d+|\/careers\/.*\/job\//i, ignored, now),
-    scanHtmlAts("iCIMS", iCimsBoards, /\.icims\.com\/jobs\/\d+\/[^/?#]+\/job/i, ignored, now),
-    scanHtmlAts("Paylocity", paylocityBoards, /recruiting\.paylocity\.com\/recruiting\/jobs\/Details\/\d+\//i, ignored, now),
-    scanWorkday(ignored, now),
+    scanGreenhouse(context, now),
+    scanLever(context, now),
+    scanAshby(context, now),
+    scanHtmlAts("BambooHR", bambooHrBoards, /\/careers\/\d+|\/careers\/.*\/job\//i, context, now),
+    scanHtmlAts("iCIMS", iCimsBoards, /\.icims\.com\/jobs\/\d+\/[^/?#]+\/job/i, context, now),
+    scanHtmlAts("Paylocity", paylocityBoards, /recruiting\.paylocity\.com\/recruiting\/jobs\/Details\/\d+\//i, context, now),
+    scanWorkday(context, now),
   ]);
   await reconcileExpiration(sources, now);
   return {

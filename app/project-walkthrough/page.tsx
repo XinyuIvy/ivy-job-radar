@@ -15,7 +15,7 @@ export default async function Walkthrough({ searchParams }: { searchParams: Prom
     <header><a href="/">← Job Radar</a><a href="/interview-prep#collection">面试复盘 / Interview guide</a><a href="/project-walkthrough">文件目录 / Source catalog</a></header>
     <p className="pw-eyebrow">PRIVATE PROJECT WALKTHROUGH · 源码与只读数据</p>
     <h1>{selected ? params.file : view ? `实时样本 / Live sample: ${view}` : "跟着代码和数据，走完项目。"}</h1>
-    <p className="pw-note">源码快照基线：<code>{snapshot.sourceCommit}</code> · 捕获时间：{snapshot.capturedAt}。这是部署前既有业务源码的逐字快照，带文件 SHA-256；不是 GitHub main 的实时镜像。链接只展示允许的代码文件，密钥值和环境文件未收录。</p>
+    <p className="pw-note">源码快照基线：<code>{snapshot.sourceCommit}</code> · 捕获时间：{snapshot.capturedAt}。这是本次构建工作区的逐字快照，以上提交为工作区基线，每份文件带 SHA-256；不是 GitHub main 的实时镜像。链接只展示允许的代码文件，密钥值和环境文件未收录。</p>
     {params.file && !selected ? <p role="alert">该文件未收录，请从目录选择。 / File not in snapshot.</p> : null}
     {selected ? <><p>文件 SHA-256：<code>{selected.sha256}</code> · 行号可以点击复制链接。对照 XMind 备注中的函数名查找。代码为只读展示，不会执行。</p><ol className="pw-code">{selected.content.split("\n").map((line, index) => <li id={`L${index + 1}`} key={index}><a href={`#L${index + 1}`} aria-label={`Line ${index + 1}`}>{index + 1}</a><code>{line || " "}</code></li>)}</ol></> : view ? <DataViewer view={view} jobId={params.jobId} /> : <>
       <section><h2>先看实际数据 / Inspect data</h2><p>这些入口只 SELECT 已有记录或读取 R2，不启动扫描、RAG 或 CV 生成。API 另外要求登录；预览环境无登录头时会返回 401。</p><nav>{views.map(item => <a key={item} href={`?view=${item}`}>{item}</a>)}</nav></section>

@@ -10,7 +10,7 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
         component = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
         layout = (ROOT / "app" / "layout.tsx").read_text(encoding="utf-8")
 
-        self.assertIn('"准备材料"', component)
+        self.assertIn("const trackedApplications = await db.select().from(applications)", component)
         self.assertIn('buildTrackedApplicationMatcher', component)
         self.assertIn('sameLogicalJob(job, candidate)', component)
         self.assertIn('const isTrackedForToday', component)
@@ -34,7 +34,7 @@ class PendingJobVisibilitySourceTests(unittest.TestCase):
     def test_jobs_api_excludes_pending_and_submitted_jobs_by_stable_identity(self):
         route = (ROOT / "app" / "api" / "jobs" / "route.ts").read_text(encoding="utf-8")
 
-        self.assertIn('"准备材料"', route)
+        self.assertIn("const trackedApplications = await db.select().from(applications)", route)
         self.assertIn('const isTrackedApplication = buildTrackedApplicationMatcher(trackedApplications)', route)
         self.assertIn('todayEligible: (shortlist.eligible || spreadsheetApproved) && !saved && !tracked', route)
         self.assertIn('sameLogicalJob(job, candidate) || sameCompanyRole(job, candidate)', route)

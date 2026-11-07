@@ -38,6 +38,8 @@ jobs:
           tests/latex-text.test.mjs
           tests/cv-tailor-alibaba.test.mjs
           tests/conference-evidence.test.mjs
+      - name: Test shared backend ingestion
+        run: node --test --test-concurrency=1 tests/job-ingestion.test.mjs tests/job-import-auth.test.mjs
       - name: Build deployable Sites artifact
         run: |
           chmod +x scripts/*.sh

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Job Radar normalized ingestion record",
+  "type": "object",
+  "required": ["company", "title", "jobUrl", "region"],
+  "properties": {
+    "company": {"type": "string", "minLength": 1, "x-aliases": ["company", "company_name", "companyName", "company.name", "hiringOrganization.name", "organization", "employer"]},
+    "title": {"type": "string", "minLength": 1, "x-aliases": ["title", "job_title", "jobTitle", "Title", "name", "text", "positionTitle", "jobOpeningName"]},
+    "location": {"type": "string", "x-aliases": ["location", "job_location", "locationsText", "locations", "jobLocation", "primaryLocation", "PrimaryLocation", "categories.location"]},
+    "description": {"type": "string", "maxLength": 50000, "x-aliases": ["full_description", "description", "content", "jobDescription", "descriptionPlain", "descriptionHtml", "jobAd.sections.jobDescription.text", "ShortDescriptionStr"]},
+    "jobUrl": {"type": "string", "format": "uri", "x-aliases": ["official_url", "jobUrl", "job_url_direct", "job_url", "absolute_url", "hostedUrl", "careersPageUrl", "applyUrl", "url", "externalPath", "ExternalURL"]},
+    "applicationId": {"type": "string", "x-aliases": ["applicationId", "application_id", "jobReqId", "requisitionId", "RequisitionNumber", "identifier.value", "id", "job_id"]},
+    "region": {"type": "string", "enum": ["美国", "中国"]}
+  }
+}
