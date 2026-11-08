@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {
-  browserSteps, collectionSteps, cvSteps, decisions, evaluationCases,
+  browserSteps, collectionSteps, cvSteps, decisions, evaluationResults,
   evidenceLevels, fileFormats, glossary, incidents, interviewQuestions,
   ragSteps, sourceMap, type PipelineStep,
 } from "./content";
@@ -45,24 +45,15 @@ const navigation = [
   ["incidents", "问题与修复"], ["questions", "面试追问"], ["boundaries", "现状与源码"],
 ] as const;
 
-function evaluationMetrics(channel: "local" | "hybrid" | "rerank", cutoff: number) {
-  const ranks = evaluationCases.map((item) => item[channel]);
-  const recall = ranks.filter((rank) => rank > 0 && rank <= cutoff).length / ranks.length;
-  const mrr = ranks.reduce((total, rank) => total + (rank > 0 && rank <= cutoff ? 1 / rank : 0), 0) / ranks.length;
-  const ndcg5 = ranks.reduce((total, rank) => total + (rank > 0 && rank <= 5 ? 1 / Math.log2(rank + 1) : 0), 0) / ranks.length;
-  return [`${(recall * 100).toFixed(1)}%`, mrr.toFixed(3), ndcg5.toFixed(3)];
-}
-
 export default function InterviewPrep() {
-  const local = evaluationMetrics("local", 20), hybrid = evaluationMetrics("hybrid", 20), rerank = evaluationMetrics("rerank", 5);
   return <main className="ip-shell">
-    <header className="ip-top"><a href="/">← 返回 Job Radar</a><a href="/evidence-rag">打开证据问答 ↗</a><span>源码核对 · 2026-10-29</span></header>
+    <header className="ip-top"><a href="/">← 返回 Job Radar</a><a href="/evidence-rag">打开证据问答 ↗</a><span>源码核对 · 2026-11-08</span></header>
     <section className="ip-hero">
       <p className="ip-kicker">AI 应用 / Agent / RAG · 面试口述手册</p><h1>把 Job Radar<br />一步一步讲明白。</h1>
       <p className="ip-hero-lead">先说这一步到底在干什么，再补上它的技术名字。沿着一份数据往下走，看清楚它从哪里来、经过谁处理、变成什么、存在哪里、下一步怎么接。</p>
       <div className="ip-hero-tags"><span>每步 5 项交接</span><span>用项目里的真实例子</span><span>可直接练习的口述回答</span></div>
       <div className="ip-current-grid">
-        <div><b className="ip-badge ip-badge-live">已线上跑通</b><strong>证据问答 RAG</strong><p>BM25 + Qwen3 召回，BGE 重排，DeepSeek 生成。已做 7 题小样本检索验证。</p></div>
+        <div><b className="ip-badge ip-badge-live">已线上跑通</b><strong>证据问答 RAG</strong><p>BM25 + Qwen3 召回，BGE 重排，DeepSeek 生成。已完成 50 题固定版本评测。</p></div>
         <div><b className="ip-badge">当前暂停</b><strong>CV 自动生成</strong><p>冻结输入、工具生成和产物存储已有代码；当前自动生成开关为暂停。</p></div>
         <div><b className="ip-badge">保留人工检查</b><strong>浏览器申请流程</strong><p>扩展链路停在 needs_review，不点击最终提交；逐题回答接口仍有缺口。</p></div>
       </div>
@@ -238,29 +229,30 @@ BM25(q,d) = Σ IDF(t) × f(t,d) × (k1+1)
 
     <Section id="browser" number="09" title="扩展拿到资料和 PDF，怎么填表？" intro="重点说明自动队列。手动选择已申请记录或模板的 autofill 入口还可能从 Git 取简历，不要混为同一路径。"><Steps steps={browserSteps} /><div className="ip-callout"><strong>字段映射和自由回答申请问题，是两件事。</strong><p>match-field 已实现的是“这个字段对应哪个已有资料键”。自动队列调用的 semantic-answers 路由当前不存在，不能描述成已经能完整回答所有自定义问题。失败会被记录，任务保留待人工检查。</p></div></Section>
 
-    <Section id="metrics" number="10" title="Recall、MRR、NDCG：到底测了什么？" intro="2026-10-29：133 条可用事实，7 个定向问题，每题指定 1 条目标事实。下面的分数由表内名次计算。">
+    <Section id="metrics" number="10" title="Recall、MRR、NDCG：到底测了什么？" intro="2026-11-08：固定 50 题 Evidence QA 测试集，包含 45 道有答案题和 5 道无答案难负例；资料库有 133 条可检索事实。">
       <Table caption="指标分别在问什么" headers={["指标", "人话解释", "计算"]} rows={[
         ["Recall@K", "前 K 找回多少应该找回的相关资料？", "单题：前 K 中相关数 / 全部已标相关数，再取问题平均。本次单目标，等于命中率。"],
         ["MRR@K", "第一条正确结果出来得早不早？", "第一条正确结果在第 r 名得 1/r；前 K 没有得 0，再取平均。"],
         ["NDCG@K", "前 K 排名离理想排序多远？", "DCG=Σ(2^相关等级-1)/log₂(名次+1)，除以理想排序 DCG，再对问题平均。"],
       ]} />
-      <div className="ip-two-column"><div className="ip-paper"><h3>本次 NDCG 怎样算？</h3><p>每题一个相关目标，理想得分为 1。第 1 名得 1；第 2 名得约 0.631；第 3 名得 0.5；第 4 名得约 0.431；不在前 5 得 0。最后对 7 题平均。</p></div><div className="ip-paper"><h3>MRR 不是 NDCG</h3><p>同样第 2 名，MRR 是 0.5，单目标 NDCG 是约 0.631。MRR 只看第一条相关结果；一般 NDCG 还会看多条结果与相关等级，折扣方式也不同。</p></div></div>
-      <Table caption="本轮目标事实名次，问题用简写展示" headers={["问题", "目标", "本地检索", "混合召回", "BGE 重排"]} rows={evaluationCases.map((item) => [item.query, item.target, item.local || "未进前 20", item.hybrid, item.rerank])} />
-      <Table caption="检索排名成绩，不是生成准确率" headers={["阶段", "目标命中 / Recall", "MRR", "NDCG@5"]} rows={[
-        ["本地 BM25 + 哈希", `${local[0]}（6/7，@20）`, `${local[1]}（@20）`, local[2]],
-        ["BM25 + Qwen3", `${hybrid[0]}（7/7，@20）`, `${hybrid[1]}（@20）`, hybrid[2]],
-        ["BGE 重排后", `${rerank[0]}（7/7，@5）`, `${rerank[1]}（@5）`, rerank[2]],
+      <div className="ip-two-column"><div className="ip-paper"><h3>本次 NDCG 怎样算？</h3><p>有答案题主要标 1 条目标事实。目标第 1 名得 1；第 2 名约 0.631；第 3 名 0.5；第 4 名约 0.431；不在前 5 得 0。最后对 45 道有答案题平均。</p></div><div className="ip-paper"><h3>无答案题另算</h3><p>无答案题没有目标 fact_id，不能混进 Recall 的分母。我单独跑完整问答链路，看系统是否明确拒答并返回 0 条引用，本轮是 5/5。</p></div></div>
+      <Table caption="50 题固定版本评测，检索分数不等于生成准确率" headers={["阶段", "Recall / 命中", "MRR", "NDCG@5"]} rows={evaluationResults.map((item) => [item.stage, item.recall, item.mrr, item.ndcg])} />
+      <Table caption="这 50 题包含什么" headers={["题目类型", "数量", "怎样判定"]} rows={[
+        ["有答案 Evidence QA", "45", "目标 fact_id 是否进入候选，并记录第一次出现的排名。"],
+        ["无答案难负例", "5", "完整链路是否明确拒答，而且不返回任何事实引用。"],
+        ["合计", "50", "中英文、精确术语、同义改写、数字、状态边界和无答案问题。"],
       ]} />
-      <div className="ip-callout"><strong>100% 不是必须达到的合格线，也不是整个项目准确率。</strong><p>7 题针对已知事实设计，每题只标一个目标，没有穷尽其他相关事实；题目还参与了调试，不是独立保留集。混合召回已有 6 题第 1，BGE 主要把剩下 1 题从第 2 提到第 1。不能据此夸大重排增益，不能和其他数据集直接横比。</p><p>目前准确结论是：<strong>小样本功能验证通过，整体可靠性仍需独立测试。</strong>没有跨项目通用的 Recall、NDCG 合格线。</p></div>
+      <div className="ip-callout"><strong>这次能得出的结论</strong><p>本地 BM25 + 固定哈希在前 20 找回 39/45；加入 Qwen3 语义召回和 RRF 后是 45/45。BGE 只看融合后的候选并压到前 5，保留 44/45，唯一漏项是 QA-044。</p><p>5 道无答案题都正确拒答并返回 0 条引用。混合召回的 100% 只属于这套固定的直接事实问答，不表示生成回答、开放问题或整个项目 100% 正确。</p></div>
+      <div className="ip-callout"><strong>为什么第一版 50 题看起来很低？</strong><p>第一版把 26 道“拿一条 JD 要求，寻找可迁移能力”的题也塞进直接事实问答。这个子集的混合 Recall@20 只有 19.9%，把总分拉到 55.7%。它需要多事实归纳、证据等级和简历能力映射，目标与单事实问答不同。</p><p>我保留它作为压力测试，但不再和 Evidence QA 合成一个分数。正确做法是分别定义任务、标注和合格线，再测 CV Tailor 那条结构化证据链。</p></div>
       <h3 className="ip-subtitle">检索分高以后，回答还要另外测</h3>
       <Table caption="还需要评估什么" headers={["层次", "怎么检查", "目前覆盖"]} rows={[
-        ["充分性与拒答", "无答案是否说明不足；有答案是否误拒。", "做过训练 Qwen/BGE、百万用户部署等负例检查，未形成规模化误拒率。"],
+        ["充分性与拒答", "无答案是否说明不足；有答案是否误拒。", "5 道固定难负例全部拒答且 0 引用；45 道有答案题的最终回答误拒率仍需逐题标注。"],
         ["答案忠实度", "拆成事实主张，逐条检查是否被原文支持，汇总支持比例。", "有引用代码检查与少量人工复核，无统一忠实度分数。"],
         ["正确与完整", "是否回答问题，数字对象是否对应，有没有漏条件。", "AUC 能答 0.745；负二项有原文回退，不能说答案评测满分。"],
         ["耗时与成本", "分阶段计时和记用量，区分冷/热缓存，统计中位数与尾部延迟。", "本轮未系统记录，不报未经测量的改善百分比。"],
         ["稳健性与组件对照", "改写、中英混合、多事实、冲突、过期、无答案与恶意输入；比较各检索组合。", "需要固定版本的独立标注集，再做 BM25-only、向量-only、融合、加重排对照。"],
       ]} />
-      <Spoken title="面试问成绩"><p>“我先做了 7 题单目标功能验证，本地前 20 命中 6/7，混合召回 7/7，NDCG@5 是 0.704 和 0.947，重排后 1。但样本少且参与过调试，所以我不把它称为整体准确率。下一步需要独立真实问题，分别测召回、排名、忠实度、误拒、延迟和成本。”</p></Spoken>
+      <Spoken title="面试问成绩"><p>“我冻结了 50 题测试集，其中 45 题有目标事实，5 题故意无答案。本地 BM25 加哈希向量的 Recall@20 是 86.7%；加入 Qwen3 embedding 和 RRF 后是 100%，MRR 0.833，NDCG@5 0.876；BGE 重排压到前 5 后 Recall@5 是 97.8%，MRR 0.941，NDCG@5 0.950。5 道无答案题全部拒答且 0 引用。这个分数只评价直接证据问答检索，生成忠实度、耗时和岗位能力迁移还要另外测。”</p></Spoken>
     </Section>
 
     <Section id="concepts" number="11" title="术语速查：中文意思与项目例子" intro="陌生词先查这一栏。专业名词可以记，回答时先说它在这里做了什么。"><div className="ip-glossary">{glossary.map(([term, plain, example]) => <article key={term}><h3>{term}</h3><strong>{plain}</strong><p>{example}</p></article>)}</div><h3 className="ip-subtitle">证据分级，为什么不能只看“相关”？</h3><Table caption="CV 分析证据类别，标准问答另有充分性检查" headers={["名字", "口语意思", "例子"]} rows={evidenceLevels} /></Section>
@@ -272,9 +264,9 @@ BM25(q,d) = Σ IDF(t) × f(t,d) × (k1+1)
     <Section id="questions" number="14" title="面试追问：用口语直接练习" intro="先自己说，再展开核对。每题都有继续追问时要讲清的点。"><div className="ip-questions">{interviewQuestions.map(([question, answer, followup], i) => <details key={question}><summary><span>{String(i + 1).padStart(2, "0")}</span>{question}</summary><div className="ip-question-body"><p className="ip-answer">{answer}</p><p className="ip-followup"><strong>继续追问时：</strong>{followup}</p></div></details>)}</div></Section>
 
     <Section id="boundaries" number="15" title="把“已做、已测、没做完”分清楚">
-      <Table caption="截至 2026-10-29 的面试表述" headers={["可以说", "需要带上的限定"]} rows={[
+      <Table caption="截至 2026-11-08 的面试表述" headers={["可以说", "需要带上的限定"]} rows={[
         ["接入学习型 embedding 和专用 reranker。", "证据问答已跑通，不等于训练模型或全站统一接入。"],
-        ["做过 RAG 检索排名评估。", "7 题单目标小样本，不能说生成或整体准确率达 100%。"],
+        ["做过固定 50 题 RAG 评估。", "45 道直接证据题加 5 道无答案题；不能说生成或整体准确率达 100%。"],
         ["有能调用 shell 的简历 Agent。", "自动生成暂停，指令要求与独立强制验证要分开。"],
         ["有状态、版本键与恢复逻辑。", "不是所有环节已原子化，浏览器领取与 Git 冲突处理还有缺口。"],
         ["扩展读取资料与 PDF，执行填表上传。", "最终停待人工检查；逐题回答路由未完整接通。"],
